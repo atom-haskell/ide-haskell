@@ -1,0 +1,20 @@
+# See https://atom.io/docs/latest/creating-a-package#menus for more details
+'context-menu':
+  '.overlayer':
+      'IDE Haskell - Check': 'ide-haskell:check'
+      'IDE Haskell - Get Type': 'ide-haskell:get-type'
+      'IDE Haskell - Lint': 'ide-haskell:lint'
+
+'menu': [
+  {
+    'label': 'Packages'
+    'submenu': [
+      'label': 'IDE Haskell'
+      'submenu': [
+        { 'label': 'Check', 'command': 'ide-haskell:check' }
+        { 'label': 'Get Type', 'command': 'ide-haskell:get-type' }
+        { 'label': 'Lint', 'command': 'ide-haskell:lint' }
+      ]
+    ]
+  }
+]

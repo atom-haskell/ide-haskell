@@ -1,0 +1,37 @@
+// The ui-variables file is provided by base themes provided by Atom.
+//
+// See https://github.com/atom/atom-dark-ui/blob/master/stylesheets/ui-variables.less
+// for a full listing of what's available.
+@import "ui-variables";
+
+@ide-haskell-color-warning: multiply(@background-color-warning, #AAA);
+@ide-haskell-color-error: multiply(@background-color-error, #AAA);
+
+.ide-haskell {
+}
+
+.ide-haskell-warning {
+    background-color: @ide-haskell-color-warning;
+}
+
+.ide-haskell-error {
+    background-color: @ide-haskell-color-error;
+}
+
+.ide-haskell-typeinfo {
+    font-family: monospace;
+}
+
+.ide-haskell-typeinfo .code {
+}
+
+.ide-haskell-typeinfo .code:after {
+    content: "::";
+    color: @text-color-highlight;
+    margin-left: 1em;
+    margin-right: 1em;
+}
+
+.ide-haskell-typeinfo .type {
+
+}
