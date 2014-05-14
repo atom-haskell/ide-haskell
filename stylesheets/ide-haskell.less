@@ -7,11 +7,41 @@
 .ide-haskell {
 }
 
-.ide-haskell-output-panel-heading {
-  cursor: row-resize;
-}
+.ide-haskell-output-view {
+  display: -webkit-flex;
+  -webkit-flex-direction: column;
+  min-height: 100px;
 
-.ide-haskell-output-panel-body {
-  //max-height: 100px; // TODO remove later
-  overflow-y: scroll;
+  .resize-handle {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 10px;
+    cursor: row-resize;
+  }
+
+  .panel {
+    -webkit-flex-grow: 1;
+    display: -webkit-flex;
+    -webkit-flex-direction: column;
+    margin: 0;
+  }
+
+  .panel-heading {
+    -webkit-flex-shrink: 0;
+
+    .icon-x {
+      cursor: pointer;
+    }
+  }
+
+  .background-message {
+    text-align: center;
+  }
+
+  .panel-body {
+    -webkit-flex-grow: 1;
+    overflow-y: scroll;
+    padding: 0;
+  }
 }

@@ -1,4 +1,10 @@
 # See https://atom.io/docs/latest/creating-a-package#menus for more details
+'context-menu':
+  '.overlayer':
+    'Check': 'ide-haskell:check'
+    'Lint': 'ide-haskell:lint'
+    'Type': 'ide-haskell:get-type'
+
 'menu': [
   {
   }
