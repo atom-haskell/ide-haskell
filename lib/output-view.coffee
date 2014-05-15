@@ -7,12 +7,16 @@ module.exports =
         @div outlet: 'resizeHandle', class: 'resize-handle'
         @div class: 'panel', =>
           @div class: 'panel-heading', =>
-            @div class: 'pull-right', =>
-              @span outlet: 'closeButton', class: 'icon-x'
-            @span 'Haskell IDE'
+            @div class: 'btn-toolbar pull-left', =>
+              @div class: 'btn-group', =>
+                @button class: 'btn', 'Errors'
+                @button class: 'btn', 'Warnings'
+                @button class: 'btn', 'Lints'
+            @div class: 'btn-toolbar pull-right', =>
+              @button class: 'btn', 'Close'
           @div class: 'panel-body', =>
             @ul outlet: 'noResultsMessage', class: 'background-message', =>
-              @li 'No Results'
+              @li 'Haskell IDE'
             @ul outlet: 'errsList', class: 'list-group'
             @ul outlet: 'warnList', class: 'list-group'
             @ul outlet: 'lintList', class: 'list-group'
@@ -42,9 +46,9 @@ module.exports =
       @height @resizeData.height + @resizeData.pageY - pageY
 
     # Clear everything inside output view
-    clear: ->
+    reset: ->
 
     # Add new data into output view
     add: ({line, column, fname, type, preview, details}) ->
-      @errsList.append $$$ ->
-        @div class: 'inset-panel padded', 'Some content'
+      # @errsList.append $$$ ->
+        # @div class: 'inset-panel padded', 'Some content'

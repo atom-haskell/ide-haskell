@@ -10,7 +10,7 @@
 .ide-haskell-output-view {
   display: -webkit-flex;
   -webkit-flex-direction: column;
-  min-height: 100px;
+  min-height: 120px;
 
   .resize-handle {
     position: absolute;
@@ -30,12 +30,17 @@
   .panel-heading {
     -webkit-flex-shrink: 0;
 
-    .icon-x {
-      cursor: pointer;
+    @padding-top-bottom: 5px;
+    padding-top: @padding-top-bottom;
+    padding-bottom: @padding-top-bottom;
+
+    .btn {
+      top: 0px;
     }
   }
 
   .background-message {
+    padding-top: 20px;
     text-align: center;
   }
 
