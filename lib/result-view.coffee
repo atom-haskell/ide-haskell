@@ -5,6 +5,12 @@ MessageView = require './message-view'
 module.exports =
   class ResultView extends View
     tabs: null
+    working: 0
+
+    @MessageType =
+      Error : 0
+      Warning : 1
+      Lint : 2
 
     @content: ->
       @div class: 'ide-haskell-output-view', =>
@@ -13,10 +19,12 @@ module.exports =
           @div class: 'panel-heading', =>
             @div class: 'btn-toolbar pull-left', =>
               @div class: 'btn-group', =>
-                @button outlet: 'errsBtn', class: 'btn selected', 'Errors'
-                @button outlet: 'warnBtn', class: 'btn', 'Warnings'
+                @div outlet: 'status', class: 'status'
               @div class: 'btn-group', =>
-                @button outlet: 'lintBtn', class: 'btn', 'Lints'
+                @button outlet: 'errsBtn', class: 'btn selected'
+                @button outlet: 'warnBtn', class: 'btn'
+              @div class: 'btn-group', =>
+                @button outlet: 'lintBtn', class: 'btn'
             @div class: 'btn-toolbar pull-right', =>
               @button class: 'btn', 'Close'
           @div class: 'panel-body padding', =>
@@ -27,10 +35,11 @@ module.exports =
     initialize: (state) ->
       @height state?.height
 
-      @tabs = [ {button: @errsBtn, view: @errsLst, count: 0}
-              , {button: @warnBtn, view: @warnLst, count: 0}
-              , {button: @lintBtn, view: @lintLst, count: 0}
-              ]
+      @tabs = [
+        {button: @errsBtn, view: @errsLst, count: 0, name: 'Errors'},
+        {button: @warnBtn, view: @warnLst, count: 0, name: 'Warnings'},
+        {button: @lintBtn, view: @lintLst, count: 0, name: 'Lints'}
+      ]
 
       @resizeHandle.on 'mousedown', (e) => @resizeStarted e
       for tab in @tabs
@@ -69,7 +78,9 @@ module.exports =
           tab.view.hide()
 
     prepareEverything: ->
-      @clearTab tab for tab in @tabs
+      for tab in @tabs
+        @setButtonResult tab
+        @clearTab tab
 
     # Clear view.
     clearTab: (tab) ->
@@ -84,12 +95,17 @@ module.exports =
 
     # Render check results.
     renderCheck: (results) ->
-      @clearTab tab for tab in [@tabs[0], @tabs[1]]
+      @clearTab tab for tab in [
+        @tabs[ResultView.MessageType.Error],
+        @tabs[ResultView.MessageType.Warning]
+      ]
       @render results
 
     # Render lints.
     renderLints: (results) ->
-      @clearTab tab for tab in [@tabs[2]]
+      @clearTab tab for tab in [
+        @tabs[ResultView.MessageType.Lint]
+      ]
       @render results
 
     # Render result due to result type
@@ -99,3 +115,21 @@ module.exports =
         @prepareTab curTab if curTab.count is 0
         curTab.view.append(new MessageView res)
         curTab.count = curTab.count + 1
+      @setButtonResult tab for tab in @tabs
+
+    # Set name of button with counter
+    setButtonResult: (tab) ->
+      if tab.count > 0
+        tab.button.text("#{tab.name} (#{tab.count})")
+      else
+        tab.button.text("#{tab.name}")
+
+    # Work process started
+    increaseWorkingCounter: ->
+      @status.attr 'data-status', 'working'
+      @working = @working + 1
+
+    # Work process finished
+    decreaseWorkingCounter: ->
+      @working = @working - 1
+      @status.attr 'data-status', 'ready' if @working is 0

@@ -1,5 +1,6 @@
 ResultView = require './result-view'
 UtilGhcMod = require './util-ghc-mod'
+path = require 'path'
 
 module.exports =
   resultView: null
@@ -8,7 +9,7 @@ module.exports =
   lintsResults: []
 
   activate: (state) ->
-    # TODO Everything is activated when cabal project was loaded
+    return unless @isCabalized()
 
     @resultView = new ResultView(state.resultView)
     @resultView.attach()
@@ -26,6 +27,14 @@ module.exports =
   serialize: ->
     resultView: @resultView.serialize()
 
+  # check if project contains cabal file
+  isCabalized: ->
+    files = atom.project.getRootDirectory()?.getEntriesSync()
+    return false if files is undefined
+    for file in files
+      return true if path.extname(file.getPath()) is '.cabal'
+    return false
+
   # ghc-mod check
   check: ->
     editorView = atom.workspaceView.getActiveView()
@@ -33,7 +42,8 @@ module.exports =
     return unless editorView? or fileName?
 
     checkResults = []
-
+    @resultView.increaseWorkingCounter()
+    
     @utilGhcMod.check
       fileName: fileName
       onResult: (result) =>
@@ -41,6 +51,7 @@ module.exports =
         checkResults.push result
       onComplete: =>
         @resultView.renderCheck checkResults
+        @resultView.decreaseWorkingCounter()
         @checkResults = checkResults
 
         # TODO update every opened editor with results

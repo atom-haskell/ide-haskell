@@ -19,3 +19,8 @@ module.exports =
         detail = d.replace /^\s+/g, (match) ->
           match.replace /\s/g, "&nbsp;"
         @$details.append("<div>#{detail}</div>")
+
+    onClick: () ->
+      # TODO open file at specific position
+      # below does not work
+      atom.workspace.open @fname, {initialLine: @line - 1, initialColumn: @column - 1}

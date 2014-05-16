@@ -37,6 +37,27 @@
     .btn {
       top: 0px;
     }
+
+    .status {
+      &:before {
+        font-family: 'Octicons Regular';
+        font-weight: normal;
+        font-style: normal;
+        display: inline-block;
+        -webkit-font-smoothing: antialiased;
+        text-decoration: none;
+        font-size: 10pt;
+        content: "\f03a";
+        width: 15pt;
+      }
+
+      &[data-status=working]:before {
+        content: "\f09e";
+      }
+      &[data-status=ready]:before {
+        content: "\f03a";
+      }
+    }
   }
 
   .background-message {

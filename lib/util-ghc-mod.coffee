@@ -1,4 +1,5 @@
 {BufferedProcess} = require 'atom'
+ResultView = require './result-view'
 path = require 'path'
 
 getGhcMod = ->
@@ -12,11 +13,11 @@ module.exports =
       @run
         cmd: 'check'
         args: [fileName]
-        cwd: path.dirname(fileName) # TODO change dir to project root
+        cwd: atom.project.getRootDirectory().getPath()
         onMessage: (line) =>
           if matches = /([^:]+):(\d+):(\d+):((?:Warning: )?)(.*)/.exec(line)
             [_, fname, line, col, warning, content] = matches
-            type = if warning.length then 1 else 0 # 0 - error, 1 - warning TODO to enum
+            type = if warning.length then ResultView.MessageType.Warning else ResultView.MessageType.Error
             pos = [parseInt(line, 10), parseInt(col, 10)]
             details = content.split('\0').filter((l)-> 0 != l.length)
             onResult
