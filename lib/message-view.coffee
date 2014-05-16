@@ -15,4 +15,7 @@ module.exports =
                  , @details # array of strings
                  }) ->
       @$position.text("line #{@line}, column #{@column} of #{@fname}")
-      @$details.text(@details)
+      for d in @details
+        detail = d.replace /^\s+/g, (match) ->
+          match.replace /\s/g, "&nbsp;"
+        @$details.append("<div>#{detail}</div>")

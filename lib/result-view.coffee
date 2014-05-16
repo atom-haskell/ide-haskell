@@ -96,6 +96,6 @@ module.exports =
     render: (results) ->
       for res in results
         curTab = @tabs[res.type]
-        if curTab.count is 0 then @prepareTab curTab
+        @prepareTab curTab if curTab.count is 0
         curTab.view.append(new MessageView res)
         curTab.count = curTab.count + 1

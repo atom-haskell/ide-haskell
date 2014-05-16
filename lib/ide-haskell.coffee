@@ -40,11 +40,13 @@ module.exports =
         console.log "ghc-mod check results:", result
         checkResults.push result
       onComplete: =>
-
-        # TODO update every editor with result
-
         @resultView.renderCheck checkResults
         @checkResults = checkResults
+
+        # TODO update every opened editor with results
+
+        # TODO should tree view must be updated with warning icons?
+
 
   # ghc-mod lint
   lint: ->

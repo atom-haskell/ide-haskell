@@ -12,7 +12,7 @@ module.exports =
       @run
         cmd: 'check'
         args: [fileName]
-        cwd: path.dirname(fileName)
+        cwd: path.dirname(fileName) # TODO change dir to project root
         onMessage: (line) =>
           if matches = /([^:]+):(\d+):(\d+):((?:Warning: )?)(.*)/.exec(line)
             [_, fname, line, col, warning, content] = matches
