@@ -26,11 +26,11 @@ module.exports =
     @outputView = new OutputView(state.outputView)
 
     # create commands
-    atom.workspaceView.command 'ide-haskell:toggle-results', =>
+    atom.workspaceView.command 'ide-haskell:toggle-output', =>
       @outputView.toggle()
-    atom.workspaceView.command 'ide-haskell:check', =>
+    atom.workspaceView.command 'ide-haskell:file-check', =>
       @check()
-    atom.workspaceView.command 'ide-haskell:lint', =>
+    atom.workspaceView.command 'ide-haskell:file-lint', =>
       @lint()
     atom.workspaceView.command 'ide-haskell:get-type', =>
       @getType()
@@ -62,7 +62,7 @@ module.exports =
 
   # handle editor event appeared here
   handleEditorEvents: (editorView) ->
-    editor = editorView.editor
+    {editor, gutter} = editorView
     return unless @isHaskellized editor.getUri()
     buffer = editor.getBuffer()
 
@@ -72,10 +72,10 @@ module.exports =
       @lint() if atom.config.get('ide-haskell.lintOnFileSave')
 
   # ghc-mod check
-  check: ->
-    editorView = atom.workspaceView.getActiveView()
-    fileName = atom.workspace.getActiveEditor()?.getPath()
-    return unless editorView? or fileName?
+  check: (editorView = atom.workspaceView.getActiveView()) ->
+    {editor, gutter} = editorView
+    fileName = editor?.getPath()
+    return unless editorView? or editor? or fileName?
 
     checkResults = []
     @outputView.increaseWorkingCounter()
@@ -91,8 +91,6 @@ module.exports =
         @checkResults = checkResults
 
         # TODO update every opened editor with results
-
-        # TODO should tree view must be updated with warning icons?
 
 
   # ghc-mod lint
