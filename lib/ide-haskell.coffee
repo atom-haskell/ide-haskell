@@ -17,7 +17,7 @@ module.exports =
   lintsResults: []
 
   activate: (state) ->
-    return unless @isCabalized()
+    return unless @isCabalProject()
 
     # create backends
     @utilGhcMod = new UtilGhcMod
@@ -35,6 +35,10 @@ module.exports =
     atom.workspaceView.command 'ide-haskell:get-type', =>
       @getType()
 
+    # buffers watch
+    atom.workspaceView.eachEditorView (editorView) =>
+      @handleEditorEvents editorView
+
   deactivate: ->
     @outputView.detach()
     @outputView = null
@@ -43,12 +47,29 @@ module.exports =
     outputView: @outputView.serialize()
 
   # check if project contains cabal file
-  isCabalized: ->
+  isCabalProject: ->
     files = atom.project.getRootDirectory()?.getEntriesSync()
     return false if files is undefined
     for file in files
       return true if path.extname(file.getPath()) is '.cabal'
     return false
+
+  # check if file is haskell source code
+  isHaskellized: (fname) ->
+    if path.extname(fname) is '.hs'
+      return true
+    return false
+
+  # handle editor event appeared here
+  handleEditorEvents: (editorView) ->
+    editor = editorView.editor
+    return unless @isHaskellized editor.getUri()
+    buffer = editor.getBuffer()
+
+    # check and lint on save
+    buffer.on 'saved', (buffer) =>
+      @check() if atom.config.get('ide-haskell.checkOnFileSave')
+      @lint() if atom.config.get('ide-haskell.lintOnFileSave')
 
   # ghc-mod check
   check: ->

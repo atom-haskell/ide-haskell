@@ -21,7 +21,7 @@ module.exports =
                 @button outlet: 'errsBtn', class: 'btn selected'
                 @button outlet: 'warnBtn', class: 'btn'
               @div class: 'btn-group', =>
-                @button outlet: 'lintBtn', class: 'btn'
+                @button outlet: 'lintBtn', class: 'btn hidden'
             @div class: 'btn-toolbar pull-right', =>
               @button outlet: 'closeBtn', class: 'btn', 'Close'
           @div class: 'panel-body padding', =>
@@ -117,7 +117,7 @@ module.exports =
       for res in results
         curTab = @tabFromResultType res.type
         continue unless curTab?
-        
+
         @prepareTab curTab if curTab.count is 0
         curTab.view.append(new ResultView res)
         curTab.count = curTab.count + 1
