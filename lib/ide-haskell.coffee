@@ -1,4 +1,4 @@
-ResultView = require './result-view'
+OutputView = require './output-view'
 UtilGhcMod = require './util-ghc-mod'
 path = require 'path'
 
@@ -10,8 +10,7 @@ module.exports =
     ghcModPath: 'ghc-mod'
 
   # views
-  resultView: null
-  resultViewShow: true
+  outputView: null
 
   # results for highlight in editors
   checkResults: []
@@ -20,31 +19,28 @@ module.exports =
   activate: (state) ->
     return unless @isCabalized()
 
-    # deserialize state
-    @resultViewShow = state.resultViewShow
-
     # create backends
     @utilGhcMod = new UtilGhcMod
 
     # create views
-    @resultView = new ResultView(state.resultView)
+    @outputView = new OutputView(state.outputView)
 
     # create commands
-    atom.workspaceView.command 'ide-haskell:toggle-results', => @toggleResultView()
-    atom.workspaceView.command 'ide-haskell:check', => @check()
-    atom.workspaceView.command 'ide-haskell:lint', => @lint()
-    atom.workspaceView.command 'ide-haskell:get-type', => @getType()
-
-    # show views
-    @resultView.attach() if @resultViewShow
+    atom.workspaceView.command 'ide-haskell:toggle-results', =>
+      @outputView.toggle()
+    atom.workspaceView.command 'ide-haskell:check', =>
+      @check()
+    atom.workspaceView.command 'ide-haskell:lint', =>
+      @lint()
+    atom.workspaceView.command 'ide-haskell:get-type', =>
+      @getType()
 
   deactivate: ->
-    @resultView.detach()
-    @resultView = null
+    @outputView.detach()
+    @outputView = null
 
   serialize: ->
-    resultView: @resultView.serialize()
-    resultViewShow: @resultViewShow
+    outputView: @outputView.serialize()
 
   # check if project contains cabal file
   isCabalized: ->
@@ -54,11 +50,6 @@ module.exports =
       return true if path.extname(file.getPath()) is '.cabal'
     return false
 
-  # toggle result view
-  toggleResultView: ->
-    @resultViewShow = not @resultViewShow
-    if @resultViewShow then @resultView.attach() else @resultView.detach()
-
   # ghc-mod check
   check: ->
     editorView = atom.workspaceView.getActiveView()
@@ -66,7 +57,7 @@ module.exports =
     return unless editorView? or fileName?
 
     checkResults = []
-    @resultView.increaseWorkingCounter()
+    @outputView.increaseWorkingCounter()
 
     @utilGhcMod.check
       fileName: fileName
@@ -74,8 +65,8 @@ module.exports =
         console.log "ghc-mod check results:", result
         checkResults.push result
       onComplete: =>
-        @resultView.renderCheck checkResults
-        @resultView.decreaseWorkingCounter()
+        @outputView.renderCheck checkResults
+        @outputView.decreaseWorkingCounter()
         @checkResults = checkResults
 
         # TODO update every opened editor with results

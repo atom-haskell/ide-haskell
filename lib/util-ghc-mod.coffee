@@ -1,5 +1,5 @@
 {BufferedProcess} = require 'atom'
-ResultView = require './result-view'
+ResultType = require './constants'
 path = require 'path'
 
 module.exports =
@@ -14,7 +14,11 @@ module.exports =
         onMessage: (line) =>
           if matches = /([^:]+):(\d+):(\d+):((?:Warning: )?)(.*)/.exec(line)
             [_, fname, line, col, warning, content] = matches
-            type = if warning.length then ResultView.MessageType.Warning else ResultView.MessageType.Error
+            type =
+              if warning.length
+                ResultType.Warning
+              else
+                ResultType.Error
             pos = [parseInt(line, 10), parseInt(col, 10)]
             details = content.split('\0').filter((l)-> 0 != l.length)
             onResult
