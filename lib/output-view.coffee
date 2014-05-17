@@ -115,11 +115,21 @@ module.exports =
     # Render result due to result type
     render: (results) ->
       for res in results
-        curTab = @tabs[res.type]
+        curTab = @tabFromResultType res.type
+        continue unless curTab?
+        
         @prepareTab curTab if curTab.count is 0
         curTab.view.append(new ResultView res)
         curTab.count = curTab.count + 1
       @setButtonResult tab for tab in @tabs
+
+    # Get tab from result type
+    tabFromResultType: (type) ->
+      switch type
+        when ResultType.Error then @tabs[0]
+        when ResultType.Warning then @tabs[1]
+        when ResultType.Lint then @tabs[2]
+        else null
 
     # Set name of button with counter
     setButtonResult: (tab) ->
