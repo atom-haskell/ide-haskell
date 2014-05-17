@@ -2,9 +2,6 @@
 ResultView = require './result-view'
 path = require 'path'
 
-getGhcMod = ->
-  return atom.config.get('ide-haskell.ghc-mod')
-
 module.exports =
   class BackendGhcMod
     constructor: ->
@@ -38,7 +35,7 @@ module.exports =
       cmdArgs.unshift(cmd)
 
       proc = new BufferedProcess
-        command: getGhcMod()
+        command: atom.config.get('ide-haskell.ghcModPath')
         args: cmdArgs
         options: options
         stdout: (line) => @stdout(onMessage, line)

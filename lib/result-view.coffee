@@ -1,4 +1,4 @@
-{$, $$$, View} = require 'atom'
+{$, View} = require 'atom'
 
 MessageView = require './message-view'
 
@@ -26,7 +26,7 @@ module.exports =
               @div class: 'btn-group', =>
                 @button outlet: 'lintBtn', class: 'btn'
             @div class: 'btn-toolbar pull-right', =>
-              @button class: 'btn', 'Close'
+              @button outlet: 'closeBtn', class: 'btn', 'Close'
           @div class: 'panel-body padding', =>
             @ul outlet: 'errsLst', class: 'list-group'
             @ul outlet: 'warnLst', class: 'list-group', style: 'display: none;'
@@ -44,6 +44,7 @@ module.exports =
       @resizeHandle.on 'mousedown', (e) => @resizeStarted e
       for tab in @tabs
         tab.button.on 'click', (e) => @switch e.currentTarget
+      # @closeBtn.on 'click', => 
 
       # prepare tabs
       @prepareEverything()

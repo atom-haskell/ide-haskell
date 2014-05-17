@@ -3,22 +3,40 @@ UtilGhcMod = require './util-ghc-mod'
 path = require 'path'
 
 module.exports =
-  resultView: null
+  # config defaults
+  configDefaults:
+    checkOnFileSave: true,
+    lintOnFileSave: true,
+    ghcModPath: 'ghc-mod'
 
+  # views
+  resultView: null
+  resultViewShow: true
+
+  # results for highlight in editors
   checkResults: []
   lintsResults: []
 
   activate: (state) ->
     return unless @isCabalized()
 
-    @resultView = new ResultView(state.resultView)
-    @resultView.attach()
+    # deserialize state
+    @resultViewShow = state.resultViewShow
 
+    # create backends
     @utilGhcMod = new UtilGhcMod
 
+    # create views
+    @resultView = new ResultView(state.resultView)
+
+    # create commands
+    atom.workspaceView.command 'ide-haskell:toggle-results', => @toggleResultView()
     atom.workspaceView.command 'ide-haskell:check', => @check()
     atom.workspaceView.command 'ide-haskell:lint', => @lint()
     atom.workspaceView.command 'ide-haskell:get-type', => @getType()
+
+    # show views
+    @resultView.attach() if @resultViewShow
 
   deactivate: ->
     @resultView.detach()
@@ -26,6 +44,7 @@ module.exports =
 
   serialize: ->
     resultView: @resultView.serialize()
+    resultViewShow: @resultViewShow
 
   # check if project contains cabal file
   isCabalized: ->
@@ -35,6 +54,11 @@ module.exports =
       return true if path.extname(file.getPath()) is '.cabal'
     return false
 
+  # toggle result view
+  toggleResultView: ->
+    @resultViewShow = not @resultViewShow
+    if @resultViewShow then @resultView.attach() else @resultView.detach()
+
   # ghc-mod check
   check: ->
     editorView = atom.workspaceView.getActiveView()
@@ -43,7 +67,7 @@ module.exports =
 
     checkResults = []
     @resultView.increaseWorkingCounter()
-    
+
     @utilGhcMod.check
       fileName: fileName
       onResult: (result) =>

@@ -1,5 +1,24 @@
-# ide-haskell package
+# Haskell IDE
 
-A short description of your package.
+Haskell IDE for cool Atom editor
 
-![A screenshot of your spankin' package](https://f.cloud.github.com/assets/69169/2290250/c35d867a-a017-11e3-86be-cd7c5bf3ff9b.gif)
+## Features
+
+* Check for errors and warnings
+
+* Linter errors and warnings
+
+* Get type at point
+
+## TODO
+
+* Jump to definition
+* Who calls and vice versa
+* Autocompletion
+* Interactive REPL
+* Cabal project management
+* Documentation support
+
+## Installation
+
+## Configuration

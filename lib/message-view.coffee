@@ -21,6 +21,6 @@ module.exports =
         @$details.append("<div>#{detail}</div>")
 
     onClick: () ->
-      # TODO open file at specific position
-      # below does not work
-      atom.workspace.open @fname, {initialLine: @line - 1, initialColumn: @column - 1}
+      pos = [@line - 1, @column - 1]
+      atom.workspace.open(@fname).then (editor) ->
+        editor.setCursorBufferPosition(pos)
