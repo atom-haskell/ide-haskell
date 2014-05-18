@@ -5,17 +5,15 @@ module.exports =
     lintsResults: []
 
     # update check results
-    updateCheck: ->
-      console.log 'updateCheck'
+    updateCheck: (results) ->
+      @checkResults = results
 
     # update lints
-    updateLints: ->
-      console.log 'updateLints'
+    updateLints: (results) ->
+      @lintsResults = results
 
     # render check results for gutter
     renderCheck: (gutter) ->
-      console.log 'renderCheck'
 
     # render lints for gutter
     renderLints: (gutter) ->
-      console.log 'renderLints'
