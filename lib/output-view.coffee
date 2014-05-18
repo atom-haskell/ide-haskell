@@ -5,9 +5,7 @@ ResultView = require './result-view'
 module.exports =
   class OutputView extends View
 
-    show: true     # show output view
-    tabs: null     # tabs in output view
-    working: 0     # working process counter
+    checkCounter: 0     # working process counter
 
     @content: ->
       @div class: 'ide-haskell-output-view', =>
@@ -31,12 +29,19 @@ module.exports =
 
     initialize: (state) ->
       @height state?.height
-      @show = state.show if state?.show?
+      @show = if state?.show? then state.show else true
 
       @tabs = [
         {button: @errsBtn, view: @errsLst, count: 0, name: 'Errors'},
         {button: @warnBtn, view: @warnLst, count: 0, name: 'Warnings'},
         {button: @lintBtn, view: @lintLst, count: 0, name: 'Lints'}
+      ]
+      @checkTabs = [
+        @tabFromResultType(ResultType.Error),
+        @tabFromResultType(ResultType.Warning)
+      ]
+      @lintsTabs = [
+        @tabFromResultType(ResultType.Lint)
       ]
 
       @resizeHandle.on 'mousedown', (e) => @resizeStarted e
@@ -99,17 +104,12 @@ module.exports =
 
     # Render check results.
     renderCheck: (results) ->
-      @clearTab tab for tab in [
-        @tabs[ResultType.Error],
-        @tabs[ResultType.Warning]
-      ]
+      @clearTab tab for tab in @checkTabs
       @render results
 
     # Render lints.
     renderLints: (results) ->
-      @clearTab tab for tab in [
-        @tabs[OutputView.MessageType.Lint]
-      ]
+      @clearTab tab for tab in @lintsTabs
       @render results
 
     # Render result due to result type
@@ -139,11 +139,19 @@ module.exports =
         tab.button.text("#{tab.name}")
 
     # Work process started
-    increaseWorkingCounter: ->
-      @status.attr 'data-status', 'working'
-      @working = @working + 1
+    incCheckCounter: ->
+      @status.attr 'data-status', 'working' if @checkCounter is 0
+      @checkCounter = @checkCounter + 1
 
     # Work process finished
-    decreaseWorkingCounter: ->
-      @working = @working - 1
-      @status.attr 'data-status', 'ready' if @working is 0
+    decCheckCounter: ->
+      @checkCounter = @checkCounter - 1
+      if @checkCounter is 0
+        @status.attr 'data-status', 'ready'
+
+        # automatic tab switching
+        if atom.config.get('ide-haskell.tabSwitchOnCheck')
+          for tab in @tabs
+            if tab.count > 0
+              @switch tab.button[0]
+              break

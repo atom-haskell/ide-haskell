@@ -1,29 +1,30 @@
-OutputView = require './output-view'
+GutterControl = require './gutter-control'
 UtilGhcMod = require './util-ghc-mod'
-path = require 'path'
+OutputView = require './output-view'
+
+{ isCabalProject
+, isHaskellized
+} = require './utils'
 
 module.exports =
   # config defaults
   configDefaults:
     checkOnFileSave: true,
     lintOnFileSave: true,
+    tabSwitchOnCheck: true,
     ghcModPath: 'ghc-mod'
 
-  # views
-  outputView: null
-
-  # results for highlight in editors
-  checkResults: []
-  lintsResults: []
-
   activate: (state) ->
-    return unless @isCabalProject()
+    return unless isCabalProject()
 
     # create backends
     @utilGhcMod = new UtilGhcMod
 
     # create views
     @outputView = new OutputView(state.outputView)
+
+    # create controllers
+    @gutterCtrl = new GutterControl
 
     # create commands
     atom.workspaceView.command 'ide-haskell:toggle-output', =>
@@ -46,25 +47,15 @@ module.exports =
   serialize: ->
     outputView: @outputView.serialize()
 
-  # check if project contains cabal file
-  isCabalProject: ->
-    files = atom.project.getRootDirectory()?.getEntriesSync()
-    return false if files is undefined
-    for file in files
-      return true if path.extname(file.getPath()) is '.cabal'
-    return false
-
-  # check if file is haskell source code
-  isHaskellized: (fname) ->
-    if path.extname(fname) is '.hs'
-      return true
-    return false
-
   # handle editor event appeared here
   handleEditorEvents: (editorView) ->
     {editor, gutter} = editorView
-    return unless @isHaskellized editor.getUri()
+    return unless isHaskellized editor.getUri()
     buffer = editor.getBuffer()
+
+    # render gutter with actual results
+    @gutterCtrl.renderCheck gutter
+    @gutterCtrl.renderLints gutter
 
     # check and lint on save
     buffer.on 'saved', (buffer) =>
@@ -73,12 +64,11 @@ module.exports =
 
   # ghc-mod check
   check: (editorView = atom.workspaceView.getActiveView()) ->
-    {editor, gutter} = editorView
-    fileName = editor?.getPath()
-    return unless editorView? or editor? or fileName?
+    fileName = editorView?.editor?.getPath()
+    return unless fileName?
 
     checkResults = []
-    @outputView.increaseWorkingCounter()
+    @outputView.incCheckCounter()
 
     @utilGhcMod.check
       fileName: fileName
@@ -86,12 +76,9 @@ module.exports =
         console.log "ghc-mod check results:", result
         checkResults.push result
       onComplete: =>
+        @gutterCtrl.updateCheck checkResults
         @outputView.renderCheck checkResults
-        @outputView.decreaseWorkingCounter()
-        @checkResults = checkResults
-
-        # TODO update every opened editor with results
-
+        @outputView.decCheckCounter()
 
   # ghc-mod lint
   lint: ->
