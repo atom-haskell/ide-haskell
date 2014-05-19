@@ -22,14 +22,12 @@ module.exports =
       {editor, gutter} = editorView
       gutter.removeClassFromAllLines 'haskell-error'
       gutter.removeClassFromAllLines 'haskell-warning'
-      gutter.find('.line-number .icon-right').attr 'check-title', 'asldhflakjshdf'
       @render editorView, @checkResults
 
     # render lints for gutter
     renderLints: (editorView) ->
       {editor, gutter} = editorView
       gutter.removeClassFromAllLines 'haskell-lint'
-      gutter.find('.line-number .icon-right').attr 'lint-title', ''
       @render editorView, @lintsResults
 
     # render gutter with results
