@@ -36,12 +36,13 @@ module.exports =
         {button: @warnBtn, view: @warnLst, count: 0, name: 'Warnings'},
         {button: @lintBtn, view: @lintLst, count: 0, name: 'Lints'}
       ]
+      @tabFromResultType = [@tabs[0], @tabs[1], @tabs[2]]
       @checkTabs = [
-        @tabFromResultType(ResultType.Error),
-        @tabFromResultType(ResultType.Warning)
+        @tabFromResultType[ResultType.Error],
+        @tabFromResultType[ResultType.Warning]
       ]
       @lintsTabs = [
-        @tabFromResultType(ResultType.Lint)
+        @tabFromResultType[ResultType.Lint]
       ]
 
       @resizeHandle.on 'mousedown', (e) => @resizeStarted e
@@ -115,21 +116,13 @@ module.exports =
     # Render result due to result type
     render: (results) ->
       for res in results
-        curTab = @tabFromResultType res.type
+        curTab = @tabFromResultType[res.type]
         continue unless curTab?
 
         @prepareTab curTab if curTab.count is 0
         curTab.view.append(new ResultView res)
         curTab.count = curTab.count + 1
       @setButtonResult tab for tab in @tabs
-
-    # Get tab from result type
-    tabFromResultType: (type) ->
-      switch type
-        when ResultType.Error then @tabs[0]
-        when ResultType.Warning then @tabs[1]
-        when ResultType.Lint then @tabs[2]
-        else null
 
     # Set name of button with counter
     setButtonResult: (tab) ->

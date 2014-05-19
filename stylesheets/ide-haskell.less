@@ -2,9 +2,39 @@
 //
 // See https://github.com/atom/atom-dark-ui/blob/master/stylesheets/ui-variables.less
 // for a full listing of what's available.
+@import "octicon-utf-codes";
 @import "ui-variables";
 
 .ide-haskell {
+}
+
+.editor .gutter .line-number {
+  &.haskell-error .icon-right {
+    visibility: visible;
+
+    &:before {
+      content: @alert;
+      color: @text-color-error;
+    }
+  }
+
+  &.haskell-warning .icon-right {
+    visibility: visible;
+
+    &:before {
+      content: @stop;
+      color: @text-color-warning;
+    }
+  }
+
+  &.haskell-lint .icon-right {
+    visibility: visible;
+
+    &:before {
+      content: @info;
+      color: @text-color-info;
+    }
+  }
 }
 
 .ide-haskell-output-view {
@@ -47,15 +77,15 @@
         -webkit-font-smoothing: antialiased;
         text-decoration: none;
         font-size: 10pt;
-        content: "\f03a";
+        content: @check;
         width: 15pt;
       }
 
       &[data-status=working]:before {
-        content: "\f09e";
+        content: @hourglass;
       }
       &[data-status=ready]:before {
-        content: "\f03a";
+        content: @check;
       }
     }
   }

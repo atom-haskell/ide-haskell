@@ -49,18 +49,20 @@ module.exports =
 
   # handle editor event appeared here
   handleEditorEvents: (editorView) ->
-    {editor, gutter} = editorView
+    editor = editorView.editor
     return unless isHaskellized editor.getUri()
     buffer = editor.getBuffer()
-
-    # render gutter with actual results
-    @gutterCtrl.renderCheck gutter
-    @gutterCtrl.renderLints gutter
 
     # check and lint on save
     buffer.on 'saved', (buffer) =>
       @check() if atom.config.get('ide-haskell.checkOnFileSave')
       @lint() if atom.config.get('ide-haskell.lintOnFileSave')
+
+    # editor was updated event, so update gutter
+    editorView.on 'editor:display-updated', =>
+
+      @gutterCtrl.renderCheck editorView
+      @gutterCtrl.renderLints editorView
 
   # ghc-mod check
   check: (editorView = atom.workspaceView.getActiveView()) ->
