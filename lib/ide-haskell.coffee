@@ -60,7 +60,6 @@ module.exports =
 
     # editor was updated event, so update gutter
     editorView.on 'editor:display-updated', =>
-
       @gutterCtrl.renderCheck editorView
       @gutterCtrl.renderLints editorView
 
