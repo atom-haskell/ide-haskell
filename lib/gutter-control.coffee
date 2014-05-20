@@ -1,25 +1,26 @@
-# TODO need optimisation!
-# in updateCheck and updateLints we can store results in
-# hash map using filename as key, so in render function we
-# can find data to draw much faster!
-
 module.exports =
   class GutterControl
 
-    checkResults: []
-    lintsResults: []
+    checkResults: {}
+    lintsResults: {}
 
     className: ['haskell-error', 'haskell-warning', 'haskell-lint']
 
     # update check results and update active view
     updateCheck: (results) ->
-      @checkResults = results
+      @checkResults = {}
+      for result in results
+        @checkResults[result.fname] = [] unless @checkResults[result.fname]?
+        @checkResults[result.fname].push(result)
       for editorView in atom.workspaceView.getEditorViews()
         @renderCheck editorView
 
     # update lint results and update active view
     updateLints: (results) ->
-      @lintsResults = results
+      @lintsResults = {}
+      for result in results
+        @lintsResults[result.fname] = [] unless @lintsResults[result.fname]?
+        @lintsResults[result.fname].push(result)
       for editorView in atom.workspaceView.getEditorViews()
         @renderLints editorView
 
@@ -48,10 +49,9 @@ module.exports =
     # render gutter with results
     render: (editorView, results) ->
       {editor, gutter} = editorView
-      return unless gutter.isVisible()
+      return unless gutter.isVisible() and results[editor.getUri()]?
 
-      for result in results
-        continue unless result.fname is editor.getUri()
+      for result in results[editor.getUri()]
 
         rowNumber = result.line - 1
         continue if rowNumber < gutter.firstScreenRow
