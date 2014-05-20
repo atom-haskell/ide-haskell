@@ -17,6 +17,7 @@ Haskell IDE for cool Atom editor
 * Autocompletion
 * Interactive REPL
 * Cabal project management
+* Code beautify
 * Documentation support
 
 ## Installation

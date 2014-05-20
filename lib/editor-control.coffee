@@ -1,5 +1,7 @@
+ResultType = require './constants'
+
 module.exports =
-  class GutterControl
+  class EditorControl
 
     checkResults: {}
     lintsResults: {}
@@ -35,6 +37,7 @@ module.exports =
       return unless gutter.isVisible()
 
       for name in [@className[0], @className[1]]
+        editorView.find('.' + name).removeClass(name)
         gutter.removeClassFromAllLines name
       @render editorView, @checkResults
 
@@ -43,7 +46,9 @@ module.exports =
       {editor, gutter} = editorView
       return unless gutter.isVisible()
 
-      gutter.removeClassFromAllLines @className[2]
+      for name in [@className[2]]
+        editorView.find('.' + name).removeClass(name)
+        gutter.removeClassFromAllLines name
       @render editorView, @lintsResults
 
     # render gutter with results
@@ -57,5 +62,10 @@ module.exports =
         continue if rowNumber < gutter.firstScreenRow
         break if rowNumber > gutter.lastScreenRow
 
-        row = gutter.find gutter.getLineNumberElement(result.line - 1)
-        row.addClass @className[result.type]
+        # update editor view
+        editorRow = editorView.lineElementForScreenRow(result.line - 1)
+        editorRow.addClass @className[result.type]
+
+        # update gutter view
+        gutterRow = gutter.find gutter.getLineNumberElement(result.line - 1)
+        gutterRow.addClass @className[result.type]

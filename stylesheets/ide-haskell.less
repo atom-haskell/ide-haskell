@@ -8,32 +8,46 @@
 .ide-haskell {
 }
 
-.editor .gutter .line-number {
+.editor {
 
-  &.haskell-lint .icon-right {
-    visibility: visible;
-
-    &:before {
-      content: @info;
-      color: @text-color-info;
-    }
+  .haskell-lint {
+    background-color: @background-color-highlight;
   }
 
-  &.haskell-warning .icon-right {
-    visibility: visible;
-
-    &:before {
-      content: @stop;
-      color: @text-color-warning;
-    }
+  .haskell-warning {
+    background-color: @background-color-highlight;
   }
 
-  &.haskell-error .icon-right {
-    visibility: visible;
+  .haskell-lint {
+    background-color: @background-color-highlight;
+  }
 
-    &:before {
-      content: @alert;
-      color: @text-color-error;
+  .gutter .line-number {
+    &.haskell-lint .icon-right {
+      visibility: visible;
+
+      &:before {
+        content: @info;
+        color: @text-color-info;
+      }
+    }
+
+    &.haskell-warning .icon-right {
+      visibility: visible;
+
+      &:before {
+        content: @stop;
+        color: @text-color-warning;
+      }
+    }
+
+    &.haskell-error .icon-right {
+      visibility: visible;
+
+      &:before {
+        content: @alert;
+        color: @text-color-error;
+      }
     }
   }
 }

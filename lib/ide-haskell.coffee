@@ -1,4 +1,4 @@
-GutterControl = require './gutter-control'
+EditorControl = require './editor-control'
 UtilGhcMod = require './util-ghc-mod'
 OutputView = require './output-view'
 
@@ -24,7 +24,7 @@ module.exports =
     @outputView = new OutputView(state.outputView)
 
     # create controllers
-    @gutterCtrl = new GutterControl
+    @editorCtrl = new EditorControl
 
     # create commands
     atom.workspaceView.command 'ide-haskell:toggle-output', =>
@@ -60,7 +60,7 @@ module.exports =
 
     # editor was updated event, so update gutter
     editorView.on 'editor:display-updated', =>
-      @gutterCtrl.renderView editorView
+      @editorCtrl.renderView editorView
 
   # ghc-mod check
   check: (editorView = atom.workspaceView.getActiveView()) ->
@@ -76,7 +76,7 @@ module.exports =
         console.log "ghc-mod check results:", result
         results.push result
       onComplete: =>
-        @gutterCtrl.updateCheck results
+        @editorCtrl.updateCheck results
         @outputView.renderCheck results
         @outputView.decCheckCounter()
 
@@ -94,7 +94,7 @@ module.exports =
         console.log "ghc-mod lint results:", result
         results.push result
       onComplete: =>
-        @gutterCtrl.updateLints results
+        @editorCtrl.updateLints results
         @outputView.renderLints results
         @outputView.decCheckCounter()
 
