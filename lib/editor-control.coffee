@@ -69,3 +69,5 @@ module.exports =
         # update gutter view
         gutterRow = gutter.find gutter.getLineNumberElement(result.line - 1)
         gutterRow.addClass @className[result.type]
+
+        gutterRow.setTooltip('<div>' + result.details[0] + '</div><div>' + result.details[1] + '</div>')
