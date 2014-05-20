@@ -99,4 +99,14 @@ module.exports =
         @outputView.decCheckCounter()
 
   # ghc-mod type
-  getType: ->
+  getType: (editorView = atom.workspaceView.getActiveView()) ->
+    editor = editorView?.editor
+    fileName = editor?.getPath()
+    point = editor?.getCursor().getBufferPosition()
+    return unless editor? or pos? or fileName?
+
+    @utilGhcMod.type
+      fileName: fileName
+      point: point
+      onResult: (result) =>
+        console.log "ghc-mod type results:", result

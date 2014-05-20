@@ -6,11 +6,12 @@ Haskell IDE for cool Atom editor
 
 * Check for errors and warnings
 
+* Source code linter
+
 * Get type at point
 
 ## TODO
 
-* Source code linter
 * Jump to definition
 * Who calls and vice versa
 * Autocompletion

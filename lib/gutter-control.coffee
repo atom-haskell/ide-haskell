@@ -1,3 +1,8 @@
+# TODO need optimisation!
+# in updateCheck and updateLints we can store results in
+# hash map using filename as key, so in render function we
+# can find data to draw much faster!
+
 module.exports =
   class GutterControl
 
@@ -9,12 +14,14 @@ module.exports =
     # update check results and update active view
     updateCheck: (results) ->
       @checkResults = results
-      @renderCheck atom.workspaceView.getActiveView()
+      for editorView in atom.workspaceView.getEditorViews()
+        @renderCheck editorView
 
     # update lint results and update active view
     updateLints: (results) ->
       @lintsResults = results
-      @renderLints atom.workspaceView.getActiveView()
+      for editorView in atom.workspaceView.getEditorViews()
+        @renderLints editorView
 
     # render view
     renderView: (editorView) ->

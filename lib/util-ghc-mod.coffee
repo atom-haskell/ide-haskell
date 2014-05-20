@@ -6,7 +6,7 @@ module.exports =
   class BackendGhcMod
     constructor: ->
 
-    check: ({onResult, onComplete, fileName})->
+    check: ({onResult, onComplete, fileName}) ->
       @run
         cmd: 'check'
         args: [fileName]
@@ -31,7 +31,7 @@ module.exports =
             console.warn "got something strange from ghc-mod check:", [line]
         onComplete: onComplete
 
-    lint: ({onResult, onComplete, fileName})->
+    lint: ({onResult, onComplete, fileName}) ->
       @run
         cmd: 'lint'
         args: [fileName]
@@ -50,6 +50,26 @@ module.exports =
           else
             console.warn "got something strange from ghc-mod lint:", [line]
         onComplete: onComplete
+
+    type: ({onResult, fileName, point}) ->
+      resultViewed = false
+      @run
+        cmd: 'type'
+        args: [fileName, 'DummyModule', point.row + 1, point.column + 1]
+        cwd: atom.project.getRootDirectory().getPath()
+        onMessage: (line) =>
+          return if resultViewed is true
+          if matches = /(\d+)\s(\d+)\s(\d+)\s(\d+)\s\"([^\"]+)/.exec(line)
+            [_, sr, sc, er, ec, type] = matches
+            spos = [parseInt(sr, 10), parseInt(sc, 10)]
+            epos = [parseInt(er, 10), parseInt(ec, 10)]
+            onResult
+              startPos: spos
+              endPos: epos
+              type: type
+          else
+            console.warn "got something strange from ghc-mod type:", [line]
+          resultViewed = true
 
     # run ghc-mod proecess with parameters
     run: ({onMessage, onComplete, cmd, args, cwd}) ->
