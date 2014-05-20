@@ -109,4 +109,5 @@ module.exports =
       fileName: fileName
       point: point
       onResult: (result) =>
+        # atom.workspaceView.getActiveView().lineElementForScreenRow(10).append('<div>shaosdhfaoisdf</div>')
         console.log "ghc-mod type results:", result

@@ -9,12 +9,13 @@
 }
 
 .editor .gutter .line-number {
-  &.haskell-error .icon-right {
+
+  &.haskell-lint .icon-right {
     visibility: visible;
 
     &:before {
-      content: @alert;
-      color: @text-color-error;
+      content: @info;
+      color: @text-color-info;
     }
   }
 
@@ -27,12 +28,12 @@
     }
   }
 
-  &.haskell-lint .icon-right {
+  &.haskell-error .icon-right {
     visibility: visible;
 
     &:before {
-      content: @info;
-      color: @text-color-info;
+      content: @alert;
+      color: @text-color-error;
     }
   }
 }
