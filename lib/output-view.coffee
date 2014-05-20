@@ -19,7 +19,7 @@ module.exports =
                 @button outlet: 'errsBtn', class: 'btn selected'
                 @button outlet: 'warnBtn', class: 'btn'
               @div class: 'btn-group', =>
-                @button outlet: 'lintBtn', class: 'btn hidden'
+                @button outlet: 'lintBtn', class: 'btn'
             @div class: 'btn-toolbar pull-right', =>
               @button outlet: 'closeBtn', class: 'btn', 'Close'
           @div class: 'panel-body padding', =>

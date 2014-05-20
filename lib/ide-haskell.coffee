@@ -60,29 +60,43 @@ module.exports =
 
     # editor was updated event, so update gutter
     editorView.on 'editor:display-updated', =>
-      @gutterCtrl.renderCheck editorView
-      @gutterCtrl.renderLints editorView
+      @gutterCtrl.renderView editorView
 
   # ghc-mod check
   check: (editorView = atom.workspaceView.getActiveView()) ->
     fileName = editorView?.editor?.getPath()
     return unless fileName?
 
-    checkResults = []
+    results = []
     @outputView.incCheckCounter()
 
     @utilGhcMod.check
       fileName: fileName
       onResult: (result) =>
         console.log "ghc-mod check results:", result
-        checkResults.push result
+        results.push result
       onComplete: =>
-        @gutterCtrl.updateCheck checkResults
-        @outputView.renderCheck checkResults
+        @gutterCtrl.updateCheck results
+        @outputView.renderCheck results
         @outputView.decCheckCounter()
 
   # ghc-mod lint
-  lint: ->
+  lint: (editorView = atom.workspaceView.getActiveView()) ->
+    fileName = editorView?.editor?.getPath()
+    return unless fileName?
+
+    results = []
+    @outputView.incCheckCounter()
+
+    @utilGhcMod.lint
+      fileName: fileName
+      onResult: (result) =>
+        console.log "ghc-mod lint results:", result
+        results.push result
+      onComplete: =>
+        @gutterCtrl.updateLints results
+        @outputView.renderLints results
+        @outputView.decCheckCounter()
 
   # ghc-mod type
   getType: ->

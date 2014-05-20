@@ -5,7 +5,6 @@ module.exports =
     lintsResults: []
 
     className: ['haskell-error', 'haskell-warning', 'haskell-lint']
-    attrName: ['check-title', 'check-title', 'lint-title']
 
     # update check results and update active view
     updateCheck: (results) ->
@@ -17,22 +16,32 @@ module.exports =
       @lintsResults = results
       @renderLints atom.workspaceView.getActiveView()
 
+    # render view
+    renderView: (editorView) ->
+      @renderCheck editorView
+      @renderLints editorView
+
     # render check results for gutter
     renderCheck: (editorView) ->
       {editor, gutter} = editorView
-      gutter.removeClassFromAllLines 'haskell-error'
-      gutter.removeClassFromAllLines 'haskell-warning'
+      return unless gutter.isVisible()
+
+      for name in [@className[0], @className[1]]
+        gutter.removeClassFromAllLines name
       @render editorView, @checkResults
 
     # render lints for gutter
     renderLints: (editorView) ->
       {editor, gutter} = editorView
-      gutter.removeClassFromAllLines 'haskell-lint'
+      return unless gutter.isVisible()
+
+      gutter.removeClassFromAllLines @className[2]
       @render editorView, @lintsResults
 
     # render gutter with results
     render: (editorView, results) ->
       {editor, gutter} = editorView
+      return unless gutter.isVisible()
 
       for result in results
         continue unless result.fname is editor.getUri()

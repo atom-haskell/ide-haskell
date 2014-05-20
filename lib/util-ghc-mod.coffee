@@ -31,6 +31,26 @@ module.exports =
             console.warn "got something strange from ghc-mod check:", [line]
         onComplete: onComplete
 
+    lint: ({onResult, onComplete, fileName})->
+      @run
+        cmd: 'lint'
+        args: [fileName]
+        cwd: atom.project.getRootDirectory().getPath()
+        onMessage: (line) =>
+          if matches = /([^:]+):(\d+):(\d+):\s([^:]+):\s(.*)/.exec(line)
+            [_, fname, line, col, type, content] = matches
+            pos = [parseInt(line, 10), parseInt(col, 10)]
+            details = content.split('\0').filter((l)-> 0 != l.length)
+            onResult
+              line: pos[0]
+              column: pos[1]
+              fname: fname
+              type: ResultType.Lint
+              details: details
+          else
+            console.warn "got something strange from ghc-mod lint:", [line]
+        onComplete: onComplete
+
     # run ghc-mod proecess with parameters
     run: ({onMessage, onComplete, cmd, args, cwd}) ->
       options = if cwd then { cwd: cwd } else {}
