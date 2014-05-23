@@ -6,58 +6,6 @@
 @import "ui-variables";
 
 .ide-haskell {
-}
-
-.tooltip-inner {
-  font-size: 11px;
-  text-align: left;
-}
-
-.editor {
-
-  .haskell-lint {
-    background-color: @background-color-highlight;
-  }
-
-  .haskell-warning {
-    background-color: @background-color-highlight;
-  }
-
-  .haskell-lint {
-    background-color: @background-color-highlight;
-  }
-
-  .gutter .line-number {
-    &.haskell-lint .icon-right {
-      visibility: visible;
-
-      &:before {
-        content: @info;
-        color: @text-color-info;
-      }
-    }
-
-    &.haskell-warning .icon-right {
-      visibility: visible;
-
-      &:before {
-        content: @stop;
-        color: @text-color-warning;
-      }
-    }
-
-    &.haskell-error .icon-right {
-      visibility: visible;
-
-      &:before {
-        content: @alert;
-        color: @text-color-error;
-      }
-    }
-  }
-}
-
-.ide-haskell-output-view {
   display: -webkit-flex;
   -webkit-flex-direction: column;
   min-height: 120px;
@@ -88,7 +36,7 @@
       top: 0px;
     }
 
-    .status {
+    .status-icon {
       &:before {
         font-family: 'Octicons Regular';
         font-weight: normal;
@@ -101,7 +49,7 @@
         width: 15pt;
       }
 
-      &[data-status=working]:before {
+      &[data-status=progress]:before {
         content: @hourglass;
       }
       &[data-status=ready]:before {
@@ -110,23 +58,128 @@
     }
   }
 
-  .background-message {
-    padding-top: 20px;
-    text-align: center;
-  }
-
   .panel-body {
     -webkit-flex-grow: 1;
     overflow-y: scroll;
     padding: 3px @component-padding;
 
-    .message-block {
-      padding: 3px 0px;
-      margin: 0px;
-      font-size: 9pt;
-      line-height: 14pt;
-      white-space: normal;
-      border-bottom: solid 1px rgba(0,0,0,.5);
-    }
   }
 }
+
+// .editor {
+//
+//   .haskell-lint {
+//     background-color: @background-color-highlight;
+//   }
+//
+//   .haskell-warning {
+//     background-color: @background-color-highlight;
+//   }
+//
+//   .haskell-lint {
+//     background-color: @background-color-highlight;
+//   }
+//
+//   .gutter .line-number {
+//     &.haskell-lint .icon-right {
+//       visibility: visible;
+//
+//       &:before {
+//         content: @info;
+//         color: @text-color-info;
+//       }
+//     }
+//
+//     &.haskell-warning .icon-right {
+//       visibility: visible;
+//
+//       &:before {
+//         content: @stop;
+//         color: @text-color-warning;
+//       }
+//     }
+//
+//     &.haskell-error .icon-right {
+//       visibility: visible;
+//
+//       &:before {
+//         content: @alert;
+//         color: @text-color-error;
+//       }
+//     }
+//   }
+// }
+//
+// .ide-haskell-output-view {
+//   display: -webkit-flex;
+//   -webkit-flex-direction: column;
+//   min-height: 120px;
+//
+//   .resize-handle {
+//     position: absolute;
+//     left: 0;
+//     right: 0;
+//     height: 10px;
+//     cursor: row-resize;
+//   }
+//
+//   .panel {
+//     -webkit-flex-grow: 1;
+//     display: -webkit-flex;
+//     -webkit-flex-direction: column;
+//     margin: 0;
+//   }
+//
+//   .panel-heading {
+//     -webkit-flex-shrink: 0;
+//
+//     @padding-top-bottom: 5px;
+//     padding-top: @padding-top-bottom;
+//     padding-bottom: @padding-top-bottom;
+//
+//     .btn {
+//       top: 0px;
+//     }
+//
+//     .status {
+//       &:before {
+//         font-family: 'Octicons Regular';
+//         font-weight: normal;
+//         font-style: normal;
+//         display: inline-block;
+//         -webkit-font-smoothing: antialiased;
+//         text-decoration: none;
+//         font-size: 10pt;
+//         content: @check;
+//         width: 15pt;
+//       }
+//
+//       &[data-status=working]:before {
+//         content: @hourglass;
+//       }
+//       &[data-status=ready]:before {
+//         content: @check;
+//       }
+//     }
+//   }
+//
+//   .background-message {
+//     padding-top: 20px;
+//     text-align: center;
+//   }
+//
+//   .panel-body {
+//     -webkit-flex-grow: 1;
+//     overflow-y: scroll;
+//     padding: 3px @component-padding;
+//
+//     .message-block {
+//       padding: 3px 0px;
+//       margin: 0px;
+//       font-size: 9pt;
+//       line-height: 14pt;
+//       white-space: normal;
+//       border-bottom: solid 1px rgba(0,0,0,.5);
+//     }
+//   }
+// }

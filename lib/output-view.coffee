@@ -1,150 +1,99 @@
 {$, View} = require 'atom'
-ResultType = require './constants'
-ResultView = require './result-view'
+{ResultView} = require './result-view'
+{ResultType} = require './util-data'
 
-module.exports =
-  class OutputView extends View
+class OutputView extends View
 
-    checkCounter: 0     # working process counter
+  progressCounter: 0
+  checkResults: {} # all results here
 
-    @content: ->
-      @div class: 'ide-haskell-output-view', =>
-        @div outlet: 'resizeHandle', class: 'resize-handle'
-        @div class: 'panel', =>
-          @div class: 'panel-heading', =>
-            @div class: 'btn-toolbar pull-left', =>
-              @div class: 'btn-group', =>
-                @div outlet: 'status', class: 'status'
-              @div class: 'btn-group', =>
-                @button outlet: 'errsBtn', class: 'btn selected'
-                @button outlet: 'warnBtn', class: 'btn'
-              @div class: 'btn-group', =>
-                @button outlet: 'lintBtn', class: 'btn'
-            @div class: 'btn-toolbar pull-right', =>
-              @button outlet: 'closeBtn', class: 'btn', 'Close'
-          @div class: 'panel-body padding', =>
-            @ul outlet: 'errsLst', class: 'list-group'
-            @ul outlet: 'warnLst', class: 'list-group', style: 'display: none;'
-            @ul outlet: 'lintLst', class: 'list-group', style: 'display: none;'
+  @content: (params) ->
+    @div class: 'ide-haskell', =>
+      @div outlet: 'resizeHandle', class: 'resize-handle'
+      @div class: 'panel', =>
+        @div class: 'panel-heading', =>
+          @div class: 'btn-toolbar pull-left', =>
+            @div class: 'btn-group', =>
+              @div outlet: 'statusIcon', class: 'status-icon'
+            @div class: 'btn-group', =>
+              @button click: 'switchTabView', class: 'btn selected', id: 'tab1', 'Errors'
+              @button click: 'switchTabView', class: 'btn', id: 'tab2', 'Warnings'
+            @div class: 'btn-group', =>
+              @button click: 'switchTabView', class: 'btn', id: 'tab3', 'Lints'
+          @div class: 'btn-toolbar pull-right', =>
+            @button outlet: 'closeButton', class: 'btn', 'Close'
+        @div class: 'panel-body padding', =>
+          @div id: 'tab1', =>
+            @subview 'errorsListView', new ResultView()
+          @div id: 'tab2', style: 'display: none;', =>
+            @subview 'warningsListView', new ResultView()
+          @div id: 'tab3', style: 'display: none;', =>
+            @subview 'lintsListView', new ResultView()
 
-    initialize: (state) ->
-      @height state?.height
-      @show = if state?.show? then state.show else true
+  initialize: (state) ->
+    @height state?.height
+    if state?.isShow? then @toggle(state.isShow) else @toggle(true)
 
-      @tabs = [
-        {button: @errsBtn, view: @errsLst, count: 0, name: 'Errors'},
-        {button: @warnBtn, view: @warnLst, count: 0, name: 'Warnings'},
-        {button: @lintBtn, view: @lintLst, count: 0, name: 'Lints'}
-      ]
-      @tabFromResultType = [@tabs[0], @tabs[1], @tabs[2]]
-      @checkTabs = [
-        @tabFromResultType[ResultType.Error],
-        @tabFromResultType[ResultType.Warning]
-      ]
-      @lintsTabs = [
-        @tabFromResultType[ResultType.Lint]
-      ]
+    # prepare arrays
+    @listViews = [@errorsListView, @warningsListView, @lintsListView]
 
-      @resizeHandle.on 'mousedown', (e) => @resizeStarted e
-      for tab in @tabs
-        tab.button.on 'click', (e) => @switch e.currentTarget
-      @closeBtn.on 'click', => @toggle()
+    # events
+    @resizeHandle.on 'mousedown', (e) => @resizeStarted e
+    @closeButton.on 'click', => @toggle()
 
-      @prepareEverything()
+  serialize: ->
+    height: @height()
+    isShow: @isShow
 
-    serialize: ->
+  toggle: (isShow = undefined) ->
+    if isShow? then @isShow = isShow else @isShow = not @isShow
+    if @isShow then @attach() else @detach()
+
+  attach: ->
+    atom.workspaceView.prependToBottom(this)
+
+  resizeStarted: ({pageY}) =>
+    @resizeData =
+      pageY: pageY
       height: @height()
-      show: @show
+    $(document.body).on 'mousemove', @resizeView
+    $(document.body).on 'mouseup', @resizeStopped
 
-    attach: ->
-      atom.workspaceView.prependToBottom(this)
+  resizeStopped: ->
+    $(document.body).off 'mousemove', @resizeView
+    $(document.body).off 'mouseup', @resizeStopped
 
-    toggle: ->
-      @show = not @show
-      if @show then @attach() else @detach()
+  resizeView: ({pageY}) =>
+    @height @resizeData.height + @resizeData.pageY - pageY
 
-    resizeStarted: ({pageY}) =>
-      @resizeData =
-        pageY: pageY
-        height: @height()
-      $(document.body).on 'mousemove', @resizeView
-      $(document.body).on 'mouseup', @resizeStopped
+  switchTabView: (event, element) ->
+    # console.log element
+    # TODO switch tabs
 
-    resizeStopped: ->
-      $(document.body).off 'mousemove', @resizeView
-      $(document.body).off 'mouseup', @resizeStopped
+  # method is called before start of any check commands
+  prepare: (types) ->
+    @statusIcon.attr 'data-status', 'progress' if @progressCounter is 0
+    @progressCounter = @progressCounter + 1
 
-    resizeView: ({pageY}) =>
-      @height @resizeData.height + @resizeData.pageY - pageY
+  # update current results
+  update: (types, results) ->
+    @checkResults[t] = [] for t in types
+    @checkResults[r.type].push(r) for r in results
 
-    switch: (btn) ->
-      for tab, index in @tabs
-        if tab.button[0] is btn
-          tab.button.addClass('selected')
-          tab.view.show()
-        else
-          tab.button.removeClass('selected')
-          tab.view.hide()
+    # update tabs with new results
+    @listViews[t].update(@checkResults[t]) for t in types
 
-    prepareEverything: ->
-      for tab in @tabs
-        @setButtonResult tab
-        @clearTab tab
-      @attach() if @show
+    # TODO update counters with new results
 
-    # Clear view.
-    clearTab: (tab) ->
-      tab.view.addClass('background-message')
-      tab.view.text('Haskell IDE')
-      tab.count = 0
+    # TODO update all editors with new results
 
-    # Prepare tab for result list.
-    prepareTab: (tab) ->
-      tab.view.removeClass('background-message')
-      tab.view.text('')
+    @progressCounter = @progressCounter - 1
+    if @progressCounter is 0
+      @statusIcon.attr 'data-status', 'ready'
 
-    # Render check results.
-    renderCheck: (results) ->
-      @clearTab tab for tab in @checkTabs
-      @render results
+      # TODO automatic tab switching
 
-    # Render lints.
-    renderLints: (results) ->
-      @clearTab tab for tab in @lintsTabs
-      @render results
 
-    # Render result due to result type
-    render: (results) ->
-      for res in results
-        curTab = @tabFromResultType[res.type]
-        continue unless curTab?
-
-        @prepareTab curTab if curTab.count is 0
-        curTab.view.append(new ResultView res)
-        curTab.count = curTab.count + 1
-      @setButtonResult tab for tab in @tabs
-
-    # Set name of button with counter
-    setButtonResult: (tab) ->
-      if tab.count > 0
-        tab.button.text("#{tab.name} (#{tab.count})")
-      else
-        tab.button.text("#{tab.name}")
-
-    # Work process started
-    incCheckCounter: ->
-      @status.attr 'data-status', 'working' if @checkCounter is 0
-      @checkCounter = @checkCounter + 1
-
-    # Work process finished
-    decCheckCounter: ->
-      @checkCounter = @checkCounter - 1
-      if @checkCounter is 0
-        @status.attr 'data-status', 'ready'
-
-        # automatic tab switching
-        if atom.config.get('ide-haskell.tabSwitchOnCheck')
-          for tab in @tabs
-            if tab.count > 0
-              @switch tab.button[0]
-              break
+module.exports = {
+  OutputView
+}

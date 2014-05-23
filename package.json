@@ -9,6 +9,5 @@
     "atom": ">0.50.0"
   },
   "dependencies": {
-    "atom-message-panel": "^1.0.0"
   }
 }

@@ -1,113 +1,64 @@
-EditorControl = require './editor-control'
-UtilGhcMod = require './util-ghc-mod'
-OutputView = require './output-view'
+{OutputView} = require './output-view'
+{EditorControl} = require './editor-control'
+utilGhcMod = require './util-ghc-mod'
 
-{ isCabalProject
-, isHaskellized
-} = require './utils'
+{isCabalProject} = require './utils'
 
-module.exports =
-  # config defaults
-  configDefaults:
-    checkOnFileSave: true,
-    lintOnFileSave: true,
-    tabSwitchOnCheck: true,
-    ghcModPath: 'ghc-mod'
 
-  activate: (state) ->
-    return unless isCabalProject()
+configDefaults =
+  checkOnFileSave: true,
+  lintOnFileSave: true,
+  tabSwitchOnCheck: true,
+  ghcModPath: 'ghc-mod'
 
-    # create backends
-    @utilGhcMod = new UtilGhcMod
 
-    # create views
-    @outputView = new OutputView(state.outputView)
+outputView = null
 
-    # create controllers
-    @editorCtrl = new EditorControl
 
-    # create commands
-    atom.workspaceView.command 'ide-haskell:toggle-output', =>
-      @outputView.toggle()
-    atom.workspaceView.command 'ide-haskell:file-check', =>
-      @check()
-    atom.workspaceView.command 'ide-haskell:file-lint', =>
-      @lint()
-    atom.workspaceView.command 'ide-haskell:get-type', =>
-      @getType()
+activate = (state) ->
+  # activate only on cabal project
+  return unless isCabalProject()
 
-    # buffers watch
-    atom.workspaceView.eachEditorView (editorView) =>
-      @handleEditorEvents editorView
+  # create global views
+  outputView = new OutputView(state.outputView)
 
-  deactivate: ->
-    @outputView.detach()
-    @outputView = null
+  # attach controller to every editor view
+  atom.workspaceView.eachEditorView (editorView) ->
+    control = new EditorControl(editorView, outputView)
 
-  serialize: ->
-    outputView: @outputView.serialize()
+  # global commands
+  atom.workspaceView.command 'ide-haskell:toggle-output', ->
+    outputView.toggle()
+  atom.workspaceView.command 'ide-haskell:check-file', ->
+    checkFile(utilGhcMod.check)
+  atom.workspaceView.command 'ide-haskell:lint-file', ->
+    checkFile(utilGhcMod.lint)
 
-  # handle editor event appeared here
-  handleEditorEvents: (editorView) ->
-    editor = editorView.editor
-    return unless isHaskellized editor.getUri()
-    buffer = editor.getBuffer()
+deactivate = ->
+  outputView.detach()
 
-    # check and lint on save
-    buffer.on 'saved', (buffer) =>
-      @check() if atom.config.get('ide-haskell.checkOnFileSave')
-      @lint() if atom.config.get('ide-haskell.lintOnFileSave')
+serialize = ->
+  outputView: outputView.serialize()
 
-    # editor was updated event, so update gutter
-    editorView.on 'editor:display-updated', =>
-      @editorCtrl.renderView editorView
+# check and lint file
+checkFile = (checkFunction) ->
+  fileName = atom.workspaceView.getActiveView().getEditor().getPath()
+  return unless fileName?
 
-  # ghc-mod check
-  check: (editorView = atom.workspaceView.getActiveView()) ->
-    fileName = editorView?.editor?.getPath()
-    return unless fileName?
+  collectedResults = []
+  checkFunction
+    fileName: fileName
+    onPrepare: (alteredTypes) ->
+      outputView.prepare(alteredTypes)
+    onResult: (result) ->
+      collectedResults.push result
+    onComplete: (alteredTypes) ->
+      outputView.update(alteredTypes, collectedResults)
 
-    results = []
-    @outputView.incCheckCounter()
 
-    @utilGhcMod.check
-      fileName: fileName
-      onResult: (result) =>
-        console.log "ghc-mod check results:", result
-        results.push result
-      onComplete: =>
-        @editorCtrl.updateCheck results
-        @outputView.renderCheck results
-        @outputView.decCheckCounter()
-
-  # ghc-mod lint
-  lint: (editorView = atom.workspaceView.getActiveView()) ->
-    fileName = editorView?.editor?.getPath()
-    return unless fileName?
-
-    results = []
-    @outputView.incCheckCounter()
-
-    @utilGhcMod.lint
-      fileName: fileName
-      onResult: (result) =>
-        console.log "ghc-mod lint results:", result
-        results.push result
-      onComplete: =>
-        @editorCtrl.updateLints results
-        @outputView.renderLints results
-        @outputView.decCheckCounter()
-
-  # ghc-mod type
-  getType: (editorView = atom.workspaceView.getActiveView()) ->
-    editor = editorView?.editor
-    fileName = editor?.getPath()
-    point = editor?.getCursor().getBufferPosition()
-    return unless editor? or pos? or fileName?
-
-    @utilGhcMod.type
-      fileName: fileName
-      point: point
-      onResult: (result) =>
-        # atom.workspaceView.getActiveView().lineElementForScreenRow(10).append('<div>shaosdhfaoisdf</div>')
-        console.log "ghc-mod type results:", result
+module.exports = {
+  configDefaults,
+  activate
+  deactivate,
+  serialize
+}
