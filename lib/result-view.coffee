@@ -1,12 +1,27 @@
-{View} = require 'atom'
+{$, $$$, View} = require 'atom'
 
 
 class ResultView extends View
   @content: ->
-    @ul outlet: 'contents', class: 'list-group'
+    @div class: 'result-view', =>
+      @ul outlet: 'resultList', class: 'list-group'
+
+  initialize: (state) ->
+    @on 'click', '.position',  ->
+      pos = [$(this).attr('row') - 1, $(this).attr('col') - 1]
+      uri = $(this).attr('uri')
+      atom.workspace.open(uri).then (editor) ->
+        editor.setCursorBufferPosition(pos)
 
   update: (results) ->
-    
+    @resultList.empty()
+
+    for r in results
+      @resultList.append $$$ ->
+        @li class: 'result-block', =>
+          @div class: 'position', row: r.pos[0], col: r.pos[1], uri: r.uri, "#{r.uri}: #{r.pos[0]}, #{r.pos[1]}"
+          @pre class: 'description', r.desc.join('\n')
+
 
 module.exports = {
   ResultView
