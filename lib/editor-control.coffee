@@ -55,7 +55,7 @@ class EditorControl
       @gutter.removeClassFromAllLines name
 
     # show everything
-    for typeResults in @checkResults
+    for typeResults in @checkResults by -1
       continue unless typeResults?
       for r in typeResults
 
@@ -72,6 +72,7 @@ class EditorControl
         gutterRow.addClass @className[r.type]
 
         # tooltip
+        gutterRow.destroyTooltip()
         gutterRow.setTooltip('<pre class="ide-haskell-tooltip">' +
                              r.desc + '</pre>')
 
