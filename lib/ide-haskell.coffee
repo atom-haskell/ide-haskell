@@ -30,30 +30,15 @@ activate = (state) ->
   atom.workspaceView.command 'ide-haskell:toggle-output', ->
     outputView.toggle()
   atom.workspaceView.command 'ide-haskell:check-file', ->
-    checkFile(utilGhcMod.check)
+    outputView.checkFile(utilGhcMod.check)
   atom.workspaceView.command 'ide-haskell:lint-file', ->
-    checkFile(utilGhcMod.lint)
+    outputView.checkFile(utilGhcMod.lint)
 
 deactivate = ->
   outputView.detach()
 
 serialize = ->
   outputView: outputView.serialize()
-
-# check and lint file
-checkFile = (checkFunction) ->
-  fileName = atom.workspaceView.getActiveView().getEditor().getPath()
-  return unless fileName?
-
-  collectedResults = []
-  checkFunction
-    fileName: fileName
-    onPrepare: (alteredTypes) ->
-      outputView.prepare(alteredTypes)
-    onResult: (result) ->
-      collectedResults.push result
-    onComplete: (alteredTypes) ->
-      outputView.update(alteredTypes, collectedResults)
 
 
 module.exports = {

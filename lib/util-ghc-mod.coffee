@@ -45,7 +45,7 @@ check = ({onPrepare, onResult, onComplete, fileName}) ->
             pos: pos
             uri: uri
             type: type
-            desc: desc
+            desc: desc.join('\n')
           )
         )
       else
@@ -70,7 +70,7 @@ lint = ({onPrepare, onResult, onComplete, fileName}) ->
             pos: pos
             uri: uri
             type: ResultType.Lint
-            desc: desc
+            desc: desc.join('\n')
           )
         )
       else

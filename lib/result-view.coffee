@@ -20,7 +20,7 @@ class ResultView extends View
       @resultList.append $$$ ->
         @li class: 'result-block', =>
           @div class: 'position', row: r.pos[0], col: r.pos[1], uri: r.uri, "#{r.uri}: #{r.pos[0]}, #{r.pos[1]}"
-          @pre class: 'description', r.desc.join('\n')
+          @pre class: 'description', r.desc
 
 
 module.exports = {

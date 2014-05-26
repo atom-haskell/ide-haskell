@@ -4,6 +4,7 @@
 // for a full listing of what's available.
 @import "octicon-utf-codes";
 @import "ui-variables";
+@import "tooltips";
 
 .ide-haskell {
   display: -webkit-flex;
@@ -75,10 +76,66 @@
       .description {
         padding-top: 3px;
         padding-bottom: 3px;
-        color: lighten(@text-color, 20%);
+        color: lighten(@text-color, 15%);
         background-color: @tool-panel-background-color;
         font-size: 8pt;
+        white-space: pre;
       }
     }
   }
+}
+
+.editor {
+
+  .ide-haskell-lint {
+    background-color: @background-color-highlight;
+  }
+
+  .ide-haskell-warning {
+    background-color: @background-color-highlight;
+  }
+
+  .ide-haskell-lint {
+    background-color: @background-color-highlight;
+  }
+
+  .gutter .line-number {
+
+    &.ide-haskell-lint .icon-right {
+      visibility: visible;
+
+      &:before {
+        content: @info;
+        color: @text-color-info;
+      }
+    }
+
+    &.ide-haskell-warning .icon-right {
+      visibility: visible;
+
+      &:before {
+        content: @stop;
+        color: @text-color-warning;
+      }
+    }
+
+    &.ide-haskell-error .icon-right {
+      visibility: visible;
+
+      &:before {
+        content: @alert;
+        color: @text-color-error;
+      }
+    }
+  }
+}
+
+.ide-haskell-tooltip {
+  .tooltip .tooltip-inner;
+  text-align: left;
+  padding: 0px;
+  white-space: pre;
+  background-color: transparent;
+  line-height: 14px;
+  font-size: 8pt;
 }

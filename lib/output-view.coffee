@@ -5,7 +5,7 @@
 class OutputView extends View
 
   progressCounter: 0
-  checkResults: {} # all results here
+  checkResults: [] # all results here
 
   @content: (params) ->
     @div class: 'ide-haskell', =>
@@ -16,10 +16,10 @@ class OutputView extends View
             @div class: 'btn-group', =>
               @div outlet: 'statusIcon', class: 'status-icon'
             @div class: 'btn-group', =>
-              @button click: 'switchTabView', class: 'btn tab-btn selected', id: 'tab1', 'Errors'
-              @button click: 'switchTabView', class: 'btn tab-btn', id: 'tab2', 'Warnings'
+              @button click: 'switchTabView', outlet: 'errorsButton', class: 'btn tab-btn selected', id: 'tab1', 'Errors'
+              @button click: 'switchTabView', outlet: 'warningsButton', class: 'btn tab-btn', id: 'tab2', 'Warnings'
             @div class: 'btn-group', =>
-              @button click: 'switchTabView', class: 'btn tab-btn', id: 'tab3', 'Lints'
+              @button click: 'switchTabView', outlet: 'lintsButton', class: 'btn tab-btn', id: 'tab3', 'Lints'
           @div class: 'btn-toolbar pull-right', =>
             @button outlet: 'closeButton', class: 'btn', 'Close'
         @div class: 'panel-body padding', =>
@@ -35,7 +35,11 @@ class OutputView extends View
     if state?.isShow? then @toggle(state.isShow) else @toggle(true)
 
     # prepare arrays for errors, warnings and lints data
-    @listViews = [@errorsListView, @warningsListView, @lintsListView]
+    @checkControl = [
+      { v: @errorsListView, b: @errorsButton, t: @errorsButton.text() },
+      { v: @warningsListView, b: @warningsButton, t: @warningsButton.text() },
+      { v: @lintsListView, b: @lintsButton, t: @lintsButton.text() },
+    ]
 
     # events
     @resizeHandle.on 'mousedown', (e) => @resizeStarted e
@@ -45,9 +49,22 @@ class OutputView extends View
     height: @height()
     isShow: @isShow
 
+  # toggle
   toggle: (isShow = undefined) ->
     if isShow? then @isShow = isShow else @isShow = not @isShow
     if @isShow then @attach() else @detach()
+
+  # check and lint file
+  checkFile: (checkFunction) ->
+    fileName = atom.workspaceView.getActiveView().getEditor().getPath()
+    return unless fileName?
+    results = []
+
+    checkFunction
+      fileName: fileName
+      onPrepare: (types) => @prepare(types)
+      onResult: (result) -> results.push result
+      onComplete: (types) => @update(types, results)
 
   attach: ->
     atom.workspaceView.prependToBottom(this)
@@ -81,18 +98,34 @@ class OutputView extends View
     @checkResults[t] = [] for t in types
     @checkResults[r.type].push(r) for r in results
 
-    # update tabs with new results
-    @listViews[t].update(@checkResults[t]) for t in types
+    for t in types
+      @checkControl[t].v.update @checkResults[t]
+      @checkControl[t].b.text @buttonName(t)
 
-    # TODO update counters with new results
-
-    # TODO update all editors with new results
+    # update all opened editors with new results
+    for editorView in atom.workspaceView.getEditorViews()
+      @updateEditorView editorView, types, results
 
     @progressCounter = @progressCounter - 1
     if @progressCounter is 0
       @statusIcon.attr 'data-status', 'ready'
 
-      # TODO automatic tab switching
+      # automatic tab switching
+      if atom.config.get('ide-haskell.tabSwitchOnCheck')
+        for btn, t in @checkControl
+          if @checkResults[t].length > 0
+            @switchTabView null, btn.b
+            break
+
+  updateEditorView: (editorView, types = undefined, results = undefined) ->
+    results = @checkResults unless results?
+    editorView.control.update types, results
+
+  # get button name using results
+  buttonName: (type) ->
+    name = @checkControl[type].t
+    count = @checkResults[type].length
+    if count > 0 then "#{name} (#{count})" else "#{name}"
 
 
 module.exports = {
