@@ -2,6 +2,7 @@
 {isHaskellSource} = require './utils'
 utilGhcMod = require './util-ghc-mod'
 
+
 class EditorControl
 
   checkResults: [] # all results here for current file
@@ -88,9 +89,9 @@ class EditorControl
         gutterRow.addClass @className[r.type]
 
         # tooltip
-        gutterRow.destroyTooltip()
-        gutterRow.setTooltip('<pre class="ide-haskell-tooltip">' +
-                             r.desc + '</pre>')
+        # gutterRow.destroyTooltip()
+        # gutterRow.setTooltip('<pre class="ide-haskell-tooltip">' +
+        #                      r.desc + '</pre>')
 
   # get expression type under mouse cursor and show it
   showExpressionType: (event) ->
@@ -102,9 +103,10 @@ class EditorControl
       utilGhcMod.type
         fileName: @editor.getUri()
         pt: screenPt
-        onResult: (type) =>
-          # TODO show type near mouse pointer
-          console.log type
+        onResult: (result) =>
+          # @editorView.append("<div>#{result.type}</div>")
+          # # TODO show type near mouse pointer
+          # console.log result.type
 
 module.exports = {
   EditorControl
