@@ -96,11 +96,15 @@ class EditorControl
   showExpressionType: (event) ->
     return unless isHaskellSource @editor.getUri()
 
-    utilGhcMod.type
-      pt: @editorView.screenPositionFromMouseEvent(event)
-      fileName: @editor.getUri()
-      onResult: (type) =>
-        console.log type
+    screenPt = @editorView.screenPositionFromMouseEvent(event)
+    bufferPt = @editor.bufferPositionForScreenPosition(screenPt)
+    if screenPt.isEqual bufferPt
+      utilGhcMod.type
+        fileName: @editor.getUri()
+        pt: screenPt
+        onResult: (type) =>
+          # TODO show type near mouse pointer
+          console.log type
 
 module.exports = {
   EditorControl
