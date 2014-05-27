@@ -1,10 +1,4 @@
 # See https://atom.io/docs/latest/creating-a-package#menus for more details
-'context-menu':
-  '.overlayer':
-    'Toggle': 'ide-haskell:toggle-output'
-    'Check': 'ide-haskell:check-file'
-    'Lint': 'ide-haskell:lint-file'
-
 'menu': [
   {
   }

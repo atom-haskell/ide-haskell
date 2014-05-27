@@ -56,7 +56,7 @@ class OutputView extends View
 
   # check and lint file
   checkFile: (checkFunction) ->
-    fileName = atom.workspaceView.getActiveView().getEditor().getPath()
+    fileName = atom.workspaceView.getActiveView()?.getEditor().getPath()
     return unless fileName?
     results = []
 
