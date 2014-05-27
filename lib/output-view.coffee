@@ -111,7 +111,7 @@ class OutputView extends View
       @statusIcon.attr 'data-status', 'ready'
 
       # automatic tab switching
-      if atom.config.get('ide-haskell.tabSwitchOnCheck')
+      if atom.config.get('ide-haskell.switchTabOnCheck')
         for btn, t in @checkControl
           if @checkResults[t].length > 0
             @switchTabView null, btn.b

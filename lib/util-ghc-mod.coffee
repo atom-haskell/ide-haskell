@@ -1,7 +1,10 @@
 {BufferedProcess} = require 'atom'
 path = require 'path'
 
-{ResultType, CheckResult} = require './util-data'
+{ ResultType
+, CheckResult
+, TypeResult
+} = require './util-data'
 
 
 # run ghc-mod backend
@@ -78,8 +81,28 @@ lint = ({onPrepare, onResult, onComplete, fileName}) ->
     onComplete: ->
       onComplete [ResultType.Lint]
 
+# ghc-mod type
+type = ({onResult, fileName, pt}) ->
+  resultViewed = false
+  run
+    cmd: 'type'
+    args: [fileName, 'DummyModule', pt.row + 1, pt.column + 1]
+    cwd: atom.project.getRootDirectory().getPath()
+    onMessage: (line) =>
+      return if resultViewed is true
+      if matches = /(\d+)\s(\d+)\s(\d+)\s(\d+)\s\"([^\"]+)/.exec(line)
+        [_, sr, sc, er, ec, type] = matches
+        onResult(
+          new TypeResult(
+            type: type
+          )
+        )
+      else
+        console.warn "got something strange from ghc-mod type:", [line]
+      resultViewed = true
 
 module.exports = {
   check,
-  lint
+  lint,
+  type
 }

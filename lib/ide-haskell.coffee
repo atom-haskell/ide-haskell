@@ -8,7 +8,8 @@ utilGhcMod = require './util-ghc-mod'
 configDefaults =
   checkOnFileSave: true,
   lintOnFileSave: true,
-  tabSwitchOnCheck: true,
+  switchTabOnCheck: true,
+  expressionTypeInterval: 1000,
   ghcModPath: 'ghc-mod'
 
 

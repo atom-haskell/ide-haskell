@@ -8,9 +8,13 @@ ResultType =
 # check results
 class CheckResult
   constructor: ({@pos, @uri, @type, @desc}) ->
-    
+
+# type results
+class TypeResult
+  constructor: ({@type}) ->
 
 module.exports = {
   ResultType,
-  CheckResult
+  CheckResult,
+  TypeResult
 }

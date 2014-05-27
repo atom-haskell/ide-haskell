@@ -1,5 +1,6 @@
+{$, View} = require 'atom'
 {isHaskellSource} = require './utils'
-
+utilGhcMod = require './util-ghc-mod'
 
 class EditorControl
 
@@ -11,7 +12,7 @@ class EditorControl
 
     @editor = @editorView.getEditor()
     @gutter = @editorView.gutter
-    @buffer = @editor.getBuffer()
+    @scroll = @editorView.find('.scroll-view')
 
     # say output view to update me
     @outputView.updateEditorView @editorView
@@ -19,9 +20,11 @@ class EditorControl
     # event for editor updates
     @editorView.on 'editor:display-updated', =>
       @render()
+    @editorView.on 'editor:will-be-removed', =>
+      @disable()
 
     # buffer events for automatic check
-    @buffer.on 'saved', (buffer) =>
+    @editor.getBuffer().on 'saved', (buffer) =>
       return unless isHaskellSource buffer.getUri()
 
       # TODO filter current results with buffer.getUri() and update editor
@@ -32,6 +35,19 @@ class EditorControl
         atom.workspaceView.trigger 'ide-haskell:check-file'
       if atom.config.get('ide-haskell.lintOnFileSave')
         atom.workspaceView.trigger 'ide-haskell:lint-file'
+
+    # mouse movement events to start getting the type of expression
+    @scroll.on "mousemove", (event) =>
+      clearInterval @timer if @timer?
+      @timer = setInterval (=>
+        clearInterval @timer
+        @showExpressionType(event)
+        ), atom.config.get('ide-haskell.expressionTypeInterval')
+    @scroll.on "mouseout", =>
+      clearInterval @timer if @timer?
+
+  disable: ->
+    clearInterval @timer if @timer?
 
   update: (types, results) ->
     if types?
@@ -60,8 +76,8 @@ class EditorControl
       for r in typeResults
 
         row = r.pos[0] - 1
-        continue if row < @gutter.firstScreenRow
-        break if row > @gutter.lastScreenRow
+        continue if row < @editorView.getFirstVisibleScreenRow()
+        break if row > @editorView.getLastVisibleScreenRow()
 
         # update editor view
         @editorView.lineElementForScreenRow(row)
@@ -75,6 +91,16 @@ class EditorControl
         gutterRow.destroyTooltip()
         gutterRow.setTooltip('<pre class="ide-haskell-tooltip">' +
                              r.desc + '</pre>')
+
+  # get expression type under mouse cursor and show it
+  showExpressionType: (event) ->
+    return unless isHaskellSource @editor.getUri()
+
+    utilGhcMod.type
+      pt: @editorView.screenPositionFromMouseEvent(event)
+      fileName: @editor.getUri()
+      onResult: (type) =>
+        console.log type
 
 module.exports = {
   EditorControl
