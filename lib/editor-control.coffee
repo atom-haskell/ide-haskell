@@ -51,9 +51,9 @@ class EditorControl
       @_clearExprTypeTimeout()
 
     # mouse movement over gutter to show check results
-    @gutter.on 'mouseover', '.check-result', (e) =>
+    @gutter.on 'mouseenter', '.check-result', (e) =>
       console.log 'show results'
-    @gutter.on 'mouseout', '.check-result', (e) =>
+    @gutter.on 'mouseleave', '.check-result', (e) =>
       console.log 'hide results'
 
   _clearExprTypeTimeout: ->
