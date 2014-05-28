@@ -6,7 +6,7 @@ utilGhcMod = require './util-ghc-mod'
 class EditorControl
 
   checkResults: [] # all results here for current file
-  className: ['ide-haskell-error', 'ide-haskell-warning', 'ide-haskell-lint'] # classes for types
+  className: ['error', 'warning', 'lint']
 
   constructor: (@editorView, @outputView) ->
     @editorView.control = this
@@ -37,18 +37,32 @@ class EditorControl
       if atom.config.get('ide-haskell.lintOnFileSave')
         atom.workspaceView.trigger 'ide-haskell:lint-file'
 
-    # mouse movement events to start getting the type of expression
-    @scroll.on "mousemove", (event) =>
-      clearInterval @timer if @timer?
-      @timer = setInterval (=>
-        clearInterval @timer
-        @showExpressionType(event)
-        ), atom.config.get('ide-haskell.expressionTypeInterval')
-    @scroll.on "mouseout", =>
-      clearInterval @timer if @timer?
+    # @scroll.on 'mousemove', '.underlayer', (e) =>
+    #   console.log 'aaa'
+
+    @scroll.on 'mousemove', (e) =>
+      # TODO hide previous showed type on mouse movement??
+
+      @_clearExprTypeTimeout()
+      @exprTypeTimeout = setTimeout (=>
+        @showExpressionType(e)
+      ), atom.config.get('ide-haskell.expressionTypeInterval')
+    @scroll.on 'mouseout', (e) =>
+      @_clearExprTypeTimeout()
+
+    # mouse movement over gutter to show check results
+    @gutter.on 'mouseover', '.check-result', (e) =>
+      console.log 'show results'
+    @gutter.on 'mouseout', '.check-result', (e) =>
+      console.log 'hide results'
+
+  _clearExprTypeTimeout: ->
+    if @exprTypeTimeout?
+      clearTimeout @exprTypeTimeout
+      @exprTypeTimeout = null
 
   disable: ->
-    clearInterval @timer if @timer?
+    @_clearExprTypeTimeout()
 
   update: (types, results) ->
     if types?
@@ -67,6 +81,9 @@ class EditorControl
 
   render: ->
     # remove all classes from gutter and current view
+    @editorView.find('.check-result').removeClass('check-result')
+    @gutter.removeClassFromAllLines('check-result')
+
     for name in @className
       @editorView.find(".#{name}").removeClass(name)
       @gutter.removeClassFromAllLines name
@@ -82,22 +99,20 @@ class EditorControl
 
         # update editor view
         @editorView.lineElementForScreenRow(row)
+          .addClass 'check-result'
           .addClass @className[r.type]
 
         # update gutter view
         gutterRow = @gutter.find @gutter.getLineNumberElement(row)
-        gutterRow.addClass @className[r.type]
-
-        # tooltip
-        # gutterRow.destroyTooltip()
-        # gutterRow.setTooltip('<pre class="ide-haskell-tooltip">' +
-        #                      r.desc + '</pre>')
+        gutterRow
+          .addClass 'check-result'
+          .addClass @className[r.type]
 
   # get expression type under mouse cursor and show it
-  showExpressionType: (event) ->
+  showExpressionType: (e) ->
     return unless isHaskellSource @editor.getUri()
 
-    screenPt = @editorView.screenPositionFromMouseEvent(event)
+    screenPt = @editorView.screenPositionFromMouseEvent(e)
     bufferPt = @editor.bufferPositionForScreenPosition(screenPt)
     if screenPt.isEqual bufferPt
       utilGhcMod.type
@@ -106,7 +121,7 @@ class EditorControl
         onResult: (result) =>
           # @editorView.append("<div>#{result.type}</div>")
           # # TODO show type near mouse pointer
-          # console.log result.type
+          console.log result.type
 
 module.exports = {
   EditorControl

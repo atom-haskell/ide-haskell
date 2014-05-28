@@ -87,21 +87,21 @@
 
 .editor {
 
-  .ide-haskell-lint {
+  .check-result.lint {
     background-color: @background-color-highlight;
   }
 
-  .ide-haskell-warning {
+  .check-result.warning {
     background-color: @background-color-highlight;
   }
 
-  .ide-haskell-lint {
+  .check-result.error {
     background-color: @background-color-highlight;
   }
 
   .gutter .line-number {
 
-    &.ide-haskell-lint .icon-right {
+    &.check-result.lint .icon-right {
       visibility: visible;
 
       &:before {
@@ -110,7 +110,7 @@
       }
     }
 
-    &.ide-haskell-warning .icon-right {
+    &.check-result.warning .icon-right {
       visibility: visible;
 
       &:before {
@@ -119,7 +119,7 @@
       }
     }
 
-    &.ide-haskell-error .icon-right {
+    &.check-result.error .icon-right {
       visibility: visible;
 
       &:before {
