@@ -8,7 +8,7 @@ class OutputView extends View
   checkResults: [] # all results here
 
   @content: (params) ->
-    @div class: 'ide-haskell', =>
+    @div class: 'ide-haskell-panel', =>
       @div outlet: 'resizeHandle', class: 'resize-handle'
       @div class: 'panel', =>
         @div class: 'panel-heading', =>

@@ -11,7 +11,6 @@ configDefaults =
   lintOnFileSave: true,
   switchTabOnCheck: true,
   expressionTypeInterval: 500,
-  checkResultInterval: 500,
   ghcModPath: 'ghc-mod'
 
 

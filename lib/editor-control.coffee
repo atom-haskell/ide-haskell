@@ -1,5 +1,6 @@
-{$, View} = require 'atom'
+{$, $$, $$$, View} = require 'atom'
 {isHaskellSource} = require './utils'
+{TooltipView} = require './tooltip-view'
 utilGhcMod = require './util-ghc-mod'
 
 
@@ -7,6 +8,9 @@ class EditorControl
 
   checkResults: [] # all results here for current file
   className: ['error', 'warning', 'lint']
+
+  checkResultTooltip: null
+  exprTypeTooltip: null
 
   constructor: (@editorView, @outputView) ->
     @editorView.control = this
@@ -37,32 +41,31 @@ class EditorControl
       if atom.config.get('ide-haskell.lintOnFileSave')
         atom.workspaceView.trigger 'ide-haskell:lint-file'
 
-    # @scroll.on 'mousemove', '.underlayer', (e) =>
-    #   console.log 'aaa'
-
+    # show expression type if mouse stopped somewhere
     @scroll.on 'mousemove', (e) =>
-      # TODO hide previous showed type on mouse movement??
-
-      @_clearExprTypeTimeout()
+      @clearExprTypeTimeout()
       @exprTypeTimeout = setTimeout (=>
-        @showExpressionType(e)
+        @showExpressionType e
       ), atom.config.get('ide-haskell.expressionTypeInterval')
     @scroll.on 'mouseout', (e) =>
-      @_clearExprTypeTimeout()
+      @clearExprTypeTimeout()
 
     # mouse movement over gutter to show check results
-    @gutter.on 'mouseenter', '.check-result', (e) =>
-      console.log 'show results'
-    @gutter.on 'mouseleave', '.check-result', (e) =>
-      console.log 'hide results'
+    @gutter.on 'mouseenter', '.ide-haskell-result', (e) =>
+      @showCheckResult e
+    @gutter.on 'mouseleave', '.ide-haskell-result', (e) =>
+      @hideCheckResult()
 
-  _clearExprTypeTimeout: ->
+  # helper function to hide tooltip and stop timeout
+  clearExprTypeTimeout: ->
     if @exprTypeTimeout?
       clearTimeout @exprTypeTimeout
       @exprTypeTimeout = null
+    @hideExpressionType()
 
   disable: ->
-    @_clearExprTypeTimeout()
+    @clearExprTypeTimeout()
+    @hideCheckResult()
 
   update: (types, results) ->
     if types?
@@ -81,8 +84,8 @@ class EditorControl
 
   render: ->
     # remove all classes from gutter and current view
-    @editorView.find('.check-result').removeClass('check-result')
-    @gutter.removeClassFromAllLines('check-result')
+    @editorView.find('.ide-haskell-result').removeClass('ide-haskell-result')
+    @gutter.removeClassFromAllLines('ide-haskell-result')
 
     for name in @className
       @editorView.find(".#{name}").removeClass(name)
@@ -99,13 +102,13 @@ class EditorControl
 
         # update editor view
         @editorView.lineElementForScreenRow(row)
-          .addClass 'check-result'
+          .addClass 'ide-haskell-result'
           .addClass @className[r.type]
 
         # update gutter view
         gutterRow = @gutter.find @gutter.getLineNumberElement(row)
         gutterRow
-          .addClass 'check-result'
+          .addClass 'ide-haskell-result'
           .addClass @className[r.type]
 
   # get expression type under mouse cursor and show it
@@ -119,9 +122,36 @@ class EditorControl
         fileName: @editor.getUri()
         pt: screenPt
         onResult: (result) =>
-          # @editorView.append("<div>#{result.type}</div>")
-          # # TODO show type near mouse pointer
-          console.log result.type
+          @exprTypeTooltip = new TooltipView(result.type)
+          $('body').append @exprTypeTooltip
+
+  hideExpressionType: ->
+    @exprTypeTooltip?.detach()
+    @exprTypeTooltip = null
+
+  # show check result when mouse over gutter icon
+  showCheckResult: (e) ->
+    row = @editorView.screenPositionFromMouseEvent(e).row + 1
+
+    # find best result for row
+    foundResult = null
+    for typeResults in @checkResults
+      continue unless typeResults?
+      for r in typeResults
+        if r.pos[0] is row
+          foundResult = r
+          break
+      break if foundResult?
+
+    # append tooltip
+    return unless foundResult?
+
+    @checkResultTooltip = new TooltipView(foundResult.desc)
+    $('body').append @checkResultTooltip
+
+  hideCheckResult: ->
+    @checkResultTooltip?.detach()
+    @checkResultTooltip = null
 
 module.exports = {
   EditorControl

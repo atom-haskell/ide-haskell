@@ -6,7 +6,7 @@
 @import "ui-variables";
 @import "tooltips";
 
-.ide-haskell {
+.ide-haskell-panel {
   display: -webkit-flex;
   -webkit-flex-direction: column;
   min-height: 120px;
@@ -66,7 +66,7 @@
       padding: 4px 0px;
       margin: 0px;
       font-size: 8pt;
-      line-height: 14pt;
+      line-height: 12pt;
       white-space: normal;
 
       .position {
@@ -74,54 +74,50 @@
       }
 
       .description {
-        padding-top: 3px;
-        padding-bottom: 3px;
+        padding: 5px 8px 3px 8px;
         color: lighten(@text-color, 15%);
         background-color: @tool-panel-background-color;
-        font-size: 8pt;
-        white-space: pre;
+        font-family: Consolas, monospace;
+        white-space: pre-wrap;
+        border-radius: 4px;
+        font-size: 9pt;
       }
     }
   }
 }
 
 .editor {
-
-  .check-result.lint {
+  .ide-haskell-result.lint {
     background-color: @background-color-highlight;
   }
 
-  .check-result.warning {
+  .ide-haskell-result.warning {
     background-color: @background-color-highlight;
   }
 
-  .check-result.error {
+  .ide-haskell-result.error {
     background-color: @background-color-highlight;
   }
 
   .gutter .line-number {
-
-    &.check-result.lint .icon-right {
+    &.ide-haskell-result.lint .icon-right {
       visibility: visible;
-
       &:before {
         content: @info;
         color: @text-color-info;
       }
     }
 
-    &.check-result.warning .icon-right {
+    &.ide-haskell-result.warning .icon-right {
       visibility: visible;
-
       &:before {
         content: @stop;
         color: @text-color-warning;
       }
     }
 
-    &.check-result.error .icon-right {
+    &.ide-haskell-result.error .icon-right {
       visibility: visible;
-
       &:before {
         content: @alert;
         color: @text-color-error;
@@ -131,11 +127,23 @@
 }
 
 .ide-haskell-tooltip {
-  .tooltip .tooltip-inner;
+  position: absolute;
+  z-index:100;
+
+  padding: 10px;
+  border: 1px solid #b3c9ce;
+  border-radius: 4px;
   text-align: left;
-  padding: 0px;
+  font-family: Consolas, monospace;
+  font-size: 9px;
+
+  // font: italic 14px/1.3 arial, sans-serif;
+  color: #333;
+  background: #fff;
+  box-shadow: 3px 3px 3px rgba(0,0,0,.3);
+
+  left: 0px;
+  top: 0px;
+
   white-space: pre;
-  background-color: transparent;
-  line-height: 14px;
-  font-size: 8pt;
 }
