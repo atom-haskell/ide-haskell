@@ -113,21 +113,31 @@ class EditorControl
 
   # get expression type under mouse cursor and show it
   showExpressionType: (e) ->
-    return unless isHaskellSource @editor.getUri()
+    return unless isHaskellSource(@editor.getUri()) and not @exprTypeTooltip?
 
     screenPt = @editorView.screenPositionFromMouseEvent(e)
     bufferPt = @editor.bufferPositionForScreenPosition(screenPt)
     if screenPt.isEqual bufferPt
+
+      # update progress in output view
+      @outputView.updateProgress()
+
+      # create tooltip with pending
+      @exprTypeTooltip = new TooltipView()
+      @exprTypeTooltip.attachAtPoint()
+
       utilGhcMod.type
         fileName: @editor.getUri()
         pt: screenPt
         onResult: (result) =>
-          @exprTypeTooltip = new TooltipView(result.type)
-          $('body').append @exprTypeTooltip
+          @exprTypeTooltip?.updateText(result.type)
+        onComplete: =>
+          @outputView.updateProgress(false)
 
   hideExpressionType: ->
-    @exprTypeTooltip?.detach()
-    @exprTypeTooltip = null
+    if @exprTypeTooltip?
+      @exprTypeTooltip.remove()
+      @exprTypeTooltip = null
 
   # show check result when mouse over gutter icon
   showCheckResult: (e) ->
@@ -147,11 +157,12 @@ class EditorControl
     return unless foundResult?
 
     @checkResultTooltip = new TooltipView(foundResult.desc)
-    $('body').append @checkResultTooltip
+    @checkResultTooltip.attachToObject(e.currentTarget)
 
   hideCheckResult: ->
-    @checkResultTooltip?.detach()
-    @checkResultTooltip = null
+    if @checkResultTooltip?
+      @checkResultTooltip.remove()
+      @checkResultTooltip = null
 
 module.exports = {
   EditorControl

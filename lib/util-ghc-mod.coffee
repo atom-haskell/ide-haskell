@@ -82,7 +82,7 @@ lint = ({onPrepare, onResult, onComplete, fileName}) ->
       onComplete [ResultType.Lint]
 
 # ghc-mod type
-type = ({onResult, fileName, pt}) ->
+type = ({onResult, onComplete, fileName, pt}) ->
   resultViewed = false
   run
     cmd: 'type'
@@ -100,6 +100,8 @@ type = ({onResult, fileName, pt}) ->
       else
         console.warn "got something strange from ghc-mod type:", [line]
       resultViewed = true
+    onComplete: ->
+      onComplete()
 
 module.exports = {
   check,

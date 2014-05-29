@@ -7,7 +7,7 @@ class OutputView extends View
   progressCounter: 0
   checkResults: [] # all results here
 
-  @content: (params) ->
+  @content: ->
     @div class: 'ide-haskell-panel', =>
       @div outlet: 'resizeHandle', class: 'resize-handle'
       @div class: 'panel', =>
@@ -90,8 +90,7 @@ class OutputView extends View
 
   # method is called before start of any check commands
   prepare: (types) ->
-    @statusIcon.attr 'data-status', 'progress' if @progressCounter is 0
-    @progressCounter = @progressCounter + 1
+    @updateProgress()
 
   # update current results
   update: (types, results) ->
@@ -106,16 +105,23 @@ class OutputView extends View
     for editorView in atom.workspaceView.getEditorViews()
       @updateEditorView editorView, types, results
 
-    @progressCounter = @progressCounter - 1
-    if @progressCounter is 0
-      @statusIcon.attr 'data-status', 'ready'
+    @updateProgress(false)
 
-      # automatic tab switching
-      if atom.config.get('ide-haskell.switchTabOnCheck')
-        for btn, t in @checkControl
-          if @checkResults[t].length > 0
-            @switchTabView null, btn.b
-            break
+    # automatic tab switching
+    if atom.config.get('ide-haskell.switchTabOnCheck') and @progressCounter is 0
+      for btn, t in @checkControl
+        if @checkResults[t].length > 0
+          @switchTabView null, btn.b
+          break
+
+  updateProgress: (isIncrement = true) ->
+    if isIncrement then val = 1 else val = -1
+    @progressCounter = @progressCounter + val
+
+    if @progressCounter is 1
+      @statusIcon.attr 'data-status', 'progress'
+    else if @progressCounter is 0
+      @statusIcon.attr 'data-status', 'ready'
 
   updateEditorView: (editorView, types = undefined, results = undefined) ->
     results = @checkResults unless results?
