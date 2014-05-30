@@ -122,9 +122,16 @@ class EditorControl
       # update progress in output view
       @outputView.updateProgress()
 
+      # create show position
+      offset = @editorView.lineHeight * 0.7
+      rect =
+        left: e.clientX
+        right: e.clientX
+        top: e.clientY - offset
+        bottom: e.clientY + offset
+
       # create tooltip with pending
-      @exprTypeTooltip = new TooltipView()
-      @exprTypeTooltip.attachAtPoint()
+      @exprTypeTooltip = new TooltipView(rect)
 
       utilGhcMod.type
         fileName: @editor.getUri()
@@ -153,11 +160,19 @@ class EditorControl
           break
       break if foundResult?
 
-    # append tooltip
+    # append tooltip if result found
     return unless foundResult?
 
-    @checkResultTooltip = new TooltipView(foundResult.desc)
-    @checkResultTooltip.attachToObject(e.currentTarget)
+    # create show position
+    targetRect = e.currentTarget.getBoundingClientRect()
+    offset = @editorView.lineHeight * 0.3
+    rect =
+      left: targetRect.left - offset
+      right: targetRect.right + offset
+      top: targetRect.top - offset
+      bottom: targetRect.bottom + offset
+
+    @checkResultTooltip = new TooltipView(rect, foundResult.desc)
 
   hideCheckResult: ->
     if @checkResultTooltip?
