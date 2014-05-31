@@ -12,13 +12,21 @@ Haskell IDE works only with cabal projects. You can simply start [Atom](http://a
 
 #### Check for errors and warnings
 
+![Check for errors and warnings](https://github.com/chaika2013/ide-haskell/raw/feature/new-ide-panel/img/check.png)
+
 #### Source code linter
+
+![Source code linter](https://github.com/chaika2013/ide-haskell/raw/feature/new-ide-panel/img/lint.png)
 
 #### Get type at point
 
+Just put your mouse cursor above expression you want to know the type of and wait for some time. Tooltip will appear with everything you want to know.
+
+![Get type at point](https://github.com/chaika2013/ide-haskell/raw/feature/new-ide-panel/img/type.png)
+
 ## Requirements
 
-* [ghc-mod](http://www.mew.org/~kazu/proj/ghc-mod/en/)
+* [ghc-mod](https://github.com/kazu-yamamoto/ghc-mod)
 
 ## Installation
 
