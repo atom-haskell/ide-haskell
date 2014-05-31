@@ -42,10 +42,12 @@ activate = (state) ->
     outputView.checkFile(utilGhcMod.lint)
 
 deactivate = ->
+  return unless outputView?
   outputView.detach()
   clearMenu()
 
 serialize = ->
+  return unless outputView?
   outputView: outputView.serialize()
 
 updateMenu = ->
