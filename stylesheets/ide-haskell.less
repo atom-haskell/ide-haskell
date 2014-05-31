@@ -2,36 +2,143 @@
 //
 // See https://github.com/atom/atom-dark-ui/blob/master/stylesheets/ui-variables.less
 // for a full listing of what's available.
+@import "octicon-utf-codes";
 @import "ui-variables";
+@import "tooltips";
 
-@ide-haskell-color-warning: multiply(@background-color-warning, #AAA);
-@ide-haskell-color-error: multiply(@background-color-error, #AAA);
+.ide-haskell-panel {
+  display: -webkit-flex;
+  -webkit-flex-direction: column;
+  min-height: 120px;
 
-.ide-haskell {
+  .resize-handle {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 10px;
+    cursor: row-resize;
+  }
+
+  .panel {
+    -webkit-flex-grow: 1;
+    display: -webkit-flex;
+    -webkit-flex-direction: column;
+    margin: 0;
+  }
+
+  .panel-heading {
+    -webkit-flex-shrink: 0;
+    padding-top: 5px;
+    padding-bottom: 5px;
+
+    .btn {
+      top: 0px;
+    }
+
+    .status-icon {
+      &:before {
+        font-family: 'Octicons Regular';
+        font-weight: normal;
+        font-style: normal;
+        display: inline-block;
+        -webkit-font-smoothing: antialiased;
+        text-decoration: none;
+        font-size: 10pt;
+        content: @check;
+        width: 15pt;
+      }
+
+      &[data-status=progress]:before {
+        content: @hourglass;
+      }
+      &[data-status=ready]:before {
+        content: @check;
+      }
+    }
+  }
+
+  .panel-body {
+    -webkit-flex-grow: 1;
+    overflow-y: scroll;
+    padding: 3px @component-padding;
+
+    .result-block {
+      padding: 4px 0px;
+      margin: 0px;
+      font-size: 8pt;
+      line-height: 12pt;
+      white-space: normal;
+
+      .position {
+        cursor: pointer;
+      }
+
+      .description {
+        padding: 5px 8px 3px 8px;
+        color: lighten(@text-color, 15%);
+        background-color: @tool-panel-background-color;
+        font-family: Consolas, monospace;
+        white-space: pre-wrap;
+        border-radius: 4px;
+        font-size: 9pt;
+      }
+    }
+  }
 }
 
-.ide-haskell-warning {
-    background-color: @ide-haskell-color-warning;
+.editor {
+  .ide-haskell-result.lint {
+    background-color: @background-color-highlight;
+  }
+
+  .ide-haskell-result.warning {
+    background-color: @background-color-highlight;
+  }
+
+  .ide-haskell-result.error {
+    background-color: @background-color-highlight;
+  }
+
+  .gutter .line-number {
+    &.ide-haskell-result.lint .icon-right {
+      visibility: visible;
+      &:before {
+        content: @info;
+        color: @text-color-info;
+      }
+    }
+
+    &.ide-haskell-result.warning .icon-right {
+      visibility: visible;
+      &:before {
+        content: @stop;
+        color: @text-color-warning;
+      }
+    }
+
+    &.ide-haskell-result.error .icon-right {
+      visibility: visible;
+      &:before {
+        content: @alert;
+        color: @text-color-error;
+      }
+    }
+  }
 }
 
-.ide-haskell-error {
-    background-color: @ide-haskell-color-error;
-}
+.ide-haskell-tooltip {
+  .tooltip .tooltip-inner;
 
-.ide-haskell-typeinfo {
-    font-family: monospace;
-}
+  position: absolute;
+  z-index:100;
+  padding: 5px 8px 3px 8px;
+  font-family: Consolas, monospace;
+  font-size: 9pt;
+  line-height: 12pt;
+  text-align: left;
+  white-space: pre;
 
-.ide-haskell-typeinfo .code {
-}
-
-.ide-haskell-typeinfo .code:after {
-    content: "::";
-    color: @text-color-highlight;
-    margin-left: 1em;
-    margin-right: 1em;
-}
-
-.ide-haskell-typeinfo .type {
-
+  &:empty {
+    display: none;
+  }
 }

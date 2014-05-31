@@ -3,12 +3,11 @@
   "main": "./lib/ide-haskell",
   "version": "0.0.0",
   "description": "Haskell IDE",
-  "repository": "https://github.com/atom/ide-haskell",
+  "repository": "https://github.com/chaika2013/ide-haskell",
   "license": "MIT",
   "engines": {
     "atom": ">0.50.0"
   },
   "dependencies": {
-    "atom-message-panel": "^1.0.0"
   }
 }
