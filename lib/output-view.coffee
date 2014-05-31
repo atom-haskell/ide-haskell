@@ -45,6 +45,9 @@ class OutputView extends View
     @resizeHandle.on 'mousedown', (e) => @resizeStarted e
     @closeButton.on 'click', => @toggle()
 
+  deactivate: ->
+    @remove()
+
   serialize: ->
     height: @height()
     isShow: @isShow

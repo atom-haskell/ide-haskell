@@ -1,4 +1,6 @@
 {$, $$, $$$, View} = require 'atom'
+{Subscriber} = require 'emissary'
+
 {isHaskellSource} = require './utils'
 {TooltipView} = require './tooltip-view'
 utilGhcMod = require './util-ghc-mod'
@@ -8,6 +10,8 @@ class EditorControl
 
   checkResults: [] # all results here for current file
   className: ['error', 'warning', 'lint']
+
+  subscriber: null
 
   checkResultTooltip: null
   exprTypeTooltip: null
@@ -19,17 +23,19 @@ class EditorControl
     @gutter = @editorView.gutter
     @scroll = @editorView.find('.scroll-view')
 
+    @subscriber = new Subscriber()
+
     # say output view to update me
     @outputView.updateEditorView @editorView
 
     # event for editor updates
-    @editorView.on 'editor:display-updated', =>
+    @subscriber.subscribe @editorView, 'editor:display-updated', =>
       @render()
-    @editorView.on 'editor:will-be-removed', =>
-      @disable()
+    @subscriber.subscribe @editorView, 'editor:will-be-removed', =>
+      @deactivate()
 
     # buffer events for automatic check
-    @editor.getBuffer().on 'saved', (buffer) =>
+    @subscriber.subscribe @editor.getBuffer(), 'saved', (buffer) =>
       return unless isHaskellSource buffer.getUri()
 
       # TODO filter current results with buffer.getUri() and update editor
@@ -42,19 +48,25 @@ class EditorControl
         atom.workspaceView.trigger 'ide-haskell:lint-file'
 
     # show expression type if mouse stopped somewhere
-    @scroll.on 'mousemove', (e) =>
+    @subscriber.subscribe @scroll, 'mousemove', (e) =>
       @clearExprTypeTimeout()
       @exprTypeTimeout = setTimeout (=>
         @showExpressionType e
       ), atom.config.get('ide-haskell.expressionTypeInterval')
-    @scroll.on 'mouseout', (e) =>
+    @subscriber.subscribe @scroll, 'mouseout', (e) =>
       @clearExprTypeTimeout()
 
     # mouse movement over gutter to show check results
-    @gutter.on 'mouseenter', '.ide-haskell-result', (e) =>
+    @subscriber.subscribe @gutter, 'mouseenter', '.ide-haskell-result', (e) =>
       @showCheckResult e
-    @gutter.on 'mouseleave', '.ide-haskell-result', (e) =>
+    @subscriber.subscribe @gutter, 'mouseleave', '.ide-haskell-result', (e) =>
       @hideCheckResult()
+
+  deactivate: ->
+    @clearExprTypeTimeout()
+    @hideCheckResult()
+    @subscriber.unsubscribe()
+    @editorView.control = undefined
 
   # helper function to hide tooltip and stop timeout
   clearExprTypeTimeout: ->
@@ -62,10 +74,6 @@ class EditorControl
       clearTimeout @exprTypeTimeout
       @exprTypeTimeout = null
     @hideExpressionType()
-
-  disable: ->
-    @clearExprTypeTimeout()
-    @hideCheckResult()
 
   update: (types, results) ->
     if types?
