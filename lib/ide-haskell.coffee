@@ -1,4 +1,5 @@
 {$} = require 'atom'
+{Subscriber} = require 'emissary'
 
 {OutputView} = require './output-view'
 {EditorControl} = require './editor-control'
@@ -14,13 +15,13 @@ configDefaults =
   ghcModPath: 'ghc-mod'
 
 
-outputView = null
 _isCabalProject = false
-
+subscription = null
+outputView = null
 
 activate = (state) ->
   _isCabalProject = isCabalProject()
-  $(window).on 'focus', -> updateMenu()
+  $(window).on 'focus', updateMenu
 
   # activate only on cabal project
   return unless _isCabalProject
@@ -30,8 +31,8 @@ activate = (state) ->
   outputView = new OutputView(state.outputView)
 
   # attach controller to every editor view
-  atom.workspaceView.eachEditorView (editorView) ->
-    control = new EditorControl(editorView, outputView)
+  subscription = atom.workspaceView.eachEditorView (editorView) ->
+    new EditorControl(editorView, outputView)
 
   # global commands
   atom.workspaceView.command 'ide-haskell:toggle-output', ->
@@ -42,12 +43,31 @@ activate = (state) ->
     outputView.checkFile(utilGhcMod.lint)
 
 deactivate = ->
-  return unless outputView?
-  outputView.detach()
+  $(window).off 'focus', updateMenu
+  return unless _isCabalProject
+
+  # remove menu
   clearMenu()
 
+  # remove editor controllers from all opened views
+  for editorView in atom.workspaceView.getEditorViews()
+    editorView.control?.deactivate()
+
+  # remove subscription
+  subscription.off()
+  subscription = null
+
+  # clear commands
+  atom.workspaceView.off 'ide-haskell:toggle-output'
+  atom.workspaceView.off 'ide-haskell:check-file'
+  atom.workspaceView.off 'ide-haskell:lint-file'
+
+  # remove output panel
+  outputView.deactivate()
+  outputView = null
+
 serialize = ->
-  return unless outputView?
+  return unless _isCabalProject
   outputView: outputView.serialize()
 
 updateMenu = ->
