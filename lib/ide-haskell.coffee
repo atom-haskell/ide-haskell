@@ -3,8 +3,9 @@
 
 {OutputView} = require './output-view'
 {EditorControl} = require './editor-control'
-utilGhcMod = require './util-ghc-mod'
+{HaskellProvider} = require './haskell-provider'
 {isCabalProject} = require './utils'
+utilGhcMod = require './util-ghc-mod'
 
 
 configDefaults =
@@ -15,9 +16,13 @@ configDefaults =
   ghcModPath: 'ghc-mod'
 
 
-_isCabalProject = false
-subscription = null
-outputView = null
+_isCabalProject = false         # true if cabal project
+editorSubscription = null       # editor view subscription for controller
+outputView = null               # output view
+
+providers = []                  # registered autocompletion providers
+autocomplete = null             # auto-completion
+completeSubscription = null     # editor view subscription for completion
 
 activate = (state) ->
   _isCabalProject = isCabalProject()
@@ -31,7 +36,7 @@ activate = (state) ->
   outputView = new OutputView(state.outputView)
 
   # attach controller to every editor view
-  subscription = atom.workspaceView.eachEditorView (editorView) ->
+  editorSubscription = atom.workspaceView.eachEditorView (editorView) ->
     new EditorControl(editorView, outputView)
 
   # global commands
@@ -41,6 +46,12 @@ activate = (state) ->
     outputView.checkFile(utilGhcMod.check)
   atom.workspaceView.command 'ide-haskell:lint-file', ->
     outputView.checkFile(utilGhcMod.lint)
+
+  # autocompletion
+  atom.packages.activatePackage("autocomplete-plus")
+    .then (pkg) =>
+      autocomplete = pkg.mainModule
+      registerProviders()
 
 deactivate = ->
   $(window).off 'focus', updateMenu
@@ -53,9 +64,17 @@ deactivate = ->
   for editorView in atom.workspaceView.getEditorViews()
     editorView.control?.deactivate()
 
-  # remove subscription
-  subscription.off()
-  subscription = null
+  # remove subscriptions
+  editorSubscription?.off()
+  editorSubscription = null
+
+  completeSubscription?.off()
+  completeSubscription = null
+
+  # remove completion providers
+  providers.forEach (provider) ->
+    autocomplete.unregisterProvider provider
+  providers = []
 
   # clear commands
   atom.workspaceView.off 'ide-haskell:toggle-output'
@@ -91,6 +110,13 @@ clearMenu = ->
     obj for obj in atom.menu.template when obj.label isnt "Haskell IDE"
   )
   atom.menu.update()
+
+registerProviders = ->
+  completeSubscription = atom.workspaceView.eachEditorView (editorView) ->
+    if editorView.attached and not editorView.mini
+      provider = new HaskellProvider editorView
+      autocomplete.registerProviderForEditorView provider, editorView
+      providers.push provider
 
 
 module.exports = {
