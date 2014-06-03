@@ -62,7 +62,7 @@ deactivate = ->
 
   # remove editor controllers from all opened views
   for editorView in atom.workspaceView.getEditorViews()
-    editorView.control?.deactivate()
+    editorView.haskellController?.deactivate()
 
   # remove subscriptions
   editorSubscription?.off()

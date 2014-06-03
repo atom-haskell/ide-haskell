@@ -133,7 +133,7 @@ class OutputView extends View
 
   updateEditorView: (editorView, types = undefined, results = undefined) ->
     results = @checkResults unless results?
-    editorView.control.update types, results
+    editorView.haskellController.update types, results
 
   # get button name using results
   buttonName: (type) ->

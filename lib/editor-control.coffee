@@ -17,7 +17,7 @@ class EditorControl
   exprTypeTooltip: null
 
   constructor: (@editorView, @outputView) ->
-    @editorView.control = this
+    @editorView.haskellController = this
 
     @editor = @editorView.getEditor()
     @gutter = @editorView.gutter
