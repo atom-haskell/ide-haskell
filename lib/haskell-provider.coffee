@@ -1,7 +1,10 @@
 {Provider, Suggestion} = require "autocomplete-plus"
+ArrayHelperModule = require './utils'
+
+ArrayHelperModule.extendArray(Array)
 
 class HaskellProvider extends Provider
-  completionList: null
+  completionList: {}    # map of module name to list of functions
 
   initialize: ->
     @buildCompletionList()
@@ -33,11 +36,40 @@ class HaskellProvider extends Provider
   # for each module serially and get the output
   buildCompletionList: ->
 
-    # get all imports in current document
+    # get all import modules in current document and their qualified names
+    importModuleList = []
+    modulePrefixList = {}
     @editor.getBuffer().scan /^import\s+(qualified\s+)?([A-Z][^ \r\n]*)(\s+as\s+([A-Z][^ \r\n]*))?/g, ({match}) ->
-      console.log 'qualified:', match[1]?, ', module name:', match[2], ', as:', match[4]
+      [_, isQualified, name, _, newQualifier] = match
+      isQualified = isQualified?
 
-    # TODO get module name itself - should we do this or we can use just default provider?
+      # remember module name
+      importModuleList.push name
+      modulePrefixList[name] = [] unless modulePrefixList[name]?
+
+      # calculate prefixes for modules
+      newQualifier = name unless newQualifier?
+      prefixList = ["#{newQualifier}."]
+      prefixList.push '' unless isQualified
+
+      prefixList = prefixList.concat modulePrefixList[name]
+      modulePrefixList[name] = prefixList.unique()
+
+    importModuleList = importModuleList.unique()
+
+    # remove obsolete modules from completions
+    for module, v of @completionList
+      delete @completionList[module] if importModuleList.indexOf(module) is -1
+
+    # find module to get completions of
+    updateModuleList = []
+    for module in importModuleList
+      updateModuleList.push module unless @completionList[module]?
+
+    # TODO start completions update procedure
+    console.log updateModuleList
+
+    # TODO update prefixes for modules
 
   # clean up everything
   dispose: ->
