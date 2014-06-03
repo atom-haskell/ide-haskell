@@ -48,10 +48,11 @@ activate = (state) ->
     outputView.checkFile(utilGhcMod.lint)
 
   # autocompletion
-  atom.packages.activatePackage("autocomplete-plus")
-    .then (pkg) =>
-      autocomplete = pkg.mainModule
-      registerProviders()
+  if atom.packages.isPackageLoaded('autocomplete-plus')
+    atom.packages.activatePackage('autocomplete-plus')
+      .then (pkg) =>
+        autocomplete = pkg.mainModule
+        registerProviders()
 
 deactivate = ->
   $(window).off 'focus', updateMenu
