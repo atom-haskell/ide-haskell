@@ -61,6 +61,8 @@ class EditorControl
       @showCheckResult e
     @subscriber.subscribe @gutter, 'mouseleave', '.ide-haskell-result', (e) =>
       @hideCheckResult()
+    @subscriber.subscribe @gutter, 'mouseleave', (e) =>
+      @hideCheckResult()
 
   deactivate: ->
     @clearExprTypeTimeout()
@@ -156,6 +158,7 @@ class EditorControl
 
   # show check result when mouse over gutter icon
   showCheckResult: (e) ->
+    @hideCheckResult()
     row = @editorView.screenPositionFromMouseEvent(e).row + 1
 
     # find best result for row
