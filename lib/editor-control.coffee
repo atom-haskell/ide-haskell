@@ -130,7 +130,7 @@ class EditorControl
     if screenPt.isEqual bufferPt
 
       # update progress in output view
-      @outputView.updateProgress()
+      @outputView.backendActive()
 
       # create show position
       offset = @editorView.lineHeight * 0.7
@@ -146,10 +146,9 @@ class EditorControl
       utilGhcMod.type
         fileName: @editor.getUri()
         pt: screenPt
-        onResult: (result) =>
-          @exprTypeTooltip?.updateText(result.type)
-        onComplete: =>
-          @outputView.updateProgress(false)
+        onResult: (result) => @exprTypeTooltip?.updateText(result.type)
+        onComplete: => @outputView.backendIdle()
+        onFailure: => @outputView.backendIdle(false)
 
   hideExpressionType: ->
     if @exprTypeTooltip?

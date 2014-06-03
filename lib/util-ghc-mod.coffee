@@ -8,7 +8,7 @@ path = require 'path'
 
 
 # run ghc-mod backend
-run = ({onMessage, onComplete, cmd, args, cwd}) ->
+run = ({onMessage, onComplete, onFailure, cmd, args, cwd}) ->
   options = if cwd then { cwd: cwd } else {}
 
   cmdArgs = args.slice(0)
@@ -22,12 +22,15 @@ run = ({onMessage, onComplete, cmd, args, cwd}) ->
     stderr: (line) -> stdout(onMessage, line)
     exit: -> onComplete?()
 
+  # on error hack (from http://discuss.atom.io/t/catching-exceptions-when-using-bufferedprocess/6407)
+  proc.process.on 'error', (node_error) -> onFailure?()
+
 stdout = (onMessage, line) ->
   line.split('\n').filter((l)->0 != l.length).map onMessage
 
 
 # ghc-mod check
-check = ({onPrepare, onResult, onComplete, fileName}) ->
+check = ({onPrepare, onResult, onComplete, onFailure, fileName}) ->
   onPrepare [ResultType.Error, ResultType.Warning]
   run
     cmd: 'check'
@@ -53,11 +56,11 @@ check = ({onPrepare, onResult, onComplete, fileName}) ->
         )
       else
         console.warn "got something strange from ghc-mod check:", [line]
-    onComplete: ->
-      onComplete [ResultType.Error, ResultType.Warning]
+    onComplete: -> onComplete [ResultType.Error, ResultType.Warning]
+    onFailure: -> onFailure()
 
 # ghc-mod lint
-lint = ({onPrepare, onResult, onComplete, fileName}) ->
+lint = ({onPrepare, onResult, onComplete, onFailure, fileName}) ->
   onPrepare [ResultType.Lint]
   run
     cmd: 'lint'
@@ -78,11 +81,11 @@ lint = ({onPrepare, onResult, onComplete, fileName}) ->
         )
       else
         console.warn "got something strange from ghc-mod lint:", [line]
-    onComplete: ->
-      onComplete [ResultType.Lint]
+    onComplete: -> onComplete [ResultType.Lint]
+    onFailure: -> onFailure()
 
 # ghc-mod type
-type = ({onResult, onComplete, fileName, pt}) ->
+type = ({onResult, onComplete, onFailure, fileName, pt}) ->
   resultViewed = false
   run
     cmd: 'type'
@@ -100,8 +103,8 @@ type = ({onResult, onComplete, fileName, pt}) ->
       else
         console.warn "got something strange from ghc-mod type:", [line]
       resultViewed = true
-    onComplete: ->
-      onComplete()
+    onComplete: -> onComplete()
+    onFailure: -> onFailure()
 
 module.exports = {
   check,

@@ -54,6 +54,10 @@
       &[data-status=ready]:before {
         content: @check;
       }
+      &[data-status=error]:before {
+        color: @text-color-error;
+        content: @alert;
+      }
     }
   }
 
