@@ -5,7 +5,7 @@
 class OutputView extends View
 
   progressCounter: 0
-  checkResults: [] # all results here
+  checkResults: []       # all results here
 
   @content: ->
     @div class: 'ide-haskell-panel', =>
@@ -65,9 +65,10 @@ class OutputView extends View
 
     checkFunction
       fileName: fileName
-      onPrepare: (types) => @prepare(types)
+      onPrepare: (types) => @prepareResults(types)
       onResult: (result) -> results.push result
-      onComplete: (types) => @update(types, results)
+      onComplete: (types) => @updateResults(types, results)
+      onFailure: => @backendIdle(false)
 
   attach: ->
     atom.workspaceView.prependToBottom(this)
@@ -92,11 +93,11 @@ class OutputView extends View
     this.find("div##{element[0].id}").show().siblings().hide()
 
   # method is called before start of any check commands
-  prepare: (types) ->
-    @updateProgress()
+  prepareResults: (types) ->
+    @backendActive()
 
   # update current results
-  update: (types, results) ->
+  updateResults: (types, results) ->
     @checkResults[t] = [] for t in types
     @checkResults[r.type].push(r) for r in results
 
@@ -108,7 +109,7 @@ class OutputView extends View
     for editorView in atom.workspaceView.getEditorViews()
       @updateEditorView editorView, types, results
 
-    @updateProgress(false)
+    @backendIdle()
 
     # automatic tab switching
     if atom.config.get('ide-haskell.switchTabOnCheck') and @progressCounter is 0
@@ -117,14 +118,18 @@ class OutputView extends View
           @switchTabView null, btn.b
           break
 
-  updateProgress: (isIncrement = true) ->
-    if isIncrement then val = 1 else val = -1
-    @progressCounter = @progressCounter + val
-
+  backendActive: ->
+    @progressCounter = @progressCounter + 1
     if @progressCounter is 1
       @statusIcon.attr 'data-status', 'progress'
-    else if @progressCounter is 0
-      @statusIcon.attr 'data-status', 'ready'
+
+  backendIdle: (noError = true) ->
+    @progressCounter = @progressCounter - 1
+    if @progressCounter is 0
+      if noError
+        @statusIcon.attr 'data-status', 'ready'
+      else
+        @statusIcon.attr 'data-status', 'error'
 
   updateEditorView: (editorView, types = undefined, results = undefined) ->
     results = @checkResults unless results?
