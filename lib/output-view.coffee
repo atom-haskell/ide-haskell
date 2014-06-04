@@ -5,6 +5,7 @@
 class OutputView extends View
 
   progressCounter: 0
+  tabSwitchCounter: 0
   checkResults: []       # all results here
 
   @content: ->
@@ -68,7 +69,7 @@ class OutputView extends View
       onPrepare: (types) => @prepareResults(types)
       onResult: (result) -> results.push result
       onComplete: (types) => @updateResults(types, results)
-      onFailure: => @backendIdle(false)
+      onFailure: => @updateResults(null)
 
   attach: ->
     atom.workspaceView.prependToBottom(this)
@@ -94,10 +95,18 @@ class OutputView extends View
 
   # method is called before start of any check commands
   prepareResults: (types) ->
+    @tabSwitchCounter = @tabSwitchCounter + 1
     @backendActive()
 
   # update current results
-  updateResults: (types, results) ->
+  updateResults: (types = null, results = null) ->
+    @tabSwitchCounter = @tabSwitchCounter - 1
+
+    # do nothing if error
+    if not types?
+      @backendIdle()
+      return
+
     @checkResults[t] = [] for t in types
     @checkResults[r.type].push(r) for r in results
 
@@ -112,7 +121,7 @@ class OutputView extends View
     @backendIdle()
 
     # automatic tab switching
-    if atom.config.get('ide-haskell.switchTabOnCheck') and @progressCounter is 0
+    if atom.config.get('ide-haskell.switchTabOnCheck') and @tabSwitchCounter is 0
       for btn, t in @checkControl
         if @checkResults[t].length > 0
           @switchTabView null, btn.b

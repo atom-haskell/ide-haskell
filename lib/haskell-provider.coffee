@@ -4,8 +4,6 @@ ArrayHelperModule = require './utils'
 ArrayHelperModule.extendArray(Array)
 
 class HaskellProvider extends Provider
-  completionList: {}    # map of module name to list of functions
-
   initialize: ->
     @buildCompletionList()
 
@@ -31,45 +29,48 @@ class HaskellProvider extends Provider
   # findSuggestionsForWord: (prefix) ->
   #   console.log prefix
 
-  # function get import modules from current buffer
-  # and buffer module itself, then it starts ghc-mod browse
-  # for each module serially and get the output
   buildCompletionList: ->
+    [imports, @prefixes] = @parseImports()
 
-    # get all import modules in current document and their qualified names
-    importModuleList = []
-    modulePrefixList = {}
+    # TODO remove obsolete modules from local completion database
+    console.log imports
+
+    # # remove obsolete modules from completions
+    # for module, v of @completionList
+    #   delete @completionList[module] if importModuleList.indexOf(module) is -1
+    #
+    # # find module to get completions of
+    # updateModuleList = []
+    # for module in importModuleList
+    #   updateModuleList.push module unless @completionList[module]?
+    #
+    # # TODO start completions update procedure
+    # console.log updateModuleList
+    #
+    # # TODO update prefixes for modules
+
+  # parse import modules from document buffer
+  parseImports: =>
+    imports = []
+    prefixes = {}
     @editor.getBuffer().scan /^import\s+(qualified\s+)?([A-Z][^ \r\n]*)(\s+as\s+([A-Z][^ \r\n]*))?/g, ({match}) ->
       [_, isQualified, name, _, newQualifier] = match
       isQualified = isQualified?
 
-      # remember module name
-      importModuleList.push name
-      modulePrefixList[name] = [] unless modulePrefixList[name]?
+      # TODO find out if module is external and remember module name
+      imports.push name
 
       # calculate prefixes for modules
+      prefixes[name] = [] unless prefixes[name]?
       newQualifier = name unless newQualifier?
       prefixList = ["#{newQualifier}."]
       prefixList.push '' unless isQualified
 
-      prefixList = prefixList.concat modulePrefixList[name]
-      modulePrefixList[name] = prefixList.unique()
+      prefixList = prefixList.concat prefixes[name]
+      prefixes[name] = prefixList.unique()
 
-    importModuleList = importModuleList.unique()
-
-    # remove obsolete modules from completions
-    for module, v of @completionList
-      delete @completionList[module] if importModuleList.indexOf(module) is -1
-
-    # find module to get completions of
-    updateModuleList = []
-    for module in importModuleList
-      updateModuleList.push module unless @completionList[module]?
-
-    # TODO start completions update procedure
-    console.log updateModuleList
-
-    # TODO update prefixes for modules
+    imports = imports.unique()
+    return [imports, prefixes]
 
   # clean up everything
   dispose: ->
