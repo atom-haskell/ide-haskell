@@ -4,7 +4,11 @@ ArrayHelperModule = require './utils'
 ArrayHelperModule.extendArray(Array)
 
 class HaskellProvider extends Provider
-  initialize: ->
+  localDatabase: null
+
+  initialize: (@editor, @mainDatabase, @outputView) ->
+    @localDatabase = new CompletionDatabase @outputView
+
     @buildCompletionList()
 
     @currentBuffer = @editor.getBuffer()

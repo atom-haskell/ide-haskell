@@ -4,6 +4,7 @@
 {OutputView} = require './output-view'
 {EditorControl} = require './editor-control'
 {HaskellProvider} = require './haskell-provider'
+{CompletionDatabase} = require './completion-db'
 {isCabalProject} = require './utils'
 utilGhcMod = require './util-ghc-mod'
 
@@ -23,6 +24,7 @@ outputView = null               # output view
 providers = []                  # registered autocompletion providers
 autocomplete = null             # auto-completion
 completeSubscription = null     # editor view subscription for completion
+completeDatabase = null         # complete database
 
 activate = (state) ->
   _isCabalProject = isCabalProject()
@@ -53,6 +55,10 @@ activate = (state) ->
       .then (pkg) =>
         autocomplete = pkg.mainModule
         registerProviders()
+
+  # update completion database with external modules
+  completeDatabase = new CompletionDatabase outputView
+  completeDatabase.build()
 
 deactivate = ->
   $(window).off 'focus', updateMenu
@@ -86,6 +92,9 @@ deactivate = ->
   outputView.deactivate()
   outputView = null
 
+  # clear completion database
+  completeDatabase = null
+
 serialize = ->
   return unless _isCabalProject
   outputView: outputView.serialize()
@@ -115,7 +124,7 @@ clearMenu = ->
 registerProviders = ->
   completeSubscription = atom.workspaceView.eachEditorView (editorView) ->
     if editorView.attached and not editorView.mini
-      provider = new HaskellProvider editorView
+      provider = new HaskellProvider editorView, completeDatabase, outputView
       autocomplete.registerProviderForEditorView provider, editorView
       providers.push provider
 
