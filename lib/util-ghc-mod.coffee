@@ -51,6 +51,8 @@ check = ({onPrepare, onResult, onComplete, fileName}) ->
             desc: desc.join('\n')
           )
         )
+      else if line == "execvp(): No such file or directory"
+        console.warn "#{atom.config.get('ide-haskell.ghcModPath')} not be found. please run 'cabal install ghc-mod'"
       else
         console.warn "got something strange from ghc-mod check:", [line]
     onComplete: ->
@@ -76,6 +78,8 @@ lint = ({onPrepare, onResult, onComplete, fileName}) ->
             desc: desc.join('\n')
           )
         )
+      else if line == "execvp(): No such file or directory"
+        console.warn "#{atom.config.get('ide-haskell.ghcModPath')} not be found. please run 'cabal install ghc-mod'"
       else
         console.warn "got something strange from ghc-mod lint:", [line]
     onComplete: ->
@@ -97,8 +101,10 @@ type = ({onResult, onComplete, fileName, pt}) ->
             type: type
           )
         )
+      else if line == "execvp(): No such file or directory"
+        console.warn "#{atom.config.get('ide-haskell.ghcModPath')} not be found. please run 'cabal install ghc-mod'"
       else
-        console.warn "got something strange from ghc-mod type:", [line]
+        console.warn "!!! got something strange from ghc-mod type:", [line]
       resultViewed = true
     onComplete: ->
       onComplete()
