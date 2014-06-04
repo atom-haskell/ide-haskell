@@ -104,7 +104,7 @@ type = ({onResult, onComplete, fileName, pt}) ->
       else if line == "execvp(): No such file or directory"
         console.warn "#{atom.config.get('ide-haskell.ghcModPath')} not be found. please run 'cabal install ghc-mod'"
       else
-        console.warn "!!! got something strange from ghc-mod type:", [line]
+        console.warn "got something strange from ghc-mod type:", [line]
       resultViewed = true
     onComplete: ->
       onComplete()
