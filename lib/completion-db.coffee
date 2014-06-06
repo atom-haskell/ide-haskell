@@ -2,8 +2,6 @@ utilGhcMod = require './util-ghc-mod'
 
 
 class CompletionDatabase
-  pendingTasks: []      # all pending tasks to do
-
   constructor: (@outputView) ->
 
   # Public: build this database as main database

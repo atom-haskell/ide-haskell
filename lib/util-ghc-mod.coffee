@@ -30,8 +30,7 @@ stdout = (onMessage, line) ->
 
 
 # ghc-mod check
-check = ({onPrepare, onResult, onComplete, onFailure, fileName}) ->
-  onPrepare [ResultType.Error, ResultType.Warning]
+check = ({fileName, onResult, onComplete, onFailure, onDone}) ->
   run
     cmd: 'check'
     args: [fileName]
@@ -46,7 +45,7 @@ check = ({onPrepare, onResult, onComplete, onFailure, fileName}) ->
             ResultType.Error
         pos = [parseInt(row, 10), parseInt(col, 10)]
         desc = content.split('\0').filter((l)-> 0 != l.length)
-        onResult(
+        onResult?(
           new CheckResult(
             pos: pos
             uri: uri
@@ -56,12 +55,15 @@ check = ({onPrepare, onResult, onComplete, onFailure, fileName}) ->
         )
       else
         console.warn "got something strange from ghc-mod check:", [line]
-    onComplete: -> onComplete [ResultType.Error, ResultType.Warning]
-    onFailure: -> onFailure()
+    onComplete: ->
+      onComplete?([ResultType.Error, ResultType.Warning])
+      onDone()
+    onFailure: ->
+      onFailure?()
+      onDone(false)
 
 # ghc-mod lint
-lint = ({onPrepare, onResult, onComplete, onFailure, fileName}) ->
-  onPrepare [ResultType.Lint]
+lint = ({fileName, onResult, onComplete, onFailure, onDone}) ->
   run
     cmd: 'lint'
     args: [fileName]
@@ -71,7 +73,7 @@ lint = ({onPrepare, onResult, onComplete, onFailure, fileName}) ->
         [_, uri, row, col, type, content] = matches
         pos = [parseInt(row, 10), parseInt(col, 10)]
         desc = content.split('\0').filter((l)-> 0 != l.length)
-        onResult(
+        onResult?(
           new CheckResult(
             pos: pos
             uri: uri
@@ -81,11 +83,15 @@ lint = ({onPrepare, onResult, onComplete, onFailure, fileName}) ->
         )
       else
         console.warn "got something strange from ghc-mod lint:", [line]
-    onComplete: -> onComplete [ResultType.Lint]
-    onFailure: -> onFailure()
+    onComplete: ->
+      onComplete?([ResultType.Lint])
+      onDone()
+    onFailure: ->
+      onFailure?()
+      onDone(false)
 
 # ghc-mod type
-type = ({onResult, onComplete, onFailure, fileName, pt}) ->
+type = ({fileName, pt, onResult, onComplete, onFailure, onDone}) ->
   resultViewed = false
   run
     cmd: 'type'
@@ -95,7 +101,7 @@ type = ({onResult, onComplete, onFailure, fileName, pt}) ->
       return if resultViewed is true
       if matches = /(\d+)\s(\d+)\s(\d+)\s(\d+)\s\"([^\"]+)/.exec(line)
         [_, sr, sc, er, ec, type] = matches
-        onResult(
+        onResult?(
           new TypeResult(
             type: type
           )
@@ -103,8 +109,12 @@ type = ({onResult, onComplete, onFailure, fileName, pt}) ->
       else
         console.warn "got something strange from ghc-mod type:", [line]
       resultViewed = true
-    onComplete: -> onComplete()
-    onFailure: -> onFailure()
+    onComplete: ->
+      onComplete?()
+      onDone()
+    onFailure: ->
+      onFailure?()
+      onDone(false)
 
 module.exports = {
   check,

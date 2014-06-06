@@ -16,21 +16,16 @@ class EditorControl
   checkResultTooltip: null
   exprTypeTooltip: null
 
-  constructor: (@editorView, @outputView) ->
-    @editorView.haskellController = this
-
+  constructor: (@editorView, @manager) ->
     @editor = @editorView.getEditor()
     @gutter = @editorView.gutter
     @scroll = @editorView.find('.scroll-view')
 
     @subscriber = new Subscriber()
 
-    # say output view to update me
-    @outputView.updateEditorView @editorView
-
     # event for editor updates
     @subscriber.subscribe @editorView, 'editor:display-updated', =>
-      @render()
+      @renderResults()
     @subscriber.subscribe @editorView, 'editor:will-be-removed', =>
       @deactivate()
 
@@ -40,7 +35,7 @@ class EditorControl
 
       # TODO filter current results with buffer.getUri() and update editor
       # we need this in case getUri was changed
-      @render()
+      @renderResults()
 
       if atom.config.get('ide-haskell.checkOnFileSave')
         atom.workspaceView.trigger 'ide-haskell:check-file'
@@ -64,6 +59,9 @@ class EditorControl
     @subscriber.subscribe @gutter, 'mouseleave', (e) =>
       @hideCheckResult()
 
+    # update all results from manager
+    @resultsUpdated()
+
   deactivate: ->
     @clearExprTypeTimeout()
     @hideCheckResult()
@@ -77,22 +75,23 @@ class EditorControl
       @exprTypeTimeout = null
     @hideExpressionType()
 
-  update: (types, results) ->
+  resultsUpdated: (types = undefined) ->
     if types?
-      @checkResults[t] = [] for t in types
-      @pushResult(r) for r in results
+      for t in types
+        @checkResults[t] = []
+        @pushResult(r) for r in @manager.checkResults[t]
     else
       @checkResults = []
-      for typeResults in results
+      for typeResults in @manager.checkResults
         @pushResult(r) for r in typeResults
-    @render()
+    @renderResults()
 
   pushResult: (result) ->
     if result.uri is @editor.getUri()
       @checkResults[result.type] = [] unless @checkResults[result.type]?
       @checkResults[result.type].push(result)
 
-  render: ->
+  renderResults: ->
     # remove all classes from gutter and current view
     @editorView.find('.ide-haskell-result').removeClass('ide-haskell-result')
     @gutter.removeClassFromAllLines('ide-haskell-result')
@@ -129,26 +128,24 @@ class EditorControl
     bufferPt = @editor.bufferPositionForScreenPosition(screenPt)
     if screenPt.isEqual bufferPt
 
-      # update progress in output view
-      @outputView.backendActive()
-
-      # create show position
+      # find out show position
       offset = @editorView.lineHeight * 0.7
-      rect =
+      tooltipRect =
         left: e.clientX
         right: e.clientX
         top: e.clientY - offset
         bottom: e.clientY + offset
 
       # create tooltip with pending
-      @exprTypeTooltip = new TooltipView(rect)
+      @exprTypeTooltip = new TooltipView(tooltipRect)
 
-      utilGhcMod.type
-        fileName: @editor.getUri()
+      # process start
+      params =
         pt: screenPt
+        fileName: @editor.getUri()
         onResult: (result) => @exprTypeTooltip?.updateText(result.type)
-        onComplete: => @outputView.backendIdle()
-        onFailure: => @outputView.backendIdle(false)
+
+      @manager.pendingProcessController.start utilGhcMod.type, params
 
   hideExpressionType: ->
     if @exprTypeTooltip?
