@@ -97,7 +97,7 @@ type = ({fileName, pt, onResult, onComplete, onFailure, onDone}) ->
     cmd: 'type'
     args: [fileName, 'DummyModule', pt.row + 1, pt.column + 1]
     cwd: atom.project.getRootDirectory().getPath()
-    onMessage: (line) =>
+    onMessage: (line) ->
       return if resultViewed is true
       if matches = /(\d+)\s(\d+)\s(\d+)\s(\d+)\s\"([^\"]+)/.exec(line)
         [_, sr, sc, er, ec, type] = matches
@@ -116,8 +116,25 @@ type = ({fileName, pt, onResult, onComplete, onFailure, onDone}) ->
       onFailure?()
       onDone(false)
 
+# ghc-mod list
+list = ({onResult, onComplete, onFailure, onDone}) ->
+  run
+    cmd: 'list'
+    args: []
+    cwd: atom.project.getRootDirectory().getPath()
+    onMessage: (line) ->
+      onResult?(line)
+    onComplete: ->
+      onComplete?()
+      onDone()
+    onFailure: ->
+      onFailure?()
+      onDone(false)
+
+
 module.exports = {
   check,
   lint,
-  type
+  type,
+  list
 }

@@ -140,12 +140,12 @@ class EditorControl
       @exprTypeTooltip = new TooltipView(tooltipRect)
 
       # process start
-      params =
+      @manager.pendingProcessController.start utilGhcMod.type, {
         pt: screenPt
         fileName: @editor.getUri()
-        onResult: (result) => @exprTypeTooltip?.updateText(result.type)
-
-      @manager.pendingProcessController.start utilGhcMod.type, params
+        onResult: (result) =>
+          @exprTypeTooltip?.updateText(result.type)
+      }
 
   hideExpressionType: ->
     if @exprTypeTooltip?

@@ -1,20 +1,29 @@
 {OutputView} = require './output-view'
 {EditorControl} = require './editor-control'
 {PendingBackend} = require './pending-backend'
+{HaskellProvider} = require './haskell-provider'
+{CompletionDatabase} = require './completion-db'
 utilGhcMod = require './util-ghc-mod'
 
 
 class PluginManager
 
-  checkResults: []          # all errors, warings and lints here
+  pendingProcessController: null
+
+  checkResults: []           # all errors, warings and lints here
+  autocompleteProviders: []  # all providers for autocompletion
+  completionDatabase: null   # main completion database
 
   constructor: (state) ->
     @createOutputViewPanel(state)
     @subsribeEditorViewController()
     @createPendingProcessController()
     @attachProcessControllerToOutputView()
+    @registerAutocompleteProviders()
+    @createCompletionDatabase()
 
   deactivate: ->
+    @unregisterAutocompleteProviders()
     @detachProcessControllerToOutputView()
     @deletePendingProcessController()
     @deleteEditorViewControllers()
@@ -40,9 +49,9 @@ class PluginManager
     return unless fileName?
 
     @outputView?.pendingCheck()
-
     checkOrLintResults = []
-    params =
+
+    @pendingProcessController.start func, {
       fileName: fileName
       onResult: (oneResult) ->
         checkOrLintResults.push oneResult
@@ -52,8 +61,7 @@ class PluginManager
         @updateAllEditorViewsWithResults affectedTypes
       onFailure: =>
         @outputView?.resultsUpdated null    # notify of error
-
-    @pendingProcessController.start func, params
+    }
 
   # Update internals with results.
   updateResults: (types, results) ->
@@ -79,7 +87,7 @@ class PluginManager
 
   # Subscribe on editor view for attaching controller.
   subsribeEditorViewController: ->
-    @editorViewSubscription = atom.workspaceView.eachEditorView (editorView) =>
+    @controlSubscription = atom.workspaceView.eachEditorView (editorView) =>
       editorView.haskellController = new EditorControl(editorView, this)
 
   deleteEditorViewControllers: ->
@@ -87,8 +95,8 @@ class PluginManager
       editorView.haskellController?.deactivate()
       editorView.haskellController = null
 
-    @editorViewSubscription?.off()
-    @editorViewSubscription = null
+    @controlSubscription?.off()
+    @controlSubscription = null
 
   # Work with precess controller
   createPendingProcessController: ->
@@ -108,6 +116,41 @@ class PluginManager
   detachProcessControllerToOutputView: ->
     @pendingProcessController.off 'backend-active'
     @pendingProcessController.off 'backend-idle'
+
+  # Working with autocomplete
+  registerAutocompleteProviders: ->
+    if atom.packages.isPackageLoaded('autocomplete-plus')
+      atom.packages.activatePackage('autocomplete-plus')
+        .then (pkg) =>
+          @autocompleteModule = pkg.mainModule
+          @attachAutocompleteToNewEditorViews()
+
+  unregisterAutocompleteProviders: ->
+    @autocompleteSubscription?.off()
+    @autocompleteSubscription = null
+
+    # remove all active providers
+    @autocompleteProviders.forEach (provider) =>
+      @autocompleteModule.unregisterProvider provider
+    @autocompleteProviders = []
+
+  attachAutocompleteToNewEditorViews: ->
+    @autocompleteSubscription = atom.workspaceView.eachEditorView (editorView) =>
+      if editorView.attached and not editorView.mini
+        provider = new HaskellProvider editorView, this
+        @autocompleteModule.registerProviderForEditorView provider, editorView
+        @autocompleteProviders.push provider
+
+        # if editor view will close, remove provider
+        editorView.on "editor:will-be-removed", =>
+          if (index = @autocompleteProviders.indexOf(provider)) isnt -1
+            @autocompleteProviders.splice index
+          @autocompleteModule.unregisterProvider provider
+
+  # Building main completion database
+  createCompletionDatabase: ->
+    @completionDatabase = new CompletionDatabase this
+    @completionDatabase.rebuildMainDatabase()
 
 module.exports = {
   PluginManager
