@@ -10,8 +10,8 @@ ArrayHelperModule.extendArray(Array)
 class HaskellProvider extends Provider
   completionDatabase: null    # local completion database
 
-  initialize: (@editorView, @manager) ->
-    @completionDatabase = new CompletionDatabase @manager
+  initialize: (@editorView, @manager) =>
+    @completionDatabase = new CompletionDatabase(@manager)
 
     # if saved, rebuild completion list
     @currentBuffer = @editor.getBuffer()
@@ -36,7 +36,7 @@ class HaskellProvider extends Provider
   # confirm: (item) ->
   #   return true
 
-  buildSuggestions: ->
+  buildSuggestions: =>
     console.log @completionDatabase.modules
     console.log @manager.completionDatabase.modules
 
@@ -70,7 +70,7 @@ class HaskellProvider extends Provider
         @completionDatabase.update fileName, module
 
   # parse import modules from document buffer
-  parseImports: =>
+  parseImports: ->
     imports = []
     prefixes = {}
     @editor.getBuffer().scan /^import\s+(qualified\s+)?([A-Z][^ \r\n]*)(\s+as\s+([A-Z][^ \r\n]*))?/g, ({match}) ->

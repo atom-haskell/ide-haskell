@@ -28,7 +28,6 @@ class CompletionDatabase
 
   # Real module update
   _update: (fileName, moduleName) ->
-    console.log fileName, moduleName
     @modules[moduleName] = []
     @manager.pendingProcessController.start utilGhcMod.browse, {
       fileName: fileName
@@ -46,12 +45,12 @@ class MainCompletionDatabase extends CompletionDatabase
   extensions: []    # language extensions (only for main)
   ghcFlags: []      # GHC flags (only for main)
 
-  constructor: ->
-    super
+  constructor: (@manager) ->
+    super(@manager)
     @rebuild()
 
   reset: ->
-    super
+    super()
     @readyCounter = 0
     @rebuildActive = true
     @ready = false

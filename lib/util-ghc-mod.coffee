@@ -1,10 +1,7 @@
 {BufferedProcess} = require 'atom'
 path = require 'path'
 
-{ ResultType
-, CheckResult
-, TypeResult
-} = require './util-data'
+{ResultType} = require './util-data'
 
 
 # run ghc-mod backend
@@ -45,14 +42,12 @@ check = ({fileName, onResult, onComplete, onFailure, onDone}) ->
             ResultType.Error
         pos = [parseInt(row, 10), parseInt(col, 10)]
         desc = content.split('\0').filter((l)-> 0 != l.length)
-        onResult?(
-          new CheckResult(
-            pos: pos
-            uri: uri
-            type: type
-            desc: desc.join('\n')
-          )
-        )
+        onResult?({
+          pos: pos
+          uri: uri
+          type: type
+          desc: desc.join('\n')
+        })
       else
         console.warn "got something strange from ghc-mod check:", [line]
     onComplete: ->
@@ -73,14 +68,12 @@ lint = ({fileName, onResult, onComplete, onFailure, onDone}) ->
         [_, uri, row, col, type, content] = matches
         pos = [parseInt(row, 10), parseInt(col, 10)]
         desc = content.split('\0').filter((l)-> 0 != l.length)
-        onResult?(
-          new CheckResult(
-            pos: pos
-            uri: uri
-            type: ResultType.Lint
-            desc: desc.join('\n')
-          )
-        )
+        onResult?({
+          pos: pos
+          uri: uri
+          type: ResultType.Lint
+          desc: desc.join('\n')
+        })
       else
         console.warn "got something strange from ghc-mod lint:", [line]
     onComplete: ->
@@ -101,11 +94,9 @@ type = ({fileName, pt, onResult, onComplete, onFailure, onDone}) ->
       return if resultViewed is true
       if matches = /(\d+)\s(\d+)\s(\d+)\s(\d+)\s\"([^\"]+)/.exec(line)
         [_, sr, sc, er, ec, type] = matches
-        onResult?(
-          new TypeResult(
-            type: type
-          )
-        )
+        onResult?({
+          type: type
+        })
       else
         console.warn "got something strange from ghc-mod type:", [line]
       resultViewed = true
@@ -135,7 +126,7 @@ list = ({onResult, onComplete, onFailure, onDone}) ->
 browse = ({fileName, moduleName, onResult, onComplete, onFailure, onDone}) ->
   run
     cmd: 'browse'
-    args: [moduleName]
+    args: ['-d', moduleName]
     cwd: path.dirname(fileName)
     onMessage: (line) ->
       onResult?(line)
