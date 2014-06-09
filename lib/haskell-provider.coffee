@@ -37,6 +37,10 @@ class HaskellProvider extends Provider
   #   return true
 
   buildSuggestions: ->
+    console.log @completionDatabase.modules
+    console.log @manager.completionDatabase.modules
+
+    return []
     # selection = @editor.getSelection()
     # prefix = @prefixOfSelection selection
     # return unless prefix.length
@@ -63,7 +67,7 @@ class HaskellProvider extends Provider
     fileName = @editor.getUri()
     for module in imports
       if not @manager.completionDatabase.update fileName, module
-        @completionDatabase.update fileName, module, true
+        @completionDatabase.update fileName, module
 
   # parse import modules from document buffer
   parseImports: =>
