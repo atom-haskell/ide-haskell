@@ -2,7 +2,7 @@
 {EditorControl} = require './editor-control'
 {PendingBackend} = require './pending-backend'
 {HaskellProvider} = require './haskell-provider'
-{CompletionDatabase} = require './completion-db'
+{MainCompletionDatabase} = require './completion-db'
 utilGhcMod = require './util-ghc-mod'
 
 
@@ -149,8 +149,8 @@ class PluginManager
 
   # Building main completion database
   createCompletionDatabase: ->
-    @completionDatabase = new CompletionDatabase this
-    @completionDatabase.rebuildMainDatabase()
+    @completionDatabase = new MainCompletionDatabase this
+
 
 module.exports = {
   PluginManager

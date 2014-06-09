@@ -1,9 +1,11 @@
 {Provider, Suggestion} = require "autocomplete-plus"
 
 {CompletionDatabase} = require './completion-db'
+{isHaskellSource} = require './utils'
 ArrayHelperModule = require './utils'
 
 ArrayHelperModule.extendArray(Array)
+
 
 class HaskellProvider extends Provider
   completionDatabase: null    # local completion database
@@ -11,15 +13,24 @@ class HaskellProvider extends Provider
   initialize: (@editorView, @manager) ->
     @completionDatabase = new CompletionDatabase @manager
 
+    # if saved, rebuild completion list
     @currentBuffer = @editor.getBuffer()
     @currentBuffer.on "saved", @onSaved
+
+    # if main database updated, rebuild completion list
+    @manager.completionDatabase.on 'database-updated', @buildCompletionList
 
     @buildCompletionList()
 
   dispose: ->
     @currentBuffer?.off "saved", @onSaved
+    @manager?.completionDatabase.off 'database-updated', @buildCompletionList
 
   onSaved: =>
+    return unless isHaskellSource @currentBuffer.getUri()
+
+    # TODO remove current module from all providers modules
+
     @buildCompletionList()
 
   # confirm: (item) ->
@@ -38,21 +49,21 @@ class HaskellProvider extends Provider
   # findSuggestionsForWord: (prefix) ->
   #   console.log prefix
 
-  buildCompletionList: ->
+  buildCompletionList: =>
+    # check if main database is ready, and if its not, subscribe on ready event
+    return unless isHaskellSource @currentBuffer.getUri()
+    return unless @manager.completionDatabase.ready
+
     {imports, @prefixes} = @parseImports()
 
     # remove obsolete modules from local completion database
     @completionDatabase.removeObsolete imports
 
-    # TODO main database must be built before this moment!!!
-
     # get completions for all modules in list
+    fileName = @editor.getUri()
     for module in imports
-      if not @manager.completionDatabase.update module
-        @completionDatabase.update module, true
-
-    # console.log @manager.completionDatabase
-    console.log @completionDatabase
+      if not @manager.completionDatabase.update fileName, module
+        @completionDatabase.update fileName, module, true
 
   # parse import modules from document buffer
   parseImports: =>
@@ -62,7 +73,6 @@ class HaskellProvider extends Provider
       [_, isQualified, name, _, newQualifier] = match
       isQualified = isQualified?
 
-      # TODO find out if module is external and remember module name
       imports.push name
 
       # calculate prefixes for modules

@@ -131,10 +131,26 @@ list = ({onResult, onComplete, onFailure, onDone}) ->
       onFailure?()
       onDone(false)
 
+# ghc-mod browse
+browse = ({fileName, moduleName, onResult, onComplete, onFailure, onDone}) ->
+  run
+    cmd: 'browse'
+    args: [moduleName]
+    cwd: path.dirname(fileName)
+    onMessage: (line) ->
+      onResult?(line)
+    onComplete: ->
+      onComplete?()
+      onDone()
+    onFailure: ->
+      onFailure?()
+      onDone(false)
+
 
 module.exports = {
   check,
   lint,
   type,
-  list
+  list,
+  browse
 }

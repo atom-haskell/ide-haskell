@@ -1,5 +1,6 @@
 {Emitter} = require 'emissary'
 
+
 class PendingBackend
   pendingTasks: []        # pending tasks here
   activeTask: null        # active tasks here
@@ -38,6 +39,7 @@ class PendingBackend
 
     # call function
     @activeTask.func(@activeTask.params)
+
 
 module.exports = {
   PendingBackend

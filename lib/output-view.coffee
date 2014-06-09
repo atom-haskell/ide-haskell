@@ -80,7 +80,7 @@ class OutputView extends View
 
   # method is called before start of any check commands
   pendingCheck: ->
-    @switchCounter = @switchCounter + 1
+    @switchCounter++
 
   # update current results
   resultsUpdated: (types) ->
