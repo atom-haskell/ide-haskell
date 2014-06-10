@@ -36,12 +36,23 @@ class HaskellProvider extends Provider
   #   return true
 
   buildSuggestions: =>
-    console.log @completionDatabase.modules
-    console.log @manager.completionDatabase.modules
+    selection = @editor.getSelection()
+    prefix = @prefixOfSelection selection
+    
+    # console.log @completionDatabase.modules
+    # console.log @prefixes
 
-    return []
-    # selection = @editor.getSelection()
-    # prefix = @prefixOfSelection selection
+    suggestions = []
+
+    # for module, prefixes of @prefixes
+    #   if @completionDatabase.modules[module]?
+    #     for res in @completionDatabase.modules[module]
+    #       suggestions.push new Suggestion(this, word: res.expr, label: res.type)
+    #   if @manager.completionDatabase.modules[module]?
+    #     for variable in @manager.completionDatabase.modules[module]
+    #       suggestions.push new Suggestion(this, word: variable, label: module)
+
+    return suggestions
     # return unless prefix.length
     #
     # console.log prefix

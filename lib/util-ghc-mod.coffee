@@ -94,9 +94,7 @@ type = ({fileName, pt, onResult, onComplete, onFailure, onDone}) ->
       return if resultViewed is true
       if matches = /(\d+)\s(\d+)\s(\d+)\s(\d+)\s\"([^\"]+)/.exec(line)
         [_, sr, sc, er, ec, type] = matches
-        onResult?({
-          type: type
-        })
+        onResult?({type})
       else
         console.warn "got something strange from ghc-mod type:", [line]
       resultViewed = true
@@ -129,7 +127,11 @@ browse = ({fileName, moduleName, onResult, onComplete, onFailure, onDone}) ->
     args: ['-d', moduleName]
     cwd: path.dirname(fileName)
     onMessage: (line) ->
-      onResult?(line)
+      if matches = /([^\s]+)\s::\s(.+)/.exec(line)
+        [_, expr, type] = matches
+        onResult?({expr, type})
+      else
+        console.warn "got something strange from ghc-mod browse:", [line]
     onComplete: ->
       onComplete?()
       onDone()
