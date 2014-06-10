@@ -120,6 +120,36 @@ list = ({onResult, onComplete, onFailure, onDone}) ->
       onFailure?()
       onDone(false)
 
+# ghc-mod lang
+lang = ({onResult, onComplete, onFailure, onDone}) ->
+  run
+    cmd: 'lang'
+    args: []
+    cwd: atom.project.getRootDirectory().getPath()
+    onMessage: (line) ->
+      onResult?(line)
+    onComplete: ->
+      onComplete?()
+      onDone()
+    onFailure: ->
+      onFailure?()
+      onDone(false)
+
+# ghc-mod lang
+flag = ({onResult, onComplete, onFailure, onDone}) ->
+  run
+    cmd: 'flag'
+    args: []
+    cwd: atom.project.getRootDirectory().getPath()
+    onMessage: (line) ->
+      onResult?(line)
+    onComplete: ->
+      onComplete?()
+      onDone()
+    onFailure: ->
+      onFailure?()
+      onDone(false)
+
 # ghc-mod browse
 browse = ({fileName, moduleName, onResult, onComplete, onFailure, onDone}) ->
   run
@@ -145,5 +175,7 @@ module.exports = {
   lint,
   type,
   list,
+  lang,
+  flag,
   browse
 }

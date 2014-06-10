@@ -1,7 +1,10 @@
 {OutputView} = require './output-view'
 {EditorControl} = require './editor-control'
 {PendingBackend} = require './pending-backend'
-{HaskellProvider} = require './haskell-provider'
+{HaskellProvider} = require './completion-haskell'
+{PragmasProvider} = require './completion-pragmas'
+{ExtensionsProvider} = require './completion-extensions'
+{GHCFlagsProvider} = require './completion-ghcflags'
 {MainCompletionDatabase} = require './completion-db'
 utilGhcMod = require './util-ghc-mod'
 
@@ -134,15 +137,23 @@ class PluginManager
   attachAutocompleteToNewEditorViews: ->
     @autocompleteSubscription = atom.workspaceView.eachEditorView (editorView) =>
       if editorView.attached and not editorView.mini
-        provider = new HaskellProvider editorView, this
-        @autocompleteModule.registerProviderForEditorView provider, editorView
-        @autocompleteProviders.push provider
+
+        providers = []
+        providers.push new HaskellProvider editorView, this
+        providers.push new PragmasProvider editorView, this
+        providers.push new ExtensionsProvider editorView, this
+        providers.push new GHCFlagsProvider editorView, this
+
+        for provider in providers
+          @autocompleteModule.registerProviderForEditorView provider, editorView
+          @autocompleteProviders.push provider
 
         # if editor view will close, remove provider
         editorView.on "editor:will-be-removed", =>
-          if (index = @autocompleteProviders.indexOf(provider)) isnt -1
-            @autocompleteProviders.splice index
-          @autocompleteModule.unregisterProvider provider
+          for provider in providers
+            if (index = @autocompleteProviders.indexOf(provider)) isnt -1
+              @autocompleteProviders.splice index
+            @autocompleteModule.unregisterProvider provider
 
   # Building main completion database
   createCompletionDatabase: ->

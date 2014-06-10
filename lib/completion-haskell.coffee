@@ -1,4 +1,4 @@
-{Provider, Suggestion} = require "autocomplete-plus"
+{Provider, Suggestion} = require 'autocomplete-plus'
 
 {CompletionDatabase} = require './completion-db'
 {isHaskellSource} = require './utils'
@@ -9,12 +9,12 @@ ArrayHelperModule.extendArray(Array)
 
 class HaskellProvider extends Provider
 
-  initialize: (@editorView, @manager) =>
+  initialize: (@editorView, @manager) ->
     @completionDatabase = new CompletionDatabase(@manager)
 
     # if saved, rebuild completion list
     @currentBuffer = @editor.getBuffer()
-    @currentBuffer.on "saved", @onSaved
+    @currentBuffer.on 'saved', @onSaved
 
     # if main database updated, rebuild completion list
     @manager.completionDatabase.on 'database-updated', @buildCompletionList
@@ -22,7 +22,7 @@ class HaskellProvider extends Provider
     @buildCompletionList()
 
   dispose: ->
-    @currentBuffer?.off "saved", @onSaved
+    @currentBuffer?.off 'saved', @onSaved
     @manager?.completionDatabase.off 'database-updated', @buildCompletionList
 
   onSaved: =>
@@ -38,7 +38,7 @@ class HaskellProvider extends Provider
   buildSuggestions: =>
     selection = @editor.getSelection()
     prefix = @prefixOfSelection selection
-    
+
     # console.log @completionDatabase.modules
     # console.log @prefixes
 

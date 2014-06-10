@@ -1,0 +1,4 @@
+'.source.haskell':
+  'Pragma':
+    'prefix': '{-#'
+    'body': '{-# $1 #-'

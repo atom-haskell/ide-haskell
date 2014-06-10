@@ -50,7 +50,18 @@ class MainCompletionDatabase extends CompletionDatabase
     return if @rebuildActive
     @reset()
 
-    # TODO run ghc-mod lang and flag
+    # run ghc-mod flag
+    @manager.pendingProcessController.start utilGhcMod.flag, {
+      onResult: (result) => @ghcFlags.push result
+      onComplete: => @updateReadyCounter()
+    }
+    # language extensions
+    @manager.pendingProcessController.start utilGhcMod.lang, {
+      onResult: (result) =>
+        @extensions.push result
+        @ghcFlags.push "-X#{result}"
+      onComplete: => @updateReadyCounter()
+    }
 
     # run ghc-mod list to get all module dependencies
     @manager.pendingProcessController.start utilGhcMod.list, {
@@ -61,7 +72,7 @@ class MainCompletionDatabase extends CompletionDatabase
   # Increase ready counter
   updateReadyCounter: ->
     @readyCounter++
-    return unless @readyCounter is 1
+    return unless @readyCounter is 3
 
     # set database ready and emmit ready event
     @rebuildActive = false
