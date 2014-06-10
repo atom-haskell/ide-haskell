@@ -4,13 +4,9 @@ utilGhcMod = require './util-ghc-mod'
 
 
 class CompletionDatabase
-  modules: {}       # all modules completion
 
   constructor: (@manager) ->
     Emitter.extend(this)
-
-  # Reset database
-  reset: ->
     @modules = {}
 
   # Remove obsolete imports - which not in provided list
@@ -37,25 +33,17 @@ class CompletionDatabase
 
 
 class MainCompletionDatabase extends CompletionDatabase
-  readyCounter: 0
-  rebuildActive: false
-
-  ready: false      # if true database is ready
-
-  extensions: []    # language extensions (only for main)
-  ghcFlags: []      # GHC flags (only for main)
-
   constructor: (@manager) ->
     super(@manager)
     @rebuild()
 
   reset: ->
-    super()
     @readyCounter = 0
     @rebuildActive = true
     @ready = false
     @extensions = []
     @ghcFlags = []
+    @modules = {}
 
   # Build this database
   rebuild: ->

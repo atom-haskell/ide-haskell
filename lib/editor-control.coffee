@@ -7,16 +7,11 @@ utilGhcMod = require './util-ghc-mod'
 
 
 class EditorControl
-
-  checkResults: [] # all results here for current file
   className: ['error', 'warning', 'lint']
 
-  subscriber: null
-
-  checkResultTooltip: null
-  exprTypeTooltip: null
-
   constructor: (@editorView, @manager) ->
+    @checkResults = []
+
     @editor = @editorView.getEditor()
     @gutter = @editorView.gutter
     @scroll = @editorView.find('.scroll-view')

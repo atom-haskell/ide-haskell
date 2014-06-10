@@ -8,13 +8,10 @@ utilGhcMod = require './util-ghc-mod'
 
 class PluginManager
 
-  pendingProcessController: null
-
-  checkResults: []           # all errors, warings and lints here
-  autocompleteProviders: []  # all providers for autocompletion
-  completionDatabase: null   # main completion database
-
   constructor: (state) ->
+    @checkResults = []            # all errors, warings and lints here
+    @autocompleteProviders = []   # all providers for autocompletion
+
     @createOutputViewPanel(state)
     @subsribeEditorViewController()
     @createPendingProcessController()

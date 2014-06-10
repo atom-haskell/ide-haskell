@@ -2,11 +2,10 @@
 
 
 class PendingBackend
-  pendingTasks: []        # pending tasks here
-  activeTask: null        # active tasks here
 
   constructor: ->
     Emitter.extend(this)
+    @pendingTasks = []
 
   # kill all runnning processes
   deactivate: ->

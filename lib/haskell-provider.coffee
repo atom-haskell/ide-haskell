@@ -8,7 +8,6 @@ ArrayHelperModule.extendArray(Array)
 
 
 class HaskellProvider extends Provider
-  completionDatabase: null    # local completion database
 
   initialize: (@editorView, @manager) =>
     @completionDatabase = new CompletionDatabase(@manager)

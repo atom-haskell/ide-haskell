@@ -33,6 +33,8 @@ class OutputView extends View
     @height state?.height
     if state?.isShow? then @toggle(state.isShow) else @toggle(true)
 
+    @switchCounter = 0   # if counter is 0 the error tab is switched
+
     # prepare arrays for errors, warnings and lints data
     @checkControl = [
       { v: @errorsListView, b: @errorsButton, t: @errorsButton.text() },
