@@ -37,8 +37,6 @@ class PendingBackend
     @activeTask[channel] = @pendingTasks[channel][0]
     @pendingTasks[channel].splice(0, 1)
 
-    console.log 'run', @activeTask[channel]
-
     # every backend must call onDone once it stopped
     @activeTask[channel].params.onDone = ((success = true, errorMsg = null) =>
       # TODO output messages to output view?
