@@ -4,7 +4,7 @@
 {KeywordsProvider} = require './providers/keywords'
 {PragmasProvider} = require './providers/pragmas'
 {ExtensionsProvider} = require './providers/extensions'
-{GHCFlagsProvider} = require './providers/ghcflags'
+{GHCFlagsProvider} = require './providers/ghc-flags'
 {HaskellProvider} = require './providers/haskell'
 {MainCompletionDatabase} = require './completion-db'
 utilGhcMod = require './util-ghc-mod'
@@ -159,7 +159,8 @@ class PluginManager
 
   # Building main completion database
   createCompletionDatabase: ->
-    @completionDatabase = new MainCompletionDatabase this
+    @mainCDB = new MainCompletionDatabase this
+    @localCDB = {} # completion databases for uri
 
 
 module.exports = {

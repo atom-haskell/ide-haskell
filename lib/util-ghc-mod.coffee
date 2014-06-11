@@ -152,6 +152,7 @@ flag = ({onResult, onComplete, onFailure, onDone}) ->
 
 # ghc-mod browse
 browse = ({fileName, moduleName, onResult, onComplete, onFailure, onDone}) ->
+  console.log 'browse', moduleName, fileName
   run
     cmd: 'browse'
     args: ['-d', moduleName]

@@ -13,7 +13,7 @@ class ExtensionsProvider extends Provider
 
   buildSuggestions: ->
     return unless isHaskellSource @editor.getBuffer().getUri()
-    return unless @manager.completionDatabase.ready
+    return unless @manager.mainCDB.ready
 
     selection = @editor.getSelection()
     prefix = @prefixOfSelection selection
@@ -28,7 +28,7 @@ class ExtensionsProvider extends Provider
     return [] unless prefix.length
 
     # Filter the words using fuzzaldrin
-    words = fuzzaldrin.filter @manager.completionDatabase.extensions, prefix
+    words = fuzzaldrin.filter @manager.mainCDB.extensions, prefix
 
     # Builds suggestions for the words
     suggestions = for word in words when word isnt prefix

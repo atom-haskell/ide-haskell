@@ -12,7 +12,13 @@ class CompletionDatabase
   # Remove obsolete imports - which not in provided list
   removeObsolete: (imports) ->
     for module, v of @modules
-      delete @modules[module] if imports.indexOf(module) is -1
+      @remove module if imports.indexOf(module) is -1
+
+  # Remove module
+  remove: (module) ->
+    removed = @modules[module]?
+    delete @modules[module] if removed
+    return removed
 
   # Update module symbols.
   # This function updates module symbols if module does not present in

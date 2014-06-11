@@ -13,7 +13,7 @@ class GHCFlagsProvider extends Provider
 
   buildSuggestions: ->
     return unless isHaskellSource @editor.getBuffer().getUri()
-    return unless @manager.completionDatabase.ready
+    return unless @manager.mainCDB.ready
 
     selection = @editor.getSelection()
     prefix = @prefixOfSelection selection
@@ -27,7 +27,7 @@ class GHCFlagsProvider extends Provider
     prefix = prefix.replace /^.*\s([A-Za-z0-9\-]+)$/, '$1'
 
     # Filter the words using fuzzaldrin
-    words = fuzzaldrin.filter @manager.completionDatabase.ghcFlags, prefix
+    words = fuzzaldrin.filter @manager.mainCDB.ghcFlags, prefix
 
     # Builds suggestions for the words
     suggestions = for word in words when word isnt prefix

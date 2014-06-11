@@ -13,37 +13,49 @@ class HaskellProvider extends Provider
   wordRegex: /\s+([A-Z]\w*\.)*\w*/g
 
   initialize: (@editorView, @manager) ->
-    @completionDatabase = new CompletionDatabase(@manager)
-
     # if saved, rebuild completion list
     @currentBuffer = @editor.getBuffer()
+    @currentBuffer.on 'will-be-saved', @onBeforeSaved
     @currentBuffer.on 'saved', @onSaved
 
     # if main database updated, rebuild completion list
-    @manager.completionDatabase.on 'rebuild', @buildCompletionList
-    @manager.completionDatabase.on 'updated', @setUpdatedFlag
-    @completionDatabase.on 'updated', @setUpdatedFlag
+    @manager.mainCDB.on 'rebuild', @buildCompletionList
+    @manager.mainCDB.on 'updated', @setUpdatedFlag
 
     @buildCompletionList()
 
   dispose: ->
     @currentBuffer?.off 'saved', @onSaved
-    @manager?.completionDatabase.off 'rebuild', @buildCompletionList
-    @manager?.completionDatabase.off 'updated', @setUpdatedFlag
-    @completionDatabase?.off 'updated', @setUpdatedFlag
+    @currentBuffer?.off 'will-be-saved', @onBeforeSaved
+    @manager?.mainCDB.off 'rebuild', @buildCompletionList
+    @manager?.mainCDB.off 'updated', @setUpdatedFlag
+    @manager.localCDB[@currentBuffer.getUri()]?.off 'updated', @setUpdatedFlag
 
   setUpdatedFlag: =>
     @databaseUpdated = true
 
-  onSaved: =>
-    return unless isHaskellSource @currentBuffer.getUri()
+  onBeforeSaved: =>
+    # in case file name was changed turn off notifications
+    @manager.localCDB[@currentBuffer.getUri()]?.off 'updated', @setUpdatedFlag
 
-    # TODO rebuild completion list for all affected databases
+  onSaved: =>
+    fileName = @currentBuffer.getUri()
+    return unless isHaskellSource fileName
+
+    # turn on notifications
+    @manager.localCDB[fileName]?.on 'updated', @setUpdatedFlag
+
+    # rebuild completion list for all affected databases
+    module = @parseModule()
+    for fname, localCDB of @manager.localCDB
+      if fname isnt fileName
+        if localCDB.remove module
+          localCDB.update fname, module
 
     # rebuild local completion database
     @buildCompletionList()
 
-  buildSuggestions: ->
+  buildSuggestions: ->    
     # try to rebuild completion list if database changed
     @rebuildWordList()
     return unless @totalWordList?
@@ -71,12 +83,15 @@ class HaskellProvider extends Provider
   # If database or prefixes was updated, rebuild world list
   rebuildWordList: ->
     return unless @databaseUpdated? and @databaseUpdated
+    fileName = @currentBuffer.getUri()
     @databaseUpdated = false
 
     @totalWordList = []
+    localCDB = @manager.localCDB[fileName]
+
     for module, prefixes of @prefixes
-      @rebuildWordList1 prefixes, @completionDatabase.modules[module]
-      @rebuildWordList1 prefixes, @manager.completionDatabase.modules[module]
+      @rebuildWordList1 prefixes, localCDB.modules[module]
+      @rebuildWordList1 prefixes, @manager.mainCDB.modules[module]
 
     # append keywords
     for keyword in ['case', 'deriving', 'do', 'else', 'if', 'in', 'let', 'module', 'of', 'then', 'where']
@@ -89,9 +104,18 @@ class HaskellProvider extends Provider
         @totalWordList.push {expr: "#{prefix}#{data.expr}", type: data.type}
 
   buildCompletionList: =>
+    fileName = @currentBuffer.getUri()
+
     # check if main database is ready, and if its not, subscribe on ready event
-    return unless isHaskellSource @currentBuffer.getUri()
-    return unless @manager.completionDatabase.ready
+    return unless isHaskellSource fileName
+    return unless @manager.mainCDB.ready
+
+    # create local database if it is not created yet
+    localCDB = @manager.localCDB[fileName]
+    if not localCDB?
+      localCDB = new CompletionDatabase @manager
+      localCDB.on 'updated', @setUpdatedFlag
+      @manager.localCDB[fileName] = localCDB
 
     {imports, prefixes} = @parseImports()
 
@@ -101,13 +125,12 @@ class HaskellProvider extends Provider
       @setUpdatedFlag()
 
     # remove obsolete modules from local completion database
-    @completionDatabase.removeObsolete imports
+    localCDB.removeObsolete imports
 
     # get completions for all modules in list
-    fileName = @editor.getUri()
     for module in imports
-      if not @manager.completionDatabase.update fileName, module
-        @completionDatabase.update fileName, module
+      if not @manager.mainCDB.update fileName, module
+        localCDB.update fileName, module
 
   # parse import modules from document buffer
   parseImports: ->
@@ -140,6 +163,12 @@ class HaskellProvider extends Provider
     imports = imports.unique()
     return {imports, prefixes}
 
+  # parse module name
+  parseModule: ->
+    module = undefined
+    @editor.getBuffer().scan /^module\s+([\w\.]+)/g, ({match}) ->
+      [_, module] = match
+    return module
 
 module.exports = {
   HaskellProvider
