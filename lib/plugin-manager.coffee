@@ -1,10 +1,11 @@
 {OutputView} = require './output-view'
 {EditorControl} = require './editor-control'
 {PendingBackend} = require './pending-backend'
-{HaskellProvider} = require './completion-haskell'
+{KeywordsProvider} = require './completion-keywords'
 {PragmasProvider} = require './completion-pragmas'
 {ExtensionsProvider} = require './completion-extensions'
 {GHCFlagsProvider} = require './completion-ghcflags'
+{HaskellProvider} = require './completion-haskell'
 {MainCompletionDatabase} = require './completion-db'
 utilGhcMod = require './util-ghc-mod'
 
@@ -139,10 +140,11 @@ class PluginManager
       if editorView.attached and not editorView.mini
 
         providers = []
-        providers.push new HaskellProvider editorView, this
+        providers.push new KeywordsProvider editorView, this
         providers.push new PragmasProvider editorView, this
         providers.push new ExtensionsProvider editorView, this
         providers.push new GHCFlagsProvider editorView, this
+        providers.push new HaskellProvider editorView, this
 
         for provider in providers
           @autocompleteModule.registerProviderForEditorView provider, editorView
