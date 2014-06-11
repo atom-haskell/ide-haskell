@@ -1,4 +1,5 @@
 {Provider, Suggestion} = require 'autocomplete-plus'
+fuzzaldrin = require 'fuzzaldrin'
 
 {CompletionDatabase} = require './completion-db'
 {isHaskellSource} = require './utils'
@@ -9,6 +10,8 @@ ArrayHelperModule.extendArray(Array)
 
 class HaskellProvider extends Provider
 
+  wordRegex: /([A-Z]\w*\.)*\w*/g
+
   initialize: (@editorView, @manager) ->
     @completionDatabase = new CompletionDatabase(@manager)
 
@@ -17,13 +20,20 @@ class HaskellProvider extends Provider
     @currentBuffer.on 'saved', @onSaved
 
     # if main database updated, rebuild completion list
-    @manager.completionDatabase.on 'database-updated', @buildCompletionList
+    @manager.completionDatabase.on 'rebuild', @buildCompletionList
+    @manager.completionDatabase.on 'updated', @setUpdatedFlag
+    @completionDatabase.on 'updated', @setUpdatedFlag
 
     @buildCompletionList()
 
   dispose: ->
     @currentBuffer?.off 'saved', @onSaved
-    @manager?.completionDatabase.off 'database-updated', @buildCompletionList
+    @manager?.completionDatabase.off 'rebuild', @buildCompletionList
+    @manager?.completionDatabase.off 'updated', @setUpdatedFlag
+    @completionDatabase?.off 'updated', @setUpdatedFlag
+
+  setUpdatedFlag: =>
+    @databaseUpdated = true
 
   onSaved: =>
     return unless isHaskellSource @currentBuffer.getUri()
@@ -32,43 +42,56 @@ class HaskellProvider extends Provider
 
     @buildCompletionList()
 
-  # confirm: (item) ->
-  #   return true
+  buildSuggestions: ->
+    # try to rebuild completion list if database changed
+    @rebuildWordList()
+    return unless @totalWordList?
 
-  buildSuggestions: =>
     selection = @editor.getSelection()
     prefix = @prefixOfSelection selection
+    return unless prefix.length
 
-    # console.log @completionDatabase.modules
-    # console.log @prefixes
+    suggestions = @findSuggestionsForPrefix prefix
+    return unless suggestions.length
+    return suggestions
 
-    suggestions = []
+  findSuggestionsForPrefix: (prefix) ->
+    # Filter the words using fuzzaldrin
+    words = fuzzaldrin.filter @totalWordList, prefix
 
-    # for module, prefixes of @prefixes
-    #   if @completionDatabase.modules[module]?
-    #     for res in @completionDatabase.modules[module]
-    #       suggestions.push new Suggestion(this, word: res.expr, label: res.type)
-    #   if @manager.completionDatabase.modules[module]?
-    #     for variable in @manager.completionDatabase.modules[module]
-    #       suggestions.push new Suggestion(this, word: variable, label: module)
+    # Builds suggestions for the words
+    suggestions = for word in words when word isnt prefix
+      new Suggestion this, word: word, prefix: prefix
 
     return suggestions
-    # return unless prefix.length
-    #
-    # console.log prefix
-    # suggestions = []
-    # suggestions.push new Suggestion(this, word: "LANGUAGE", label: "test")
-    # return suggestions
 
-  # findSuggestionsForWord: (prefix) ->
-  #   console.log prefix
+  # If database or prefixes was updated, rebuild world list
+  rebuildWordList: ->
+    return unless @databaseUpdated? and @databaseUpdated
+    @databaseUpdated = false
+
+    @totalWordList = []
+    for module, prefixes of @prefixes
+      if @completionDatabase.modules[module]?
+        for word in @completionDatabase.modules[module]
+          for prefix in prefixes
+            @totalWordList.push "#{prefix}#{word.expr}"
+      else if @manager.completionDatabase.modules[module]?
+        for word in @manager.completionDatabase.modules[module]
+          for prefix in prefixes
+            @totalWordList.push "#{prefix}#{word.expr}"
 
   buildCompletionList: =>
     # check if main database is ready, and if its not, subscribe on ready event
     return unless isHaskellSource @currentBuffer.getUri()
     return unless @manager.completionDatabase.ready
 
-    {imports, @prefixes} = @parseImports()
+    {imports, prefixes} = @parseImports()
+
+    # remember prefixes and set update flag if it was changed
+    if JSON.stringify(@prefixes) isnt JSON.stringify(prefixes)
+      @prefixes = prefixes
+      @setUpdatedFlag()
 
     # remove obsolete modules from local completion database
     @completionDatabase.removeObsolete imports
@@ -97,6 +120,15 @@ class HaskellProvider extends Provider
 
       prefixList = prefixList.concat prefixes[name]
       prefixes[name] = prefixList.unique()
+
+    # add prelude import by default
+    imports.push 'Prelude'
+
+    prefixList = ['Prelude.', '']
+    prefixes['Prelude'] = [] if not prefixes['Prelude']?
+    prefixList = prefixList.concat prefixes['Prelude']
+    prefixes['Prelude'] = prefixList.unique()
+
 
     imports = imports.unique()
     return {imports, prefixes}

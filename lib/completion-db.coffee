@@ -29,6 +29,7 @@ class CompletionDatabase
       fileName: fileName
       moduleName: moduleName
       onResult: (result) => @modules[moduleName]?.push result
+      onComplete: => @emit 'updated'
     }
 
 
@@ -79,7 +80,7 @@ class MainCompletionDatabase extends CompletionDatabase
     @ready = true
 
     # emit ready event
-    @emit 'database-updated'
+    @emit 'rebuild'
 
   # Update module symbols.
   # In main database we got another behaviour. If module is not preset,
