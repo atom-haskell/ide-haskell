@@ -38,8 +38,9 @@ class HaskellProvider extends Provider
   onSaved: =>
     return unless isHaskellSource @currentBuffer.getUri()
 
-    # TODO remove current module from all providers modules
+    # TODO rebuild completion list for all affected databases
 
+    # rebuild local completion database
     @buildCompletionList()
 
   buildSuggestions: ->
@@ -128,13 +129,13 @@ class HaskellProvider extends Provider
       prefixes[name] = prefixList.unique()
 
     # add prelude import by default
-    imports.push 'Prelude'
-
-    prefixList = ['Prelude.', '']
-    prefixes['Prelude'] = [] if not prefixes['Prelude']?
-    prefixList = prefixList.concat prefixes['Prelude']
-    prefixes['Prelude'] = prefixList.unique()
-
+    preludes = ['Prelude']
+    for name in preludes
+      prefixList = ["#{name}.", '']
+      prefixes[name] = [] if not prefixes[name]?
+      prefixList = prefixList.concat prefixes[name]
+      prefixes[name] = prefixList.unique()
+      imports.push name
 
     imports = imports.unique()
     return {imports, prefixes}
