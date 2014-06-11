@@ -1,6 +1,6 @@
 {OutputView} = require './output-view'
 {EditorControl} = require './editor-control'
-{PendingBackend} = require './pending-backend'
+{PendingBackend, Channel} = require './pending-backend'
 {KeywordsProvider} = require './providers/keywords'
 {PragmasProvider} = require './providers/pragmas'
 {ExtensionsProvider} = require './providers/extensions'
@@ -52,7 +52,7 @@ class PluginManager
     @outputView?.pendingCheck()
     checkOrLintResults = []
 
-    @pendingProcessController.start func, {
+    @pendingProcessController.start Channel.checkAndLint, func, {
       fileName: fileName
       onResult: (oneResult) ->
         checkOrLintResults.push oneResult

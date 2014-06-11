@@ -1,5 +1,6 @@
 {Emitter} = require 'emissary'
 
+{Channel} = require './pending-backend'
 utilGhcMod = require './util-ghc-mod'
 
 
@@ -31,7 +32,7 @@ class CompletionDatabase
   # Real module update
   _update: (fileName, moduleName) ->
     @modules[moduleName] = []
-    @manager.pendingProcessController.start utilGhcMod.browse, {
+    @manager.pendingProcessController.start Channel.completion, utilGhcMod.browse, {
       fileName: fileName
       moduleName: moduleName
       onResult: (result) => @modules[moduleName]?.push result
@@ -58,12 +59,12 @@ class MainCompletionDatabase extends CompletionDatabase
     @reset()
 
     # run ghc-mod flag
-    @manager.pendingProcessController.start utilGhcMod.flag, {
+    @manager.pendingProcessController.start Channel.completion, utilGhcMod.flag, {
       onResult: (result) => @ghcFlags.push result
       onComplete: => @updateReadyCounter()
     }
     # language extensions
-    @manager.pendingProcessController.start utilGhcMod.lang, {
+    @manager.pendingProcessController.start Channel.completion, utilGhcMod.lang, {
       onResult: (result) =>
         @extensions.push result
         @ghcFlags.push "-X#{result}"
@@ -71,7 +72,7 @@ class MainCompletionDatabase extends CompletionDatabase
     }
 
     # run ghc-mod list to get all module dependencies
-    @manager.pendingProcessController.start utilGhcMod.list, {
+    @manager.pendingProcessController.start Channel.completion, utilGhcMod.list, {
       onResult: (result) => @modules[result] = null
       onComplete: => @updateReadyCounter()
     }

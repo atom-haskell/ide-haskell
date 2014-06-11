@@ -1,6 +1,7 @@
 {$, $$, $$$, View} = require 'atom'
 {Subscriber} = require 'emissary'
 
+{Channel} = require './pending-backend'
 {isHaskellSource} = require './utils'
 {TooltipView} = require './tooltip-view'
 utilGhcMod = require './util-ghc-mod'
@@ -135,7 +136,7 @@ class EditorControl
       @exprTypeTooltip = new TooltipView(tooltipRect)
 
       # process start
-      @manager.pendingProcessController.start utilGhcMod.type, {
+      @manager.pendingProcessController.start Channel.expressionType, utilGhcMod.type, {
         pt: screenPt
         fileName: @editor.getUri()
         onResult: (result) =>
