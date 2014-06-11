@@ -10,7 +10,7 @@ ArrayHelperModule.extendArray(Array)
 
 class HaskellProvider extends Provider
 
-  wordRegex: /([A-Z]\w*\.)*\w*/g
+  wordRegex: /\s+([A-Z]\w*\.)*\w*/g
 
   initialize: (@editorView, @manager) ->
     @completionDatabase = new CompletionDatabase(@manager)
@@ -56,12 +56,14 @@ class HaskellProvider extends Provider
     return suggestions
 
   findSuggestionsForPrefix: (prefix) ->
+    prefix = prefix.replace /^\s+(.*)$/, '$1'
+
     # Filter the words using fuzzaldrin
-    words = fuzzaldrin.filter @totalWordList, prefix
+    words = fuzzaldrin.filter @totalWordList, prefix, key: 'expr'
 
     # Builds suggestions for the words
     suggestions = for word in words when word isnt prefix
-      new Suggestion this, word: word, prefix: prefix
+      new Suggestion this, word: word.expr, prefix: prefix, label: word.type
 
     return suggestions
 
@@ -72,14 +74,18 @@ class HaskellProvider extends Provider
 
     @totalWordList = []
     for module, prefixes of @prefixes
-      if @completionDatabase.modules[module]?
-        for word in @completionDatabase.modules[module]
-          for prefix in prefixes
-            @totalWordList.push "#{prefix}#{word.expr}"
-      else if @manager.completionDatabase.modules[module]?
-        for word in @manager.completionDatabase.modules[module]
-          for prefix in prefixes
-            @totalWordList.push "#{prefix}#{word.expr}"
+      @rebuildWordList1 prefixes, @completionDatabase.modules[module]
+      @rebuildWordList1 prefixes, @manager.completionDatabase.modules[module]
+
+    # append keywords
+    for keyword in ['case', 'deriving', 'do', 'else', 'if', 'in', 'let', 'module', 'of', 'then', 'where']
+      @totalWordList.push {expr: keyword}
+
+  rebuildWordList1: (prefixes, module) ->
+    return unless module?
+    for data in module
+      for prefix in prefixes
+        @totalWordList.push {expr: "#{prefix}#{data.expr}", type: data.type}
 
   buildCompletionList: =>
     # check if main database is ready, and if its not, subscribe on ready event
