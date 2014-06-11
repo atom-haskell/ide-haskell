@@ -55,18 +55,32 @@ class HaskellProvider extends Provider
     # rebuild local completion database
     @buildCompletionList()
 
-  buildSuggestions: ->    
+  buildSuggestions: ->
     # try to rebuild completion list if database changed
     @rebuildWordList()
     return unless @totalWordList?
 
     selection = @editor.getSelection()
+    return unless @isSuitablePrefixOfSelection selection
+
     prefix = @prefixOfSelection selection
     return unless prefix.length
 
     suggestions = @findSuggestionsForPrefix prefix
     return unless suggestions.length
     return suggestions
+
+  isSuitablePrefixOfSelection: (selection) ->
+    selectionRange = selection.getBufferRange()
+    lineRange = [[selectionRange.start.row, 0], [selectionRange.end.row, @editor.lineLengthForBufferRow(selectionRange.end.row)]]
+
+    result = true
+
+    @editor.getBuffer().scanInRange /^(import)\s.*$/g, lineRange, ({match, range, stop}) ->
+      stop() if range.start.isGreaterThan(selectionRange.end)
+      result = false
+
+    return result
 
   findSuggestionsForPrefix: (prefix) ->
     prefix = prefix.replace /^\s+(.*)$/, '$1'

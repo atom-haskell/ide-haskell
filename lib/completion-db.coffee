@@ -51,6 +51,7 @@ class MainCompletionDatabase extends CompletionDatabase
     @ready = false
     @extensions = []
     @ghcFlags = []
+    @moduleNames = []
     @modules = {}
 
   # Build this database
@@ -73,7 +74,9 @@ class MainCompletionDatabase extends CompletionDatabase
 
     # run ghc-mod list to get all module dependencies
     @manager.pendingProcessController.start Channel.completion, utilGhcMod.list, {
-      onResult: (result) => @modules[result] = null
+      onResult: (result) =>
+        @modules[result] = null
+        @moduleNames.push result
       onComplete: => @updateReadyCounter()
     }
 

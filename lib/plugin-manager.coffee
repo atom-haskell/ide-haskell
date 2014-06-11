@@ -1,6 +1,7 @@
 {OutputView} = require './output-view'
 {EditorControl} = require './editor-control'
 {PendingBackend, Channel} = require './pending-backend'
+{ImportsProvider} = require './providers/imports'
 {KeywordsProvider} = require './providers/keywords'
 {PragmasProvider} = require './providers/pragmas'
 {ExtensionsProvider} = require './providers/extensions'
@@ -140,6 +141,7 @@ class PluginManager
       if editorView.attached and not editorView.mini
 
         providers = []
+        providers.push new ImportsProvider editorView, this
         providers.push new KeywordsProvider editorView, this
         providers.push new PragmasProvider editorView, this
         providers.push new ExtensionsProvider editorView, this
