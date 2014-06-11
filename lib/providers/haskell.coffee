@@ -1,9 +1,9 @@
 {Provider, Suggestion} = require 'autocomplete-plus'
 fuzzaldrin = require 'fuzzaldrin'
 
-{CompletionDatabase} = require './completion-db'
-{isHaskellSource} = require './utils'
-ArrayHelperModule = require './utils'
+{CompletionDatabase} = require '../completion-db'
+{isHaskellSource} = require '../utils'
+ArrayHelperModule = require '../utils'
 
 ArrayHelperModule.extendArray(Array)
 

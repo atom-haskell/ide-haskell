@@ -1,19 +1,23 @@
 {Provider, Suggestion} = require 'autocomplete-plus'
 fuzzaldrin = require 'fuzzaldrin'
 
-{isHaskellSource} = require './utils'
+{isHaskellSource} = require '../utils'
 
 
-class GHCFlagsProvider extends Provider
+class PragmasProvider extends Provider
 
-  wordRegex: /\{-\#\s+OPTIONS_GHC(\s+[A-Za-z0-9\-]+)*/g
+  wordRegex: /\{-\#\s+\w+/g
   exclusive: true
+
+  possibleWords: [
+    'LANGUAGE', 'OPTIONS_GHC', 'INCLUDE', 'WARNING', 'DEPRECATED', 'INLINE',
+    'NOINLINE', 'ANN', 'LINE', 'RULES', 'SPECIALIZE', 'UNPACK', 'SOURCE'
+  ]
 
   initialize: (@editorView, @manager) ->
 
   buildSuggestions: ->
     return unless isHaskellSource @editor.getBuffer().getUri()
-    return unless @manager.completionDatabase.ready
 
     selection = @editor.getSelection()
     prefix = @prefixOfSelection selection
@@ -24,10 +28,10 @@ class GHCFlagsProvider extends Provider
     return suggestions
 
   findSuggestionsForPrefix: (prefix) ->
-    prefix = prefix.replace /^.*\s([A-Za-z0-9\-]+)$/, '$1'
+    prefix = prefix.replace /^\{-\#\s+/, ''
 
     # Filter the words using fuzzaldrin
-    words = fuzzaldrin.filter @manager.completionDatabase.ghcFlags, prefix
+    words = fuzzaldrin.filter @possibleWords, prefix
 
     # Builds suggestions for the words
     suggestions = for word in words when word isnt prefix
@@ -37,5 +41,5 @@ class GHCFlagsProvider extends Provider
 
 
 module.exports = {
-  GHCFlagsProvider
+  PragmasProvider
 }

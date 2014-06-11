@@ -1,23 +1,19 @@
 {Provider, Suggestion} = require 'autocomplete-plus'
 fuzzaldrin = require 'fuzzaldrin'
 
-{isHaskellSource} = require './utils'
+{isHaskellSource} = require '../utils'
 
 
-class PragmasProvider extends Provider
+class ExtensionsProvider extends Provider
 
-  wordRegex: /\{-\#\s+\w+/g
+  wordRegex: /\{-\#\s+LANGUAGE\s(\s*[A-Za-z0-9]+(\s*,)?)*/g
   exclusive: true
-
-  possibleWords: [
-    'LANGUAGE', 'OPTIONS_GHC', 'INCLUDE', 'WARNING', 'DEPRECATED', 'INLINE',
-    'NOINLINE', 'ANN', 'LINE', 'RULES', 'SPECIALIZE', 'UNPACK', 'SOURCE'
-  ]
 
   initialize: (@editorView, @manager) ->
 
   buildSuggestions: ->
     return unless isHaskellSource @editor.getBuffer().getUri()
+    return unless @manager.completionDatabase.ready
 
     selection = @editor.getSelection()
     prefix = @prefixOfSelection selection
@@ -28,10 +24,11 @@ class PragmasProvider extends Provider
     return suggestions
 
   findSuggestionsForPrefix: (prefix) ->
-    prefix = prefix.replace /^\{-\#\s+/, ''
+    prefix = prefix.replace /^.*(\b([A-Za-z0-9]+)|,)$/, '$2'
+    return [] unless prefix.length
 
     # Filter the words using fuzzaldrin
-    words = fuzzaldrin.filter @possibleWords, prefix
+    words = fuzzaldrin.filter @manager.completionDatabase.extensions, prefix
 
     # Builds suggestions for the words
     suggestions = for word in words when word isnt prefix
@@ -41,5 +38,5 @@ class PragmasProvider extends Provider
 
 
 module.exports = {
-  PragmasProvider
+  ExtensionsProvider
 }

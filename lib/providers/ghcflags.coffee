@@ -1,23 +1,19 @@
 {Provider, Suggestion} = require 'autocomplete-plus'
 fuzzaldrin = require 'fuzzaldrin'
 
-{isHaskellSource} = require './utils'
+{isHaskellSource} = require '../utils'
 
 
-class KeywordsProvider extends Provider
+class GHCFlagsProvider extends Provider
 
-  wordRegex: /^[a-z]+/g
+  wordRegex: /\{-\#\s+OPTIONS_GHC(\s+[A-Za-z0-9\-]+)*/g
   exclusive: true
-
-  possibleWords: [
-    'class', 'data', 'default', 'import', 'infix', 'infixl', 'infixr',
-    'instance', 'main', 'module', 'newtype', 'type'
-  ]
 
   initialize: (@editorView, @manager) ->
 
   buildSuggestions: ->
     return unless isHaskellSource @editor.getBuffer().getUri()
+    return unless @manager.completionDatabase.ready
 
     selection = @editor.getSelection()
     prefix = @prefixOfSelection selection
@@ -28,8 +24,10 @@ class KeywordsProvider extends Provider
     return suggestions
 
   findSuggestionsForPrefix: (prefix) ->
+    prefix = prefix.replace /^.*\s([A-Za-z0-9\-]+)$/, '$1'
+
     # Filter the words using fuzzaldrin
-    words = fuzzaldrin.filter @possibleWords, prefix
+    words = fuzzaldrin.filter @manager.completionDatabase.ghcFlags, prefix
 
     # Builds suggestions for the words
     suggestions = for word in words when word isnt prefix
@@ -39,5 +37,5 @@ class KeywordsProvider extends Provider
 
 
 module.exports = {
-  KeywordsProvider
+  GHCFlagsProvider
 }
