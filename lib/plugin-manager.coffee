@@ -1,12 +1,7 @@
 {OutputView} = require './output-view'
 {EditorControl} = require './editor-control'
 {PendingBackend, Channel} = require './pending-backend'
-{ImportsProvider} = require './providers/imports'
-{KeywordsProvider} = require './providers/keywords'
-{PragmasProvider} = require './providers/pragmas'
-{ExtensionsProvider} = require './providers/extensions'
-{GHCFlagsProvider} = require './providers/ghc-flags'
-{HaskellProvider} = require './providers/haskell'
+{CompleteProvider} = require './complete-provider'
 {MainCompletionDatabase} = require './completion-db'
 utilGhcMod = require './util-ghc-mod'
 
@@ -139,18 +134,9 @@ class PluginManager
   attachAutocompleteToNewEditorViews: ->
     @autocompleteSubscription = atom.workspaceView.eachEditorView (editorView) =>
       if editorView.attached and not editorView.mini
-
-        providers = []
-        providers.push new ImportsProvider editorView, this
-        providers.push new KeywordsProvider editorView, this
-        providers.push new PragmasProvider editorView, this
-        providers.push new ExtensionsProvider editorView, this
-        providers.push new GHCFlagsProvider editorView, this
-        providers.push new HaskellProvider editorView, this
-
-        for provider in providers
-          @autocompleteModule.registerProviderForEditorView provider, editorView
-          @autocompleteProviders.push provider
+        provider = new CompleteProvider editorView, this
+        @autocompleteModule.registerProviderForEditorView provider, editorView
+        @autocompleteProviders.push provider
 
         # if editor view will close, remove provider
         editorView.on "editor:will-be-removed", =>
