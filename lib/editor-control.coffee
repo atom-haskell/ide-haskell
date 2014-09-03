@@ -1,7 +1,7 @@
 {$, $$, $$$, View} = require 'atom'
 {Subscriber} = require 'emissary'
 
-{isHaskellSource} = require './utils'
+{isHaskellSource, pixelPositionForMouseEvent} = require './utils'
 {TooltipView} = require './tooltip-view'
 utilGhcMod = require './util-ghc-mod'
 
@@ -125,7 +125,8 @@ class EditorControl
   showExpressionType: (e) ->
     return unless isHaskellSource(@editor.getUri()) and not @exprTypeTooltip?
 
-    screenPt = @editorView.screenPositionFromMouseEvent(e)
+    pixelPt = pixelPositionForMouseEvent(@editorView, e)
+    screenPt = @editor.screenPositionForPixelPosition(pixelPt)
     bufferPt = @editor.bufferPositionForScreenPosition(screenPt)
     if screenPt.isEqual bufferPt
 
