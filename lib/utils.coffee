@@ -14,17 +14,20 @@ isHaskellSource = (fname) ->
     return true
   return false
 
-# pixel position for mouse event
-pixelPositionForMouseEvent = (editorView, event) ->
+# pixel position from mouse event
+pixelPositionFromMouseEvent = (editorView, event) ->
   {clientX, clientY} = event
   linesClientRect = editorView.find('.lines')[0].getBoundingClientRect()
   top = clientY - linesClientRect.top
   left = clientX - linesClientRect.left
   {top, left}
 
+# screen position from mouse event
+screenPositionFromMouseEvent = (editorView, event) ->
+  editorView.getModel().screenPositionForPixelPosition(pixelPositionFromMouseEvent(editorView, event))
 
 module.exports = {
   isCabalProject,
   isHaskellSource,
-  pixelPositionForMouseEvent
+  screenPositionFromMouseEvent
 }
