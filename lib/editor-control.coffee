@@ -1,7 +1,7 @@
 {$, $$, $$$, View} = require 'atom'
 {Subscriber} = require 'emissary'
 
-{isHaskellSource} = require './utils'
+{isHaskellSource, screenPositionFromMouseEvent} = require './utils'
 {TooltipView} = require './tooltip-view'
 utilGhcMod = require './util-ghc-mod'
 
@@ -125,7 +125,7 @@ class EditorControl
   showExpressionType: (e) ->
     return unless isHaskellSource(@editor.getUri()) and not @exprTypeTooltip?
 
-    screenPt = @editorView.screenPositionFromMouseEvent(e)
+    screenPt = screenPositionFromMouseEvent(@editorView, e)
     bufferPt = @editor.bufferPositionForScreenPosition(screenPt)
     if screenPt.isEqual bufferPt
 
@@ -158,7 +158,7 @@ class EditorControl
   # show check result when mouse over gutter icon
   showCheckResult: (e) ->
     @hideCheckResult()
-    row = @editorView.screenPositionFromMouseEvent(e).row + 1
+    row = screenPositionFromMouseEvent(@editorView, e).row + 1
 
     # find best result for row
     foundResult = null
