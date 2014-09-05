@@ -140,10 +140,9 @@ class PluginManager
 
         # if editor view will close, remove provider
         editorView.on "editor:will-be-removed", =>
-          for provider in providers
-            if (index = @autocompleteProviders.indexOf(provider)) isnt -1
-              @autocompleteProviders.splice index
-            @autocompleteModule.unregisterProvider provider
+          if (index = @autocompleteProviders.indexOf(provider)) isnt -1
+            @autocompleteProviders.splice index
+          @autocompleteModule.unregisterProvider provider
 
   # Building main completion database
   createCompletionDatabase: ->

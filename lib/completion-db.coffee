@@ -31,6 +31,7 @@ class CompletionDatabase
 
   # Real module update
   _update: (fileName, moduleName) ->
+    #console.log 'update ' + fileName + ', ' + moduleName
     @modules[moduleName] = []
     @manager.pendingProcessController.start Channel.completion, utilGhcMod.browse, {
       fileName: fileName
