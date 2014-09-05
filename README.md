@@ -34,22 +34,27 @@ Just put your mouse cursor above expression you want to know the type of and wai
 
 ## Configuration
 
-Open `~/.atom/config.scon` by clicking **Open Your Config** in **Atom** menu. The plugin main section is `ide-haskell`.
+Open `~/.atom/config.cson` by clicking **Open Your Config** in **Atom** menu. Manually add `ide-haskell` plugin section as in example below.
 
-* `ghcModPath` - path to `ghc-mod` utility
-* `checkOnFileSave` - check file after save (defaut is `true`)
-* `lintOnFileSave` - lint file after save  (defaut is `true`)
-* `switchTabOnCheck` - switch to error tab after file check finished (defaut is `true`)
+    'ide-haskell':
+      'ghcModPath': '/path/to/ghc-mod'
+
+Following entries are also customizable in `ide-haskell` section.
+
+- `ghcModPath` - path to `ghc-mod` utility
+- `checkOnFileSave` - check file after save (defaut is `true`)
+- `lintOnFileSave` - lint file after save  (defaut is `true`)
+- `switchTabOnCheck` - switch to error tab after file check finished (defaut is `true`)
 
 ## TODO
 
-* Jump to definition
-* Who calls and vice versa
-* Autocompletion
-* Interactive REPL
-* Cabal project management
-* Code beautify
-* Documentation support
+- Jump to definition
+- Who calls and vice versa
+- Autocompletion
+- Interactive REPL
+- Cabal project management
+- Code beautify
+- Documentation support
 
 ## Changelog
 

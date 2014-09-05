@@ -12,12 +12,12 @@ class OutputView extends View
       @div class: 'panel', =>
         @div class: 'panel-heading', =>
           @div class: 'btn-toolbar pull-left', =>
-            @div class: 'btn-group', =>
+            @div class: 'btn-group btn-cell', =>
               @div outlet: 'statusIcon', class: 'status-icon'
-            @div class: 'btn-group', =>
+            @div class: 'btn-group btn-cell', =>
               @button click: 'switchTabView', outlet: 'errorsButton', class: 'btn tab-btn selected', id: 'tab1', 'Errors'
               @button click: 'switchTabView', outlet: 'warningsButton', class: 'btn tab-btn', id: 'tab2', 'Warnings'
-            @div class: 'btn-group', =>
+            @div class: 'btn-group btn-cell', =>
               @button click: 'switchTabView', outlet: 'lintsButton', class: 'btn tab-btn', id: 'tab3', 'Lints'
           @div class: 'btn-toolbar pull-right', =>
             @button outlet: 'closeButton', class: 'btn', 'Close'
