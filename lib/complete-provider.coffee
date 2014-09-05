@@ -4,6 +4,7 @@ fuzzaldrin = require 'fuzzaldrin'
 {CompletionDatabase} = require './completion-db'
 {isHaskellSource} = require './utils'
 ArrayHelperModule = require './utils'
+{CompleteType} = require './util-data'
 
 ArrayHelperModule.extendArray(Array)
 
@@ -54,12 +55,34 @@ class CompleteProvider extends Provider
     @buildCompletionList()
 
   buildSuggestions: ->
-    
-    # # try to rebuild completion list if database changed
-    # @rebuildWordList()
-    # return unless @totalWordList?
-    #
-    # selection = @editor.getSelection()
+    # try to rebuild completion list if database changed
+    @rebuildWordList()
+    return unless @totalWordList?
+
+    selection = @editor.getSelection()
+    tipType = @getSelectionType selection
+
+  getSelectionType: (selection) ->
+    selectionRange = selection.getBufferRange()
+    return CompleteType.Pragmas if @isHaskellPragmas selectionRange
+
+  isHaskellPragmas: (srange) ->
+    lrange = [[srange.start.row, 0], [srange.end.row, srange.end.column]]
+    match = @editor.getBuffer().getTextInRange(lrange).match /^\{\-#\s+_?([A-Z_]*)$/
+    return false unless match?
+
+    words = fuzzaldrin.filter ['LANGUAGE', 'OPTIONS_GHC'], match[1]
+
+    console.log words
+
+    # console.log lrange
+    # @editor.getBuffer().scanInRange /^\{\-#\s+[A-Z_]*$/g, lrange, ({match, range, stop}) ->
+    #   stop() if range.start.isGreaterThan(srange.end)
+    #   console.log match, range, stop
+
+    # lineRange = [[selectionRange.start.row, 0], [selectionRange.end.row, @editor.lineLengthForBufferRow(selectionRange.end.row)]]
+    # console.log lineRange
+
     # return unless @isSuitablePrefixOfSelection selection
     #
     # prefix = @prefixOfSelection selection

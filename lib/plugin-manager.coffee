@@ -16,8 +16,8 @@ class PluginManager
     @subsribeEditorViewController()
     @createPendingProcessController()
     @attachProcessControllerToOutputView()
-    # @registerAutocompleteProviders()
-    # @createCompletionDatabase()
+    @registerAutocompleteProviders()
+    @createCompletionDatabase()
 
   deactivate: ->
     # @unregisterAutocompleteProviders()
