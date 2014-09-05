@@ -6,11 +6,11 @@
   "repository": "https://github.com/chaika2013/ide-haskell",
   "license": "MIT",
   "engines": {
-    "atom": ">=0.70.0"
+    "atom": ">=0.116.0"
   },
   "dependencies": {
-    "emissary": ">=1.2.1",
-    "autocomplete-plus": "git://github.com/saschagehlich/autocomplete-plus.git",
-    "fuzzaldrin": ">=1.2.0"
+    "autocomplete-plus": "git+https://github.com/saschagehlich/autocomplete-plus.git#feature/api",
+    "fuzzaldrin": "~1.0.0",
+    "emissary": "~1.2.1"
   }
 }

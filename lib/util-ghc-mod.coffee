@@ -40,10 +40,11 @@ check = ({fileName, onResult, onComplete, onFailure, onDone}) ->
             ResultType.Warning
           else
             ResultType.Error
-        pos = [parseInt(row, 10), parseInt(col, 10)]
+        pos = [parseInt(row, 10) - 1, parseInt(col, 10) - 1]
+        range = [pos, [pos[0], pos[1] + 1]]
         desc = content.split('\0').filter((l)-> 0 != l.length)
         onResult?({
-          pos: pos
+          range: range
           uri: uri
           type: type
           desc: desc.join('\n')
@@ -66,10 +67,11 @@ lint = ({fileName, onResult, onComplete, onFailure, onDone}) ->
     onMessage: (line) ->
       if matches = /([^:]+):(\d+):(\d+):\s([^:]+):\s(.*)/.exec(line)
         [_, uri, row, col, type, content] = matches
-        pos = [parseInt(row, 10), parseInt(col, 10)]
+        pos = [parseInt(row, 10) - 1, parseInt(col, 10) - 1]
+        range = [pos, [pos[0], pos[1] + 1]]
         desc = content.split('\0').filter((l)-> 0 != l.length)
         onResult?({
-          pos: pos
+          range: range
           uri: uri
           type: ResultType.Lint
           desc: desc.join('\n')
