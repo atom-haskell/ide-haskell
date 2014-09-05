@@ -8,10 +8,10 @@ utilGhcMod = require './util-ghc-mod'
 
 
 class EditorControl
-  className: ['error', 'warning', 'lint']
+  className: ['ide-haskell-error', 'ide-haskell-warning', 'ide-haskell-lint']
 
   constructor: (@editorView, @manager) ->
-    @checkResults = []
+    @checkMarkers = []
 
     @editor = @editorView.getEditor()
     @gutter = @editorView.gutter
@@ -20,8 +20,6 @@ class EditorControl
     @subscriber = new Subscriber()
 
     # event for editor updates
-    @subscriber.subscribe @editorView, 'editor:display-updated', =>
-      @renderResults()
     @subscriber.subscribe @editorView, 'editor:will-be-removed', =>
       @deactivate()
 
@@ -29,9 +27,7 @@ class EditorControl
     @subscriber.subscribe @editor.getBuffer(), 'saved', (buffer) =>
       return unless isHaskellSource buffer.getUri()
 
-      # TODO filter current results with buffer.getUri() and update editor
-      # we need this in case getUri was changed
-      @renderResults()
+      # TODO if uri was changed, then we have to remove all current markers
 
       if atom.config.get('ide-haskell.checkOnFileSave')
         atom.workspaceView.trigger 'ide-haskell:check-file'
@@ -48,10 +44,11 @@ class EditorControl
       @clearExprTypeTimeout()
 
     # mouse movement over gutter to show check results
-    @subscriber.subscribe @gutter, 'mouseenter', '.ide-haskell-result', (e) =>
-      @showCheckResult e
-    @subscriber.subscribe @gutter, 'mouseleave', '.ide-haskell-result', (e) =>
-      @hideCheckResult()
+    for klass in @className
+      @subscriber.subscribe @gutter, 'mouseenter', ".#{klass}", (e) =>
+        @showCheckResult e
+      @subscriber.subscribe @gutter, 'mouseleave', ".#{klass}", (e) =>
+        @hideCheckResult()
     @subscriber.subscribe @gutter, 'mouseleave', (e) =>
       @hideCheckResult()
 
@@ -72,49 +69,44 @@ class EditorControl
     @hideExpressionType()
 
   resultsUpdated: (types = undefined) ->
+    @destroyMarkersForTypes types
     if types?
       for t in types
-        @checkResults[t] = []
-        @pushResult(r) for r in @manager.checkResults[t]
+        @markerFromCheckResult(r) for r in @manager.checkResults[t]
     else
-      @checkResults = []
       for typeResults in @manager.checkResults
-        @pushResult(r) for r in typeResults
-    @renderResults()
+        @markerFromCheckResult(r) for r in typeResults
+    @renderResults types
 
-  pushResult: (result) ->
-    if result.uri is @editor.getUri()
-      @checkResults[result.type] = [] unless @checkResults[result.type]?
-      @checkResults[result.type].push(result)
+  destroyMarkersForTypes: (types = undefined) ->
+    if types?
+      for t in types
+        m.marker.destroy() for m in @checkMarkers[t] ? []
+        @checkMarkers[t] = []
+    else
+      for markers in @checkMarkers
+        m.marker.destroy() for m in markers
+      @checkMarkers = []
 
-  renderResults: ->
-    # remove all classes from gutter and current view
-    @editorView.find('.ide-haskell-result').removeClass('ide-haskell-result')
-    @gutter.removeClassFromAllLines('ide-haskell-result')
+  markerFromCheckResult: (result) ->
+    return unless result.uri is @editor.getUri()
+    @checkMarkers[result.type] = [] unless @checkMarkers[result.type]?
 
-    for name in @className
-      @editorView.find(".#{name}").removeClass(name)
-      @gutter.removeClassFromAllLines name
+    # create a new marker
+    marker = @editor.markBufferRange result.range, invalidate: 'never'
+    @checkMarkers[result.type].push({ marker, klass: @className[result.type], desc: result.desc })
 
-    # show everything
-    for typeResults in @checkResults by -1
-      continue unless typeResults?
-      for r in typeResults
+  renderResults: (types = undefined) ->
+    if types?
+      @decorateMarker(m) for m in @checkMarkers[t] for t in types
+    else
+      @decorateMarker(m) for m in markers for markers in @checkMarkers
 
-        row = r.pos[0] - 1
-        continue if row < @editorView.getFirstVisibleScreenRow()
-        break if row > @editorView.getLastVisibleScreenRow()
-
-        # update editor view
-        @editorView.lineElementForScreenRow(row)
-          .addClass 'ide-haskell-result'
-          .addClass @className[r.type]
-
-        # update gutter view
-        gutterRow = @gutter.find @gutter.getLineNumberElement(row)
-        gutterRow
-          .addClass 'ide-haskell-result'
-          .addClass @className[r.type]
+  decorateMarker: (m) ->
+    { marker, klass } = m
+    @editor.decorateMarker marker, type: 'gutter', class: klass
+    @editor.decorateMarker marker, type: 'highlight', class: klass
+    @editor.decorateMarker marker, type: 'line', class: klass
 
   # get expression type under mouse cursor and show it
   showExpressionType: (e) ->
@@ -151,15 +143,16 @@ class EditorControl
   # show check result when mouse over gutter icon
   showCheckResult: (e) ->
     @hideCheckResult()
-    row = screenPositionFromMouseEvent(@editorView, e).row + 1
+    row = screenPositionFromMouseEvent(@editorView, e).row
 
     # find best result for row
     foundResult = null
-    for typeResults in @checkResults
-      continue unless typeResults?
-      for r in typeResults
-        if r.pos[0] is row
-          foundResult = r
+    for markers in @checkMarkers
+      continue unless markers?
+      for m in markers
+        {marker, desc} = m
+        if marker.getHeadBufferPosition().row is row
+          foundResult = desc
           break
       break if foundResult?
 
@@ -175,7 +168,7 @@ class EditorControl
       top: targetRect.top - offset
       bottom: targetRect.bottom + offset
 
-    @checkResultTooltip = new TooltipView(rect, foundResult.desc)
+    @checkResultTooltip = new TooltipView(rect, foundResult)
 
   hideCheckResult: ->
     if @checkResultTooltip?

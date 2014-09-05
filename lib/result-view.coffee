@@ -8,7 +8,7 @@ class ResultView extends View
 
   initialize: (state) ->
     @on 'click', '.position',  ->
-      pos = [$(this).attr('row') - 1, $(this).attr('col') - 1]
+      pos = [parseInt($(this).attr('row'), 10), parseInt($(this).attr('col'), 10)]
       uri = $(this).attr('uri')
       atom.workspace.open(uri).then (editor) ->
         editor.setCursorBufferPosition(pos)
@@ -19,7 +19,7 @@ class ResultView extends View
     for r in results
       @resultList.append $$$ ->
         @li class: 'result-block', =>
-          @div class: 'position', row: r.pos[0], col: r.pos[1], uri: r.uri, "#{r.uri}: #{r.pos[0]}, #{r.pos[1]}"
+          @div class: 'position', row: r.range[0][0], col: r.range[0][1], uri: r.uri, "#{r.uri}: #{r.range[0][0] + 1}, #{r.range[0][1] + 1}"
           @div class: 'description', r.desc
 
 
