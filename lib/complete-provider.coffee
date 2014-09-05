@@ -11,6 +11,16 @@ ArrayHelperModule.extendArray(Array)
 
 class CompleteProvider extends Provider
 
+  pragmasWords: [
+    'LANGUAGE', 'OPTIONS_GHC', 'INCLUDE', 'WARNING', 'DEPRECATED', 'INLINE',
+    'NOINLINE', 'ANN', 'LINE', 'RULES', 'SPECIALIZE', 'UNPACK', 'SOURCE'
+  ]
+
+  keyWords: [
+    'class', 'data', 'default', 'import', 'infix', 'infixl', 'infixr',
+    'instance', 'main', 'module', 'newtype', 'type'
+  ]
+
   initialize: (@editorView, @manager) ->
     # if saved, rebuild completion list
     @currentBuffer = @editor.getBuffer()
@@ -60,61 +70,71 @@ class CompleteProvider extends Provider
     return unless @totalWordList?
 
     selection = @editor.getSelection()
-    tipType = @getSelectionType selection
+    suggestions = @getSelectionSuggestion selection
+    return unless suggestions.length
+    return suggestions
 
-  getSelectionType: (selection) ->
+  getSelectionSuggestion: (selection) ->
     selectionRange = selection.getBufferRange()
-    return CompleteType.Pragmas if @isHaskellPragmas selectionRange
+    for test in [ @isLanguagePragmas,
+                  @isLanguageExtensions,
+                  @isLanguageGhcFlags,
+                  @isLanguageKeywords]
+      suggestions = test selectionRange
+      return suggestions if suggestions?
+    return []
 
-  isHaskellPragmas: (srange) ->
+  # check for pragmas
+  isLanguagePragmas: (srange) =>
     lrange = [[srange.start.row, 0], [srange.end.row, srange.end.column]]
-    match = @editor.getBuffer().getTextInRange(lrange).match /^\{\-#\s+_?([A-Z_]*)$/
-    return false unless match?
+    match = @editor.getBuffer().getTextInRange(lrange).match /^\{\-#\s+([A-Za-z_]*)$/
+    return null unless match?
 
-    words = fuzzaldrin.filter ['LANGUAGE', 'OPTIONS_GHC'], match[1]
+    prefix = match[1]
+    words = fuzzaldrin.filter @pragmasWords, prefix
 
-    console.log words
+    suggestions = for word in words when word isnt prefix
+      new Suggestion this, word: word, prefix: prefix
+    return suggestions
 
-    # console.log lrange
-    # @editor.getBuffer().scanInRange /^\{\-#\s+[A-Z_]*$/g, lrange, ({match, range, stop}) ->
-    #   stop() if range.start.isGreaterThan(srange.end)
-    #   console.log match, range, stop
+  # check for language extensions
+  isLanguageExtensions: (srange) =>
+    lrange = [[srange.start.row, 0], [srange.end.row, srange.end.column]]
+    match = @editor.getBuffer().getTextInRange(lrange).match /^\{\-#\s+LANGUAGE(\s*([a-zA-Z0-9_]*)\s*,?)*$/
+    return null unless match?
 
-    # lineRange = [[selectionRange.start.row, 0], [selectionRange.end.row, @editor.lineLengthForBufferRow(selectionRange.end.row)]]
-    # console.log lineRange
+    prefix = if match[1].slice(-1) is "," then "" else (match[2] ? "")
+    words = fuzzaldrin.filter @manager.mainCDB.extensions, prefix
 
-    # return unless @isSuitablePrefixOfSelection selection
-    #
-    # prefix = @prefixOfSelection selection
-    # return unless prefix.length
-    #
-    # suggestions = @findSuggestionsForPrefix prefix
-    # return unless suggestions.length
-    # return suggestions
+    suggestions = for word in words when word isnt prefix
+      new Suggestion this, word: word, prefix: prefix
+    return suggestions
 
-  # isSuitablePrefixOfSelection: (selection) ->
-  #   selectionRange = selection.getBufferRange()
-  #   lineRange = [[selectionRange.start.row, 0], [selectionRange.end.row, @editor.lineLengthForBufferRow(selectionRange.end.row)]]
-  #
-  #   result = true
-  #
-  #   @editor.getBuffer().scanInRange /^(import)\s.*$/g, lineRange, ({match, range, stop}) ->
-  #     stop() if range.start.isGreaterThan(selectionRange.end)
-  #     result = false
-  #
-  #   return result
-  #
-  # findSuggestionsForPrefix: (prefix) ->
-  #   prefix = prefix.replace /^\s+(.*)$/, '$1'
-  #
-  #   # Filter the words using fuzzaldrin
-  #   words = fuzzaldrin.filter @totalWordList, prefix, key: 'expr'
-  #
-  #   # Builds suggestions for the words
-  #   suggestions = for word in words when word isnt prefix
-  #     new Suggestion this, word: word.expr, prefix: prefix, label: word.type
-  #
-  #   return suggestions
+  # check for ghc flags
+  isLanguageGhcFlags: (srange) =>
+    lrange = [[srange.start.row, 0], [srange.end.row, srange.end.column]]
+    match = @editor.getBuffer().getTextInRange(lrange).match /^\{\-#\s+OPTIONS_GHC(\s*([a-zA-Z0-9\-]*)\s*,?)*$/
+    return null unless match?
+
+    prefix = if match[1].slice(-1) is "," then "" else (match[2] ? "")
+    words = fuzzaldrin.filter @manager.mainCDB.ghcFlags, prefix
+
+    suggestions = for word in words when word isnt prefix
+      new Suggestion this, word: word, prefix: prefix
+    return suggestions
+
+  # check for keywords
+  isLanguageKeywords: (srange) =>
+    lrange = [[srange.start.row, 0], [srange.end.row, srange.end.column]]
+    match = @editor.getBuffer().getTextInRange(lrange).match /^([a-z]*)$/
+    return null unless match?
+
+    prefix = match[1]
+    words = fuzzaldrin.filter @keyWords, prefix
+
+    suggestions = for word in words when word isnt prefix
+      new Suggestion this, word: word, prefix: prefix
+    return suggestions
 
   # If database or prefixes was updated, rebuild world list
   rebuildWordList: ->
