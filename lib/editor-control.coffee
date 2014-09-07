@@ -98,9 +98,13 @@ class EditorControl
 
   renderResults: (types = undefined) ->
     if types?
-      @decorateMarker(m) for m in @checkMarkers[t] for t in types
+      for t in types
+        for m in @checkMarkers[t]
+          @decorateMarker(m)
     else
-      @decorateMarker(m) for m in markers for markers in @checkMarkers
+      for markers in @checkMarkers
+        for m in markers ? []
+          @decorateMarker(m)
 
   decorateMarker: (m) ->
     { marker, klass } = m
