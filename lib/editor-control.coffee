@@ -115,7 +115,7 @@ class EditorControl
   showExpressionType: (e) ->
     return unless isHaskellSource(@editor.getUri()) and not @exprTypeTooltip?
 
-    screenPt = @editorView.screenPositionFromMouseEvent(e)
+    screenPt = @editor.screenPositionForPixelPosition({top: e.screenY, left: e.screenX})
     bufferPt = @editor.bufferPositionForScreenPosition(screenPt)
     if screenPt.isEqual bufferPt
 
