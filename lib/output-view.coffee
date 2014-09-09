@@ -4,8 +4,7 @@
 
 class OutputView extends View
 
-  progressCounter: 0
-  checkResults: [] # all results here
+  switchCounter: 0   # if counter is 0 the error tab is switched
 
   @content: ->
     @div class: 'ide-haskell-panel', =>
@@ -13,12 +12,12 @@ class OutputView extends View
       @div class: 'panel', =>
         @div class: 'panel-heading', =>
           @div class: 'btn-toolbar pull-left', =>
-            @div class: 'btn-group', =>
+            @div class: 'btn-group btn-cell', =>
               @div outlet: 'statusIcon', class: 'status-icon'
-            @div class: 'btn-group', =>
+            @div class: 'btn-group btn-cell', =>
               @button click: 'switchTabView', outlet: 'errorsButton', class: 'btn tab-btn selected', id: 'tab1', 'Errors'
               @button click: 'switchTabView', outlet: 'warningsButton', class: 'btn tab-btn', id: 'tab2', 'Warnings'
-            @div class: 'btn-group', =>
+            @div class: 'btn-group btn-cell', =>
               @button click: 'switchTabView', outlet: 'lintsButton', class: 'btn tab-btn', id: 'tab3', 'Lints'
           @div class: 'btn-toolbar pull-right', =>
             @button outlet: 'closeButton', class: 'btn', 'Close'
@@ -30,9 +29,11 @@ class OutputView extends View
           @div class: 'tab-view', id: 'tab3', style: 'display: none;', =>
             @subview 'lintsListView', new ResultView()
 
-  initialize: (state) ->
+  initialize: (state, @manager) ->
     @height state?.height
     if state?.isShow? then @toggle(state.isShow) else @toggle(true)
+
+    @switchCounter = 0   # if counter is 0 the error tab is switched
 
     # prepare arrays for errors, warnings and lints data
     @checkControl = [
@@ -45,6 +46,9 @@ class OutputView extends View
     @resizeHandle.on 'mousedown', (e) => @resizeStarted e
     @closeButton.on 'click', => @toggle()
 
+  deactivate: ->
+    @remove()
+
   serialize: ->
     height: @height()
     isShow: @isShow
@@ -53,18 +57,6 @@ class OutputView extends View
   toggle: (isShow = undefined) ->
     if isShow? then @isShow = isShow else @isShow = not @isShow
     if @isShow then @attach() else @detach()
-
-  # check and lint file
-  checkFile: (checkFunction) ->
-    fileName = atom.workspaceView.getActiveView()?.getEditor().getPath()
-    return unless fileName?
-    results = []
-
-    checkFunction
-      fileName: fileName
-      onPrepare: (types) => @prepare(types)
-      onResult: (result) -> results.push result
-      onComplete: (types) => @update(types, results)
 
   attach: ->
     atom.workspaceView.prependToBottom(this)
@@ -89,49 +81,41 @@ class OutputView extends View
     this.find("div##{element[0].id}").show().siblings().hide()
 
   # method is called before start of any check commands
-  prepare: (types) ->
-    @updateProgress()
+  pendingCheck: ->
+    @switchCounter++
 
   # update current results
-  update: (types, results) ->
-    @checkResults[t] = [] for t in types
-    @checkResults[r.type].push(r) for r in results
+  resultsUpdated: (types) ->
 
-    for t in types
-      @checkControl[t].v.update @checkResults[t]
-      @checkControl[t].b.text @buttonName(t)
+    # update result views if everything is ok
+    if types?
+      for t in types
+        # button name calculation
+        count = @manager.checkResults[t].length
+        buttonName = @checkControl[t].t + (
+          if count > 0 then " (#{count})" else ""
+        )
 
-    # update all opened editors with new results
-    for editorView in atom.workspaceView.getEditorViews()
-      @updateEditorView editorView, types, results
+        # update buttons and views
+        @checkControl[t].v.update @manager.checkResults[t]
+        @checkControl[t].b.text buttonName
 
-    @updateProgress(false)
+    @autoSwitchTabView()
 
-    # automatic tab switching
-    if atom.config.get('ide-haskell.switchTabOnCheck') and @progressCounter is 0
+  # auto-switching tab
+  autoSwitchTabView: ->
+    @switchCounter = @switchCounter - 1
+    if atom.config.get('ide-haskell.switchTabOnCheck') and @switchCounter is 0
       for btn, t in @checkControl
-        if @checkResults[t].length > 0
+        if @manager.checkResults[t]?.length > 0
           @switchTabView null, btn.b
           break
 
-  updateProgress: (isIncrement = true) ->
-    if isIncrement then val = 1 else val = -1
-    @progressCounter = @progressCounter + val
+  backendActive: ->
+    @statusIcon.attr 'data-status', 'progress'
 
-    if @progressCounter is 1
-      @statusIcon.attr 'data-status', 'progress'
-    else if @progressCounter is 0
-      @statusIcon.attr 'data-status', 'ready'
-
-  updateEditorView: (editorView, types = undefined, results = undefined) ->
-    results = @checkResults unless results?
-    editorView.control.update types, results
-
-  # get button name using results
-  buttonName: (type) ->
-    name = @checkControl[type].t
-    count = @checkResults[type].length
-    if count > 0 then "#{name} (#{count})" else "#{name}"
+  backendIdle: ->
+    @statusIcon.attr 'data-status', 'ready'
 
 
 module.exports = {

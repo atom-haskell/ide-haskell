@@ -5,16 +5,11 @@ ResultType =
   Warning: 1
   Lint: 2
 
-# check results
-class CheckResult
-  constructor: ({@pos, @uri, @type, @desc}) ->
-
-# type results
-class TypeResult
-  constructor: ({@type}) ->
+# Autocompletion type enumeration
+CompleteType =
+  Pragmas: 0
 
 module.exports = {
   ResultType,
-  CheckResult,
-  TypeResult
+  CompleteType
 }

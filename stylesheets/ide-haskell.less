@@ -31,16 +31,22 @@
     padding-top: 5px;
     padding-bottom: 5px;
 
+    .btn-cell {
+      display: table-cell;
+      padding: 0px 1px;
+    }
+
     .btn {
       top: 0px;
     }
 
     .status-icon {
+      padding-top: 3px;
+      
       &:before {
         font-family: 'Octicons Regular';
         font-weight: normal;
         font-style: normal;
-        display: inline-block;
         -webkit-font-smoothing: antialiased;
         text-decoration: none;
         font-size: 10pt;
@@ -53,6 +59,10 @@
       }
       &[data-status=ready]:before {
         content: @check;
+      }
+      &[data-status=error]:before {
+        color: @text-color-error;
+        content: @alert;
       }
     }
   }
@@ -86,41 +96,64 @@
   }
 }
 
+@error-color: #b22222;
+
 .editor {
-  .ide-haskell-result.lint {
+  .ide-haskell-lint {
     background-color: @background-color-highlight;
+    z-index: 1;
   }
 
-  .ide-haskell-result.warning {
+  .ide-haskell-warning {
     background-color: @background-color-highlight;
+    z-index: 2;
   }
 
-  .ide-haskell-result.error {
+  .ide-haskell-error {
     background-color: @background-color-highlight;
+    z-index: 3;
+  }
+
+  .highlight {
+    &.ide-haskell-lint .region {
+      background: linear-gradient(to right, @background-color-info 0%, fadeout(@background-color-info, 50%) 100%);
+      z-index: 1;
+    }
+    &.ide-haskell-warning .region {
+      background: linear-gradient(to right, @background-color-warning 0%, fadeout(@background-color-warning, 50%) 100%);
+      z-index: 2;
+    }
+    &.ide-haskell-error .region {
+      background: linear-gradient(to right, @background-color-error 0%, fadeout(@background-color-error, 50%) 100%);
+      z-index: 3;
+    }
   }
 
   .gutter .line-number {
-    &.ide-haskell-result.lint .icon-right {
+    &.ide-haskell-lint .icon-right {
       visibility: visible;
       &:before {
         content: @info;
         color: @text-color-info;
+        z-index: 1;
       }
     }
 
-    &.ide-haskell-result.warning .icon-right {
+    &.ide-haskell-warning .icon-right {
       visibility: visible;
       &:before {
         content: @stop;
         color: @text-color-warning;
+        z-index: 2;
       }
     }
 
-    &.ide-haskell-result.error .icon-right {
+    &.ide-haskell-error .icon-right {
       visibility: visible;
       &:before {
         content: @alert;
         color: @text-color-error;
+        z-index: 3;
       }
     }
   }

@@ -1,8 +1,6 @@
 {$} = require 'atom'
 
-{OutputView} = require './output-view'
-{EditorControl} = require './editor-control'
-utilGhcMod = require './util-ghc-mod'
+{PluginManager} = require './plugin-manager'
 {isCabalProject} = require './utils'
 
 
@@ -13,42 +11,44 @@ configDefaults =
   expressionTypeInterval: 300,
   ghcModPath: 'ghc-mod'
 
-
-outputView = null
-_isCabalProject = false
-
+_isCabalProject = false         # true if cabal project
+_pluginManager = null           # plugin manager
 
 activate = (state) ->
   _isCabalProject = isCabalProject()
-  $(window).on 'focus', -> updateMenu()
-
-  # activate only on cabal project
+  $(window).on 'focus', updateMenu
   return unless _isCabalProject
-  updateMenu()
 
-  # create global views
-  outputView = new OutputView(state.outputView)
-
-  # attach controller to every editor view
-  atom.workspaceView.eachEditorView (editorView) ->
-    control = new EditorControl(editorView, outputView)
+  _pluginManager = new PluginManager(state)
 
   # global commands
   atom.workspaceView.command 'ide-haskell:toggle-output', ->
-    outputView.toggle()
+    _pluginManager.togglePanel()
   atom.workspaceView.command 'ide-haskell:check-file', ->
-    outputView.checkFile(utilGhcMod.check)
+    _pluginManager.checkFile()
   atom.workspaceView.command 'ide-haskell:lint-file', ->
-    outputView.checkFile(utilGhcMod.lint)
+    _pluginManager.lintFile()
+
+  updateMenu()
 
 deactivate = ->
-  return unless outputView?
-  outputView.detach()
+  $(window).off 'focus', updateMenu
+  return unless _isCabalProject
+  _isCabalProject = false
+
+  _pluginManager.deactivate()
+  _pluginManager = null
+
+  # clear commands
+  atom.workspaceView.off 'ide-haskell:toggle-output'
+  atom.workspaceView.off 'ide-haskell:check-file'
+  atom.workspaceView.off 'ide-haskell:lint-file'
+
   clearMenu()
 
 serialize = ->
-  return unless outputView?
-  outputView: outputView.serialize()
+  return unless _isCabalProject
+  _pluginManager.serialize()
 
 updateMenu = ->
   clearMenu()

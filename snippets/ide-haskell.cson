@@ -1,0 +1,12 @@
+'.source.haskell':
+  'Pragma':
+    'prefix': '{-#'
+    'body': '{-# $1 #-'
+  'Module':
+    'prefix': 'module'
+    'body':
+      """
+      module ${1:Name}
+        ( 
+        ) where
+      """
