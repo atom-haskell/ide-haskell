@@ -82,6 +82,12 @@ class CompleteProvider extends Provider
                   @isLanguageKeywords]
       suggestions = test selectionRange
       return suggestions if suggestions?
+
+    currentScope = @getCurrentScope selectionRange
+    for test in [ @isLanguageImports]
+      suggestions = test selectionRange, currentScope
+      return suggestions if suggestions?
+
     return []
 
   # check for pragmas
@@ -135,6 +141,58 @@ class CompleteProvider extends Provider
     suggestions = for word in words when word isnt prefix
       new Suggestion this, word: word, prefix: prefix
     return suggestions
+
+  # completions inside import statement
+  isLanguageImports: (srange, scope) =>
+    return unless scope == "import"
+    lrange = [[0, 0], [srange.end.row, srange.end.column]]
+
+    scopeMatch = undefined
+    @editor.getBuffer().backwardsScanInRange /^import\s+(qualified\s+)?([A-Z][a-zA-Z0-9\.]*\s+)?((hiding\s+)|(as\s+)?([A-Z][a-zA-Z0-9\.]*\s+)?)?(\()?/g, lrange, ({match, stop}) ->
+      scopeMatch = match
+      stop()
+    return unless scopeMatch?
+
+    if scopeMatch[7]?
+      prefix = @getCurrentPrefix(srange, /[\(\s,]+([a-zA-Z0-9']*)/)[1]
+      # TODO list of module methods goes here
+
+    else if scopeMatch[4]? or scopeMatch[5]? or scopeMatch[6]?
+
+    else if scopeMatch[2]?
+      prefix = @getCurrentPrefix(srange, /\s+([a-z]*)/)[1]
+      words = fuzzaldrin.filter ['hiding', 'as'], prefix
+
+    else if scopeMatch[1]? or scopeMatch[0]?
+      prefix = @getCurrentPrefix(srange, /\s+([a-zA-Z0-9\.]*)/)[1]
+      words = fuzzaldrin.filter ['qualified'], prefix
+      if scopeMatch[1]? or words.length is 0
+        # TODO add list with local cabal project imports
+        words = fuzzaldrin.filter @manager.mainCDB.moduleNames, prefix
+
+    return unless prefix? and words?
+
+    suggestions = for word in words when word isnt prefix
+      new Suggestion this, word: word, prefix: prefix
+    return suggestions
+
+  # get prefix before cursor
+  getCurrentPrefix: (srange, regex) =>
+    currentMatch = undefined
+    lrange = [[srange.start.row, 0], [srange.end.row, srange.end.column]]
+    @editor.getBuffer().backwardsScanInRange regex, lrange, ({match, stop}) ->
+      currentMatch = match
+      stop()
+    return currentMatch
+
+  # get the scope where the cursor is
+  getCurrentScope: (srange) =>
+    currentScope = undefined
+    lrange = [[0, 0], [srange.end.row, srange.end.column]]
+    @editor.getBuffer().backwardsScanInRange /^[^\s]+/g, lrange, ({match, stop}) ->
+      currentScope = match[0]
+      stop()
+    return currentScope
 
   # If database or prefixes was updated, rebuild world list
   rebuildWordList: ->

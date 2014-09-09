@@ -23,7 +23,7 @@ class CompletionDatabase
 
   # Update module symbols.
   # This function updates module symbols if module does not present in
-  # module list. If module is in list, merely return true.
+  # module list. If module is in list, just return true.
   update: (fileName, moduleName) ->
     return true if @modules[moduleName]?
     @_update fileName, moduleName
