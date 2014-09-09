@@ -20,7 +20,10 @@ run = ({onMessage, onComplete, onFailure, cmd, args, cwd}) ->
     exit: -> onComplete?()
 
   # on error hack (from http://discuss.atom.io/t/catching-exceptions-when-using-bufferedprocess/6407)
-  proc.process.on 'error', (node_error) -> onFailure?()
+  proc.process.on 'error', (node_error) ->
+    # TODO this error should be in output view log tab
+    console.error "ghc-mod utility not found at #{atom.config.get('ide-haskell.ghcModPath')}, please run 'cabal install ghc-mod'"
+    onFailure?()
 
 stdout = (onMessage, line) ->
   line.split('\n').filter((l)->0 != l.length).map onMessage
