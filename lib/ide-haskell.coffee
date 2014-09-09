@@ -1,9 +1,6 @@
 {$} = require 'atom'
-{Subscriber} = require 'emissary'
 
-{OutputView} = require './output-view'
-{EditorControl} = require './editor-control'
-utilGhcMod = require './util-ghc-mod'
+{PluginManager} = require './plugin-manager'
 {isCabalProject} = require './utils'
 
 
@@ -14,61 +11,44 @@ configDefaults =
   expressionTypeInterval: 300,
   ghcModPath: 'ghc-mod'
 
-
-_isCabalProject = false
-subscription = null
-outputView = null
+_isCabalProject = false         # true if cabal project
+_pluginManager = null           # plugin manager
 
 activate = (state) ->
   _isCabalProject = isCabalProject()
   $(window).on 'focus', updateMenu
-
-  # activate only on cabal project
   return unless _isCabalProject
-  updateMenu()
 
-  # create global views
-  outputView = new OutputView(state.outputView)
-
-  # attach controller to every editor view
-  subscription = atom.workspaceView.eachEditorView (editorView) ->
-    new EditorControl(editorView, outputView)
+  _pluginManager = new PluginManager(state)
 
   # global commands
   atom.workspaceView.command 'ide-haskell:toggle-output', ->
-    outputView.toggle()
+    _pluginManager.togglePanel()
   atom.workspaceView.command 'ide-haskell:check-file', ->
-    outputView.checkFile(utilGhcMod.check)
+    _pluginManager.checkFile()
   atom.workspaceView.command 'ide-haskell:lint-file', ->
-    outputView.checkFile(utilGhcMod.lint)
+    _pluginManager.lintFile()
+
+  updateMenu()
 
 deactivate = ->
   $(window).off 'focus', updateMenu
   return unless _isCabalProject
+  _isCabalProject = false
 
-  # remove menu
-  clearMenu()
-
-  # remove editor controllers from all opened views
-  for editorView in atom.workspaceView.getEditorViews()
-    editorView.control?.deactivate()
-
-  # remove subscription
-  subscription.off()
-  subscription = null
+  _pluginManager.deactivate()
+  _pluginManager = null
 
   # clear commands
   atom.workspaceView.off 'ide-haskell:toggle-output'
   atom.workspaceView.off 'ide-haskell:check-file'
   atom.workspaceView.off 'ide-haskell:lint-file'
 
-  # remove output panel
-  outputView.deactivate()
-  outputView = null
+  clearMenu()
 
 serialize = ->
   return unless _isCabalProject
-  outputView: outputView.serialize()
+  _pluginManager.serialize()
 
 updateMenu = ->
   clearMenu()

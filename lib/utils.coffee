@@ -26,8 +26,16 @@ pixelPositionFromMouseEvent = (editorView, event) ->
 screenPositionFromMouseEvent = (editorView, event) ->
   editorView.getModel().screenPositionForPixelPosition(pixelPositionFromMouseEvent(editorView, event))
 
+extendArray = (constructor) ->
+  constructor.prototype.unique = ->
+    output = {}
+    output[@[key]] = @[key] for key in [0...@length]
+    value for key, value of output
+    
+
 module.exports = {
   isCabalProject,
   isHaskellSource,
-  screenPositionFromMouseEvent
+  screenPositionFromMouseEvent,
+  extendArray
 }
