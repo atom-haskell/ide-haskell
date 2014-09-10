@@ -165,10 +165,9 @@ class CompleteProvider extends Provider
 
     else if scopeMatch[1]? or scopeMatch[0]?
       prefix = @getCurrentPrefix(srange, /\s+([a-zA-Z0-9\.]*)/)[1]
-      words = fuzzaldrin.filter ['qualified'], prefix
-      if scopeMatch[1]? or words.length is 0
-        # TODO add list with local cabal project imports
-        words = fuzzaldrin.filter @manager.mainCDB.moduleNames, prefix
+      words = fuzzaldrin.filter @manager.mainCDB.moduleNames, prefix
+      if not scopeMatch[1]?
+        Array::push.apply words, (fuzzaldrin.filter ['qualified'], prefix)
 
     return unless prefix? and words?
 
