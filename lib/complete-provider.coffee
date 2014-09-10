@@ -210,7 +210,14 @@ class CompleteProvider extends Provider
 
   # function scope goes here
   isLanguageFunctions: (srange, scope) =>
-    # TODO check if current cursor is not inside string
+
+    # check if current cursor is not inside string
+    [_, scope] = @editor.getCursorScopes()
+    return if scope? and scope in
+                      [ "string.quoted.single.haskell",
+                        "string.quoted.double.haskell",
+                         "comment.line.double-dash.haskell",
+                         "comment.block.haskell" ]
 
     match = @getCurrentPrefix(srange, PREFIX_FUNCTION_NAME)
     return unless match?
