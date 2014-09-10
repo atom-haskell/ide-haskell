@@ -9,6 +9,33 @@ ArrayHelperModule = require './utils'
 ArrayHelperModule.extendArray(Array)
 
 
+# used regular expressions
+REGEXP_MODULE_NAME         = "[\\w\\.']"
+REGEXP_MODULE_NAME_MAYBE   = REGEXP_MODULE_NAME + "*"
+REGEXP_MODULE_NAME_CAP     = "[A-Z]" + REGEXP_MODULE_NAME_MAYBE
+REGEXP_ALIAS_NAME          = "[\\w']"
+REGEXP_ALIAS_NAME_MAYBE    = REGEXP_ALIAS_NAME + "*"
+REGEXP_ALIAS_NAME_CAP      = "[A-Z]" + REGEXP_ALIAS_NAME_MAYBE
+REGEXP_FUNCTION_NAME       = "[\\w']"
+REGEXP_FUNCTION_NAME_MAYBE = REGEXP_FUNCTION_NAME + "*"
+REGEXP_FUNCTION_NAME_JUST  = REGEXP_FUNCTION_NAME + "+"
+
+PREFIX_PRAGMA              = /^\{\-#\s+(\w*)$/
+PREFIX_PRAGMA_LANGUAGE     = /^\{\-#\s+LANGUAGE(\s*(\w*)\s*,?)*$/
+PREFIX_PRAGMA_OPTIONS      = /^\{\-#\s+OPTIONS_GHC(\s*([\w\-]*)\s*,?)*$/
+PREFIX_KEYWORD             = /^([a-z]*)$/
+
+BWSCAN_SCOPE               = /^[^\s]+/g
+
+# regexps for completion in imports
+BWSCAN_IMPORT              = new RegExp("^import\\s+(qualified\\s+)?(" + REGEXP_MODULE_NAME_CAP + "\\s+)?((hiding\\s+)|(as\\s+)?(" + REGEXP_ALIAS_NAME_CAP + "\\s+)?)?(\\()?", "g")
+PREFIX_IMPORT_MODULE_NAME  = new RegExp("\\s+(" + REGEXP_MODULE_NAME_MAYBE + ")$")
+PREFIX_IMPORT_HIDING_AS    = /\s+([a-z]*)$/
+PREFIX_IMPORT_FUNCTIONS    = new RegExp("[\\(\\s,]+(" + REGEXP_FUNCTION_NAME_MAYBE + ")$")
+
+# regexps for completion in functions
+PREFIX_FUNCTION_NAME       = new RegExp("(" + REGEXP_FUNCTION_NAME_JUST + "|" + REGEXP_ALIAS_NAME_CAP + "\\." + REGEXP_FUNCTION_NAME_MAYBE + ")$")
+
 class CompleteProvider extends Provider
 
   pragmasWords: [
@@ -19,6 +46,11 @@ class CompleteProvider extends Provider
   keyWords: [
     'class', 'data', 'default', 'import', 'infix', 'infixl', 'infixr',
     'instance', 'main', 'module', 'newtype', 'type'
+  ]
+
+  funcKeyWords: [
+    'case', 'deriving', 'do', 'else', 'if', 'in', 'let', 'module', 'of',
+    'then', 'where'
   ]
 
   initialize: (@editorView, @manager) ->
@@ -84,7 +116,8 @@ class CompleteProvider extends Provider
       return suggestions if suggestions?
 
     currentScope = @getCurrentScope selectionRange
-    for test in [ @isLanguageImports]
+    for test in [ @isLanguageImports,
+                  @isLanguageFunctions]
       suggestions = test selectionRange, currentScope
       return suggestions if suggestions?
 
@@ -93,7 +126,7 @@ class CompleteProvider extends Provider
   # check for pragmas
   isLanguagePragmas: (srange) =>
     lrange = [[srange.start.row, 0], [srange.end.row, srange.end.column]]
-    match = @editor.getBuffer().getTextInRange(lrange).match /^\{\-#\s+([A-Za-z_]*)$/
+    match = @editor.getBuffer().getTextInRange(lrange).match PREFIX_PRAGMA
     return null unless match?
 
     prefix = match[1]
@@ -106,7 +139,7 @@ class CompleteProvider extends Provider
   # check for language extensions
   isLanguageExtensions: (srange) =>
     lrange = [[srange.start.row, 0], [srange.end.row, srange.end.column]]
-    match = @editor.getBuffer().getTextInRange(lrange).match /^\{\-#\s+LANGUAGE(\s*([a-zA-Z0-9_]*)\s*,?)*$/
+    match = @editor.getBuffer().getTextInRange(lrange).match PREFIX_PRAGMA_LANGUAGE
     return null unless match?
 
     prefix = if match[1].slice(-1) is "," then "" else (match[2] ? "")
@@ -119,7 +152,7 @@ class CompleteProvider extends Provider
   # check for ghc flags
   isLanguageGhcFlags: (srange) =>
     lrange = [[srange.start.row, 0], [srange.end.row, srange.end.column]]
-    match = @editor.getBuffer().getTextInRange(lrange).match /^\{\-#\s+OPTIONS_GHC(\s*([a-zA-Z0-9\-]*)\s*,?)*$/
+    match = @editor.getBuffer().getTextInRange(lrange).match PREFIX_PRAGMA_OPTIONS
     return null unless match?
 
     prefix = if match[1].slice(-1) is "," then "" else (match[2] ? "")
@@ -132,7 +165,7 @@ class CompleteProvider extends Provider
   # check for keywords
   isLanguageKeywords: (srange) =>
     lrange = [[srange.start.row, 0], [srange.end.row, srange.end.column]]
-    match = @editor.getBuffer().getTextInRange(lrange).match /^([a-z]*)$/
+    match = @editor.getBuffer().getTextInRange(lrange).match PREFIX_KEYWORD
     return null unless match?
 
     prefix = match[1]
@@ -148,23 +181,23 @@ class CompleteProvider extends Provider
     lrange = [[0, 0], [srange.end.row, srange.end.column]]
 
     scopeMatch = undefined
-    @editor.getBuffer().backwardsScanInRange /^import\s+(qualified\s+)?([A-Z][a-zA-Z0-9\.]*\s+)?((hiding\s+)|(as\s+)?([A-Z][a-zA-Z0-9\.]*\s+)?)?(\()?/g, lrange, ({match, stop}) ->
+    @editor.getBuffer().backwardsScanInRange BWSCAN_IMPORT, lrange, ({match, stop}) ->
       scopeMatch = match
       stop()
     return unless scopeMatch?
 
     if scopeMatch[7]?
-      prefix = @getCurrentPrefix(srange, /[\(\s,]+([a-zA-Z0-9']*)/)[1]
+      prefix = @getCurrentPrefix(srange, PREFIX_IMPORT_FUNCTIONS)
       # TODO list of module methods goes here
 
     else if scopeMatch[4]? or scopeMatch[5]? or scopeMatch[6]?
 
     else if scopeMatch[2]?
-      prefix = @getCurrentPrefix(srange, /\s+([a-z]*)/)[1]
+      prefix = @getCurrentPrefix(srange, PREFIX_IMPORT_HIDING_AS)[1]
       words = fuzzaldrin.filter ['hiding', 'as'], prefix
 
     else if scopeMatch[1]? or scopeMatch[0]?
-      prefix = @getCurrentPrefix(srange, /\s+([a-zA-Z0-9\.]*)/)[1]
+      prefix = @getCurrentPrefix(srange, PREFIX_IMPORT_MODULE_NAME)[1]
       words = fuzzaldrin.filter @manager.mainCDB.moduleNames, prefix
       if not scopeMatch[1]?
         Array::push.apply words, (fuzzaldrin.filter ['qualified'], prefix)
@@ -175,20 +208,30 @@ class CompleteProvider extends Provider
       new Suggestion this, word: word, prefix: prefix
     return suggestions
 
+  # function scope goes here
+  isLanguageFunctions: (srange, scope) =>
+    # TODO check if current cursor is not inside string
+
+    match = @getCurrentPrefix(srange, PREFIX_FUNCTION_NAME)
+    return unless match?
+    prefix = match[1]
+
+    words = fuzzaldrin.filter @totalWordList, prefix, key: 'expr'
+
+    suggestions = for word in words when word isnt prefix
+      new Suggestion this, word: word.expr, prefix: prefix, label: word.type
+    return suggestions
+
   # get prefix before cursor
   getCurrentPrefix: (srange, regex) =>
-    currentMatch = undefined
     lrange = [[srange.start.row, 0], [srange.end.row, srange.end.column]]
-    @editor.getBuffer().backwardsScanInRange regex, lrange, ({match, stop}) ->
-      currentMatch = match
-      stop()
-    return currentMatch
+    @editor.getBuffer().getTextInRange(lrange).match regex
 
   # get the scope where the cursor is
   getCurrentScope: (srange) =>
     currentScope = undefined
     lrange = [[0, 0], [srange.end.row, srange.end.column]]
-    @editor.getBuffer().backwardsScanInRange /^[^\s]+/g, lrange, ({match, stop}) ->
+    @editor.getBuffer().backwardsScanInRange BWSCAN_SCOPE, lrange, ({match, stop}) ->
       currentScope = match[0]
       stop()
     return currentScope
@@ -206,9 +249,9 @@ class CompleteProvider extends Provider
       @rebuildWordList1 prefixes, localCDB.modules[module]
       @rebuildWordList1 prefixes, @manager.mainCDB.modules[module]
 
-    # # append keywords
-    # for keyword in ['case', 'deriving', 'do', 'else', 'if', 'in', 'let', 'module', 'of', 'then', 'where']
-    #   @totalWordList.push {expr: keyword}
+    # append keywords
+    for keyword in @funcKeyWords
+      @totalWordList.push {expr: keyword}
 
   rebuildWordList1: (prefixes, module) ->
     return unless module?

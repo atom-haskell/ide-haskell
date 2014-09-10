@@ -7,6 +7,6 @@
     'body':
       """
       module ${1:Name}
-        ( 
-        ) where
+          (
+          ) where
       """
