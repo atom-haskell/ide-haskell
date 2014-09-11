@@ -36,6 +36,7 @@ extendArray = (constructor) ->
 module.exports = {
   isCabalProject,
   isHaskellSource,
+  pixelPositionFromMouseEvent,
   screenPositionFromMouseEvent,
   extendArray
 }

@@ -2,7 +2,7 @@
 {Subscriber} = require 'emissary'
 
 {Channel} = require './pending-backend'
-{isHaskellSource, screenPositionFromMouseEvent} = require './utils'
+{isHaskellSource, screenPositionFromMouseEvent, pixelPositionFromMouseEvent} = require './utils'
 {TooltipView} = require './tooltip-view'
 utilGhcMod = require './util-ghc-mod'
 
@@ -116,7 +116,12 @@ class EditorControl
   showExpressionType: (e) ->
     return unless isHaskellSource(@editor.getUri()) and not @exprTypeTooltip?
 
-    bufferPt = @editor.bufferPositionForScreenPosition(screenPositionFromMouseEvent(@editorView, e))
+    pixelPt = pixelPositionFromMouseEvent(@editorView, e)
+    screenPt = @editor.screenPositionForPixelPosition(pixelPt)
+    bufferPt = @editor.bufferPositionForScreenPosition(screenPt)
+    nextCharPixelPt = @editor.pixelPositionForBufferPosition([bufferPt.row, bufferPt.column + 1])
+
+    return if pixelPt.left > nextCharPixelPt.left
 
     # find out show position
     offset = @editorView.lineHeight * 0.7
