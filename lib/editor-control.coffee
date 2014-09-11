@@ -116,28 +116,26 @@ class EditorControl
   showExpressionType: (e) ->
     return unless isHaskellSource(@editor.getUri()) and not @exprTypeTooltip?
 
-    screenPt = screenPositionFromMouseEvent(@editorView, e)
-    bufferPt = @editor.bufferPositionForScreenPosition(screenPt)
-    if screenPt.isEqual bufferPt
+    bufferPt = @editor.bufferPositionForScreenPosition(screenPositionFromMouseEvent(@editorView, e))
 
-      # find out show position
-      offset = @editorView.lineHeight * 0.7
-      tooltipRect =
-        left: e.clientX
-        right: e.clientX
-        top: e.clientY - offset
-        bottom: e.clientY + offset
+    # find out show position
+    offset = @editorView.lineHeight * 0.7
+    tooltipRect =
+      left: e.clientX
+      right: e.clientX
+      top: e.clientY - offset
+      bottom: e.clientY + offset
 
-      # create tooltip with pending
-      @exprTypeTooltip = new TooltipView(tooltipRect)
+    # create tooltip with pending
+    @exprTypeTooltip = new TooltipView(tooltipRect)
 
-      # process start
-      @manager.pendingProcessController.start Channel.expressionType, utilGhcMod.type, {
-        pt: screenPt
-        fileName: @editor.getUri()
-        onResult: (result) =>
-          @exprTypeTooltip?.updateText(result.type)
-      }
+    # process start
+    @manager.pendingProcessController.start Channel.expressionType, utilGhcMod.type, {
+      pt: bufferPt
+      fileName: @editor.getUri()
+      onResult: (result) =>
+        @exprTypeTooltip?.updateText(result.type)
+    }
 
   hideExpressionType: ->
     if @exprTypeTooltip?
@@ -147,7 +145,7 @@ class EditorControl
   # show check result when mouse over gutter icon
   showCheckResult: (e) ->
     @hideCheckResult()
-    row = screenPositionFromMouseEvent(@editorView, e).row
+    row = @editor.bufferPositionForScreenPosition(screenPositionFromMouseEvent(@editorView, e)).row
 
     # find best result for row
     foundResult = null
