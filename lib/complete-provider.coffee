@@ -314,8 +314,10 @@ class CompleteProvider extends Provider
       prefixList = prefixList.concat prefixes[name]
       prefixes[name] = prefixList.unique()
 
-    # add prelude import by default
+    # add prelude import and local module name by default
     preludes = ['Prelude']
+    moduleName = @parseModule()
+    preludes.push moduleName if moduleName?
     for name in preludes
       prefixList = ["#{name}.", '']
       prefixes[name] = [] if not prefixes[name]?
