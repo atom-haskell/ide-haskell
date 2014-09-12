@@ -11,4 +11,4 @@
   'ctrl-cmd-o': 'ide-haskell:toggle-output'
 
 '.editor':
-  'ctrl-cmd-f': 'ide-haskell:prettify-file'
+  'ctrl-cmd-s': 'ide-haskell:prettify-file'
