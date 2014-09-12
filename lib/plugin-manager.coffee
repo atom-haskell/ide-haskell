@@ -3,6 +3,7 @@
 {PendingBackend, Channel} = require './pending-backend'
 {CompleteProvider} = require './complete-provider'
 {MainCompletionDatabase} = require './completion-db'
+utilStylishHaskell = require './util-stylish-haskell'
 utilGhcMod = require './util-ghc-mod'
 
 
@@ -39,9 +40,27 @@ class PluginManager
   lintFile: ->
     @checkOrLintFile(utilGhcMod.lint)
 
+  # File prettify
+  prettifyFile: ->
+    editor = atom.workspaceView.getActiveView()?.getEditor()
+    fileName = editor?.getPath()
+    return unless fileName?
+
+    # first we should save current buffer if it was modified
+    if editor.isModified()
+      @checkTurnedOff = true
+      editor.save()
+      @checkTurnedOff = false
+
+    # start prettifier - it must convert file in-place
+    @pendingProcessController.start(
+      Channel.prettify,
+      utilStylishHaskell.prettify,
+      { fileName: fileName })
 
   # File check or lint.
   checkOrLintFile: (func) ->
+    return if @checkTurnedOff? and @checkTurnedOff
     fileName = atom.workspaceView.getActiveView()?.getEditor().getPath()
     return unless fileName?
 
@@ -57,7 +76,7 @@ class PluginManager
         @outputView?.resultsUpdated affectedTypes
         @updateAllEditorViewsWithResults affectedTypes
       onFailure: =>
-        @outputView?.resultsUpdated null    # notify of error
+        @outputView?.resultsUpdated null    # TODO notify of error
     }
 
   # Update internals with results.

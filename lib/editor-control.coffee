@@ -2,7 +2,7 @@
 {Subscriber} = require 'emissary'
 
 {Channel} = require './pending-backend'
-{isHaskellSource, screenPositionFromMouseEvent} = require './utils'
+{isHaskellSource, screenPositionFromMouseEvent, pixelPositionFromMouseEvent} = require './utils'
 {TooltipView} = require './tooltip-view'
 utilGhcMod = require './util-ghc-mod'
 
@@ -116,28 +116,31 @@ class EditorControl
   showExpressionType: (e) ->
     return unless isHaskellSource(@editor.getUri()) and not @exprTypeTooltip?
 
-    screenPt = screenPositionFromMouseEvent(@editorView, e)
+    pixelPt = pixelPositionFromMouseEvent(@editorView, e)
+    screenPt = @editor.screenPositionForPixelPosition(pixelPt)
     bufferPt = @editor.bufferPositionForScreenPosition(screenPt)
-    if screenPt.isEqual bufferPt
+    nextCharPixelPt = @editor.pixelPositionForBufferPosition([bufferPt.row, bufferPt.column + 1])
 
-      # find out show position
-      offset = @editorView.lineHeight * 0.7
-      tooltipRect =
-        left: e.clientX
-        right: e.clientX
-        top: e.clientY - offset
-        bottom: e.clientY + offset
+    return if pixelPt.left > nextCharPixelPt.left
 
-      # create tooltip with pending
-      @exprTypeTooltip = new TooltipView(tooltipRect)
+    # find out show position
+    offset = @editorView.lineHeight * 0.7
+    tooltipRect =
+      left: e.clientX
+      right: e.clientX
+      top: e.clientY - offset
+      bottom: e.clientY + offset
 
-      # process start
-      @manager.pendingProcessController.start Channel.expressionType, utilGhcMod.type, {
-        pt: screenPt
-        fileName: @editor.getUri()
-        onResult: (result) =>
-          @exprTypeTooltip?.updateText(result.type)
-      }
+    # create tooltip with pending
+    @exprTypeTooltip = new TooltipView(tooltipRect)
+
+    # process start
+    @manager.pendingProcessController.start Channel.expressionType, utilGhcMod.type, {
+      pt: bufferPt
+      fileName: @editor.getUri()
+      onResult: (result) =>
+        @exprTypeTooltip?.updateText(result.type)
+    }
 
   hideExpressionType: ->
     if @exprTypeTooltip?
@@ -147,7 +150,7 @@ class EditorControl
   # show check result when mouse over gutter icon
   showCheckResult: (e) ->
     @hideCheckResult()
-    row = screenPositionFromMouseEvent(@editorView, e).row
+    row = @editor.bufferPositionForScreenPosition(screenPositionFromMouseEvent(@editorView, e)).row
 
     # find best result for row
     foundResult = null

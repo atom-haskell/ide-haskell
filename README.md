@@ -4,29 +4,51 @@ Welcome to Haskell IDE plugin for amazing [Atom](http://atom.io) editor! This pl
 
 *Haskell IDE is currently in active development state.*
 
-## Features
+## Implemented features
 
 #### Cabal project autodetection
 
 Haskell IDE works only with cabal projects. You can simply start [Atom](http://atom.io) from cabal project root or drag and drop cabal project folder on editor and plugin will be started automatically.
 
-#### Check for errors and warnings
+#### Errors, warnings and linter
 
-![Check for errors and warnings](https://github.com/chaika2013/ide-haskell/raw/master/img/check.png)
+After saving the current file the check and linter processes will be executed. After processes are finished the results can be seen in plugin output panel. You can see different kind of results by switching `Errors`, `Warnings` and `Lints` tab buttons. By pressing with mouse button on any result inside output panel the Atom editor will open the appropriate file with cursor already at the position of this result.
 
-#### Source code linter
+Also all the results can be seen near the line numbers if you position the mouse cursor over the handsome icon. And of course the results are highlighted inside editor view so you can easily locate where the problem is.
 
-![Source code linter](https://github.com/chaika2013/ide-haskell/raw/master/img/lint.png)
+![Errors, warnings and linter](http://chaika2013.github.io/ide-haskell/images/check.gif)
 
 #### Get type at point
 
-Just put your mouse cursor above expression you want to know the type of and wait for some time. Tooltip will appear with everything you want to know.
+Just position your mouse cursor above expression you want to know the type of and wait for some time. Tooltip will appear with everything you want to know.
 
-![Get type at point](https://github.com/chaika2013/ide-haskell/raw/master/img/type.png)
+![Get type at point](http://chaika2013.github.io/ide-haskell/images/types.gif)
+
+#### Autocompletion
+
+Remember that you need [autocomplete-plus](https://atom.io/packages/autocomplete-plus) package to be installed to use Haskell IDE autocompletion feature.
+
+Autocompletion feature works for pragmas like `LANGUAGE` and `OPTIONS_GHC`. Also autocompletion works for `import` keyword.
+
+![Autocompletion](http://chaika2013.github.io/ide-haskell/images/complete1.gif)
+
+And of course autocompletion feature works inside functions to make your Haskelling happier.
+
+![Autocompletion](http://chaika2013.github.io/ide-haskell/images/complete2.gif)
+
+*Not all the things I wanted from this feature was implemented. That is why autocompletion is subject to change the way you want! So you are welcome with suggestions how this feature can be changed to make your work with Haskell code more comfortable. Pelease, write issues with enhancement of autocompletion [here](https://github.com/chaika2013/ide-haskell/issues).*
+
+#### Code beautify
+
+Now you can use `stylish-haskell` utility to indent pragmas, imports and data type definitions. Simply select `Prettify` from Haskel IDE menu or press magic combination of buttons to apply `stylish-haskell` to current file.
+
+![Code beautify](http://chaika2013.github.io/ide-haskell/images/beautify.gif)
 
 ## Requirements
 
 * [ghc-mod](https://github.com/kazu-yamamoto/ghc-mod)
+* [stylish-haskell](https://github.com/jaspervdj/stylish-haskell)
+* [autocomplete-plus](https://atom.io/packages/autocomplete-plus)
 
 ## Installation
 
@@ -38,23 +60,29 @@ Open `~/.atom/config.cson` by clicking **Open Your Config** in **Atom** menu. Ma
 
     'ide-haskell':
       'ghcModPath': '/path/to/ghc-mod'
+      'stylishHaskellPath': '/path/to/stylish-haskell'
 
-Following entries are also customizable in `ide-haskell` section.
+Following entries are also customizable in `ide-haskell` section
 
 - `ghcModPath` - path to `ghc-mod` utility
+- `stylishHaskellPath` - path to `stylish-haskell` utility
 - `checkOnFileSave` - check file after save (defaut is `true`)
 - `lintOnFileSave` - lint file after save  (defaut is `true`)
 - `switchTabOnCheck` - switch to error tab after file check finished (defaut is `true`)
+- `expressionTypeInterval` - after this period of time the process of getting the expression type will be started (milliseconds, default is `300`)
 
 ## TODO
 
-- Jump to definition
-- Who calls and vice versa
-- Autocompletion
-- Interactive REPL
-- Cabal project management
-- Code beautify
-- Documentation support
+- [x] Cabal project autodetection
+- [x] Errors, warnings and linter
+- [x] Get type at point
+- [x] Autocompletion
+- [x] Code beautify
+- [ ] Jump to definition
+- [ ] Who calls and vice versa
+- [ ] Interactive REPL
+- [ ] Cabal project management
+- [ ] Documentation support
 
 ## Changelog
 
