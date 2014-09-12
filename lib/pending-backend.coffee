@@ -5,13 +5,14 @@ Channel =
   checkAndLint: 0
   expressionType: 0
   completion: 1
+  prettify: 2
 
 
 class PendingBackend
 
   constructor: ->
     Emitter.extend(this)
-    @pendingTasks = [[], []]
+    @pendingTasks = [[], [], []]
     @activeTask = []
 
   # kill all runnning processes
@@ -27,8 +28,7 @@ class PendingBackend
     return if @activeTask[channel]?
 
     # calc total length
-    pendingLength = @pendingTasks.reduce (x, y) -> x.length + y.length
-    # pendingLength = pendingLength + tasks.length for tasks in @pendingTasks
+    pendingLength = (@pendingTasks.map (x) -> x.length).reduce (x, y) -> x + y
     @emit 'backend-idle' if pendingLength is 0
 
     return if @pendingTasks[channel].length is 0
