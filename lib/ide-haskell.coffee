@@ -9,7 +9,8 @@ configDefaults =
   lintOnFileSave: true,
   switchTabOnCheck: true,
   expressionTypeInterval: 300,
-  ghcModPath: 'ghc-mod'
+  ghcModPath: 'ghc-mod',
+  stylishHaskellPath: 'stylish-haskell'
 
 _isCabalProject = false         # true if cabal project
 _pluginManager = null           # plugin manager
@@ -28,6 +29,8 @@ activate = (state) ->
     _pluginManager.checkFile()
   atom.workspaceView.command 'ide-haskell:lint-file', ->
     _pluginManager.lintFile()
+  atom.workspaceView.command 'ide-haskell:prettify-file', ->
+    _pluginManager.prettifyFile(true)
 
   updateMenu()
 
@@ -43,6 +46,7 @@ deactivate = ->
   atom.workspaceView.off 'ide-haskell:toggle-output'
   atom.workspaceView.off 'ide-haskell:check-file'
   atom.workspaceView.off 'ide-haskell:lint-file'
+  atom.workspaceView.off 'ide-haskell:prettify-output'
 
   clearMenu()
 
@@ -58,9 +62,11 @@ updateMenu = ->
     {
       label: 'Haskell IDE'
       submenu : [
-        {label: 'Check File', command: 'ide-haskell:check-file'},
-        {label: 'Lint File', command: 'ide-haskell:lint-file'},
+        {label: 'Check', command: 'ide-haskell:check-file'},
+        {label: 'Linter', command: 'ide-haskell:lint-file'},
         {label: 'Separator1', type: 'separator'},
+        {label: 'Prettify', command: 'ide-haskell:prettify-file'},
+        {label: 'Separator2', type: 'separator'},
         {label: 'Toggle Panel', command: 'ide-haskell:toggle-output'}
       ]
     }

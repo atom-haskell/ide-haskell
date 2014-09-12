@@ -38,9 +38,16 @@ And of course autocompletion feature works inside functions to make your Haskell
 
 *Not all the things I wanted from this feature was implemented. That is why autocompletion is subject to change the way you want! So you are welcome with suggestions how this feature can be changed to make your work with Haskell code more comfortable. Pelease, write issues with enhancement of autocompletion [here](https://github.com/chaika2013/ide-haskell/issues).*
 
+#### Code beautify
+
+Now you can use `stylish-haskell` utility to indent pragmas, imports and data type definitions. Simply select `Prettify` from Haskel IDE menu or press magic combination of buttons to apply `stylish-haskell` to current file.
+
+![Code beautify](http://chaika2013.github.io/ide-haskell/images/beautify.gif)
+
 ## Requirements
 
 * [ghc-mod](https://github.com/kazu-yamamoto/ghc-mod)
+* [stylish-haskell](https://github.com/jaspervdj/stylish-haskell)
 * [autocomplete-plus](https://atom.io/packages/autocomplete-plus)
 
 ## Installation
@@ -53,10 +60,12 @@ Open `~/.atom/config.cson` by clicking **Open Your Config** in **Atom** menu. Ma
 
     'ide-haskell':
       'ghcModPath': '/path/to/ghc-mod'
+      'stylishHaskellPath': '/path/to/stylish-haskell'
 
 Following entries are also customizable in `ide-haskell` section
 
 - `ghcModPath` - path to `ghc-mod` utility
+- `stylishHaskellPath` - path to `stylish-haskell` utility
 - `checkOnFileSave` - check file after save (defaut is `true`)
 - `lintOnFileSave` - lint file after save  (defaut is `true`)
 - `switchTabOnCheck` - switch to error tab after file check finished (defaut is `true`)
@@ -68,11 +77,11 @@ Following entries are also customizable in `ide-haskell` section
 - [x] Errors, warnings and linter
 - [x] Get type at point
 - [x] Autocompletion
+- [x] Code beautify
 - [ ] Jump to definition
 - [ ] Who calls and vice versa
 - [ ] Interactive REPL
 - [ ] Cabal project management
-- [ ] Code beautify
 - [ ] Documentation support
 
 ## Changelog
