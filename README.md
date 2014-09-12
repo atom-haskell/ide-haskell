@@ -16,19 +16,27 @@ After saving the current file the check and linter processes will be executed. A
 
 Also all the results can be seen near the line numbers if you position the mouse cursor over the handsome icon. And of course the results are highlighted inside editor view so you can easily locate where the problem is.
 
-<!-- ![Errors, warnings and linter](https://github.com/chaika2013/ide-haskell/raw/master/img/check.png) -->
+![Errors, warnings and linter](http://chaika2013.github.io/ide-haskell/images/check.gif)
 
 #### Get type at point
 
 Just position your mouse cursor above expression you want to know the type of and wait for some time. Tooltip will appear with everything you want to know.
 
-<!-- ![Get type at point](https://github.com/chaika2013/ide-haskell/raw/master/img/check.png) -->
+![Get type at point](http://chaika2013.github.io/ide-haskell/images/types.gif)
 
 #### Autocompletion
 
 Remember that you need [autocomplete-plus](https://atom.io/packages/autocomplete-plus) package to be installed to use Haskell IDE autocompletion feature.
 
-<!-- ![Autocompletion](https://github.com/chaika2013/ide-haskell/raw/master/img/check.png) -->
+Autocompletion feature works for pragmas like `LANGUAGE` and `OPTIONS_GHC`. Also autocompletion works for `import` keyword.
+
+![Autocompletion](http://chaika2013.github.io/ide-haskell/images/complete1.gif)
+
+And of course autocompletion feature works inside functions to make your Haskelling happier.
+
+![Autocompletion](http://chaika2013.github.io/ide-haskell/images/complete2.gif)
+
+*Autocompletion is subject to change the way you want! So you are welcome with suggestions how this feature can be changed to make your work with Haskell code more comfortable. Pelease, write issues with enhancement of autocompletion [here](https://github.com/chaika2013/ide-haskell/issues).*
 
 ## Requirements
 
