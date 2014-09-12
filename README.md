@@ -36,7 +36,7 @@ And of course autocompletion feature works inside functions to make your Haskell
 
 ![Autocompletion](http://chaika2013.github.io/ide-haskell/images/complete2.gif)
 
-*Autocompletion is subject to change the way you want! So you are welcome with suggestions how this feature can be changed to make your work with Haskell code more comfortable. Pelease, write issues with enhancement of autocompletion [here](https://github.com/chaika2013/ide-haskell/issues).*
+*Not all the things I wanted from this feature was implemented. That is why autocompletion is subject to change the way you want! So you are welcome with suggestions how this feature can be changed to make your work with Haskell code more comfortable. Pelease, write issues with enhancement of autocompletion [here](https://github.com/chaika2013/ide-haskell/issues).*
 
 ## Requirements
 
