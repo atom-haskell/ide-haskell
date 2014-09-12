@@ -1,3 +1,6 @@
+## 0.3.0
+* New: Code prettify by `stylish-haskell`.
+
 ## 0.2.0
 * New: Autocompletion feature added (issue #4).
 * Fixed: Types and errors tooltips were not showed if `Soft Wrap` was turned on.
