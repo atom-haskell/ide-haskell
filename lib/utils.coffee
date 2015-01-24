@@ -1,4 +1,5 @@
 path = require 'path'
+$ = require 'jquery'
 
 # check if project contains cabal file
 isCabalProject = ->
@@ -14,17 +15,30 @@ isHaskellSource = (fname) ->
     return true
   return false
 
+getElementsByClass = (elem,klass) ->
+  # this is pretty obtuse, but jquery doesn't seem to support inspecting the shadowRoot directly
+  # can remove the fallback once the option to disable the shadow dom is gone
+  if elem.shadowRoot
+    if klass[0] == "."
+      klass = klass.substring(1)
+    elem.shadowRoot.getElementsByClassName(klass)
+  else
+    if klass[0] != "."
+      klass = "." + klass
+    $(elem).find(klass)
+
 # pixel position from mouse event
-pixelPositionFromMouseEvent = (editorView, event) ->
+pixelPositionFromMouseEvent = (editor, event) ->
   {clientX, clientY} = event
-  linesClientRect = editorView.find('.lines')[0].getBoundingClientRect()
+  elem = atom.views.getView(editor)
+  linesClientRect = getElementsByClass(elem, ".lines")[0].getBoundingClientRect()
   top = clientY - linesClientRect.top
   left = clientX - linesClientRect.left
   {top, left}
 
 # screen position from mouse event
-screenPositionFromMouseEvent = (editorView, event) ->
-  editorView.getModel().screenPositionForPixelPosition(pixelPositionFromMouseEvent(editorView, event))
+screenPositionFromMouseEvent = (editor, event) ->
+  editor.screenPositionForPixelPosition(pixelPositionFromMouseEvent(editor, event))
 
 extendArray = (constructor) ->
   constructor.prototype.unique = ->
@@ -34,6 +48,7 @@ extendArray = (constructor) ->
 
 
 module.exports = {
+  getElementsByClass,
   isCabalProject,
   isHaskellSource,
   pixelPositionFromMouseEvent,

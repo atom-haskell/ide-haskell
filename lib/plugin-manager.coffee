@@ -5,13 +5,15 @@
 {MainCompletionDatabase} = require './completion-db'
 utilStylishHaskell = require './util-stylish-haskell'
 utilGhcMod = require './util-ghc-mod'
-
+{CompositeDisposable} = require 'atom'
 
 class PluginManager
 
   constructor: (state) ->
     @checkResults = []            # all errors, warings and lints here
     @autocompleteProviders = []   # all providers for autocompletion
+
+    @disposables = new CompositeDisposable
 
     @createOutputViewPanel(state)
     @subsribeEditorViewController()
@@ -21,6 +23,8 @@ class PluginManager
     @createCompletionDatabase()
 
   deactivate: ->
+    @disposables.dispose();
+
     # @unregisterAutocompleteProviders()
     @detachProcessControllerToOutputView()
     @deletePendingProcessController()
@@ -105,7 +109,7 @@ class PluginManager
   # Subscribe on editor view for attaching controller.
   subsribeEditorViewController: ->
     @controlSubscription = atom.workspaceView.eachEditorView (editorView) =>
-      editorView.haskellController = new EditorControl(editorView, this)
+      editorView.haskellController = new EditorControl(editorView.getEditor(), this)
 
   deleteEditorViewControllers: ->
     for editorView in atom.workspaceView.getEditorViews()
@@ -152,14 +156,17 @@ class PluginManager
     @autocompleteProviders = []
 
   attachAutocompleteToNewEditorViews: ->
+    # going to leave this using the deprecated API until I am ready to upgrade autocomplete.
+    # want to remove the usages of editorView in haskell-ide before I do that upgrade.
     @autocompleteSubscription = atom.workspaceView.eachEditorView (editorView) =>
       if editorView.attached and not editorView.mini
         provider = new CompleteProvider editorView, this
         @autocompleteModule.registerProviderForEditorView provider, editorView
         @autocompleteProviders.push provider
 
+        editor = editorView.getModel()
         # if editor view will close, remove provider
-        editorView.on "editor:will-be-removed", =>
+        @disposables.add editor.onDidDestroy =>
           if (index = @autocompleteProviders.indexOf(provider)) isnt -1
             @autocompleteProviders.splice index
           @autocompleteModule.unregisterProvider provider

@@ -3,25 +3,25 @@ $ = require 'jquery'
 {Subscriber} = require 'emissary'
 
 {Channel} = require './pending-backend'
-{isHaskellSource, screenPositionFromMouseEvent, pixelPositionFromMouseEvent} = require './utils'
+{isHaskellSource, screenPositionFromMouseEvent, pixelPositionFromMouseEvent, getElementsByClass} = require './utils'
 {TooltipView} = require './tooltip-view'
 utilGhcMod = require './util-ghc-mod'
-
+{CompositeDisposable} = require 'atom'
 
 class EditorControl
   className: ['ide-haskell-error', 'ide-haskell-warning', 'ide-haskell-lint']
 
-  constructor: (@editorView, @manager) ->
+  constructor: (@editor, @manager) ->
     @checkMarkers = []
-
-    @editor = @editorView.getEditor()
-    @gutter = @editorView.find('.gutter')
-    @scroll = @editorView.find('.scroll-view')
+    @disposables = new CompositeDisposable
+    @editorElement = atom.views.getView(@editor)
+    @gutter = $(getElementsByClass(@editorElement, '.gutter'))
+    @scroll = $(getElementsByClass(@editorElement, '.scroll-view'))
 
     @subscriber = new Subscriber()
 
     # event for editor updates
-    @subscriber.subscribe @editorView, 'editor:will-be-removed', =>
+    @disposables.add @editor.onDidDestroy =>
       @deactivate()
 
     # buffer events for automatic check
@@ -60,7 +60,7 @@ class EditorControl
     @clearExprTypeTimeout()
     @hideCheckResult()
     @subscriber.unsubscribe()
-    @editorView.control = undefined
+    @disposables.dispose()
 
   # helper function to hide tooltip and stop timeout
   clearExprTypeTimeout: ->
@@ -117,7 +117,7 @@ class EditorControl
   showExpressionType: (e) ->
     return unless isHaskellSource(@editor.getUri()) and not @exprTypeTooltip?
 
-    pixelPt = pixelPositionFromMouseEvent(@editorView, e)
+    pixelPt = pixelPositionFromMouseEvent(@editor, e)
     screenPt = @editor.screenPositionForPixelPosition(pixelPt)
     bufferPt = @editor.bufferPositionForScreenPosition(screenPt)
     nextCharPixelPt = @editor.pixelPositionForBufferPosition([bufferPt.row, bufferPt.column + 1])
@@ -125,7 +125,7 @@ class EditorControl
     return if pixelPt.left > nextCharPixelPt.left
 
     # find out show position
-    offset = @editorView.lineHeight * 0.7
+    offset = @editor.getLineHeightInPixels() * 0.7
     tooltipRect =
       left: e.clientX
       right: e.clientX
@@ -151,7 +151,7 @@ class EditorControl
   # show check result when mouse over gutter icon
   showCheckResult: (e) ->
     @hideCheckResult()
-    row = @editor.bufferPositionForScreenPosition(screenPositionFromMouseEvent(@editorView, e)).row
+    row = @editor.bufferPositionForScreenPosition(screenPositionFromMouseEvent(@editor, e)).row
 
     # find best result for row
     foundResult = null
@@ -169,7 +169,7 @@ class EditorControl
 
     # create show position
     targetRect = e.currentTarget.getBoundingClientRect()
-    offset = @editorView.lineHeight * 0.3
+    offset = @editor.getLineHeightInPixels() * 0.3
     rect =
       left: targetRect.left - offset
       right: targetRect.right + offset
