@@ -1,4 +1,5 @@
-{$, $$, $$$, View} = require 'atom'
+{$$, $$$, View} = require 'atom-space-pen-views'
+$ = require 'jquery'
 {Subscriber} = require 'emissary'
 
 {Channel} = require './pending-backend'

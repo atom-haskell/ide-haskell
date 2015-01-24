@@ -11,6 +11,8 @@
   "dependencies": {
     "autocomplete-plus": "git+https://github.com/saschagehlich/autocomplete-plus.git#feature/api",
     "fuzzaldrin": "~1.0.0",
-    "emissary": "~1.2.1"
+    "emissary": "~1.2.1",
+    "jquery": "^2",
+    "atom-space-pen-views": "^2.0.3"
   }
 }

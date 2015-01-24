@@ -1,4 +1,5 @@
-{$, View} = require 'atom'
+{View} = require 'atom-space-pen-views'
+$ = require 'jquery'
 {ResultView} = require './result-view'
 {ResultType} = require './util-data'
 

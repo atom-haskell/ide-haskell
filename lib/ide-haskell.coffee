@@ -1,4 +1,4 @@
-{$} = require 'atom'
+$ = require 'jquery'
 
 {PluginManager} = require './plugin-manager'
 {isCabalProject} = require './utils'
