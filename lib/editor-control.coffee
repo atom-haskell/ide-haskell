@@ -15,7 +15,7 @@ class EditorControl
     @checkMarkers = []
 
     @editor = @editorView.getEditor()
-    @gutter = @editorView.gutter
+    @gutter = @editorView.find('.gutter')
     @scroll = @editorView.find('.scroll-view')
 
     @subscriber = new Subscriber()
