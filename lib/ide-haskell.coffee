@@ -2,7 +2,7 @@
 
 {PluginManager} = require './plugin-manager'
 {isCabalProject} = require './utils'
-
+{CompositeDisposable} = require 'atom'
 
 configDefaults =
   checkOnFileSave: true,
@@ -14,6 +14,7 @@ configDefaults =
 
 _isCabalProject = false         # true if cabal project
 _pluginManager = null           # plugin manager
+_disposables = new CompositeDisposable
 
 activate = (state) ->
   _isCabalProject = isCabalProject()
@@ -23,14 +24,15 @@ activate = (state) ->
   _pluginManager = new PluginManager(state)
 
   # global commands
-  atom.workspaceView.command 'ide-haskell:toggle-output', ->
-    _pluginManager.togglePanel()
-  atom.workspaceView.command 'ide-haskell:check-file', ->
-    _pluginManager.checkFile()
-  atom.workspaceView.command 'ide-haskell:lint-file', ->
-    _pluginManager.lintFile()
-  atom.workspaceView.command 'ide-haskell:prettify-file', ->
-    _pluginManager.prettifyFile(true)
+  _disposables.add atom.commands.add 'atom-workspace',
+    'ide-haskell:toggle-output': ->
+      _pluginManager.togglePanel()
+    'ide-haskell:check-file': ->
+      _pluginManager.checkFile()
+    'ide-haskell:lint-file': ->
+      _pluginManager.lintFile()
+    'ide-haskell:prettify-file': ->
+      _pluginManager.prettifyFile(true)
 
   updateMenu()
 
@@ -43,10 +45,8 @@ deactivate = ->
   _pluginManager = null
 
   # clear commands
-  atom.workspaceView.off 'ide-haskell:toggle-output'
-  atom.workspaceView.off 'ide-haskell:check-file'
-  atom.workspaceView.off 'ide-haskell:lint-file'
-  atom.workspaceView.off 'ide-haskell:prettify-output'
+  _disposables.dispose();
+  _disposables = new CompositeDisposable
 
   clearMenu()
 

@@ -28,11 +28,11 @@ class EditorControl
       return unless isHaskellSource buffer.getUri()
 
       # TODO if uri was changed, then we have to remove all current markers
-
+      workspaceElement = atom.views.getView(atom.workspace)
       if atom.config.get('ide-haskell.checkOnFileSave')
-        atom.workspaceView.trigger 'ide-haskell:check-file'
+        atom.commands.dispatch workspaceElement, 'ide-haskell:check-file'
       if atom.config.get('ide-haskell.lintOnFileSave')
-        atom.workspaceView.trigger 'ide-haskell:lint-file'
+        atom.commands.dispatch workspaceElement, 'ide-haskell:lint-file'
 
     # show expression type if mouse stopped somewhere
     @subscriber.subscribe @scroll, 'mousemove', (e) =>

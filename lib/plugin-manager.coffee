@@ -42,7 +42,7 @@ class PluginManager
 
   # File prettify
   prettifyFile: ->
-    editor = atom.workspaceView.getActiveView()?.getEditor()
+    editor = atom.workspace.getActiveTextEditor()
     fileName = editor?.getPath()
     return unless fileName?
 
@@ -61,7 +61,8 @@ class PluginManager
   # File check or lint.
   checkOrLintFile: (func) ->
     return if @checkTurnedOff? and @checkTurnedOff
-    fileName = atom.workspaceView.getActiveView()?.getEditor().getPath()
+    editor = atom.workspace.getActiveTextEditor()
+    fileName = editor?.getPath()
     return unless fileName?
 
     @outputView?.pendingCheck()

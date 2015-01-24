@@ -59,7 +59,8 @@ class OutputView extends View
     if @isShow then @attach() else @detach()
 
   attach: ->
-    atom.workspaceView.prependToBottom(this)
+    atom.workspace.addBottomPanel
+      item: this
 
   resizeStarted: ({pageY}) =>
     @resizeData =
