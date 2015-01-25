@@ -16,7 +16,7 @@ class PluginManager
     @disposables = new CompositeDisposable
 
     @createOutputViewPanel(state)
-    @subsribeEditorViewController()
+    @subscribeEditorController()
     @createPendingProcessController()
     @attachProcessControllerToOutputView()
     @registerAutocompleteProviders()
@@ -28,7 +28,7 @@ class PluginManager
     # @unregisterAutocompleteProviders()
     @detachProcessControllerToOutputView()
     @deletePendingProcessController()
-    @deleteEditorViewControllers()
+    @deleteEditorControllers()
     @deleteOutputViewPanel()
 
   serialize: ->
@@ -79,7 +79,7 @@ class PluginManager
       onComplete: (affectedTypes) =>
         @updateResults affectedTypes, checkOrLintResults
         @outputView?.resultsUpdated affectedTypes
-        @updateAllEditorViewsWithResults affectedTypes
+        @updateAllEditorsWithResults affectedTypes
       onFailure: =>
         @outputView?.resultsUpdated null    # TODO notify of error
     }
@@ -90,13 +90,9 @@ class PluginManager
     @checkResults[r.type].push(r) for r in results
 
   # Update every editor view with results
-  updateAllEditorViewsWithResults: (types) ->
-    for editorView in atom.workspaceView.getEditorViews()
-      editorView.haskellController?.resultsUpdated types
-
-  # Update the editor view with results.
-  updateEditorView: (editorView, types = undefined) ->
-    editorView.haskellController.resultsUpdated types
+  updateAllEditorsWithResults: (types) ->
+    for editor in atom.workspace.getTextEditors()
+      editor.haskellController?.resultsUpdated types
 
   # Create and delete output view panel.
   createOutputViewPanel: (state) ->
@@ -106,18 +102,20 @@ class PluginManager
     @outputView?.deactivate()
     @outputView = null
 
-  # Subscribe on editor view for attaching controller.
-  subsribeEditorViewController: ->
-    @controlSubscription = atom.workspaceView.eachEditorView (editorView) =>
-      editorView.haskellController = new EditorControl(editorView.getEditor(), this)
+  removeController: (editor) ->
+    editor.haskellController?.deactivate()
+    editor.haskellController = null
 
-  deleteEditorViewControllers: ->
-    for editorView in atom.workspaceView.getEditorViews()
-      editorView.haskellController?.deactivate()
-      editorView.haskellController = null
+  # Observe text editors to attach controller
+  subscribeEditorController: ->
+    @disposables.add atom.workspace.observeTextEditors (editor) =>
+      editor.haskellController = new EditorControl(editor, this)
+      @disposables.add editor.onDidDestroy () =>
+        @removeController editor
 
-    @controlSubscription?.off()
-    @controlSubscription = null
+  deleteEditorControllers: ->
+    for editor in atom.workspace.getTextEditors()
+      @removeController editor
 
   # Work with precess controller
   createPendingProcessController: ->
