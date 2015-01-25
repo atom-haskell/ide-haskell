@@ -3,6 +3,10 @@ path = require 'path'
 
 {ResultType} = require './util-data'
 
+getProjectRoot = () ->
+  # deprecation cop wants to use getPaths()...but, that doesn't tell us the root, which is what
+  # we need.
+  atom.project.getPath()
 
 # run ghc-mod backend
 run = ({onMessage, onComplete, onFailure, cmd, args, cwd}) ->
@@ -34,7 +38,7 @@ check = ({fileName, onResult, onComplete, onFailure, onDone}) ->
   run
     cmd: 'check'
     args: [fileName]
-    cwd: atom.project.getRootDirectory().getPath()
+    cwd: getProjectRoot()
     onMessage: (line) ->
       if matches = /([^:]+):(\d+):(\d+):((?:Warning: )?)(.*)/.exec(line)
         [_, uri, row, col, isWarning, content] = matches
@@ -66,7 +70,7 @@ lint = ({fileName, onResult, onComplete, onFailure, onDone}) ->
   run
     cmd: 'lint'
     args: [fileName]
-    cwd: atom.project.getRootDirectory().getPath()
+    cwd: getProjectRoot()
     onMessage: (line) ->
       if matches = /([^:]+):(\d+):(\d+):\s([^:]+):\s(.*)/.exec(line)
         [_, uri, row, col, type, content] = matches
@@ -94,7 +98,7 @@ type = ({fileName, pt, onResult, onComplete, onFailure, onDone}) ->
   run
     cmd: 'type'
     args: [fileName, 'DummyModule', pt.row + 1, pt.column + 1]
-    cwd: atom.project.getRootDirectory().getPath()
+    cwd: getProjectRoot()
     onMessage: (line) ->
       return if resultViewed is true
       if matches = /(\d+)\s(\d+)\s(\d+)\s(\d+)\s\"([^\"]+)/.exec(line)
@@ -115,7 +119,7 @@ list = ({onResult, onComplete, onFailure, onDone}) ->
   run
     cmd: 'list'
     args: []
-    cwd: atom.project.getRootDirectory().getPath()
+    cwd: getProjectRoot()
     onMessage: (line) ->
       onResult?(line)
     onComplete: ->
@@ -130,7 +134,7 @@ lang = ({onResult, onComplete, onFailure, onDone}) ->
   run
     cmd: 'lang'
     args: []
-    cwd: atom.project.getRootDirectory().getPath()
+    cwd: getProjectRoot()
     onMessage: (line) ->
       onResult?(line)
     onComplete: ->
@@ -145,7 +149,7 @@ flag = ({onResult, onComplete, onFailure, onDone}) ->
   run
     cmd: 'flag'
     args: []
-    cwd: atom.project.getRootDirectory().getPath()
+    cwd: getProjectRoot()
     onMessage: (line) ->
       onResult?(line)
     onComplete: ->

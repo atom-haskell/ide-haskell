@@ -5,6 +5,7 @@ fuzzaldrin = require 'fuzzaldrin'
 {isHaskellSource} = require './utils'
 ArrayHelperModule = require './utils'
 {CompleteType} = require './util-data'
+{CompositeDisposable} = require 'atom'
 
 ArrayHelperModule.extendArray(Array)
 
@@ -54,10 +55,14 @@ class CompleteProvider extends Provider
   ]
 
   initialize: (@editorView, @manager) ->
+    @disposables = new CompositeDisposable
+
     # if saved, rebuild completion list
     @currentBuffer = @editor.getBuffer()
+    # this is what it should be, instead of will-be-saved, however, it currently does not work
+    #@disposables.add @currentBuffer.onWillSave, @onBeforeSaved
     @currentBuffer.on 'will-be-saved', @onBeforeSaved
-    @currentBuffer.on 'saved', @onSaved
+    @disposables.add @currentBuffer.onDidSave @onSaved
 
     # if main database updated, rebuild completion list
     @manager.mainCDB.on 'rebuild', @buildCompletionList
@@ -66,11 +71,11 @@ class CompleteProvider extends Provider
     @buildCompletionList()
 
   dispose: ->
-    @currentBuffer?.off 'saved', @onSaved
     @currentBuffer?.off 'will-be-saved', @onBeforeSaved
     @manager?.mainCDB.off 'rebuild', @buildCompletionList
     @manager?.mainCDB.off 'updated', @setUpdatedFlag
     @manager.localCDB[@currentBuffer.getUri()]?.off 'updated', @setUpdatedFlag
+    @disposables.dispose()
 
   setUpdatedFlag: =>
     @databaseUpdated = true
@@ -101,7 +106,7 @@ class CompleteProvider extends Provider
     @rebuildWordList()
     return unless @totalWordList?
 
-    selection = @editor.getSelection()
+    selection = @editor.getLastSelection()
     suggestions = @getSelectionSuggestion selection
     return unless suggestions.length
     return suggestions
@@ -212,7 +217,7 @@ class CompleteProvider extends Provider
   isLanguageFunctions: (srange, scope) =>
 
     # check if current cursor is not inside string
-    [_, scope] = @editor.getCursorScopes()
+    [_, scope] = @editor.getLastCursor().getScopeDescriptor().getScopesArray()
     return if scope? and scope in
                       [ "string.quoted.single.haskell",
                         "string.quoted.double.haskell",

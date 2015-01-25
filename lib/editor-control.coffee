@@ -90,7 +90,7 @@ class EditorControl
       @checkMarkers = []
 
   markerFromCheckResult: (result) ->
-    return unless result.uri is @editor.getUri()
+    return unless result.uri is @editor.getURI()
     @checkMarkers[result.type] = [] unless @checkMarkers[result.type]?
 
     # create a new marker
@@ -109,17 +109,19 @@ class EditorControl
 
   decorateMarker: (m) ->
     { marker, klass } = m
-    @editor.decorateMarker marker, type: 'gutter', class: klass
+    @editor.decorateMarker marker, type: 'line-number', class: klass
     @editor.decorateMarker marker, type: 'highlight', class: klass
     @editor.decorateMarker marker, type: 'line', class: klass
 
   # get expression type under mouse cursor and show it
   showExpressionType: (e) ->
-    return unless isHaskellSource(@editor.getUri()) and not @exprTypeTooltip?
+    return unless isHaskellSource(@editor.getURI()) and not @exprTypeTooltip?
 
     pixelPt = pixelPositionFromMouseEvent(@editor, e)
     screenPt = @editor.screenPositionForPixelPosition(pixelPt)
     bufferPt = @editor.bufferPositionForScreenPosition(screenPt)
+    # deprecation cop doesn't like this, but, only other way to do is to poke at the displayBuffer on the editor,
+    # which doesn't have an accessor and is therefore private ? 
     nextCharPixelPt = @editor.pixelPositionForBufferPosition([bufferPt.row, bufferPt.column + 1])
 
     return if pixelPt.left > nextCharPixelPt.left
@@ -138,7 +140,7 @@ class EditorControl
     # process start
     @manager.pendingProcessController.start Channel.expressionType, utilGhcMod.type, {
       pt: bufferPt
-      fileName: @editor.getUri()
+      fileName: @editor.getURI()
       onResult: (result) =>
         @exprTypeTooltip?.updateText(result.type)
     }
