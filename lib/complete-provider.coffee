@@ -59,9 +59,7 @@ class CompleteProvider extends Provider
 
     # if saved, rebuild completion list
     @currentBuffer = @editor.getBuffer()
-    # this is what it should be, instead of will-be-saved, however, it currently does not work
-    #@disposables.add @currentBuffer.onWillSave, @onBeforeSaved
-    @currentBuffer.on 'will-be-saved', @onBeforeSaved
+    @disposables.add @currentBuffer.onWillSave @onBeforeSaved
     @disposables.add @currentBuffer.onDidSave @onSaved
 
     # if main database updated, rebuild completion list
@@ -71,7 +69,6 @@ class CompleteProvider extends Provider
     @buildCompletionList()
 
   dispose: ->
-    @currentBuffer?.off 'will-be-saved', @onBeforeSaved
     @manager?.mainCDB.off 'rebuild', @buildCompletionList
     @manager?.mainCDB.off 'updated', @setUpdatedFlag
     @manager.localCDB[@currentBuffer.getUri()]?.off 'updated', @setUpdatedFlag
