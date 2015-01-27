@@ -14,6 +14,7 @@ getCabalProjectDir = ->
   for file in files
     if path.extname(file.getPath()) is '.cabal'
       return path.dirname(file.getPath())
+  return null
 
 # check if project contains cabal file
 isCabalProject = ->
@@ -59,6 +60,7 @@ extendArray = (constructor) ->
 
 module.exports = {
   getElementsByClass,
+  getCabalProjectDir,
   isCabalProject,
   isHaskellSource,
   pixelPositionFromMouseEvent,

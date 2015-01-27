@@ -1,7 +1,7 @@
 $ = require 'jquery'
 
 {PluginManager} = require './plugin-manager'
-{isCabalProject} = require './utils'
+{isCabalProject, getCabalProjectDir} = require './utils'
 {CompositeDisposable} = require 'atom'
 
 configDefaults =
@@ -17,9 +17,13 @@ _pluginManager = null           # plugin manager
 _disposables = new CompositeDisposable
 
 activate = (state) ->
-  _isCabalProject = isCabalProject()
+  projRoot = getCabalProjectDir()
+  _isCabalProject = (projRoot != null)
   $(window).on 'focus', updateMenu
   return unless _isCabalProject
+
+  # store project root on the atom project, since the utils need it
+  atom.project.cabalProjectRoot = projRoot
 
   _pluginManager = new PluginManager(state)
 

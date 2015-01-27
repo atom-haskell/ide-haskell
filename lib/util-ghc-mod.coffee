@@ -4,9 +4,8 @@ path = require 'path'
 {ResultType} = require './util-data'
 
 getProjectRoot = () ->
-  # deprecation cop wants to use getPaths()...but, that doesn't tell us the root, which is what
-  # we need.
-  atom.project.getPath()
+  # this is set up by ide-haskell::activate
+  atom.project.cabalProjectRoot
 
 # run ghc-mod backend
 run = ({onMessage, onComplete, onFailure, cmd, args, cwd}) ->
