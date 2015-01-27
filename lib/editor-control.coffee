@@ -120,9 +120,8 @@ class EditorControl
     pixelPt = pixelPositionFromMouseEvent(@editor, e)
     screenPt = @editor.screenPositionForPixelPosition(pixelPt)
     bufferPt = @editor.bufferPositionForScreenPosition(screenPt)
-    # deprecation cop doesn't like this, but, only other way to do is to poke at the displayBuffer on the editor,
-    # which doesn't have an accessor and is therefore private ? 
-    nextCharPixelPt = @editor.pixelPositionForBufferPosition([bufferPt.row, bufferPt.column + 1])
+    editorElement = atom.views.getView(@editor);
+    nextCharPixelPt = editorElement.pixelPositionForBufferPosition([bufferPt.row, bufferPt.column + 1])
 
     return if pixelPt.left > nextCharPixelPt.left
 

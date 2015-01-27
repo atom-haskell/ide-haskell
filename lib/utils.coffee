@@ -1,8 +1,7 @@
 path = require 'path'
 $ = require 'jquery'
 
-# check if project contains cabal file
-isCabalProject = ->
+getCabalProjectDir = ->
   # just want to check the project root directory, but getRootDirectory is deprecated.
   # getDirectories() returns a list of directories, including(only?) the project root, but it
   # isn't properly flagged as root (isRoot() returns false; it must be the filesystem root, not the project root).
@@ -11,10 +10,14 @@ isCabalProject = ->
   for dir in atom.project.getDirectories()
     if dir # sometimes it is null...woooo
       files = files.concat dir.getEntriesSync()
-  return false unless files?
+  return null unless files?
   for file in files
-    return true if path.extname(file.getPath()) is '.cabal'
-  return false
+    if path.extname(file.getPath()) is '.cabal'
+      return path.dirname(file.getPath())
+
+# check if project contains cabal file
+isCabalProject = ->
+  return getCabalProjectDir() != null
 
 # check if file is haskell source code
 isHaskellSource = (fname) ->
