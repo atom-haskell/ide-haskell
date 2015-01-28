@@ -9,7 +9,6 @@
     "atom": ">=0.116.0"
   },
   "dependencies": {
-    "autocomplete-plus": "git+https://github.com/saschagehlich/autocomplete-plus.git#feature/api",
     "fuzzaldrin": "~1.0.0",
     "emissary": "~1.2.1",
     "jquery": "^2",

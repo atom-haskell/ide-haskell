@@ -19,8 +19,8 @@ class PluginManager
     @subscribeEditorController()
     @createPendingProcessController()
     @attachProcessControllerToOutputView()
-    @registerAutocompleteProviders()
     @createCompletionDatabase()
+    @registerAutocompleteProviders()
 
   deactivate: ->
     @disposables.dispose();
@@ -138,11 +138,14 @@ class PluginManager
 
   # Working with autocomplete
   registerAutocompleteProviders: ->
-    if atom.packages.isPackageLoaded('autocomplete-plus')
-      atom.packages.activatePackage('autocomplete-plus')
-        .then (pkg) =>
-          @autocompleteModule = pkg.mainModule
-          @attachAutocompleteToNewEditorViews()
+
+    # can't use the atom.services.provide API to get autocomplete,
+    # because we call registerProviderForEditor for each editor window,
+    # rather than using a single provider for everything.  so, we need access to the autocomplete module.
+    acPackage = atom.packages.getActivePackage("autocomplete-plus")
+    @autocompleteModule = acPackage?.mainModule
+    if @autocompleteModule
+      @attachAutocompleteToNewEditorViews()
 
   unregisterAutocompleteProviders: ->
     @autocompleteSubscription?.off()
@@ -154,15 +157,14 @@ class PluginManager
     @autocompleteProviders = []
 
   attachAutocompleteToNewEditorViews: ->
-    # going to leave this using the deprecated API until I am ready to upgrade autocomplete.
-    # want to remove the usages of editorView in haskell-ide before I do that upgrade.
-    @autocompleteSubscription = atom.workspaceView.eachEditorView (editorView) =>
-      if editorView.attached and not editorView.mini
-        provider = new CompleteProvider editorView, this
-        @autocompleteModule.registerProviderForEditorView provider, editorView
+    @disposables.add atom.workspace.observeTextEditors (editor) =>
+      # NOTE: the code used to check view.attached here, but the attached property is always false now
+      #view = atom.views.getView(editor)
+      if not editor.mini #and view.attached
+        provider = new CompleteProvider editor, this
+        @autocompleteModule.registerProviderForEditor provider, editor
         @autocompleteProviders.push provider
 
-        editor = editorView.getModel()
         # if editor view will close, remove provider
         @disposables.add editor.onDidDestroy =>
           if (index = @autocompleteProviders.indexOf(provider)) isnt -1

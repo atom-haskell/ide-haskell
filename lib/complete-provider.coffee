@@ -1,4 +1,3 @@
-{Provider, Suggestion} = require 'autocomplete-plus'
 fuzzaldrin = require 'fuzzaldrin'
 
 {CompletionDatabase} = require './completion-db'
@@ -8,7 +7,6 @@ ArrayHelperModule = require './utils'
 {CompositeDisposable} = require 'atom'
 
 ArrayHelperModule.extendArray(Array)
-
 
 # used regular expressions
 REGEXP_MODULE_NAME         = "[\\w\\.']"
@@ -37,7 +35,13 @@ PREFIX_IMPORT_FUNCTIONS    = new RegExp("[\\(\\s,]+(" + REGEXP_FUNCTION_NAME_MAY
 # regexps for completion in functions
 PREFIX_FUNCTION_NAME       = new RegExp("(" + REGEXP_FUNCTION_NAME_JUST + "|" + REGEXP_ALIAS_NAME_CAP + "\\." + REGEXP_FUNCTION_NAME_MAYBE + ")$")
 
-class CompleteProvider extends Provider
+class Suggestion
+  constructor: (@provider, options) ->
+    @word = options.word if options.word?
+    @prefix = options.prefix if options.prefix?
+    @label = options.label if options.label?
+
+class CompleteProvider
 
   pragmasWords: [
     'LANGUAGE', 'OPTIONS_GHC', 'INCLUDE', 'WARNING', 'DEPRECATED', 'INLINE',
@@ -54,9 +58,8 @@ class CompleteProvider extends Provider
     'then', 'where'
   ]
 
-  initialize: (@editorView, @manager) ->
+  constructor: (@editor, @manager) ->
     @disposables = new CompositeDisposable
-
     # if saved, rebuild completion list
     @currentBuffer = @editor.getBuffer()
     @disposables.add @currentBuffer.onWillSave @onBeforeSaved
