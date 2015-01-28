@@ -25,7 +25,8 @@ class EditorControl
       @deactivate()
 
     # buffer events for automatic check
-    @subscriber.subscribe @editor.getBuffer(), 'saved', (buffer) =>
+    buffer = @editor.getBuffer()
+    @disposables.add buffer.onDidSave () =>
       return unless isHaskellSource buffer.getUri()
 
       # TODO if uri was changed, then we have to remove all current markers
