@@ -8,6 +8,13 @@
   "engines": {
     "atom": ">=0.116.0"
   },
+  "providedServices": {
+    "autocomplete.provider": {
+      "versions": {
+        "1.0.0": "provideAutocomplete"
+      }
+    }
+  },
   "dependencies": {
     "fuzzaldrin": "~1.0.0",
     "emissary": "~1.2.1",

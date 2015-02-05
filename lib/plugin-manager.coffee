@@ -137,26 +137,6 @@ class PluginManager
 
   # Working with autocomplete
   registerAutocompleteProviders: ->
-
-    # register a single "provider" with autocomplete; then we create one of our own CompleteProvider objects for each
-    # editor view, and requestHandler forwards requests to the appropriate object.
-    provider =
-      selector: '.source.haskell',
-      blacklist: '.source.haskell .comment'
-      requestHandler: (options) ->
-        return [] unless options?.editor?.haskellCompletionProvider
-
-        options.editor.haskellCompletionProvider.buildSuggestions()
-      #shouldn't need this
-      #dispose: ->
-      #  console.log "do something?"
-
-    # Register the provider
-    @acRegistration = atom.services.provide('autocomplete.provider', '1.0.0', {provider:provider})
-    return unless @acRegistration
-
-    @disposables.add @acRegistration
-
     @createEditorAutocompleteProviders()
 
   unregisterAutocompleteProviders: ->
