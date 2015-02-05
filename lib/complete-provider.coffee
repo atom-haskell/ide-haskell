@@ -36,7 +36,7 @@ PREFIX_IMPORT_FUNCTIONS    = new RegExp("[\\(\\s,]+(" + REGEXP_FUNCTION_NAME_MAY
 PREFIX_FUNCTION_NAME       = new RegExp("(" + REGEXP_FUNCTION_NAME_JUST + "|" + REGEXP_ALIAS_NAME_CAP + "\\." + REGEXP_FUNCTION_NAME_MAYBE + ")$")
 
 class Suggestion
-  constructor: (@provider, options) ->
+  constructor: (options) ->
     @word = options.word if options.word?
     @prefix = options.prefix if options.prefix?
     @label = options.label if options.label?
@@ -59,6 +59,13 @@ class CompleteProvider
   ]
 
   constructor: (@editor, @manager) ->
+    if (@editor.haskellCompletionProvider && @editor.haskellCompletionProvider != this)
+      # shouldn't happen, but log just in case
+      console.log "weird: editor already has a haskell completion provider"
+      @editor.haskellCompletionProvider.dispose()
+
+    @editor.haskellCompletionProvider = this
+
     @disposables = new CompositeDisposable
     # if saved, rebuild completion list
     @currentBuffer = @editor.getBuffer()
@@ -72,6 +79,7 @@ class CompleteProvider
     @buildCompletionList()
 
   dispose: ->
+    delete @editor.haskellCompletionProvider
     @manager?.mainCDB.off 'rebuild', @buildCompletionList
     @manager?.mainCDB.off 'updated', @setUpdatedFlag
     @manager.localCDB[@currentBuffer.getUri()]?.off 'updated', @setUpdatedFlag
@@ -101,6 +109,7 @@ class CompleteProvider
     # rebuild local completion database
     @buildCompletionList()
 
+  # internal method: called by the from the provider requestHandler in the plugin manager
   buildSuggestions: ->
     # try to rebuild completion list if database changed
     @rebuildWordList()
@@ -138,7 +147,7 @@ class CompleteProvider
     words = fuzzaldrin.filter @pragmasWords, prefix
 
     suggestions = for word in words when word isnt prefix
-      new Suggestion this, word: word, prefix: prefix
+      new Suggestion word: word, prefix: prefix
     return suggestions
 
   # check for language extensions
@@ -151,7 +160,7 @@ class CompleteProvider
     words = fuzzaldrin.filter @manager.mainCDB.extensions, prefix
 
     suggestions = for word in words when word isnt prefix
-      new Suggestion this, word: word, prefix: prefix
+      new Suggestion word: word, prefix: prefix
     return suggestions
 
   # check for ghc flags
@@ -164,7 +173,7 @@ class CompleteProvider
     words = fuzzaldrin.filter @manager.mainCDB.ghcFlags, prefix
 
     suggestions = for word in words when word isnt prefix
-      new Suggestion this, word: word, prefix: prefix
+      new Suggestion word: word, prefix: prefix
     return suggestions
 
   # check for keywords
@@ -177,7 +186,7 @@ class CompleteProvider
     words = fuzzaldrin.filter @keyWords, prefix
 
     suggestions = for word in words when word isnt prefix
-      new Suggestion this, word: word, prefix: prefix
+      new Suggestion word: word, prefix: prefix
     return suggestions
 
   # completions inside import statement
@@ -210,7 +219,7 @@ class CompleteProvider
     return unless prefix? and words?
 
     suggestions = for word in words when word isnt prefix
-      new Suggestion this, word: word, prefix: prefix
+      new Suggestion word: word, prefix: prefix
     return suggestions
 
   # function scope goes here
@@ -231,7 +240,7 @@ class CompleteProvider
     words = fuzzaldrin.filter @totalWordList, prefix, key: 'expr'
 
     suggestions = for word in words when word isnt prefix
-      new Suggestion this, word: word.expr, prefix: prefix, label: word.type
+      new Suggestion word: word.expr, prefix: prefix, label: word.type
     return suggestions
 
   # get prefix before cursor

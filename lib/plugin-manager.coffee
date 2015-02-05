@@ -25,7 +25,7 @@ class PluginManager
   deactivate: ->
     @disposables.dispose();
 
-    # @unregisterAutocompleteProviders()
+    @unregisterAutocompleteProviders()
     @detachProcessControllerToOutputView()
     @deletePendingProcessController()
     @deleteEditorControllers()
@@ -33,7 +33,6 @@ class PluginManager
 
   serialize: ->
     outputView: @outputView?.serialize()
-
 
   togglePanel: ->
     @outputView?.toggle()
@@ -139,37 +138,46 @@ class PluginManager
   # Working with autocomplete
   registerAutocompleteProviders: ->
 
-    # can't use the atom.services.provide API to get autocomplete,
-    # because we call registerProviderForEditor for each editor window,
-    # rather than using a single provider for everything.  so, we need access to the autocomplete module.
-    acPackage = atom.packages.getActivePackage("autocomplete-plus")
-    @autocompleteModule = acPackage?.mainModule
-    if @autocompleteModule
-      @attachAutocompleteToNewEditorViews()
+    # register a single "provider" with autocomplete; then we create one of our own CompleteProvider objects for each
+    # editor view, and requestHandler forwards requests to the appropriate object.
+    provider =
+      selector: '.source.haskell',
+      blacklist: '.source.haskell .comment'
+      requestHandler: (options) ->
+        return [] unless options?.editor?.haskellCompletionProvider
+
+        options.editor.haskellCompletionProvider.buildSuggestions()
+      #shouldn't need this
+      #dispose: ->
+      #  console.log "do something?"
+
+    # Register the provider
+    @acRegistration = atom.services.provide('autocomplete.provider', '1.0.0', {provider:provider})
+    return unless @acRegistration
+
+    @disposables.add @acRegistration
+
+    @createEditorAutocompleteProviders()
 
   unregisterAutocompleteProviders: ->
-    @autocompleteSubscription?.off()
-    @autocompleteSubscription = null
-
     # remove all active providers
     @autocompleteProviders.forEach (provider) =>
-      @autocompleteModule.unregisterProvider provider
+      provider.dispose()
     @autocompleteProviders = []
 
-  attachAutocompleteToNewEditorViews: ->
+  createEditorAutocompleteProviders: ->
     @disposables.add atom.workspace.observeTextEditors (editor) =>
       # NOTE: the code used to check view.attached here, but the attached property is always false now
       #view = atom.views.getView(editor)
       if not editor.mini #and view.attached
         provider = new CompleteProvider editor, this
-        @autocompleteModule.registerProviderForEditor provider, editor
         @autocompleteProviders.push provider
 
         # if editor view will close, remove provider
         @disposables.add editor.onDidDestroy =>
           if (index = @autocompleteProviders.indexOf(provider)) isnt -1
             @autocompleteProviders.splice index
-          @autocompleteModule.unregisterProvider provider
+          provider.dispose();
 
   # Building main completion database
   createCompletionDatabase: ->
