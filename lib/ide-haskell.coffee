@@ -16,13 +16,29 @@ configDefaults =
 _pluginManager = null           # plugin manager
 _disposables = new CompositeDisposable
 
+isActive = ->
+  !!_pluginManager
+
 activate = (state) ->
+  initIdeHaskell(state)
+
+  # if we did not activate (no cabal project), set up an event to activate when a haskell file is opened
+  _disposables.add atom.workspace.onDidOpen (event) ->
+    if not isActive()
+      item = event.item
+      if item && item.getGrammar && item.getGrammar().scopeName == "source.haskell"
+        initIdeHaskell(state)
+
+initIdeHaskell = (state) ->
+  return if isActive()
+
   settings = getProjectSettings()
   settings.root = getCabalProjectDir()
   settings.isCabalProject = (settings.root != null)
 
-  $(window).on 'focus', updateMenu
   return unless settings.isCabalProject
+
+  $(window).on 'focus', updateMenu
 
   _pluginManager = new PluginManager(state)
 
@@ -40,9 +56,9 @@ activate = (state) ->
   updateMenu()
 
 deactivate = ->
+  return unless isActive()
+
   $(window).off 'focus', updateMenu
-  return unless _isCabalProject
-  _isCabalProject = false
 
   _pluginManager.deactivate()
   _pluginManager = null
