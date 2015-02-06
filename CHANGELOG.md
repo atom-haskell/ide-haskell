@@ -1,3 +1,7 @@
+## 0.3.1
+* Fixed: Upgrade to atom 1.0 api.  Upgrade autocomplete
+* Fixed: Fix issue requiring package to be manually deactivated/reactivated
+
 ## 0.3.0
 * New: Code prettify by `stylish-haskell`.
 

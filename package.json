@@ -6,7 +6,7 @@
   "repository": "https://github.com/chaika2013/ide-haskell",
   "license": "MIT",
   "engines": {
-    "atom": ">=0.116.0"
+    "atom": ">=0.177.0"
   },
   "providedServices": {
     "autocomplete.provider": {
