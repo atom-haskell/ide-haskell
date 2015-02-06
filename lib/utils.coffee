@@ -27,16 +27,7 @@ isHaskellSource = (fname) ->
   return false
 
 getElementsByClass = (elem,klass) ->
-  # this is pretty obtuse, but jquery doesn't seem to support inspecting the shadowRoot directly
-  # can remove the fallback once the option to disable the shadow dom is gone
-  if elem.shadowRoot
-    if klass[0] == "."
-      klass = klass.substring(1)
-    elem.shadowRoot.getElementsByClassName(klass)
-  else
-    if klass[0] != "."
-      klass = "." + klass
-    $(elem).find(klass)
+  elem.rootElement.querySelectorAll(klass)
 
 # pixel position from mouse event
 pixelPositionFromMouseEvent = (editor, event) ->
