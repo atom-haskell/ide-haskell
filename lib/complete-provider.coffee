@@ -59,13 +59,6 @@ class CompleteProvider
   ]
 
   constructor: (@editor, @manager) ->
-    if (@editor.haskellCompletionProvider && @editor.haskellCompletionProvider != this)
-      # shouldn't happen, but log just in case
-      console.log "weird: editor already has a haskell completion provider"
-      @editor.haskellCompletionProvider.dispose()
-
-    @editor.haskellCompletionProvider = this
-
     @disposables = new CompositeDisposable
     # if saved, rebuild completion list
     @currentBuffer = @editor.getBuffer()
@@ -79,7 +72,6 @@ class CompleteProvider
     @buildCompletionList()
 
   dispose: ->
-    delete @editor.haskellCompletionProvider
     @manager?.mainCDB.off 'rebuild', @buildCompletionList
     @manager?.mainCDB.off 'updated', @setUpdatedFlag
     @manager.localCDB[@currentBuffer.getUri()]?.off 'updated', @setUpdatedFlag

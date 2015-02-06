@@ -84,14 +84,13 @@ clearMenu = ->
 
 provideAutocomplete = ->
   # register a single "provider" with autocomplete; then we create one of our own CompleteProvider objects for each
-  # editor view, and requestHandler forwards requests to the appropriate object.
+  # editor. requestHandler forwards requests to the appropriate object.
   provider =
     selector: '.source.haskell',
     blacklist: '.source.haskell .comment'
     requestHandler: (options) ->
-      return [] unless options?.editor?.haskellCompletionProvider
-
-      options.editor.haskellCompletionProvider.buildSuggestions()
+      return [] unless _pluginManager
+      _pluginManager.autocompleteProviderForEditor(options.editor)?.buildSuggestions();
 
   return {provider: provider}
 

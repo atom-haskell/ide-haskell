@@ -11,22 +11,20 @@ class PluginManager
 
   constructor: (state) ->
     @checkResults = []            # all errors, warings and lints here
-    @autocompleteProviders = []   # all providers for autocompletion
 
     @disposables = new CompositeDisposable
     @controllers = new WeakMap
+    @completeProviders = new WeakMap
 
+    @createPendingProcessController()
+    @createCompletionDatabase()
     @createOutputViewPanel(state)
     @subscribeEditorController()
-    @createPendingProcessController()
     @attachProcessControllerToOutputView()
-    @createCompletionDatabase()
-    @registerAutocompleteProviders()
 
   deactivate: ->
     @disposables.dispose();
 
-    @unregisterAutocompleteProviders()
     @detachProcessControllerToOutputView()
     @deletePendingProcessController()
     @deleteEditorControllers()
@@ -104,13 +102,25 @@ class PluginManager
 
   removeController: (editor) ->
     @controllers.get(editor)?.deactivate()
+    @completeProviders.get(editor)?.dispose()
     @controllers.delete(editor)
+    @completeProviders.delete(editor)
+
+  autocompleteProviderForEditor: (editor) ->
+    return null unless editor
+    return @completeProviders.get(editor)
 
   # Observe text editors to attach controller
   subscribeEditorController: ->
     @disposables.add atom.workspace.observeTextEditors (editor) =>
       if not @controllers.get(editor)
         @controllers.set(editor, new EditorControl(editor, this))
+        if not editor.mini
+          # create a completion provider for the editor; note, there is only one provider object
+          # that is actually registered with autocomplete (see provideAutocomplete()), but we use n instances of
+          # these internally to manage per-file state.
+          @completeProviders.set(editor, new CompleteProvider(editor, this))
+
         @disposables.add editor.onDidDestroy () =>
           @removeController editor
 
@@ -136,30 +146,6 @@ class PluginManager
   detachProcessControllerToOutputView: ->
     @pendingProcessController.off 'backend-active'
     @pendingProcessController.off 'backend-idle'
-
-  # Working with autocomplete
-  registerAutocompleteProviders: ->
-    @createEditorAutocompleteProviders()
-
-  unregisterAutocompleteProviders: ->
-    # remove all active providers
-    @autocompleteProviders.forEach (provider) =>
-      provider.dispose()
-    @autocompleteProviders = []
-
-  createEditorAutocompleteProviders: ->
-    @disposables.add atom.workspace.observeTextEditors (editor) =>
-      # NOTE: the code used to check view.attached here, but the attached property is always false now
-      #view = atom.views.getView(editor)
-      if not editor.mini #and view.attached
-        provider = new CompleteProvider editor, this
-        @autocompleteProviders.push provider
-
-        # if editor view will close, remove provider
-        @disposables.add editor.onDidDestroy =>
-          if (index = @autocompleteProviders.indexOf(provider)) isnt -1
-            @autocompleteProviders.splice index
-          provider.dispose();
 
   # Building main completion database
   createCompletionDatabase: ->
