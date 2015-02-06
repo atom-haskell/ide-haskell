@@ -2,10 +2,10 @@
 path = require 'path'
 
 {ResultType} = require './util-data'
+{getProjectSettings} = require './project-settings'
 
 getProjectRoot = () ->
-  # this is set up by ide-haskell::activate
-  atom.project.cabalProjectRoot
+  getProjectSettings().root
 
 # run ghc-mod backend
 run = ({onMessage, onComplete, onFailure, cmd, args, cwd}) ->

@@ -3,6 +3,7 @@ $ = require 'jquery'
 {PluginManager} = require './plugin-manager'
 {isCabalProject, getCabalProjectDir} = require './utils'
 {CompositeDisposable} = require 'atom'
+{getProjectSettings} = require './project-settings'
 
 configDefaults =
   checkOnFileSave: true,
@@ -12,18 +13,16 @@ configDefaults =
   ghcModPath: 'ghc-mod',
   stylishHaskellPath: 'stylish-haskell'
 
-_isCabalProject = false         # true if cabal project
 _pluginManager = null           # plugin manager
 _disposables = new CompositeDisposable
 
 activate = (state) ->
-  projRoot = getCabalProjectDir()
-  _isCabalProject = (projRoot != null)
-  $(window).on 'focus', updateMenu
-  return unless _isCabalProject
+  settings = getProjectSettings()
+  settings.root = getCabalProjectDir()
+  settings.isCabalProject = (settings.root != null)
 
-  # store project root on the atom project, since the utils need it
-  atom.project.cabalProjectRoot = projRoot
+  $(window).on 'focus', updateMenu
+  return unless settings.isCabalProject
 
   _pluginManager = new PluginManager(state)
 
@@ -55,12 +54,12 @@ deactivate = ->
   clearMenu()
 
 serialize = ->
-  return unless _isCabalProject
+  return unless getProjectSettings().isCabalProject
   _pluginManager.serialize()
 
 updateMenu = ->
   clearMenu()
-  return unless _isCabalProject
+  return unless getProjectSettings().isCabalProject
 
   atom.menu.add [
     {
