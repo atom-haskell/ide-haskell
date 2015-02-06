@@ -14,6 +14,7 @@ class PluginManager
     @autocompleteProviders = []   # all providers for autocompletion
 
     @disposables = new CompositeDisposable
+    @controllers = new WeakMap
 
     @createOutputViewPanel(state)
     @subscribeEditorController()
@@ -91,7 +92,7 @@ class PluginManager
   # Update every editor view with results
   updateAllEditorsWithResults: (types) ->
     for editor in atom.workspace.getTextEditors()
-      editor.haskellController?.resultsUpdated types
+      @controllers.get(editor)?.resultsUpdated types
 
   # Create and delete output view panel.
   createOutputViewPanel: (state) ->
@@ -102,15 +103,16 @@ class PluginManager
     @outputView = null
 
   removeController: (editor) ->
-    editor.haskellController?.deactivate()
-    editor.haskellController = null
+    @controllers.get(editor)?.deactivate()
+    @controllers.delete(editor)
 
   # Observe text editors to attach controller
   subscribeEditorController: ->
     @disposables.add atom.workspace.observeTextEditors (editor) =>
-      editor.haskellController = new EditorControl(editor, this)
-      @disposables.add editor.onDidDestroy () =>
-        @removeController editor
+      if not @controllers.get(editor)
+        @controllers.set(editor, new EditorControl(editor, this))
+        @disposables.add editor.onDidDestroy () =>
+          @removeController editor
 
   deleteEditorControllers: ->
     for editor in atom.workspace.getTextEditors()
