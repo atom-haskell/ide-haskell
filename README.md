@@ -49,6 +49,7 @@ Now you can use `stylish-haskell` utility to indent pragmas, imports and data ty
 * [ghc-mod](https://github.com/kazu-yamamoto/ghc-mod)
 * [stylish-haskell](https://github.com/jaspervdj/stylish-haskell)
 * [autocomplete-plus](https://atom.io/packages/autocomplete-plus)
+* [language-haskell](https://atom.io/packages/language-haskell)
 
 ## Installation
 
