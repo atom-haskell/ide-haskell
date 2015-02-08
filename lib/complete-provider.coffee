@@ -1,13 +1,12 @@
-{Provider, Suggestion} = require 'autocomplete-plus'
 fuzzaldrin = require 'fuzzaldrin'
 
 {CompletionDatabase} = require './completion-db'
 {isHaskellSource} = require './utils'
 ArrayHelperModule = require './utils'
 {CompleteType} = require './util-data'
+{CompositeDisposable} = require 'atom'
 
 ArrayHelperModule.extendArray(Array)
-
 
 # used regular expressions
 REGEXP_MODULE_NAME         = "[\\w\\.']"
@@ -36,7 +35,13 @@ PREFIX_IMPORT_FUNCTIONS    = new RegExp("[\\(\\s,]+(" + REGEXP_FUNCTION_NAME_MAY
 # regexps for completion in functions
 PREFIX_FUNCTION_NAME       = new RegExp("(" + REGEXP_FUNCTION_NAME_JUST + "|" + REGEXP_ALIAS_NAME_CAP + "\\." + REGEXP_FUNCTION_NAME_MAYBE + ")$")
 
-class CompleteProvider extends Provider
+class Suggestion
+  constructor: (options) ->
+    @word = options.word if options.word?
+    @prefix = options.prefix if options.prefix?
+    @label = options.label if options.label?
+
+class CompleteProvider
 
   pragmasWords: [
     'LANGUAGE', 'OPTIONS_GHC', 'INCLUDE', 'WARNING', 'DEPRECATED', 'INLINE',
@@ -53,11 +58,12 @@ class CompleteProvider extends Provider
     'then', 'where'
   ]
 
-  initialize: (@editorView, @manager) ->
+  constructor: (@editor, @manager) ->
+    @disposables = new CompositeDisposable
     # if saved, rebuild completion list
     @currentBuffer = @editor.getBuffer()
-    @currentBuffer.on 'will-be-saved', @onBeforeSaved
-    @currentBuffer.on 'saved', @onSaved
+    @disposables.add @currentBuffer.onWillSave @onBeforeSaved
+    @disposables.add @currentBuffer.onDidSave @onSaved
 
     # if main database updated, rebuild completion list
     @manager.mainCDB.on 'rebuild', @buildCompletionList
@@ -66,11 +72,10 @@ class CompleteProvider extends Provider
     @buildCompletionList()
 
   dispose: ->
-    @currentBuffer?.off 'saved', @onSaved
-    @currentBuffer?.off 'will-be-saved', @onBeforeSaved
     @manager?.mainCDB.off 'rebuild', @buildCompletionList
     @manager?.mainCDB.off 'updated', @setUpdatedFlag
     @manager.localCDB[@currentBuffer.getUri()]?.off 'updated', @setUpdatedFlag
+    @disposables.dispose()
 
   setUpdatedFlag: =>
     @databaseUpdated = true
@@ -96,12 +101,13 @@ class CompleteProvider extends Provider
     # rebuild local completion database
     @buildCompletionList()
 
+  # internal method: called by the from the provider requestHandler in the plugin manager
   buildSuggestions: ->
     # try to rebuild completion list if database changed
     @rebuildWordList()
     return unless @totalWordList?
 
-    selection = @editor.getSelection()
+    selection = @editor.getLastSelection()
     suggestions = @getSelectionSuggestion selection
     return unless suggestions.length
     return suggestions
@@ -133,7 +139,7 @@ class CompleteProvider extends Provider
     words = fuzzaldrin.filter @pragmasWords, prefix
 
     suggestions = for word in words when word isnt prefix
-      new Suggestion this, word: word, prefix: prefix
+      new Suggestion word: word, prefix: prefix
     return suggestions
 
   # check for language extensions
@@ -146,7 +152,7 @@ class CompleteProvider extends Provider
     words = fuzzaldrin.filter @manager.mainCDB.extensions, prefix
 
     suggestions = for word in words when word isnt prefix
-      new Suggestion this, word: word, prefix: prefix
+      new Suggestion word: word, prefix: prefix
     return suggestions
 
   # check for ghc flags
@@ -159,7 +165,7 @@ class CompleteProvider extends Provider
     words = fuzzaldrin.filter @manager.mainCDB.ghcFlags, prefix
 
     suggestions = for word in words when word isnt prefix
-      new Suggestion this, word: word, prefix: prefix
+      new Suggestion word: word, prefix: prefix
     return suggestions
 
   # check for keywords
@@ -172,7 +178,7 @@ class CompleteProvider extends Provider
     words = fuzzaldrin.filter @keyWords, prefix
 
     suggestions = for word in words when word isnt prefix
-      new Suggestion this, word: word, prefix: prefix
+      new Suggestion word: word, prefix: prefix
     return suggestions
 
   # completions inside import statement
@@ -205,14 +211,14 @@ class CompleteProvider extends Provider
     return unless prefix? and words?
 
     suggestions = for word in words when word isnt prefix
-      new Suggestion this, word: word, prefix: prefix
+      new Suggestion word: word, prefix: prefix
     return suggestions
 
   # function scope goes here
   isLanguageFunctions: (srange, scope) =>
 
     # check if current cursor is not inside string
-    [_, scope] = @editor.getCursorScopes()
+    [_, scope] = @editor.getLastCursor().getScopeDescriptor().getScopesArray()
     return if scope? and scope in
                       [ "string.quoted.single.haskell",
                         "string.quoted.double.haskell",
@@ -226,7 +232,7 @@ class CompleteProvider extends Provider
     words = fuzzaldrin.filter @totalWordList, prefix, key: 'expr'
 
     suggestions = for word in words when word isnt prefix
-      new Suggestion this, word: word.expr, prefix: prefix, label: word.type
+      new Suggestion word: word.expr, prefix: prefix, label: word.type
     return suggestions
 
   # get prefix before cursor

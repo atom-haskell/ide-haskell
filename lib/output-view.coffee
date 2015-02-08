@@ -1,4 +1,5 @@
-{$, View} = require 'atom'
+{View} = require 'atom-space-pen-views'
+$ = require 'jquery'
 {ResultView} = require './result-view'
 {ResultType} = require './util-data'
 
@@ -59,7 +60,8 @@ class OutputView extends View
     if @isShow then @attach() else @detach()
 
   attach: ->
-    atom.workspaceView.prependToBottom(this)
+    atom.workspace.addBottomPanel
+      item: this
 
   resizeStarted: ({pageY}) =>
     @resizeData =

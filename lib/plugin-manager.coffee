@@ -5,31 +5,33 @@
 {MainCompletionDatabase} = require './completion-db'
 utilStylishHaskell = require './util-stylish-haskell'
 utilGhcMod = require './util-ghc-mod'
-
+{CompositeDisposable} = require 'atom'
 
 class PluginManager
 
   constructor: (state) ->
     @checkResults = []            # all errors, warings and lints here
-    @autocompleteProviders = []   # all providers for autocompletion
 
-    @createOutputViewPanel(state)
-    @subsribeEditorViewController()
+    @disposables = new CompositeDisposable
+    @controllers = new WeakMap
+    @completeProviders = new WeakMap
+
     @createPendingProcessController()
-    @attachProcessControllerToOutputView()
-    @registerAutocompleteProviders()
     @createCompletionDatabase()
+    @createOutputViewPanel(state)
+    @subscribeEditorController()
+    @attachProcessControllerToOutputView()
 
   deactivate: ->
-    # @unregisterAutocompleteProviders()
+    @disposables.dispose();
+
     @detachProcessControllerToOutputView()
     @deletePendingProcessController()
-    @deleteEditorViewControllers()
+    @deleteEditorControllers()
     @deleteOutputViewPanel()
 
   serialize: ->
     outputView: @outputView?.serialize()
-
 
   togglePanel: ->
     @outputView?.toggle()
@@ -42,7 +44,7 @@ class PluginManager
 
   # File prettify
   prettifyFile: ->
-    editor = atom.workspaceView.getActiveView()?.getEditor()
+    editor = atom.workspace.getActiveTextEditor()
     fileName = editor?.getPath()
     return unless fileName?
 
@@ -61,7 +63,8 @@ class PluginManager
   # File check or lint.
   checkOrLintFile: (func) ->
     return if @checkTurnedOff? and @checkTurnedOff
-    fileName = atom.workspaceView.getActiveView()?.getEditor().getPath()
+    editor = atom.workspace.getActiveTextEditor()
+    fileName = editor?.getPath()
     return unless fileName?
 
     @outputView?.pendingCheck()
@@ -74,7 +77,7 @@ class PluginManager
       onComplete: (affectedTypes) =>
         @updateResults affectedTypes, checkOrLintResults
         @outputView?.resultsUpdated affectedTypes
-        @updateAllEditorViewsWithResults affectedTypes
+        @updateAllEditorsWithResults affectedTypes
       onFailure: =>
         @outputView?.resultsUpdated null    # TODO notify of error
     }
@@ -85,13 +88,9 @@ class PluginManager
     @checkResults[r.type].push(r) for r in results
 
   # Update every editor view with results
-  updateAllEditorViewsWithResults: (types) ->
-    for editorView in atom.workspaceView.getEditorViews()
-      editorView.haskellController?.resultsUpdated types
-
-  # Update the editor view with results.
-  updateEditorView: (editorView, types = undefined) ->
-    editorView.haskellController.resultsUpdated types
+  updateAllEditorsWithResults: (types) ->
+    for editor in atom.workspace.getTextEditors()
+      @controllers.get(editor)?.resultsUpdated types
 
   # Create and delete output view panel.
   createOutputViewPanel: (state) ->
@@ -101,18 +100,33 @@ class PluginManager
     @outputView?.deactivate()
     @outputView = null
 
-  # Subscribe on editor view for attaching controller.
-  subsribeEditorViewController: ->
-    @controlSubscription = atom.workspaceView.eachEditorView (editorView) =>
-      editorView.haskellController = new EditorControl(editorView, this)
+  removeController: (editor) ->
+    @controllers.get(editor)?.deactivate()
+    @completeProviders.get(editor)?.dispose()
+    @controllers.delete(editor)
+    @completeProviders.delete(editor)
 
-  deleteEditorViewControllers: ->
-    for editorView in atom.workspaceView.getEditorViews()
-      editorView.haskellController?.deactivate()
-      editorView.haskellController = null
+  autocompleteProviderForEditor: (editor) ->
+    return null unless editor
+    return @completeProviders.get(editor)
 
-    @controlSubscription?.off()
-    @controlSubscription = null
+  # Observe text editors to attach controller
+  subscribeEditorController: ->
+    @disposables.add atom.workspace.observeTextEditors (editor) =>
+      if not @controllers.get(editor)
+        @controllers.set(editor, new EditorControl(editor, this))
+        if not editor.mini
+          # create a completion provider for the editor; note, there is only one provider object
+          # that is actually registered with autocomplete (see provideAutocomplete()), but we use n instances of
+          # these internally to manage per-file state.
+          @completeProviders.set(editor, new CompleteProvider(editor, this))
+
+        @disposables.add editor.onDidDestroy () =>
+          @removeController editor
+
+  deleteEditorControllers: ->
+    for editor in atom.workspace.getTextEditors()
+      @removeController editor
 
   # Work with precess controller
   createPendingProcessController: ->
@@ -132,36 +146,6 @@ class PluginManager
   detachProcessControllerToOutputView: ->
     @pendingProcessController.off 'backend-active'
     @pendingProcessController.off 'backend-idle'
-
-  # Working with autocomplete
-  registerAutocompleteProviders: ->
-    if atom.packages.isPackageLoaded('autocomplete-plus')
-      atom.packages.activatePackage('autocomplete-plus')
-        .then (pkg) =>
-          @autocompleteModule = pkg.mainModule
-          @attachAutocompleteToNewEditorViews()
-
-  unregisterAutocompleteProviders: ->
-    @autocompleteSubscription?.off()
-    @autocompleteSubscription = null
-
-    # remove all active providers
-    @autocompleteProviders.forEach (provider) =>
-      @autocompleteModule.unregisterProvider provider
-    @autocompleteProviders = []
-
-  attachAutocompleteToNewEditorViews: ->
-    @autocompleteSubscription = atom.workspaceView.eachEditorView (editorView) =>
-      if editorView.attached and not editorView.mini
-        provider = new CompleteProvider editorView, this
-        @autocompleteModule.registerProviderForEditorView provider, editorView
-        @autocompleteProviders.push provider
-
-        # if editor view will close, remove provider
-        editorView.on "editor:will-be-removed", =>
-          if (index = @autocompleteProviders.indexOf(provider)) isnt -1
-            @autocompleteProviders.splice index
-          @autocompleteModule.unregisterProvider provider
 
   # Building main completion database
   createCompletionDatabase: ->

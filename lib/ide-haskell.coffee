@@ -1,8 +1,9 @@
-{$} = require 'atom'
+$ = require 'jquery'
 
 {PluginManager} = require './plugin-manager'
-{isCabalProject} = require './utils'
-
+{isCabalProject, getCabalProjectDir} = require './utils'
+{CompositeDisposable} = require 'atom'
+{getProjectSettings} = require './project-settings'
 
 configDefaults =
   checkOnFileSave: true,
@@ -12,51 +13,69 @@ configDefaults =
   ghcModPath: 'ghc-mod',
   stylishHaskellPath: 'stylish-haskell'
 
-_isCabalProject = false         # true if cabal project
 _pluginManager = null           # plugin manager
+_disposables = new CompositeDisposable
+
+isActive = ->
+  !!_pluginManager
 
 activate = (state) ->
-  _isCabalProject = isCabalProject()
+  initIdeHaskell(state)
+
+  # if we did not activate (no cabal project), set up an event to activate when a haskell file is opened
+  _disposables.add atom.workspace.onDidOpen (event) ->
+    if not isActive()
+      item = event.item
+      if item && item.getGrammar && item.getGrammar().scopeName == "source.haskell"
+        initIdeHaskell(state)
+
+initIdeHaskell = (state) ->
+  return if isActive()
+
+  settings = getProjectSettings()
+  settings.root = getCabalProjectDir()
+  settings.isCabalProject = (settings.root != null)
+
+  return unless settings.isCabalProject
+
   $(window).on 'focus', updateMenu
-  return unless _isCabalProject
 
   _pluginManager = new PluginManager(state)
 
   # global commands
-  atom.workspaceView.command 'ide-haskell:toggle-output', ->
-    _pluginManager.togglePanel()
-  atom.workspaceView.command 'ide-haskell:check-file', ->
-    _pluginManager.checkFile()
-  atom.workspaceView.command 'ide-haskell:lint-file', ->
-    _pluginManager.lintFile()
-  atom.workspaceView.command 'ide-haskell:prettify-file', ->
-    _pluginManager.prettifyFile(true)
+  _disposables.add atom.commands.add 'atom-workspace',
+    'ide-haskell:toggle-output': ->
+      _pluginManager.togglePanel()
+    'ide-haskell:check-file': ->
+      _pluginManager.checkFile()
+    'ide-haskell:lint-file': ->
+      _pluginManager.lintFile()
+    'ide-haskell:prettify-file': ->
+      _pluginManager.prettifyFile(true)
 
   updateMenu()
 
 deactivate = ->
+  return unless isActive()
+
   $(window).off 'focus', updateMenu
-  return unless _isCabalProject
-  _isCabalProject = false
 
   _pluginManager.deactivate()
   _pluginManager = null
 
   # clear commands
-  atom.workspaceView.off 'ide-haskell:toggle-output'
-  atom.workspaceView.off 'ide-haskell:check-file'
-  atom.workspaceView.off 'ide-haskell:lint-file'
-  atom.workspaceView.off 'ide-haskell:prettify-output'
+  _disposables.dispose();
+  _disposables = new CompositeDisposable
 
   clearMenu()
 
 serialize = ->
-  return unless _isCabalProject
+  return unless getProjectSettings().isCabalProject
   _pluginManager.serialize()
 
 updateMenu = ->
   clearMenu()
-  return unless _isCabalProject
+  return unless getProjectSettings().isCabalProject
 
   atom.menu.add [
     {
@@ -78,10 +97,22 @@ clearMenu = ->
   )
   atom.menu.update()
 
+provideAutocomplete = ->
+  # register a single "provider" with autocomplete; then we create one of our own CompleteProvider objects for each
+  # editor. requestHandler forwards requests to the appropriate object.
+  provider =
+    selector: '.source.haskell',
+    blacklist: '.source.haskell .comment'
+    requestHandler: (options) ->
+      return [] unless _pluginManager
+      _pluginManager.autocompleteProviderForEditor(options.editor)?.buildSuggestions();
+
+  return {provider: provider}
 
 module.exports = {
   configDefaults,
   activate
   deactivate,
-  serialize
+  serialize,
+  provideAutocomplete
 }
