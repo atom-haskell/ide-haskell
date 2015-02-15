@@ -27,7 +27,7 @@ PREFIX_KEYWORD             = /^([a-z]*)$/
 BWSCAN_SCOPE               = /^[^\s]+/g
 
 # regexps for completion in imports
-BWSCAN_IMPORT              = new RegExp("^import\\s+(qualified\\s+)?(" + REGEXP_MODULE_NAME_CAP + "\\s+)?((hiding\\s+)|(as\\s+)?(" + REGEXP_ALIAS_NAME_CAP + "\\s+)?)?(\\()?", "g")
+BWSCAN_IMPORT              = new RegExp("^import(\\s+qualified)?(\\s+" + REGEXP_MODULE_NAME_CAP + ")?((\\s+hiding)|(\\s+as)?(\\s+" + REGEXP_ALIAS_NAME_CAP + ")?)?(\\s*\\()?(\\s+)?", "g")
 PREFIX_IMPORT_MODULE_NAME  = new RegExp("\\s+(" + REGEXP_MODULE_NAME_MAYBE + ")$")
 PREFIX_IMPORT_HIDING_AS    = /\s+([a-z]*)$/
 PREFIX_IMPORT_FUNCTIONS    = new RegExp("[\\(\\s,]+(" + REGEXP_FUNCTION_NAME_MAYBE + ")$")
@@ -198,7 +198,7 @@ class CompleteProvider
 
     else if scopeMatch[4]? or scopeMatch[5]? or scopeMatch[6]?
 
-    else if scopeMatch[2]?
+    else if scopeMatch[2]? and scopeMatch[8]?
       prefix = @getCurrentPrefix(srange, PREFIX_IMPORT_HIDING_AS)[1]
       words = fuzzaldrin.filter ['hiding', 'as'], prefix
 
