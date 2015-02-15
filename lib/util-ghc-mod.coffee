@@ -39,7 +39,7 @@ check = ({fileName, onResult, onComplete, onFailure, onDone}) ->
     args: [fileName]
     cwd: getProjectRoot()
     onMessage: (line) ->
-      if matches = /([^:]+):(\d+):(\d+):((?:Warning: )?)(.*)/.exec(line)
+      if matches = /^(.+?):(\d+):(\d+):((?:Warning: )?)(.*)/.exec(line)
         [_, uri, row, col, isWarning, content] = matches
         type =
           if isWarning.length
