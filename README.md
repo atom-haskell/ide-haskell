@@ -1,5 +1,7 @@
 # Haskell IDE
 
+[![Join the chat at https://gitter.im/chaika2013/ide-haskell](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/chaika2013/ide-haskell?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Welcome to Haskell IDE plugin for amazing [Atom](http://atom.io) editor! This plugin is intended to help you in [Haskell](http://haskell.org) developing.
 
 *Haskell IDE is currently in active development state.*
