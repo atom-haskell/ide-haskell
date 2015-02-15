@@ -15,10 +15,15 @@ class EditorControl
     @checkMarkers = []
     @disposables = new CompositeDisposable
     @editorElement = atom.views.getView(@editor)
-    @gutter = $(getElementsByClass(@editorElement, '.gutter'))
+
     @scroll = $(getElementsByClass(@editorElement, '.scroll-view'))
 
     @subscriber = new Subscriber()
+
+    # defer-init the gutter events (#37)
+    @initGutterSched = setTimeout (=>
+      @initGutter()
+    ), 100 # 0 seems to be enough here, but wait a bit just to be safe.
 
     # event for editor updates
     @disposables.add @editor.onDidDestroy =>
@@ -45,6 +50,14 @@ class EditorControl
     @subscriber.subscribe @scroll, 'mouseout', (e) =>
       @clearExprTypeTimeout()
 
+    # update all results from manager
+    @resultsUpdated()
+
+  initGutter: ->
+    clearTimeout(@initGutterSched)
+
+    @gutter = $(getElementsByClass(@editorElement, '.gutter'))
+
     # mouse movement over gutter to show check results
     for klass in @className
       @subscriber.subscribe @gutter, 'mouseenter', ".#{klass}", (e) =>
@@ -54,10 +67,8 @@ class EditorControl
     @subscriber.subscribe @gutter, 'mouseleave', (e) =>
       @hideCheckResult()
 
-    # update all results from manager
-    @resultsUpdated()
-
   deactivate: ->
+    clearTimeout(@initGutterSched)
     @clearExprTypeTimeout()
     @hideCheckResult()
     @subscriber.unsubscribe()
