@@ -1,3 +1,7 @@
+## 0.3.2
+* Fixed #16
+* Fixed #25
+
 ## 0.3.1
 * Fixed: Upgrade to atom 1.0 api.  Upgrade autocomplete
 * Fixed: Fix issue requiring package to be manually deactivated/reactivated
