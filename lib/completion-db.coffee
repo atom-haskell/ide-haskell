@@ -32,6 +32,9 @@ class CompletionDatabase
   # Real module update
   _update: (fileName, moduleName) ->
     @modules[moduleName] = []
+    #This is a temporary hack-fix for #29, #36
+    unless @manager.pendingProcessController?
+      @manager.createPendingProcessController()
     @manager.pendingProcessController.start Channel.completion, utilGhcMod.browse, {
       fileName: fileName
       moduleName: moduleName
