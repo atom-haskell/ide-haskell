@@ -1,3 +1,7 @@
+## 0.3.3
+* Fixed #26, #37, #40
+* Added a hack, which should hopefully fix #29
+
 ## 0.3.2
 * Fixed #16
 * Fixed #25
