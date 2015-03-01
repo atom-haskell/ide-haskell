@@ -47,7 +47,7 @@ class EditorControl
       screenPt = @editor.screenPositionForPixelPosition pixelPt
       bufferPt = @editor.bufferPositionForScreenPosition screenPt
       return if @lastExprTypeBufferPt?.isEqual(bufferPt)
-      
+
       @lastExprTypeBufferPt = bufferPt
       @clearExprTypeTimeout()
       @exprTypeTimeout = setTimeout (=>
