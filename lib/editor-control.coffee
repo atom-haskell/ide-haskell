@@ -43,6 +43,12 @@ class EditorControl
 
     # show expression type if mouse stopped somewhere
     @subscriber.subscribe @scroll, 'mousemove', (e) =>
+      pixelPt = pixelPositionFromMouseEvent @editor, e
+      screenPt = @editor.screenPositionForPixelPosition pixelPt
+      bufferPt = @editor.bufferPositionForScreenPosition screenPt
+      return if @lastExprTypeBufferPt?.isEqual(bufferPt)
+      
+      @lastExprTypeBufferPt = bufferPt
       @clearExprTypeTimeout()
       @exprTypeTimeout = setTimeout (=>
         @showExpressionType e
