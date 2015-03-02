@@ -165,7 +165,7 @@ browse = ({fileName, moduleName, onResult, onComplete, onFailure, onDone}) ->
     args: ['-d', moduleName]
     cwd: path.dirname(fileName)
     onMessage: (line) ->
-      if matches = /^([A-Za-z0-9_']+)(\s::\s(.+))?$/.exec(line)
+      if matches = /^([A-Za-z0-9_']+)(\s::\s(.+))?$/m.exec(line)
         [_, expr, _, type] = matches
         onResult?({expr, type})
       else
