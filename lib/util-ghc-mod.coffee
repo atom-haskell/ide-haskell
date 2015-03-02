@@ -29,7 +29,7 @@ run = ({onMessage, onComplete, onFailure, cmd, args, cwd}) ->
     onFailure?()
 
 stdout = (onMessage, line) ->
-   line.split(/\r?\n|\r/).filter((l)->0 != l.length).map onMessage
+  line.split(/\r?\n|\r/).filter((l)->0 != l.length).map onMessage
 
 
 # ghc-mod check
