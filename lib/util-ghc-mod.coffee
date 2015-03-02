@@ -29,7 +29,7 @@ run = ({onMessage, onComplete, onFailure, cmd, args, cwd}) ->
     onFailure?()
 
 stdout = (onMessage, line) ->
-  line.split('\n').filter((l)->0 != l.length).map onMessage
+   line.split(/\r?\n|\r/).filter((l)->0 != l.length).map onMessage
 
 
 # ghc-mod check
@@ -165,7 +165,7 @@ browse = ({fileName, moduleName, onResult, onComplete, onFailure, onDone}) ->
     args: ['-d', moduleName]
     cwd: path.dirname(fileName)
     onMessage: (line) ->
-      if matches = /^([A-Za-z0-9_']+)(\s::\s(.+))?$/m.exec(line)
+      if matches = /^([A-Za-z0-9_']+)(\s::\s(.+))?$/.exec(line)
         [_, expr, _, type] = matches
         onResult?({expr, type})
       else
