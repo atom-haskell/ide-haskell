@@ -2,17 +2,20 @@
 $ = require 'jquery'
 class TooltipView extends View
   @content: ->
-    @div class: 'ide-haskell-tooltip'
+    @div class: 'ide-haskell-tooltip tooltip', =>
+      @div class: 'tooltip-inner', outlet: 'inner'
 
   initialize: (@rect, text = null) ->
-    @text(text) if text?
+    @inner.text(text) if text?
     $(document.body).append this
     @updatePosition()
+    @fadeTo(0,1) if text?
 
   # update tooltip text
   updateText: (text) ->
-    @text(text)
+    @inner.text(text)
     @updatePosition()
+    @fadeTo(0,1)
 
   # smart position update
   updatePosition: ->
@@ -31,7 +34,7 @@ class TooltipView extends View
     if coords[1] + this[0].offsetHeight >= $(document.body).height()
       coords[1] = @rect.top - this[0].offsetHeight
 
-    this.css({ left: coords[0], top: coords[1], right: coords[2] })
+    @css({ left: coords[0], top: coords[1], right: coords[2] })
 
 module.exports = {
   TooltipView
