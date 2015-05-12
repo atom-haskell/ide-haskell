@@ -1,4 +1,4 @@
-## 0.3.7
+## 0.4.0
 * Fixed main file deprecations
 * Fixed #50
 
