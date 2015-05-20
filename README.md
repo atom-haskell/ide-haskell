@@ -59,20 +59,8 @@ Now you can use `stylish-haskell` utility to indent pragmas, imports and data ty
 
 ## Configuration
 
-Open `~/.atom/config.cson` by clicking **Open Your Config** in **Atom** menu. Manually add `ide-haskell` plugin section as in example below.
-
-    'ide-haskell':
-      'ghcModPath': '/path/to/ghc-mod'
-      'stylishHaskellPath': '/path/to/stylish-haskell'
-
-Following entries are also customizable in `ide-haskell` section
-
-- `ghcModPath` - path to `ghc-mod` utility
-- `stylishHaskellPath` - path to `stylish-haskell` utility
-- `checkOnFileSave` - check file after save (defaut is `true`)
-- `lintOnFileSave` - lint file after save  (defaut is `true`)
-- `switchTabOnCheck` - switch to error tab after file check finished (defaut is `true`)
-- `expressionTypeInterval` - after this period of time the process of getting the expression type will be started (milliseconds, default is `300`)
+Package is fully configurable via **Edit → Preferences → Packages → ide-haskell
+→ Settings**
 
 ## TODO
 

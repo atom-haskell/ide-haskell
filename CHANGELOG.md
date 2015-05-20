@@ -1,3 +1,7 @@
+## 0.4.1
+* Somewhat better error-reporting on ghc-mod errors
+* Options descriptions
+
 ## 0.4.0
 * Fixed main file deprecations
 * Fixed #50
