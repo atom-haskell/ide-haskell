@@ -14,21 +14,28 @@ module.exports = IdeHaskell =
     checkOnFileSave:
       type: "boolean"
       default: true
+      description: "Check file after save"
     lintOnFileSave:
       type: "boolean"
       default: true
+      description: "Lint file after save"
     switchTabOnCheck:
       type: "boolean"
       default: true
+      description: "Switch to error tab after file check finished"
     expressionTypeInterval:
       type: "integer"
       default: 300
+      description: "After this period of time the process of getting the
+                    expression type will be started"
     ghcModPath:
       type: "string"
       default: 'ghc-mod'
+      description: "Path to `ghc-mod` utility"
     stylishHaskellPath:
       type: "string"
       default: 'stylish-haskell'
+      description: "Path to `stylish-haskell` utility"
 
   isActive: ->
     !!@_pluginManager
