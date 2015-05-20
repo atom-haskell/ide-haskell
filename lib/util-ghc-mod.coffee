@@ -22,11 +22,13 @@ run = ({onMessage, onComplete, onFailure, cmd, args, cwd}) ->
     stderr: (line) -> stdout(onMessage, line)
     exit: -> onComplete?()
 
-  # on error hack (from http://discuss.atom.io/t/catching-exceptions-when-using-bufferedprocess/6407)
-  proc.process.on 'error', (node_error) ->
-    # TODO this error should be in output view log tab
-    console.error "ghc-mod utility not found at #{atom.config.get('ide-haskell.ghcModPath')}, please run 'cabal install ghc-mod'"
+  proc.onWillThrowError ({error, handle}) ->
+    atom.notifications.addError "Ide-haskell could not spawn
+      #{atom.config.get('ide-haskell.ghcModPath')}",
+      detail: "#{error}"
+    console.error error
     onFailure?()
+    handle()
 
 stdout = (onMessage, line) ->
   line.split(/\r?\n|\r/).filter((l)->0 != l.length).map onMessage
