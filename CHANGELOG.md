@@ -1,3 +1,7 @@
+## 0.4.2
+* Allowing text selection in bottom pane (Daniel Beskin)
+* Fixing a missing resize cursor on Windows (Daniel Beskin)
+
 ## 0.4.1
 * Somewhat better error-reporting on ghc-mod errors
 * Options descriptions
@@ -10,7 +14,7 @@
 * Fixed #48
 
 ## 0.3.5
-* Merged #45
+* Fixed ghc-mod newline compatibility on Windows (Luka Horvat)
 
 ## 0.3.4
 * Fixed #44
@@ -24,8 +28,8 @@
 * Fixed #25
 
 ## 0.3.1
-* Fixed: Upgrade to atom 1.0 api.  Upgrade autocomplete
-* Fixed: Fix issue requiring package to be manually deactivated/reactivated
+* Fixed: Upgrade to atom 1.0 api.  Upgrade autocomplete (John Quigley)
+* Fixed: Fix issue requiring package to be manually deactivated/reactivated (John Quigley)
 
 ## 0.3.0
 * New: Code prettify by `stylish-haskell`.
