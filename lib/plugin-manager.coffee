@@ -1,8 +1,6 @@
 {OutputView} = require './output-view'
 {EditorControl} = require './editor-control'
 {PendingBackend, Channel} = require './pending-backend'
-{CompleteProvider} = require './complete-provider'
-{MainCompletionDatabase} = require './completion-db'
 utilStylishHaskell = require './util-stylish-haskell'
 utilGhcMod = require './util-ghc-mod'
 {CompositeDisposable} = require 'atom'
@@ -14,16 +12,14 @@ class PluginManager
 
     @disposables = new CompositeDisposable
     @controllers = new WeakMap
-    @completeProviders = new WeakMap
 
     @createPendingProcessController()
-    @createCompletionDatabase()
     @createOutputViewPanel(state)
     @subscribeEditorController()
     @attachProcessControllerToOutputView()
 
   deactivate: ->
-    @disposables.dispose();
+    @disposables.dispose()
 
     @detachProcessControllerToOutputView()
     @deletePendingProcessController()
@@ -102,25 +98,13 @@ class PluginManager
 
   removeController: (editor) ->
     @controllers.get(editor)?.deactivate()
-    @completeProviders.get(editor)?.dispose()
     @controllers.delete(editor)
-    @completeProviders.delete(editor)
-
-  autocompleteProviderForEditor: (editor) ->
-    return null unless editor
-    return @completeProviders.get(editor)
 
   # Observe text editors to attach controller
   subscribeEditorController: ->
     @disposables.add atom.workspace.observeTextEditors (editor) =>
       if not @controllers.get(editor)
         @controllers.set(editor, new EditorControl(editor, this))
-        if not editor.mini
-          # create a completion provider for the editor; note, there is only one provider object
-          # that is actually registered with autocomplete (see provideAutocomplete()), but we use n instances of
-          # these internally to manage per-file state.
-          @completeProviders.set(editor, new CompleteProvider(editor, this))
-
         @disposables.add editor.onDidDestroy () =>
           @removeController editor
 
@@ -146,11 +130,6 @@ class PluginManager
   detachProcessControllerToOutputView: ->
     @pendingProcessController.off 'backend-active'
     @pendingProcessController.off 'backend-idle'
-
-  # Building main completion database
-  createCompletionDatabase: ->
-    @mainCDB = new MainCompletionDatabase this
-    @localCDB = {} # completion databases for uri
 
 
 module.exports = {

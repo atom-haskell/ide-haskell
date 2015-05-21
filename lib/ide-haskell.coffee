@@ -135,18 +135,3 @@ module.exports = IdeHaskell =
       obj for obj in atom.menu.template when obj.label isnt "Haskell IDE"
     )
     atom.menu.update()
-
-  provideAutocomplete: ->
-    # register a single "provider" with autocomplete;
-    # then we create one of our own CompleteProvider objects for each
-    # editor. requestHandler forwards requests to the appropriate object.
-    provider =
-      selector: '.source.haskell',
-      blacklist: '.source.haskell .comment'
-      requestHandler: (options) ->
-        return [] unless @_pluginManager
-        @_pluginManager
-          .autocompleteProviderForEditor(options.editor)
-          ?.buildSuggestions()
-
-    return {provider: provider}
