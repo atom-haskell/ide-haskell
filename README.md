@@ -28,17 +28,7 @@ Just position your mouse cursor above expression you want to know the type of an
 
 #### Autocompletion
 
-Remember that you need [autocomplete-plus](https://atom.io/packages/autocomplete-plus) package to be installed to use Haskell IDE autocompletion feature.
-
-Autocompletion feature works for pragmas like `LANGUAGE` and `OPTIONS_GHC`. Also autocompletion works for `import` keyword.
-
-![Autocompletion](http://atom-haskell.github.io/ide-haskell/images/complete1.gif)
-
-And of course autocompletion feature works inside functions to make your Haskelling happier.
-
-![Autocompletion](http://atom-haskell.github.io/ide-haskell/images/complete2.gif)
-
-*Not all the things I wanted from this feature was implemented. That is why autocompletion is subject to change the way you want! So you are welcome with suggestions how this feature can be changed to make your work with Haskell code more comfortable. Pelease, write issues with enhancement of autocompletion [here](https://github.com/atom-haskell/ide-haskell/issues).*
+Autocompletion facilities have been moved to [autocomplete-haskell](https://atom.io/packages/autocomplete-haskell) package.
 
 #### Code beautify
 

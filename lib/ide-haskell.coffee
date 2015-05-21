@@ -36,11 +36,27 @@ module.exports = IdeHaskell =
       type: "string"
       default: 'stylish-haskell'
       description: "Path to `stylish-haskell` utility"
+    autocompleteInfo:
+      type: "boolean"
+      default: true
+      description: "Show info message about autocomplete-haskell on activation"
 
   isActive: ->
     !!@_pluginManager
 
   activate: (state) ->
+    autocompleteHaskellInstalled =
+      atom.packages.getAvailablePackageNames().some (pn) ->
+        pn == 'autocomplete-haskell'
+    unless autocompleteHaskellInstalled
+      message = "
+        Ide-haskell:
+        Autocompletion has been delegated to autocomplete-haskell package.
+        Please, install it.
+        You can disable this message in ide-haskell settings.
+        "
+      atom.notifications.addInfo message, dismissable: true
+      console.log message
     @initIdeHaskell(state)
 
     # if we did not activate (no cabal project),
