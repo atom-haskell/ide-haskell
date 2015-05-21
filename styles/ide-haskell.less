@@ -98,33 +98,15 @@
 @error-color: #b22222;
 
 atom-text-editor::shadow {
-  .ide-haskell-lint {
-    background-color: @background-color-highlight;
-    z-index: 1;
-  }
-
-  .ide-haskell-warning {
-    background-color: @background-color-highlight;
-    z-index: 2;
-  }
-
-  .ide-haskell-error {
-    background-color: @background-color-highlight;
-    z-index: 3;
-  }
-
   .highlight {
     &.ide-haskell-lint .region {
       background: linear-gradient(to right, @background-color-info 0%, fadeout(@background-color-info, 50%) 100%);
-      z-index: 1;
     }
     &.ide-haskell-warning .region {
       background: linear-gradient(to right, @background-color-warning 0%, fadeout(@background-color-warning, 50%) 100%);
-      z-index: 2;
     }
     &.ide-haskell-error .region {
       background: linear-gradient(to right, @background-color-error 0%, fadeout(@background-color-error, 50%) 100%);
-      z-index: 3;
     }
   }
 
@@ -162,6 +144,7 @@ atom-text-editor::shadow {
   font-family: Consolas, monospace;
   .tooltip-inner {
     white-space: pre-wrap !important;
+    text-align: left;
   }
 }
 

@@ -2,17 +2,13 @@
 $ = require 'jquery'
 {Subscriber} = require 'emissary'
 
-{Channel} = require './pending-backend'
 {isHaskellSource, screenPositionFromMouseEvent, pixelPositionFromMouseEvent, getElementsByClass} = require './utils'
 {TooltipView} = require './tooltip-view'
-utilGhcMod = require './util-ghc-mod'
-{CompositeDisposable} = require 'atom'
+{CompositeDisposable, Range} = require 'atom'
 
 class EditorControl
-  className: ['ide-haskell-error', 'ide-haskell-warning', 'ide-haskell-lint']
-
   constructor: (@editor, @manager) ->
-    @checkMarkers = []
+    @checkMarkers = {}
     @disposables = new CompositeDisposable
     @editorElement = atom.views.getView(@editor)
 
@@ -28,6 +24,8 @@ class EditorControl
     # event for editor updates
     @disposables.add @editor.onDidDestroy =>
       @deactivate()
+
+    @disposables.add @manager.onResultsUpdated @updateResults
 
     # buffer events for automatic check
     buffer = @editor.getBuffer()
@@ -57,7 +55,7 @@ class EditorControl
       @clearExprTypeTimeout()
 
     # update all results from manager
-    @resultsUpdated()
+    @updateResults {}
 
   initGutter: ->
     clearTimeout(@initGutterSched)
@@ -65,10 +63,10 @@ class EditorControl
     @gutter = $(getElementsByClass(@editorElement, '.gutter'))
 
     # mouse movement over gutter to show check results
-    for klass in @className
-      @subscriber.subscribe @gutter, 'mouseenter', ".#{klass}", (e) =>
+    for c in ['ide-haskell-error', 'ide-haskell-warning', 'ide-haskell-lint']
+      @subscriber.subscribe @gutter, 'mouseenter', ".#{c}", (e) =>
         @showCheckResult e
-      @subscriber.subscribe @gutter, 'mouseleave', ".#{klass}", (e) =>
+      @subscriber.subscribe @gutter, 'mouseleave', ".#{c}", (e) =>
         @hideCheckResult()
     @subscriber.subscribe @gutter, 'mouseleave', (e) =>
       @hideCheckResult()
@@ -87,43 +85,35 @@ class EditorControl
       @exprTypeTimeout = null
     @hideExpressionType()
 
-  resultsUpdated: (types = undefined) ->
+  updateResults: ({res, types}) =>
+    res ?= @manager.checkResults
+    types ?= Object.keys(res)
     @destroyMarkersForTypes types
-    if types?
-      for t in types
-        @markerFromCheckResult(r) for r in @manager.checkResults[t]
-    else
-      for typeResults in @manager.checkResults
-        @markerFromCheckResult(r) for r in typeResults
+    for t in types
+      @markerFromCheckResult(r) for r in res[t]
     @renderResults types
 
-  destroyMarkersForTypes: (types = undefined) ->
-    if types?
-      for t in types
-        m.marker.destroy() for m in @checkMarkers[t] ? []
-        @checkMarkers[t] = []
-    else
-      for markers in @checkMarkers
-        m.marker.destroy() for m in markers
-      @checkMarkers = []
+  destroyMarkersForTypes: (types) ->
+    for t in types
+      m.marker.destroy() for m in @checkMarkers[t] ? []
+      @checkMarkers[t] = []
 
-  markerFromCheckResult: (result) ->
-    return unless result.uri is @editor.getURI()
-    @checkMarkers[result.type] = [] unless @checkMarkers[result.type]?
+  markerFromCheckResult: ({file, severity, message, position}) ->
+    return unless file is @editor.getURI()
+    @checkMarkers[severity] = [] unless @checkMarkers[severity]?
 
     # create a new marker
-    marker = @editor.markBufferRange result.range, invalidate: 'never'
-    @checkMarkers[result.type].push({ marker, klass: @className[result.type], desc: result.desc })
+    range = new Range position, {row: position.row, column: position.column+1}
+    marker = @editor.markBufferRange range, invalidate: 'never'
+    @checkMarkers[severity].push
+      marker: marker
+      klass: 'ide-haskell-'+severity
+      desc: message
 
-  renderResults: (types = undefined) ->
-    if types?
-      for t in types
-        for m in @checkMarkers[t]
-          @decorateMarker(m)
-    else
-      for markers in @checkMarkers
-        for m in markers ? []
-          @decorateMarker(m)
+  renderResults: (types) ->
+    for t in types
+      for m in @checkMarkers[t]
+        @decorateMarker(m)
 
   decorateMarker: (m) ->
     { marker, klass } = m
@@ -138,8 +128,10 @@ class EditorControl
     pixelPt = pixelPositionFromMouseEvent(@editor, e)
     screenPt = @editor.screenPositionForPixelPosition(pixelPt)
     bufferPt = @editor.bufferPositionForScreenPosition(screenPt)
-    editorElement = atom.views.getView(@editor);
-    nextCharPixelPt = editorElement.pixelPositionForBufferPosition([bufferPt.row, bufferPt.column + 1])
+    range = new Range bufferPt, bufferPt
+    editorElement = atom.views.getView(@editor)
+    nextCharPixelPt = editorElement.pixelPositionForBufferPosition(
+      [bufferPt.row, bufferPt.column + 1])
 
     return if pixelPt.left > nextCharPixelPt.left
 
@@ -155,12 +147,8 @@ class EditorControl
     @exprTypeTooltip = new TooltipView(tooltipRect)
 
     # process start
-    @manager.pendingProcessController.start Channel.expressionType, utilGhcMod.type, {
-      pt: bufferPt
-      fileName: @editor.getURI()
-      onResult: (result) =>
-        @exprTypeTooltip?.updateText(result.type)
-    }
+    @manager.backend?.getType @editor.getBuffer(), range, ({type}) =>
+      @exprTypeTooltip?.updateText(type)
 
   hideExpressionType: ->
     if @exprTypeTooltip?
@@ -170,11 +158,14 @@ class EditorControl
   # show check result when mouse over gutter icon
   showCheckResult: (e) ->
     @hideCheckResult()
-    row = @editor.bufferPositionForScreenPosition(screenPositionFromMouseEvent(@editor, e)).row
+    row = @editor.bufferPositionForScreenPosition(
+      screenPositionFromMouseEvent(@editor, e)).row
 
     # find best result for row
     foundResult = null
-    for markers in @checkMarkers
+    console.log @checkMarkers
+    for t, markers of @checkMarkers
+      console.log markers
       continue unless markers?
       for m in markers
         {marker, desc} = m
@@ -183,6 +174,7 @@ class EditorControl
           break
       break if foundResult?
 
+    console.log foundResult
     # append tooltip if result found
     return unless foundResult?
 

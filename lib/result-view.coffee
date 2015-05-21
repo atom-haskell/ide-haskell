@@ -1,5 +1,6 @@
 {$$$, View} = require 'atom-space-pen-views'
 $ = require 'jquery'
+{Point} = require 'atom'
 
 
 class ResultView extends View
@@ -9,7 +10,7 @@ class ResultView extends View
 
   initialize: (state) ->
     @on 'click', '.position',  ->
-      pos = [parseInt($(this).attr('row'), 10), parseInt($(this).attr('col'), 10)]
+      pos = new Point $(this).attr('row'), $(this).attr('col')
       uri = $(this).attr('uri')
       atom.workspace.open(uri).then (editor) ->
         editor.setCursorBufferPosition(pos)
@@ -20,8 +21,13 @@ class ResultView extends View
     for r in results
       @resultList.append $$$ ->
         @li class: 'result-block', =>
-          @div class: 'position', row: r.range[0][0], col: r.range[0][1], uri: r.uri, "#{r.uri}: #{r.range[0][0] + 1}, #{r.range[0][1] + 1}"
-          @div class: 'description', r.desc
+          @div
+            class: 'position'
+            row: r.position.row
+            col: r.position.column
+            uri: r.file
+            "#{r.file}: #{r.position.row + 1}, #{r.position.column + 1}"
+          @div class: 'description', r.message
 
 
 module.exports = {

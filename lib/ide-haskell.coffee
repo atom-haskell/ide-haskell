@@ -40,23 +40,47 @@ module.exports = IdeHaskell =
       type: "boolean"
       default: true
       description: "Show info message about autocomplete-haskell on activation"
+    ideBackendInfo:
+      type: "boolean"
+      default: true
+      description: "Show info message about haskell-ide-backend service on
+                    activation"
 
   isActive: ->
     !!@_pluginManager
 
   activate: (state) ->
-    autocompleteHaskellInstalled =
-      atom.packages.getAvailablePackageNames().some (pn) ->
-        pn == 'autocomplete-haskell'
-    unless autocompleteHaskellInstalled
-      message = "
-        Ide-haskell:
-        Autocompletion has been delegated to autocomplete-haskell package.
-        Please, install it.
-        You can disable this message in ide-haskell settings.
-        "
-      atom.notifications.addInfo message, dismissable: true
-      console.log message
+    if atom.config.get('ide-haskell.autocompleteInfo')
+      autocompleteHaskellInstalled =
+        atom.packages.getAvailablePackageNames().some (pn) ->
+          pn == 'autocomplete-haskell'
+      unless autocompleteHaskellInstalled
+        message = "
+          Ide-haskell:
+          Autocompletion has been delegated to autocomplete-haskell package.
+          Please, install it, if you want autocompletion.
+          You can disable this message in ide-haskell settings.
+          "
+        atom.notifications.addInfo message, dismissable: true
+        console.log message
+
+    if atom.config.get('ide-haskell.ideBackendInfo')
+      setTimeout (=>
+        unless @backend?
+          message = "
+            Ide-haskell:
+            Ide-haskell requires a package providing haskell-ide-backend
+            service.
+            Only one such package should be activated at a time.
+            Consider installing haskell-ghc-mod or other package, which
+            provides haskell-ide-backend.
+            You can disable this message in ide-haskell settings.
+            "
+          atom.notifications.addInfo message, dismissable: true
+          console.log message
+        ), 5000
+
+    @backend = null
     @initIdeHaskell(state)
 
     # if we did not activate (no cabal project),
@@ -77,9 +101,8 @@ module.exports = IdeHaskell =
 
     return unless settings.isCabalProject
 
+    @_pluginManager = new PluginManager state, @backend
     $(window).on 'focus', => @updateMenu()
-
-    @_pluginManager = new PluginManager(state)
 
     # global commands
     @_disposables.add atom.commands.add 'atom-workspace',
@@ -135,3 +158,7 @@ module.exports = IdeHaskell =
       obj for obj in atom.menu.template when obj.label isnt "Haskell IDE"
     )
     atom.menu.update()
+
+  consumeBackend_0_1_0: (service) ->
+    @backend = service
+    @_pluginManager?.setBackend service

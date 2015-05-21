@@ -3,31 +3,27 @@ path = require 'path'
 
 
 # run stylish-haskell backend
-run = ({onComplete, onFailure, args}) ->
+prettify = (text, {onComplete, onFailure}) ->
+
+  lines=[]
 
   proc = new BufferedProcess
     command: atom.config.get('ide-haskell.stylishHaskellPath')
-    args: args
-    exit: -> onComplete?()
+    args: []
+    stdout: (line) ->
+      lines.push(line)
+    exit: -> onComplete?(lines.join(''))
 
-  # on error hack (from http://discuss.atom.io/t/catching-exceptions-when-using-bufferedprocess/6407)
-  proc.process.on 'error', (node_error) ->
-    # TODO this error should be in output view log tab
-    console.error "stylish-haskell utility not found at #{atom.config.get('ide-haskell.stylishHaskellPath')}, please run 'cabal install stylish-haskell'"
+  proc.onWillThrowError ({error, handle}) ->
+    atom.notifications.addError "Ide-haskell could not spawn
+      #{atom.config.get('ide-haskell.stylishHaskellPath')}",
+      detail: "#{error}"
+    console.error error
     onFailure?()
+    handle()
 
-
-# ghc-mod check
-prettify = ({fileName, onComplete, onFailure, onDone}) ->
-  run
-    args: ['-i', fileName]
-    onComplete: ->
-      onComplete?()
-      onDone()
-    onFailure: ->
-      onFailure?()
-      onDone(false)
-
+  proc.process.stdin.write(text)
+  proc.process.stdin.end()
 
 module.exports = {
   prettify
