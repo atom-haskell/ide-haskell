@@ -1,6 +1,6 @@
 # Haskell IDE
 
-[![Join the chat at https://gitter.im/chaika2013/ide-haskell](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/chaika2013/ide-haskell?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/atom-haskell/ide-haskell](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/atom-haskell/ide-haskell?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Welcome to Haskell IDE plugin for amazing [Atom](http://atom.io) editor! This plugin is intended to help you in [Haskell](http://haskell.org) developing.
 
@@ -18,13 +18,13 @@ After saving the current file the check and linter processes will be executed. A
 
 Also all the results can be seen near the line numbers if you position the mouse cursor over the handsome icon. And of course the results are highlighted inside editor view so you can easily locate where the problem is.
 
-![Errors, warnings and linter](http://chaika2013.github.io/ide-haskell/images/check.gif)
+![Errors, warnings and linter](http://atom-haskell.github.io/ide-haskell/images/check.gif)
 
 #### Get type at point
 
 Just position your mouse cursor above expression you want to know the type of and wait for some time. Tooltip will appear with everything you want to know.
 
-![Get type at point](http://chaika2013.github.io/ide-haskell/images/types.gif)
+![Get type at point](http://atom-haskell.github.io/ide-haskell/images/types.gif)
 
 #### Autocompletion
 
@@ -32,19 +32,19 @@ Remember that you need [autocomplete-plus](https://atom.io/packages/autocomplete
 
 Autocompletion feature works for pragmas like `LANGUAGE` and `OPTIONS_GHC`. Also autocompletion works for `import` keyword.
 
-![Autocompletion](http://chaika2013.github.io/ide-haskell/images/complete1.gif)
+![Autocompletion](http://atom-haskell.github.io/ide-haskell/images/complete1.gif)
 
 And of course autocompletion feature works inside functions to make your Haskelling happier.
 
-![Autocompletion](http://chaika2013.github.io/ide-haskell/images/complete2.gif)
+![Autocompletion](http://atom-haskell.github.io/ide-haskell/images/complete2.gif)
 
-*Not all the things I wanted from this feature was implemented. That is why autocompletion is subject to change the way you want! So you are welcome with suggestions how this feature can be changed to make your work with Haskell code more comfortable. Pelease, write issues with enhancement of autocompletion [here](https://github.com/chaika2013/ide-haskell/issues).*
+*Not all the things I wanted from this feature was implemented. That is why autocompletion is subject to change the way you want! So you are welcome with suggestions how this feature can be changed to make your work with Haskell code more comfortable. Pelease, write issues with enhancement of autocompletion [here](https://github.com/atom-haskell/ide-haskell/issues).*
 
 #### Code beautify
 
 Now you can use `stylish-haskell` utility to indent pragmas, imports and data type definitions. Simply select `Prettify` from Haskel IDE menu or press magic combination of buttons to apply `stylish-haskell` to current file.
 
-![Code beautify](http://chaika2013.github.io/ide-haskell/images/beautify.gif)
+![Code beautify](http://atom-haskell.github.io/ide-haskell/images/beautify.gif)
 
 ## Requirements
 
@@ -62,6 +62,8 @@ Now you can use `stylish-haskell` utility to indent pragmas, imports and data ty
 Package is fully configurable via **Edit → Preferences → Packages → ide-haskell
 → Settings**
 
+You will likely need to specify full paths to `ghc-mod` and `stylish-haskell`, if those are not in `PATH`, at the very least.
+
 ## TODO
 
 - [x] Cabal project autodetection
@@ -77,10 +79,16 @@ Package is fully configurable via **Edit → Preferences → Packages → ide-ha
 
 ## Changelog
 
-Changelog is available [here](https://github.com/chaika2013/ide-haskell/blob/master/CHANGELOG.md).
+Changelog is available [here](https://github.com/atom-haskell/ide-haskell/blob/master/CHANGELOG.md).
 
 ## License
 
-Copyright (c) 2014 Alexander Chaika
+Copyright © 2015 Alexander Chaika
 
-See the [LICENSE.md](https://github.com/chaika2013/ide-haskell/blob/master/LICENSE.md) for details.
+Contributors:
+* Daniel Beskin
+* John Quigley
+* Luka Horvat
+* Nikolay Yakimov
+
+See the [LICENSE.md](https://github.com/atom-haskell/ide-haskell/blob/master/LICENSE.md) for details.
