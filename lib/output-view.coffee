@@ -8,7 +8,7 @@ class OutputView extends View
   switchCounter: 0   # if counter is 0 the error tab is switched
 
   @content: ->
-    @div class: 'ide-haskell-panel', =>
+    @div class: 'ide-haskell-panel native-key-bindings', tabindex: -1, =>
       @div outlet: 'resizeHandle', class: 'resize-handle'
       @div class: 'panel', =>
         @div class: 'panel-heading', =>
