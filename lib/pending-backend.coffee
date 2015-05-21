@@ -4,7 +4,6 @@
 Channel =
   checkAndLint: 0
   expressionType: 0
-  completion: 1
   prettify: 2
 
 
