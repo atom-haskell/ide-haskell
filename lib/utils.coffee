@@ -19,10 +19,6 @@ module.exports = Utils =
         return path.dirname(file.getPath())
     return null
 
-  # check if project contains cabal file
-  isCabalProject: ->
-    return Utils.getCabalProjectDir() != null
-
   # check if file is haskell source code
   isHaskellSource: (fname) ->
     if path.extname(fname) is '.hs'

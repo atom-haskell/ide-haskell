@@ -1,7 +1,7 @@
 {$} = require 'atom-space-pen-views'
 
 {PluginManager} = require './plugin-manager'
-{isCabalProject, getCabalProjectDir} = require './utils'
+{getCabalProjectDir} = require './utils'
 {CompositeDisposable} = require 'atom'
 
 
