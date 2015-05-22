@@ -74,16 +74,35 @@ module.exports = IdeHaskell =
     if atom.config.get('ide-haskell.ideBackendInfo')
       setTimeout (=>
         unless @backend?
-          message = "
-            Ide-haskell:
-            Ide-haskell requires a package providing haskell-ide-backend
-            service.
-            Only one such package should be activated at a time.
-            Consider installing haskell-ghc-mod or other package, which
-            provides haskell-ide-backend.
-            You can disable this message in ide-haskell settings.
-            "
-          atom.notifications.addInfo message, dismissable: true
+          bn = atom.config.get('ide-haskell.useBackend')
+          if !bn
+            message = "
+              Ide-haskell:
+              Ide-haskell requires a package providing haskell-ide-backend
+              service.
+              Consider installing haskell-ghc-mod or other package, which
+              provides haskell-ide-backend.
+              You can disable this message in ide-haskell settings.
+              "
+          else
+            p=atom.packages.getActivePackage(bn)
+            if p?
+              message = "
+                Ide-haskell:
+                You have selected #{bn} as your backend provider, but it
+                does not provide haskell-ide-backend service. You may need to
+                update #{bn}.
+                You can disable this message in ide-haskell settings.
+                "
+            else
+              message = "
+                Ide-haskell:
+                You have selected #{bn} as your backend provider, but it
+                failed to activate.
+                Check your spelling and if #{bn} is installed and activated.
+                You can disable this message in ide-haskell settings.
+                "
+          atom.notifications.addWarning message, dismissable: true
           console.log message
         ), 5000
 
