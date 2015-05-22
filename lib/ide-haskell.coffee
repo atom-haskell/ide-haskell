@@ -3,12 +3,14 @@
 {PluginManager} = require './plugin-manager'
 {isCabalProject, getCabalProjectDir} = require './utils'
 {CompositeDisposable} = require 'atom'
-{getProjectSettings} = require './project-settings'
 
 
 module.exports = IdeHaskell =
   _pluginManager: null
   _disposables: new CompositeDisposable
+  _project:
+    isCabalProject: false # true if cabal project
+    root: ""              # detected project root directory
 
   config:
     checkOnFileSave:
@@ -95,11 +97,10 @@ module.exports = IdeHaskell =
   initIdeHaskell: (state) ->
     return if @isActive()
 
-    settings = getProjectSettings()
-    settings.root = getCabalProjectDir()
-    settings.isCabalProject = (settings.root != null)
+    @_project.root = getCabalProjectDir()
+    @_project.isCabalProject = (@_project.root != null)
 
-    return unless settings.isCabalProject
+    return unless @_project.isCabalProject
 
     @_pluginManager = new PluginManager state, @backend
     $(window).on 'focus', => @updateMenu()
@@ -134,12 +135,12 @@ module.exports = IdeHaskell =
     clearMenu()
 
   serialize: ->
-    return unless getProjectSettings().isCabalProject
+    return unless @_project.isCabalProject
     @_pluginManager.serialize()
 
   updateMenu: ->
     @clearMenu()
-    return unless getProjectSettings().isCabalProject
+    return unless @_project.isCabalProject
 
     atom.menu.add [
       {
