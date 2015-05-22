@@ -1,5 +1,4 @@
-{$$$, View} = require 'atom-space-pen-views'
-$ = require 'jquery'
+{$, $$$, View} = require 'atom-space-pen-views'
 {Point} = require 'atom'
 
 

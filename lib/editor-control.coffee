@@ -1,20 +1,15 @@
-{$$, $$$, View} = require 'atom-space-pen-views'
-$ = require 'jquery'
-{Subscriber} = require 'emissary'
+SubAtom = require 'sub-atom'
 
-{isHaskellSource, screenPositionFromMouseEvent, pixelPositionFromMouseEvent, getElementsByClass} = require './utils'
+{isHaskellSource, screenPositionFromMouseEvent,
+pixelPositionFromMouseEvent} = require './utils'
 {TooltipView} = require './tooltip-view'
-{CompositeDisposable, Range} = require 'atom'
+{Range} = require 'atom'
 
 class EditorControl
   constructor: (@editor, @manager) ->
     @checkMarkers = {}
-    @disposables = new CompositeDisposable
-    @editorElement = atom.views.getView(@editor)
-
-    @scroll = $(getElementsByClass(@editorElement, '.scroll-view'))
-
-    @subscriber = new Subscriber()
+    @disposables = new SubAtom
+    @editorElement = atom.views.getView(@editor).rootElement
 
     # defer-init the gutter events (#37)
     @initGutterSched = setTimeout (=>
@@ -29,7 +24,7 @@ class EditorControl
 
     # buffer events for automatic check
     buffer = @editor.getBuffer()
-    @disposables.add buffer.onDidSave () =>
+    @disposables.add buffer.onDidSave () ->
       return unless isHaskellSource buffer.getUri()
 
       # TODO if uri was changed, then we have to remove all current markers
@@ -40,7 +35,7 @@ class EditorControl
         atom.commands.dispatch workspaceElement, 'ide-haskell:lint-file'
 
     # show expression type if mouse stopped somewhere
-    @subscriber.subscribe @scroll, 'mousemove', (e) =>
+    @disposables.add @editorElement, 'mousemove', '.scroll-view', (e) =>
       pixelPt = pixelPositionFromMouseEvent @editor, e
       screenPt = @editor.screenPositionForPixelPosition pixelPt
       bufferPt = @editor.bufferPositionForScreenPosition screenPt
@@ -51,7 +46,7 @@ class EditorControl
       @exprTypeTimeout = setTimeout (=>
         @showExpressionType e
       ), atom.config.get('ide-haskell.expressionTypeInterval')
-    @subscriber.subscribe @scroll, 'mouseout', (e) =>
+    @disposables.add @editorElement, 'mouseout', '.scroll-view', (e) =>
       @clearExprTypeTimeout()
 
     # update all results from manager
@@ -60,22 +55,19 @@ class EditorControl
   initGutter: ->
     clearTimeout(@initGutterSched)
 
-    @gutter = $(getElementsByClass(@editorElement, '.gutter'))
-
     # mouse movement over gutter to show check results
     for c in ['ide-haskell-error', 'ide-haskell-warning', 'ide-haskell-lint']
-      @subscriber.subscribe @gutter, 'mouseenter', ".#{c}", (e) =>
+      @disposables.add @editorElement, 'mouseenter', ".gutter .#{c}", (e) =>
         @showCheckResult e
-      @subscriber.subscribe @gutter, 'mouseleave', ".#{c}", (e) =>
+      @disposables.add @editorElement, 'mouseleave', ".gutter .#{c}", (e) =>
         @hideCheckResult()
-    @subscriber.subscribe @gutter, 'mouseleave', (e) =>
+    @disposables.add @editorElement, 'mouseleave', '.gutter', (e) =>
       @hideCheckResult()
 
   deactivate: ->
     clearTimeout(@initGutterSched)
     @clearExprTypeTimeout()
     @hideCheckResult()
-    @subscriber.unsubscribe()
     @disposables.dispose()
 
   # helper function to hide tooltip and stop timeout

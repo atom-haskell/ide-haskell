@@ -1,5 +1,5 @@
 path = require 'path'
-$ = require 'jquery'
+{$} = require 'atom-space-pen-views'
 
 getCabalProjectDir = ->
   # just want to check the project root directory, but getRootDirectory is deprecated.
@@ -25,9 +25,6 @@ isHaskellSource = (fname) ->
   if path.extname(fname) is '.hs'
     return true
   return false
-
-getElementsByClass = (elem,klass) ->
-  elem.rootElement.querySelectorAll(klass)
 
 # pixel position from mouse event
 pixelPositionFromMouseEvent = (editor, event) ->

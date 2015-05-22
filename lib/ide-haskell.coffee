@@ -1,4 +1,4 @@
-$ = require 'jquery'
+{$} = require 'atom-space-pen-views'
 
 {PluginManager} = require './plugin-manager'
 {isCabalProject, getCabalProjectDir} = require './utils'

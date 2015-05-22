@@ -1,5 +1,4 @@
-{View} = require 'atom-space-pen-views'
-$ = require 'jquery'
+{$, View} = require 'atom-space-pen-views'
 class TooltipView extends View
   @content: ->
     @div class: 'ide-haskell-tooltip tooltip', =>
