@@ -137,7 +137,7 @@ module.exports = IdeHaskell =
     @_disposables.dispose()
     @_disposables = new CompositeDisposable
 
-    clearMenu()
+    @clearMenu()
 
   serialize: ->
     return unless @_project.isCabalProject
