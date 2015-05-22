@@ -114,6 +114,8 @@ module.exports = IdeHaskell =
         @_pluginManager.lintFile()
       'ide-haskell:prettify-file': =>
         @_pluginManager.prettifyFile(true)
+      'ide-haskell:shutdown-backend': =>
+        @backend.shutdownBackend()
 
     @updateMenu()
 
@@ -148,7 +150,9 @@ module.exports = IdeHaskell =
           {label: 'Separator1', type: 'separator'},
           {label: 'Prettify', command: 'ide-haskell:prettify-file'},
           {label: 'Separator2', type: 'separator'},
-          {label: 'Toggle Panel', command: 'ide-haskell:toggle-output'}
+          {label: 'Toggle Panel', command: 'ide-haskell:toggle-output'},
+          {label: 'Separator3', type: 'separator'},
+          {label: 'Stop Backend', command: 'ide-haskell:shutdown-backend'}
         ]
       }
     ]
