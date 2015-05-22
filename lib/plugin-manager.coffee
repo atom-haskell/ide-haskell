@@ -20,6 +20,7 @@ class PluginManager
 
   deactivate: ->
     @disposables.dispose()
+    @backend.shutdownBackend()
 
     @deleteEditorControllers()
     @deleteOutputViewPanel()
@@ -28,12 +29,11 @@ class PluginManager
     outputView: @outputView?.serialize()
 
   setBackend: (backend) =>
-    return if @backend?
     @backend = backend
 
-    @disposables.add @backend.onBackendActive =>
+    @disposables.add @backend?.onBackendActive =>
       @outputView.backendActive()
-    @disposables.add @backend.onBackendIdle =>
+    @disposables.add @backend?.onBackendIdle =>
       @outputView.backendIdle()
 
   togglePanel: ->

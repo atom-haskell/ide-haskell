@@ -47,6 +47,11 @@ module.exports = IdeHaskell =
       default: true
       description: "Show info message about haskell-ide-backend service on
                     activation"
+    useBackend:
+      type: "string"
+      default: ''
+      description: 'Name of backend to use. Leave empty for any. Consult
+                    backend provider documentation for name.'
 
   isActive: ->
     !!@_pluginManager
@@ -165,5 +170,11 @@ module.exports = IdeHaskell =
     atom.menu.update()
 
   consumeBackend_0_1_0: (service) ->
+    return if @backend?
+    bn = atom.config.get('ide-haskell.useBackend')
+    return if !!bn and service.name()!=bn
+    service.onDidDestroy =>
+      @backend = null
+      @_pluginManager?.setBackend @backend
     @backend = service
     @_pluginManager?.setBackend service
