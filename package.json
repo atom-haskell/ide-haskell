@@ -6,7 +6,7 @@
   "repository": "https://github.com/atom-haskell/ide-haskell",
   "license": "MIT",
   "engines": {
-    "atom": ">=0.177.0"
+    "atom": ">=0.174.0 <2.0.0"
   },
   "consumedServices": {
     "haskell-ide-backend": {
