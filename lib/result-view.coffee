@@ -24,8 +24,8 @@ class ResultView extends View
             class: 'position'
             row: r.position.row
             col: r.position.column
-            uri: r.file
-            "#{r.file}: #{r.position.row + 1}, #{r.position.column + 1}"
+            uri: r.uri
+            "#{r.uri}: #{r.position.row + 1}, #{r.position.column + 1}"
           @div class: 'description', r.message
 
 

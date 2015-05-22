@@ -90,8 +90,8 @@ class EditorControl
       m.marker.destroy() for m in @checkMarkers[t] ? []
       @checkMarkers[t] = []
 
-  markerFromCheckResult: ({file, severity, message, position}) ->
-    return unless file is @editor.getURI()
+  markerFromCheckResult: ({uri, severity, message, position}) ->
+    return unless uri is @editor.getURI()
     @checkMarkers[severity] = [] unless @checkMarkers[severity]?
 
     # create a new marker
