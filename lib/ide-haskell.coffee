@@ -191,9 +191,15 @@ module.exports = IdeHaskell =
     atom.menu.update()
 
   consumeBackend_0_1_0: (service) ->
-    return if @backend?
     bn = atom.config.get('ide-haskell.useBackend')
     return if !!bn and service.name()!=bn
+    if @backend?
+      atom.notifications.addInfo "ide-haskell is already using
+        backend #{@backend?.name?()}, and new backend #{service?.name?()}
+        appeared. You can select one in ide-haskell settings.
+        Will keep using #{@backend?.name?()} for now.", dismissable: true
+      return
+    return if @backend?
     service.onDidDestroy =>
       @backend = null
       @pluginManager?.setBackend @backend
