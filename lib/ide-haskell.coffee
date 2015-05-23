@@ -6,9 +6,9 @@
 
 
 module.exports = IdeHaskell =
-  _pluginManager: null
-  _disposables: new CompositeDisposable
-  _project:
+  pluginManager: null
+  disposables: null
+  project:
     isCabalProject: false # true if cabal project
     root: ""              # detected project root directory
 
@@ -54,9 +54,11 @@ module.exports = IdeHaskell =
                     backend provider documentation for name.'
 
   isActive: ->
-    !!@_pluginManager
+    !!@pluginManager
 
   activate: (state) ->
+    @disposables = new CompositeDisposable
+
     if atom.config.get('ide-haskell.autocompleteInfo')
       autocompleteHaskellInstalled =
         atom.packages.getAvailablePackageNames().some (pn) ->
@@ -111,7 +113,7 @@ module.exports = IdeHaskell =
 
     # if we did not activate (no cabal project),
     # set up an event to activate when a haskell file is opened
-    @_disposables.add atom.workspace.onDidOpen (event) =>
+    @disposables.add atom.workspace.onDidOpen (event) =>
       if not @isActive()
         item = event.item
         if item && item.getGrammar &&
@@ -121,24 +123,24 @@ module.exports = IdeHaskell =
   initIdeHaskell: (state) ->
     return if @isActive()
 
-    @_project.root = getCabalProjectDir()
-    @_project.isCabalProject = (@_project.root != null)
+    @project.root = getCabalProjectDir()
+    @project.isCabalProject = (@project.root != null)
 
-    return unless @_project.isCabalProject
+    return unless @project.isCabalProject
 
-    @_pluginManager = new PluginManager state, @backend
+    @pluginManager = new PluginManager state, @backend
     $(window).on 'focus', => @updateMenu()
 
     # global commands
-    @_disposables.add atom.commands.add 'atom-workspace',
+    @disposables.add atom.commands.add 'atom-workspace',
       'ide-haskell:toggle-output': =>
-        @_pluginManager.togglePanel()
+        @pluginManager.togglePanel()
       'ide-haskell:check-file': =>
-        @_pluginManager.checkFile()
+        @pluginManager.checkFile()
       'ide-haskell:lint-file': =>
-        @_pluginManager.lintFile()
+        @pluginManager.lintFile()
       'ide-haskell:prettify-file': =>
-        @_pluginManager.prettifyFile(true)
+        @pluginManager.prettifyFile(true)
       'ide-haskell:shutdown-backend': =>
         @backend.shutdownBackend()
 
@@ -149,22 +151,22 @@ module.exports = IdeHaskell =
 
     $(window).off 'focus', => @updateMenu()
 
-    @_pluginManager.deactivate()
-    @_pluginManager = null
+    @pluginManager.deactivate()
+    @pluginManager = null
 
     # clear commands
-    @_disposables.dispose()
-    @_disposables = new CompositeDisposable
+    @disposables.dispose()
+    @disposables = null
 
     @clearMenu()
 
   serialize: ->
-    return unless @_project.isCabalProject
-    @_pluginManager.serialize()
+    return unless @project.isCabalProject
+    @pluginManager.serialize()
 
   updateMenu: ->
     @clearMenu()
-    return unless @_project.isCabalProject
+    return unless @project.isCabalProject
 
     atom.menu.add [
       {
@@ -194,6 +196,6 @@ module.exports = IdeHaskell =
     return if !!bn and service.name()!=bn
     service.onDidDestroy =>
       @backend = null
-      @_pluginManager?.setBackend @backend
+      @pluginManager?.setBackend @backend
     @backend = service
-    @_pluginManager?.setBackend service
+    @pluginManager?.setBackend service
