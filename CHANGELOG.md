@@ -1,3 +1,8 @@
+## 0.5.0
+* Specify Atom version according to docs
+* Migration to haskell-ide-backend service
+* Autocompletion delegated to autocomplete-haskell
+
 ## 0.4.2
 * Allowing text selection in bottom pane (Daniel Beskin)
 * Fixing a missing resize cursor on Windows (Daniel Beskin)
