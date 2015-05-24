@@ -33,11 +33,11 @@ class EditorControl
     @disposables.add buffer.onWillSave () =>
       # TODO if uri was changed, then we have to remove all current markers
       editorElement = atom.views.getView(@editor)
-      if atom.config.get('ide-haskell.onSave.check')
+      if atom.config.get('ide-haskell.onSaveCheck')
         atom.commands.dispatch editorElement, 'ide-haskell:check-file'
-      if atom.config.get('ide-haskell.onSave.lint')
+      if atom.config.get('ide-haskell.onSaveLint')
         atom.commands.dispatch editorElement, 'ide-haskell:lint-file'
-      if atom.config.get('ide-haskell.onSave.prettify')
+      if atom.config.get('ide-haskell.onSavePrettify')
         atom.commands.dispatch editorElement, 'ide-haskell:prettify-file'
 
     # show expression type if mouse stopped somewhere

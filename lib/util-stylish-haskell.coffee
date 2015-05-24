@@ -7,16 +7,17 @@ prettify = (text, {onComplete, onFailure}) ->
 
   lines=[]
 
+  shpath = atom.config.get('ide-haskell.stylishHaskellPath')
+
   proc = new BufferedProcess
-    command: atom.config.get('ide-haskell.paths.stylishHaskell')
+    command: shpath
     args: []
     stdout: (line) ->
       lines.push(line)
     exit: -> onComplete?(lines.join(''))
 
   proc.onWillThrowError ({error, handle}) ->
-    atom.notifications.addError "Ide-haskell could not spawn
-      #{atom.config.get('ide-haskell.paths.stylishHaskell')}",
+    atom.notifications.addError "Ide-haskell could not spawn #{shpath}",
       detail: "#{error}"
     console.error error
     onFailure?()
