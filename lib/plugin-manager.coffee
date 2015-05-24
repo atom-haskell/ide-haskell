@@ -62,18 +62,8 @@ class PluginManager
       onComplete: (text) ->
         editor.setText(text)
 
-  showType: (editor) ->
-    @controllers?.get?(editor)?.showExpressionType()
-
-  showInfo: (editor) ->
-    @controllers?.get?(editor)?.showExpressionType(null,'getInfo')
-
-  insertType: (editor) ->
-    @controllers?.get?(editor)?.insertType()
-
-  closeTooltip: (editor) ->
-    @controllers?.get?(editor)?.hideExpressionType()
-    @controllers?.get?(editor)?.hideCheckResult()
+  controller: (editor) ->
+    @controllers?.get? editor
 
   # Update internals with results.
   updateResults: (types, results) ->

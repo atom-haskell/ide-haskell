@@ -179,6 +179,10 @@ class EditorControl
           indent+symbol+" :: "+type+"\n"
         stop()
 
+  closeTooltips: () ->
+    @hideExpressionType()
+    @hideCheckResult()
+
 module.exports = {
   EditorControl
 }
