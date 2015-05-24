@@ -8,11 +8,13 @@ module.exports = IdeHaskell =
   pluginManager: null
   disposables: null
   menu: null
-  project:
-    isCabalProject: false # true if cabal project
-    root: ""              # detected project root directory
 
   config:
+    activateStandalone:
+      type: "boolean"
+      default: true
+      description: "Activate package on standalone Haskell files, not
+                    requiring a cabal project"
     onSaveCheck:
       type: "boolean"
       default: true
@@ -194,17 +196,19 @@ module.exports = IdeHaskell =
     @disposables.add atom.workspace.onDidOpen (event) =>
       if not @isActive()
         item = event.item
-        if item && item.getGrammar &&
-           item.getGrammar().scopeName == "source.haskell"
-          @initIdeHaskell(state)
+        if item?.getGrammar?()?.scopeName == "source.haskell"
+          @initIdeHaskell state
 
   initIdeHaskell: (state) ->
     return if @isActive()
 
-    @project.root = getCabalProjectDir()
-    @project.isCabalProject = (@project.root != null)
+    canActivate = getCabalProjectDir()?
 
-    return unless @project.isCabalProject
+    if atom.config.get('ide-haskell.activateStandalone')
+      canActivate = atom.workspace.getTextEditors().some (e) ->
+        e.getGrammar()?.scopeName == "source.haskell"
+
+    return unless canActivate
 
     @pluginManager = new PluginManager state, @backend
     @updateMenu()
@@ -251,12 +255,10 @@ module.exports = IdeHaskell =
     @clearMenu()
 
   serialize: ->
-    return unless @project.isCabalProject
-    @pluginManager.serialize()
+    @pluginManager?.serialize()
 
   updateMenu: ->
     return if @menu?
-    return unless @project.isCabalProject
 
     @menu = new CompositeDisposable
     @menu.add atom.menu.add [
