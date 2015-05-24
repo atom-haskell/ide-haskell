@@ -13,18 +13,22 @@ module.exports = IdeHaskell =
     root: ""              # detected project root directory
 
   config:
-    checkOnFileSave:
-      type: "boolean"
-      default: true
-      description: "Check file after save"
-    lintOnFileSave:
-      type: "boolean"
-      default: true
-      description: "Lint file after save"
-    prettifyOnFileSave:
-      type: "boolean"
-      default: false
-      description: "Run file through stylish-haskell before save"
+    onSave:
+      type: "object"
+      properties:
+        check:
+          type: "boolean"
+          default: true
+          description: "Check file on save"
+        lint:
+          type: "boolean"
+          default: true
+          description: "Lint file on save"
+        prettify:
+          type: "boolean"
+          default: false
+          description: "Run file through stylish-haskell before save"
+
     switchTabOnCheck:
       type: "boolean"
       default: true
@@ -34,79 +38,79 @@ module.exports = IdeHaskell =
       default: 300
       description: "After this period of time the process of getting the
                     expression type will be started"
-    ghcModPath:
-      type: "string"
-      default: 'ghc-mod'
-      description: "Path to `ghc-mod` utility"
-    stylishHaskellPath:
-      type: "string"
-      default: 'stylish-haskell'
-      description: "Path to `stylish-haskell` utility"
-    autocompleteInfo:
-      type: "boolean"
-      default: true
-      description: "Show info message about autocomplete-haskell on activation"
-    ideBackendInfo:
-      type: "boolean"
-      default: true
-      description: "Show info message about haskell-ide-backend service on
-                    activation"
+    paths:
+      type: "object"
+      properties:
+        stylishHaskell:
+          type: "string"
+          default: 'stylish-haskell'
+          description: "Path to `stylish-haskell` utility"
+    startupMessages:
+      type: "object"
+      properties:
+        autocomplete:
+          type: "boolean"
+          default: true
+          description: "Show info message about autocomplete-haskell
+                        on activation"
+        ideBackend:
+          type: "boolean"
+          default: true
+          description: "Show info message about haskell-ide-backend service on
+                        activation"
     useBackend:
       type: "string"
       default: ''
       description: 'Name of backend to use. Leave empty for any. Consult
                     backend provider documentation for name.'
-    hotkeyToggleOutput:
-      # 'ide-haskell:toggle-output': =>
-      type: "string"
-      default: ''
-      description: 'Hotkey to toggle output'
-    hotkeyShutdownBackend:
-      # 'ide-haskell:shutdown-backend': =>
-      type: "string"
-      default: ''
-    hotkeyCheckFile:
-      # 'ide-haskell:check-file': ({target}) =>
-      type: "string"
-      default: ''
-    hotkeyLintFile:
-      # 'ide-haskell:lint-file': ({target}) =>
-      type: "string"
-      default: ''
-    hotkeyPrettifyFile:
-      # 'ide-haskell:prettify-file': ({target}) =>
-      type: "string"
-      default: ''
-    hotkeyShowType:
-      # 'ide-haskell:show-type': ({target}) =>
-      type: "string"
-      default: ''
-    hotkeyShowInfo:
-      # 'ide-haskell:show-info': ({target}) =>
-      type: "string"
-      default: ''
-    hotkeyInsertType:
-      # 'ide-haskell:insert-type': ({target}) =>
-      type: "string"
-      default: ''
-    hotkeyCloseTooltip:
-      type: "string"
-      default: 'escape'
+
+    hotkeys:
+      type: "object"
+      properties:
+        toggleOutput:
+          type: "string"
+          default: ''
+          description: 'Hotkey to toggle output'
+        shutdownBackend:
+          type: "string"
+          default: ''
+        checkFile:
+          type: "string"
+          default: ''
+        lintFile:
+          type: "string"
+          default: ''
+        prettifyFile:
+          type: "string"
+          default: ''
+        showType:
+          type: "string"
+          default: ''
+        showInfo:
+          type: "string"
+          default: ''
+        insertType:
+          type: "string"
+          default: ''
+        closeTooltip:
+          type: "string"
+          default: 'escape'
 
   hotkeys: {}
 
   watchKB: (option, source, command) ->
-    @disposables.add atom.config.observe "ide-haskell.#{option}", (value) =>
-      @hotkeys[option]?.dispose()
-      if !value
+    @disposables.add atom.config.observe "ide-haskell.hotkeys.#{option}",
+      (value) =>
+        @hotkeys[option]?.dispose()
+        if !value
+          atom.menu.update()
+          return
+        kb = {}
+        kb[value] = command
+        kbb = {}
+        kbb[source] = kb
+        @hotkeys[option] = atom.keymaps.add 'ide-haskell.hotkeys', kbb
         atom.menu.update()
-        return
-      kb = {}
-      kb[value] = command
-      kbb = {}
-      kbb[source] = kb
-      @hotkeys[option] = atom.keymaps.add 'ide-haskell.hotkeys', kbb
-      atom.menu.update()
 
   setKB: (source, kbs) ->
     for o,c of kbs
@@ -114,16 +118,16 @@ module.exports = IdeHaskell =
 
   setHotkeys: ->
     @setKB 'atom-workspace',
-      hotkeyToggleOutput: 'ide-haskell:toggle-output'
-      hotkeyShutdownBackend: 'ide-haskell:shutdown-backend'
+      toggleOutput: 'ide-haskell:toggle-output'
+      shutdownBackend: 'ide-haskell:shutdown-backend'
     @setKB 'atom-text-editor[data-grammar~="haskell"]',
-      hotkeyCheckFile: 'ide-haskell:check-file'
-      hotkeyLintFile: 'ide-haskell:lint-file'
-      hotkeyPrettifyFile: 'ide-haskell:prettify-file'
-      hotkeyShowType: 'ide-haskell:show-type'
-      hotkeyShowInfo: 'ide-haskell:show-info'
-      hotkeyInsertType: 'ide-haskell:insert-type'
-      hotkeyCloseTooltip: 'ide-haskell:close-tooltip'
+      checkFile: 'ide-haskell:check-file'
+      lintFile: 'ide-haskell:lint-file'
+      prettifyFile: 'ide-haskell:prettify-file'
+      showType: 'ide-haskell:show-type'
+      showInfo: 'ide-haskell:show-info'
+      insertType: 'ide-haskell:insert-type'
+      closeTooltip: 'ide-haskell:close-tooltip'
 
   unsetHotkeys: ->
     d.dispose() for o,d of @hotkeys
@@ -137,7 +141,7 @@ module.exports = IdeHaskell =
     @disposables.add atom.views.addViewProvider TooltipMessage, (message) ->
       (new TooltipElement).setMessage message
 
-    if atom.config.get('ide-haskell.autocompleteInfo')
+    if atom.config.get('ide-haskell.startupMessages.autocomplete')
       autocompleteHaskellInstalled =
         atom.packages.getAvailablePackageNames().some (pn) ->
           pn == 'autocomplete-haskell'
@@ -151,7 +155,7 @@ module.exports = IdeHaskell =
         atom.notifications.addInfo message, dismissable: true
         console.log message
 
-    if atom.config.get('ide-haskell.ideBackendInfo')
+    if atom.config.get('ide-haskell.startupMessages.ideBackend')
       setTimeout (=>
         unless @backend?
           bn = atom.config.get('ide-haskell.useBackend')

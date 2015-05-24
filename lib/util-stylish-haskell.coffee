@@ -8,7 +8,7 @@ prettify = (text, {onComplete, onFailure}) ->
   lines=[]
 
   proc = new BufferedProcess
-    command: atom.config.get('ide-haskell.stylishHaskellPath')
+    command: atom.config.get('ide-haskell.paths.stylishHaskell')
     args: []
     stdout: (line) ->
       lines.push(line)
@@ -16,7 +16,7 @@ prettify = (text, {onComplete, onFailure}) ->
 
   proc.onWillThrowError ({error, handle}) ->
     atom.notifications.addError "Ide-haskell could not spawn
-      #{atom.config.get('ide-haskell.stylishHaskellPath')}",
+      #{atom.config.get('ide-haskell.paths.stylishHaskell')}",
       detail: "#{error}"
     console.error error
     onFailure?()
