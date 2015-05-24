@@ -71,6 +71,10 @@ class PluginManager
   insertType: (editor) ->
     @controllers?.get?(editor)?.insertType()
 
+  closeTooltip: (editor) ->
+    @controllers?.get?(editor)?.hideExpressionType()
+    @controllers?.get?(editor)?.hideCheckResult()
+
   # Update internals with results.
   updateResults: (types, results) ->
     @checkResults[t] = [] for t in types

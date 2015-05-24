@@ -89,6 +89,9 @@ module.exports = IdeHaskell =
       # 'ide-haskell:insert-type': ({target}) =>
       type: "string"
       default: ''
+    hotkeyCloseTooltip:
+      type: "string"
+      default: 'escape'
 
   hotkeys: {}
 
@@ -120,6 +123,7 @@ module.exports = IdeHaskell =
       hotkeyShowType: 'ide-haskell:show-type'
       hotkeyShowInfo: 'ide-haskell:show-info'
       hotkeyInsertType: 'ide-haskell:insert-type'
+      hotkeyCloseTooltip: 'ide-haskell:close-tooltip'
 
   unsetHotkeys: ->
     d.dispose() for o,d of @hotkeys
@@ -227,6 +231,8 @@ module.exports = IdeHaskell =
           @pluginManager.showInfo target.getModel()
         'ide-haskell:insert-type': ({target}) =>
           @pluginManager.insertType target.getModel()
+        'ide-haskell:close-tooltip': ({target}) =>
+          @pluginManager.closeTooltip target.getModel()
 
     @updateMenu()
 
