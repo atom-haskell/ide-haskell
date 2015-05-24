@@ -38,6 +38,13 @@ module.exports = IdeHaskell =
       default: 300
       description: "After this period of time the process of getting the
                     expression type will be started"
+    onMouseHoverShow:
+      type: 'string'
+      default: 'Type'
+      enum: ['Nothing', 'Type', 'Info']
+    closeTooltipsOnCursorMove:
+      type: 'boolean'
+      default: false
     paths:
       type: "object"
       properties:

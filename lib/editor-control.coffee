@@ -42,6 +42,8 @@ class EditorControl
 
     # show expression type if mouse stopped somewhere
     @disposables.add @editorElement, 'mousemove', '.scroll-view', (e) =>
+      action = atom.config.get('ide-haskell.onMouseHoverShow')
+      return if action == 'Nothing'
       pixelPt = pixelPositionFromMouseEvent @editor, e
       screenPt = @editor.screenPositionForPixelPosition pixelPt
       bufferPt = @editor.bufferPositionForScreenPosition screenPt
@@ -50,9 +52,14 @@ class EditorControl
       @lastExprTypeBufferPt = bufferPt
       @clearExprTypeTimeout()
       @exprTypeTimeout = setTimeout (=>
-        @showExpressionType e
+        @showExpressionType e, 'get'+action
       ), atom.config.get('ide-haskell.expressionTypeInterval')
     @disposables.add @editorElement, 'mouseout', '.scroll-view', (e) =>
+      action = atom.config.get('ide-haskell.onMouseHoverShow')
+      return if action == 'Nothing'
+      @clearExprTypeTimeout()
+
+    @disposables.add @editor.onDidChangeCursorPosition =>
       @clearExprTypeTimeout()
 
     # update all results from manager
