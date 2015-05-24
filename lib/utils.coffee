@@ -19,12 +19,6 @@ module.exports = Utils =
         return path.dirname(file.getPath())
     return null
 
-  # check if file is haskell source code
-  isHaskellSource: (fname) ->
-    if path.extname(fname) is '.hs'
-      return true
-    return false
-
   # pixel position from mouse event
   pixelPositionFromMouseEvent: (editor, event) ->
     {clientX, clientY} = event

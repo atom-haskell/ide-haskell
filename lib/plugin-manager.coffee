@@ -40,16 +40,16 @@ class PluginManager
   togglePanel: ->
     @outputView?.toggle()
 
-  checkFile: ->
-    @checkOrLint(@backend?.checkBuffer,['error', 'warning'])
+  checkFile: (editor) ->
+    @checkOrLint editor,@backend?.checkBuffer,['error', 'warning']
 
-  lintFile: ->
-    @checkOrLint(@backend?.lintBuffer,['lint'])
+  lintFile: (editor) ->
+    @checkOrLint editor,@backend?.lintBuffer,['lint']
 
-  checkOrLint: (func, types) =>
+  checkOrLint: (editor, func, types) =>
     return unless func?
     @outputView?.pendingCheck()
-    func atom.workspace.getActiveTextEditor().getBuffer(), (res) =>
+    func editor.getBuffer(), (res) =>
       @checkResults[t] = (res.filter ({severity}) -> severity==t) for t in types
       @emitter.emit 'results-updated', {res: @checkResults, types}
 
@@ -57,12 +57,19 @@ class PluginManager
     @emitter.on 'results-updated', callback
 
   # File prettify
-  prettifyFile: ->
-    editor = atom.workspace.getActiveTextEditor()
-
+  prettifyFile: (editor) ->
     utilStylishHaskell.prettify editor.getText(),
       onComplete: (text) ->
         editor.setText(text)
+
+  showType: (editor) ->
+    @controllers?.get?(editor)?.showExpressionType()
+
+  showInfo: (editor) ->
+    @controllers?.get?(editor)?.showExpressionType(null,'getInfo')
+
+  insertType: (editor) ->
+    @controllers?.get?(editor)?.insertType()
 
   # Update internals with results.
   updateResults: (types, results) ->
@@ -77,17 +84,28 @@ class PluginManager
     @outputView?.deactivate()
     @outputView = null
 
+  addController: (editor) ->
+    unless @controllers.get(editor)?
+      @controllers.set(editor, new EditorControl(editor, this))
+      @disposables.add editor.onDidDestroy () =>
+        @removeController editor
+
   removeController: (editor) ->
     @controllers.get(editor)?.deactivate()
     @controllers.delete(editor)
 
+  controllerOnGrammar: (editor, grammar) ->
+    if grammar.scopeName == 'source.haskell'
+      @addController editor
+    else
+      @removeController editor
+
   # Observe text editors to attach controller
   subscribeEditorController: ->
     @disposables.add atom.workspace.observeTextEditors (editor) =>
-      if not @controllers.get(editor)
-        @controllers.set(editor, new EditorControl(editor, this))
-        @disposables.add editor.onDidDestroy () =>
-          @removeController editor
+      @disposables.add editor.onDidChangeGrammar (grammar) =>
+        @controllerOnGrammar editor, grammar
+      @controllerOnGrammar editor, editor.getGrammar()
 
   deleteEditorControllers: ->
     for editor in atom.workspace.getTextEditors()

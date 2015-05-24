@@ -1,20 +1,26 @@
 SubAtom = require 'sub-atom'
 
-{isHaskellSource, screenPositionFromMouseEvent,
+{screenPositionFromMouseEvent,
 pixelPositionFromMouseEvent} = require './utils'
-{TooltipView} = require './tooltip-view'
-{Range} = require 'atom'
+{TooltipMessage} = require './tooltip-view'
+{Range,CompositeDisposable,Disposable} = require 'atom'
 
 class EditorControl
   constructor: (@editor, @manager) ->
-    @checkMarkers = {}
     @disposables = new SubAtom
+    @tooltipMarkers = new CompositeDisposable
     @editorElement = atom.views.getView(@editor).rootElement
 
-    # defer-init the gutter events (#37)
-    @initGutterSched = setTimeout (=>
-      @initGutter()
-    ), 100 # 0 seems to be enough here, but wait a bit just to be safe.
+    @gutter = @editor.gutterWithName "ide-haskell-check-results"
+    @gutter ?= @editor.addGutter
+      name: "ide-haskell-check-results"
+      priority: 10
+
+    gutterElement = atom.views.getView(@gutter)
+    @disposables.add gutterElement, 'mouseenter', ".decoration", (e) =>
+      @showCheckResult e
+    @disposables.add gutterElement, 'mouseleave', ".decoration", (e) =>
+      @hideCheckResult()
 
     # event for editor updates
     @disposables.add @editor.onDidDestroy =>
@@ -24,15 +30,15 @@ class EditorControl
 
     # buffer events for automatic check
     buffer = @editor.getBuffer()
-    @disposables.add buffer.onDidSave () ->
-      return unless isHaskellSource buffer.getUri()
-
+    @disposables.add buffer.onWillSave () =>
       # TODO if uri was changed, then we have to remove all current markers
-      workspaceElement = atom.views.getView(atom.workspace)
+      editorElement = atom.views.getView(@editor)
       if atom.config.get('ide-haskell.checkOnFileSave')
-        atom.commands.dispatch workspaceElement, 'ide-haskell:check-file'
+        atom.commands.dispatch editorElement, 'ide-haskell:check-file'
       if atom.config.get('ide-haskell.lintOnFileSave')
-        atom.commands.dispatch workspaceElement, 'ide-haskell:lint-file'
+        atom.commands.dispatch editorElement, 'ide-haskell:lint-file'
+      if atom.config.get('ide-haskell.prettifyOnFileSave')
+        atom.commands.dispatch editorElement, 'ide-haskell:prettify-file'
 
     # show expression type if mouse stopped somewhere
     @disposables.add @editorElement, 'mousemove', '.scroll-view', (e) =>
@@ -52,23 +58,12 @@ class EditorControl
     # update all results from manager
     @updateResults {}
 
-  initGutter: ->
-    clearTimeout(@initGutterSched)
-
-    # mouse movement over gutter to show check results
-    for c in ['ide-haskell-error', 'ide-haskell-warning', 'ide-haskell-lint']
-      @disposables.add @editorElement, 'mouseenter', ".gutter .#{c}", (e) =>
-        @showCheckResult e
-      @disposables.add @editorElement, 'mouseleave', ".gutter .#{c}", (e) =>
-        @hideCheckResult()
-    @disposables.add @editorElement, 'mouseleave', '.gutter', (e) =>
-      @hideCheckResult()
-
   deactivate: ->
-    clearTimeout(@initGutterSched)
     @clearExprTypeTimeout()
     @hideCheckResult()
     @disposables.dispose()
+    @tooltipMarkers.dispose()
+    @tooltipMarkers=null
 
   # helper function to hide tooltip and stop timeout
   clearExprTypeTimeout: ->
@@ -87,65 +82,70 @@ class EditorControl
 
   destroyMarkersForTypes: (types) ->
     for t in types
-      m.marker.destroy() for m in @checkMarkers[t] ? []
-      @checkMarkers[t] = []
+      for m in @editor.findMarkers {type: 'check-result', severity: t}
+        m.destroy()
 
   markerFromCheckResult: ({uri, severity, message, position}) ->
     return unless uri is @editor.getURI()
-    @checkMarkers[severity] = [] unless @checkMarkers[severity]?
 
     # create a new marker
     range = new Range position, {row: position.row, column: position.column+1}
-    marker = @editor.markBufferRange range, invalidate: 'never'
-    @checkMarkers[severity].push
-      marker: marker
-      klass: 'ide-haskell-'+severity
+    marker = @editor.markBufferRange range,
+      type: 'check-result'
+      severity: severity
       desc: message
 
   renderResults: (types) ->
     for t in types
-      for m in @checkMarkers[t]
+      for m in @editor.findMarkers {type: 'check-result', severity: t}
         @decorateMarker(m)
 
   decorateMarker: (m) ->
-    { marker, klass } = m
-    @editor.decorateMarker marker, type: 'line-number', class: klass
-    @editor.decorateMarker marker, type: 'highlight', class: klass
-    @editor.decorateMarker marker, type: 'line', class: klass
+    cls = 'ide-haskell-'+m.getProperties().severity
+    @gutter.decorateMarker m, type: 'line-number', class: cls
+    @editor.decorateMarker m, type: 'highlight', class: cls
+    @editor.decorateMarker m, type: 'line', class: cls
 
   # get expression type under mouse cursor and show it
-  showExpressionType: (e) ->
-    return unless isHaskellSource(@editor.getURI()) and not @exprTypeTooltip?
+  showExpressionType: (e,fun = "getType") ->
+    @hideExpressionType()
 
-    pixelPt = pixelPositionFromMouseEvent(@editor, e)
-    screenPt = @editor.screenPositionForPixelPosition(pixelPt)
-    bufferPt = @editor.bufferPositionForScreenPosition(screenPt)
-    range = new Range bufferPt, bufferPt
-    editorElement = atom.views.getView(@editor)
-    nextCharPixelPt = editorElement.pixelPositionForBufferPosition(
-      [bufferPt.row, bufferPt.column + 1])
+    selRange = @editor.getLastSelection().getBufferRange()
 
-    return if pixelPt.left > nextCharPixelPt.left
-
-    # find out show position
-    offset = @editor.getLineHeightInPixels() * 0.7
-    tooltipRect =
-      left: e.clientX
-      right: e.clientX
-      top: e.clientY - offset
-      bottom: e.clientY + offset
-
-    # create tooltip with pending
-    @exprTypeTooltip = new TooltipView(tooltipRect)
+    if e?
+      pixelPt = pixelPositionFromMouseEvent(@editor, e)
+      screenPt = @editor.screenPositionForPixelPosition(pixelPt)
+      bufferPt = @editor.bufferPositionForScreenPosition(screenPt)
+      if selRange.containsPoint bufferPt
+        crange = selRange
+      else
+        crange = bufferPt
+      if bufferPt.isEqual @editor.bufferRangeForBufferRow(bufferPt.row).end
+        return
+    else
+      crange = @editor.getLastSelection().getBufferRange()
+      bufferPt = crange.start
 
     # process start
-    @manager.backend?.getType @editor.getBuffer(), range, ({type}) =>
-      @exprTypeTooltip?.updateText(type)
+    @manager.backend?[fun] @editor.getBuffer(), crange, ({range,type,info}) =>
+      type ?= info
+      @hideExpressionType()
+      tooltipMarker = @editor.markBufferPosition bufferPt
+      highlightMarker = @editor.markBufferRange range
+      @tooltipMarkers.add new Disposable ->
+        tooltipMarker.destroy()
+      @tooltipMarkers.add new Disposable ->
+        highlightMarker.destroy()
+      @editor.decorateMarker tooltipMarker,
+        type: 'overlay'
+        item: new TooltipMessage type
+      @editor.decorateMarker highlightMarker,
+        type: 'highlight'
+        class: 'ide-haskell-type'
 
   hideExpressionType: ->
-    if @exprTypeTooltip?
-      @exprTypeTooltip.remove()
-      @exprTypeTooltip = null
+    @tooltipMarkers.dispose()
+    @tooltipMarkers = new CompositeDisposable
 
   # show check result when mouse over gutter icon
   showCheckResult: (e) ->
@@ -153,38 +153,31 @@ class EditorControl
     row = @editor.bufferPositionForScreenPosition(
       screenPositionFromMouseEvent(@editor, e)).row
 
-    # find best result for row
-    foundResult = null
-    console.log @checkMarkers
-    for t, markers of @checkMarkers
-      console.log markers
-      continue unless markers?
-      for m in markers
-        {marker, desc} = m
-        if marker.getHeadBufferPosition().row is row
-          foundResult = desc
-          break
-      break if foundResult?
+    [marker] = @editor.findMarkers {type: 'check-result', startBufferRow: row}
 
-    console.log foundResult
-    # append tooltip if result found
-    return unless foundResult?
+    return unless marker?
 
-    # create show position
-    targetRect = e.currentTarget.getBoundingClientRect()
-    offset = @editor.getLineHeightInPixels() * 0.3
-    rect =
-      left: targetRect.left - offset
-      right: targetRect.right + offset
-      top: targetRect.top - offset
-      bottom: targetRect.bottom + offset
-
-    @checkResultTooltip = new TooltipView(rect, foundResult)
+    @checkResultTooltip = @editor.decorateMarker marker,
+      type: 'overlay'
+      position: 'tail'
+      item: new TooltipMessage marker.getProperties().desc
 
   hideCheckResult: ->
     if @checkResultTooltip?
-      @checkResultTooltip.remove()
+      @checkResultTooltip.destroy()
       @checkResultTooltip = null
+
+  insertType: ->
+    crange = @editor.getLastSelection().getBufferRange()
+    @manager.backend.getType @editor.getBuffer(), crange, ({range,type}) =>
+      n = @editor.indentationForBufferRow(range.start.row)
+      indent = ' '.repeat n*@editor.getTabLength()
+      @editor.scanInBufferRange /[\w'.]+/, range, ({matchText,stop}) =>
+        symbol = matchText
+        pos=[range.start.row,0]
+        @editor.setTextInBufferRange [pos,pos],
+          indent+symbol+" :: "+type+"\n"
+        stop()
 
 module.exports = {
   EditorControl

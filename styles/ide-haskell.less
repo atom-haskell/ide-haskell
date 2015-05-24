@@ -108,10 +108,26 @@ atom-text-editor::shadow {
     &.ide-haskell-error .region {
       background: linear-gradient(to right, @background-color-error 0%, fadeout(@background-color-error, 50%) 100%);
     }
+    &.ide-haskell-type .region {
+      background: fade(@background-color-info, 10%);
+    }
   }
 
-  .gutter .line-number {
-    &.ide-haskell-lint .icon-right {
+  .gutter[gutter-name="ide-haskell-check-results"] .decoration {
+    &:before {
+      font-family: 'Octicons Regular';
+      font-weight: normal;
+      font-style: normal;
+      display: inline-block;
+      line-height: 1;
+      -webkit-font-smoothing: antialiased;
+      text-decoration: none;
+      font-size:0.8em;
+      width:0.8em;
+      height:0.8em;
+    }
+
+    &.ide-haskell-lint {
       visibility: visible;
       &:before {
         content: @info;
@@ -120,7 +136,7 @@ atom-text-editor::shadow {
       }
     }
 
-    &.ide-haskell-warning .icon-right {
+    &.ide-haskell-warning {
       visibility: visible;
       &:before {
         content: @stop;
@@ -129,7 +145,7 @@ atom-text-editor::shadow {
       }
     }
 
-    &.ide-haskell-error .icon-right {
+    &.ide-haskell-error {
       visibility: visible;
       &:before {
         content: @alert;
@@ -140,12 +156,17 @@ atom-text-editor::shadow {
   }
 }
 
-.ide-haskell-tooltip {
-  font-family: Consolas, monospace;
-  .tooltip-inner {
-    white-space: pre-wrap !important;
+ide-haskell-tooltip {
+  div {
+    white-space: pre-wrap;
     text-align: left;
+    color: @text-color-info;
   }
+  display: block;
+  background: @overlay-background-color;
+  border: solid 2px @overlay-border-color;
+  padding: 5px;
+  border-radius: 3px;
 }
 
 .platform-win32 {
