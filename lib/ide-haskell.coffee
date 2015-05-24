@@ -2,6 +2,7 @@
 {TooltipMessage,TooltipElement} = require './tooltip-view'
 {getCabalProjectDir} = require './utils'
 {CompositeDisposable} = require 'atom'
+BackendHelper = require 'atom-backend-helper'
 
 
 module.exports = IdeHaskell =
@@ -152,52 +153,28 @@ module.exports = IdeHaskell =
         atom.notifications.addInfo message, dismissable: true
         console.log message
 
-    if atom.config.get('ide-haskell.startupMessageIdeBackend')
-      setTimeout (=>
-        unless @backend?
-          bn = atom.config.get('ide-haskell.useBackend')
-          if !bn
-            message = "
-              Ide-haskell:
-              Ide-haskell requires a package providing haskell-ide-backend
-              service.
-              Consider installing haskell-ghc-mod or other package, which
-              provides haskell-ide-backend.
-              You can disable this message in ide-haskell settings.
-              "
-          else
-            p=atom.packages.getActivePackage(bn)
-            if p?
-              message = "
-                Ide-haskell:
-                You have selected #{bn} as your backend provider, but it
-                does not provide haskell-ide-backend service. You may need to
-                update #{bn}.
-                You can disable this message in ide-haskell settings.
-                "
-            else
-              message = "
-                Ide-haskell:
-                You have selected #{bn} as your backend provider, but it
-                failed to activate.
-                Check your spelling and if #{bn} is installed and activated.
-                You can disable this message in ide-haskell settings.
-                "
-          atom.notifications.addWarning message, dismissable: true
-          console.log message
-        ), 5000
-
     @backend = null
+
+    @backendHelper = new BackendHelper 'ide-haskell',
+      main: IdeHaskell
+      backendInfo: 'startupMessageIdeBackend'
+      backendName: 'haskell-ide-backend'
+
+    @backendHelper.init()
+
     @initIdeHaskell(state)
     @setHotkeys()
 
     # if we did not activate (no cabal project),
     # set up an event to activate when a haskell file is opened
-    @disposables.add atom.workspace.onDidOpen (event) =>
-      if not @isActive()
-        item = event.item
-        if item?.getGrammar?()?.scopeName == "source.haskell"
-          @initIdeHaskell state
+    if not @isActive()
+      @disposables.add myself=atom.workspace.onDidOpen (event) =>
+        if not @isActive()
+          item = event.item
+          if item?.getGrammar?()?.scopeName == "source.haskell"
+            @initIdeHaskell state
+            if @isActive()
+              myself.dispose()
 
   initIdeHaskell: (state) ->
     return if @isActive()
@@ -293,17 +270,6 @@ module.exports = IdeHaskell =
     atom.menu.update()
 
   consumeBackend_0_1_0: (service) ->
-    bn = atom.config.get('ide-haskell.useBackend')
-    return if !!bn and service.name()!=bn
-    if @backend?
-      atom.notifications.addInfo "ide-haskell is already using
-        backend #{@backend?.name?()}, and new backend #{service?.name?()}
-        appeared. You can select one in ide-haskell settings.
-        Will keep using #{@backend?.name?()} for now.", dismissable: true
-      return
-    return if @backend?
-    service.onDidDestroy =>
-      @backend = null
-      @pluginManager?.setBackend @backend
-    @backend = service
+    @backendHelper.consume service, dispose: =>
+      @pluginManager?.setBackend null
     @pluginManager?.setBackend service
