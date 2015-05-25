@@ -82,7 +82,7 @@ class PluginManager
     unless @controllers.get(editor)?
       @controllers.set(editor, new EditorControl(editor, this))
       @disposables.add editor.onDidDestroy () =>
-        @removeController editor
+        @controllers.delete(editor) #deactivation is handled in EditorControl
 
   removeController: (editor) ->
     @controllers.get(editor)?.deactivate()
