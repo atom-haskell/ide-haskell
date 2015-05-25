@@ -66,11 +66,17 @@ class EditorControl
     @updateResults {}
 
   deactivate: ->
-    @clearExprTypeTimeout()
-    @hideCheckResult()
-    @disposables.dispose()
-    @tooltipMarkers.dispose()
-    @tooltipMarkers=null
+    if @manager? #if has not been deactivated before
+      @manager = null
+      @clearExprTypeTimeout()
+      @hideCheckResult()
+      @disposables.dispose()
+      @tooltipMarkers.dispose()
+      @disposables = null
+      @editorElement = null
+      @editor = null
+      @lastExprTypeBufferPt = null
+      @tooltipMarkers=null
 
   # helper function to hide tooltip and stop timeout
   clearExprTypeTimeout: ->
