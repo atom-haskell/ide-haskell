@@ -121,8 +121,11 @@ class EditorControl
       pixelPt = pixelPositionFromMouseEvent(@editor, e)
       screenPt = @editor.screenPositionForPixelPosition(pixelPt)
       bufferPt = @editor.bufferPositionForScreenPosition(screenPt)
-      [selRange] = @editor.getSelections().filter (sel) ->
-        sel.getBufferRange().containsPoint bufferPt
+      [selRange] = @editor.getSelections()
+        .map (sel) ->
+          sel.getBufferRange()
+        .filter (sel) ->
+          sel.containsPoint bufferPt
       crange = selRange ? bufferPt
       if bufferPt.isEqual @editor.bufferRangeForBufferRow(bufferPt.row).end
         return
