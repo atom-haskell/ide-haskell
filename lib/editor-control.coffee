@@ -60,7 +60,8 @@ class EditorControl
       @clearExprTypeTimeout()
 
     @disposables.add @editor.onDidChangeCursorPosition =>
-      @clearExprTypeTimeout()
+      if atom.config.get('ide-haskell.closeTooltipsOnCursorMove')
+        @clearExprTypeTimeout()
 
     # update all results from manager
     @updateResults {}
