@@ -1,3 +1,7 @@
+## 0.5.3
+* Make closeTooltipsOnCursorMove matter
+* More accurate fix for error on close (#56)
+
 ## 0.5.2
 * Fix error on file close (#56)
 
