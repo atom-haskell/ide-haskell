@@ -58,9 +58,17 @@ class PluginManager
 
   # File prettify
   prettifyFile: (editor) ->
+    [firstCursor, cursors...] = editor.getCursors().map (cursor) ->
+      cursor.getBufferPosition()
     utilStylishHaskell.prettify editor.getText(),
       onComplete: (text) ->
         editor.setText(text)
+        editor.getLastCursor().setBufferPosition firstCursor,
+          autoscroll: false
+        cursors.forEach (cursor) ->
+          editor.addCursorAtBufferPosition cursor,
+            autoscroll: false
+
 
   controller: (editor) ->
     @controllers?.get? editor
