@@ -1,3 +1,6 @@
+## 0.5.1
+* Fix error when hovering mouse over selection
+
 ## 0.5.0
 * Specify Atom version according to docs
 * Migration to haskell-ide-backend service
