@@ -1,3 +1,6 @@
+## 0.5.2
+* Fix error on file close (#56)
+
 ## 0.5.1
 * Fix error when hovering mouse over selection
 
