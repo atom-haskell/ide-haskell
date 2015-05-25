@@ -1,96 +1,74 @@
 {OutputView} = require './output-view'
 {EditorControl} = require './editor-control'
-{PendingBackend, Channel} = require './pending-backend'
-{CompleteProvider} = require './complete-provider'
-{MainCompletionDatabase} = require './completion-db'
 utilStylishHaskell = require './util-stylish-haskell'
-utilGhcMod = require './util-ghc-mod'
-{CompositeDisposable} = require 'atom'
+{CompositeDisposable, Emitter} = require 'atom'
 
 class PluginManager
 
-  constructor: (state) ->
-    @checkResults = []            # all errors, warings and lints here
+  constructor: (state, backend) ->
+    @checkResults = {}            # all errors, warings and lints here
+
+    @emitter = new Emitter
 
     @disposables = new CompositeDisposable
     @controllers = new WeakMap
-    @completeProviders = new WeakMap
 
-    @createPendingProcessController()
-    @createCompletionDatabase()
     @createOutputViewPanel(state)
     @subscribeEditorController()
-    @attachProcessControllerToOutputView()
+
+    @setBackend backend if backend?
 
   deactivate: ->
-    @disposables.dispose();
+    @disposables.dispose()
+    @backend?.shutdownBackend()
 
-    @detachProcessControllerToOutputView()
-    @deletePendingProcessController()
     @deleteEditorControllers()
     @deleteOutputViewPanel()
 
   serialize: ->
     outputView: @outputView?.serialize()
 
+  setBackend: (backend) =>
+    @backend = backend
+
+    if @backend?
+      @disposables.add @backend.onBackendActive =>
+        @outputView.backendActive()
+      @disposables.add @backend.onBackendIdle =>
+        @outputView.backendIdle()
+
   togglePanel: ->
     @outputView?.toggle()
 
-  checkFile: ->
-    @checkOrLintFile(utilGhcMod.check)
+  checkFile: (editor) ->
+    @checkOrLint editor,@backend?.checkBuffer,['error', 'warning']
 
-  lintFile: ->
-    @checkOrLintFile(utilGhcMod.lint)
+  lintFile: (editor) ->
+    @checkOrLint editor,@backend?.lintBuffer,['lint']
+
+  checkOrLint: (editor, func, types) =>
+    return unless func?
+    @outputView?.pendingCheck()
+    func editor.getBuffer(), (res) =>
+      @checkResults[t] = (res.filter ({severity}) -> severity==t) for t in types
+      @emitter.emit 'results-updated', {res: @checkResults, types}
+
+  onResultsUpdated: (callback) =>
+    @emitter.on 'results-updated', callback
 
   # File prettify
-  prettifyFile: ->
-    editor = atom.workspace.getActiveTextEditor()
-    fileName = editor?.getPath()
-    return unless fileName?
+  prettifyFile: (editor) ->
+    utilStylishHaskell.prettify editor.getText(),
+      onComplete: (text) ->
+        editor.setText(text)
 
-    # first we should save current buffer if it was modified
-    if editor.isModified()
-      @checkTurnedOff = true
-      editor.save()
-      @checkTurnedOff = false
-
-    # start prettifier - it must convert file in-place
-    @pendingProcessController.start(
-      Channel.prettify,
-      utilStylishHaskell.prettify,
-      { fileName: fileName })
-
-  # File check or lint.
-  checkOrLintFile: (func) ->
-    return if @checkTurnedOff? and @checkTurnedOff
-    editor = atom.workspace.getActiveTextEditor()
-    fileName = editor?.getPath()
-    return unless fileName?
-
-    @outputView?.pendingCheck()
-    checkOrLintResults = []
-
-    @pendingProcessController.start Channel.checkAndLint, func, {
-      fileName: fileName
-      onResult: (oneResult) ->
-        checkOrLintResults.push oneResult
-      onComplete: (affectedTypes) =>
-        @updateResults affectedTypes, checkOrLintResults
-        @outputView?.resultsUpdated affectedTypes
-        @updateAllEditorsWithResults affectedTypes
-      onFailure: =>
-        @outputView?.resultsUpdated null    # TODO notify of error
-    }
+  controller: (editor) ->
+    @controllers?.get? editor
 
   # Update internals with results.
   updateResults: (types, results) ->
     @checkResults[t] = [] for t in types
     @checkResults[r.type].push(r) for r in results
-
-  # Update every editor view with results
-  updateAllEditorsWithResults: (types) ->
-    for editor in atom.workspace.getTextEditors()
-      @controllers.get(editor)?.resultsUpdated types
 
   # Create and delete output view panel.
   createOutputViewPanel: (state) ->
@@ -100,57 +78,32 @@ class PluginManager
     @outputView?.deactivate()
     @outputView = null
 
+  addController: (editor) ->
+    unless @controllers.get(editor)?
+      @controllers.set(editor, new EditorControl(editor, this))
+      @disposables.add editor.onDidDestroy () =>
+        @removeController editor
+
   removeController: (editor) ->
     @controllers.get(editor)?.deactivate()
-    @completeProviders.get(editor)?.dispose()
     @controllers.delete(editor)
-    @completeProviders.delete(editor)
 
-  autocompleteProviderForEditor: (editor) ->
-    return null unless editor
-    return @completeProviders.get(editor)
+  controllerOnGrammar: (editor, grammar) ->
+    if grammar.scopeName == 'source.haskell'
+      @addController editor
+    else
+      @removeController editor
 
   # Observe text editors to attach controller
   subscribeEditorController: ->
     @disposables.add atom.workspace.observeTextEditors (editor) =>
-      if not @controllers.get(editor)
-        @controllers.set(editor, new EditorControl(editor, this))
-        if not editor.mini
-          # create a completion provider for the editor; note, there is only one provider object
-          # that is actually registered with autocomplete (see provideAutocomplete()), but we use n instances of
-          # these internally to manage per-file state.
-          @completeProviders.set(editor, new CompleteProvider(editor, this))
-
-        @disposables.add editor.onDidDestroy () =>
-          @removeController editor
+      @disposables.add editor.onDidChangeGrammar (grammar) =>
+        @controllerOnGrammar editor, grammar
+      @controllerOnGrammar editor, editor.getGrammar()
 
   deleteEditorControllers: ->
     for editor in atom.workspace.getTextEditors()
       @removeController editor
-
-  # Work with precess controller
-  createPendingProcessController: ->
-    @pendingProcessController = new PendingBackend
-
-  deletePendingProcessController: ->
-    @pendingProcessController?.deactivate()
-    @pendingProcessController = null
-
-  # Attach process controller to output view
-  attachProcessControllerToOutputView: ->
-    @pendingProcessController.on 'backend-active', =>
-      @outputView.backendActive()
-    @pendingProcessController.on 'backend-idle', =>
-      @outputView.backendIdle()
-
-  detachProcessControllerToOutputView: ->
-    @pendingProcessController.off 'backend-active'
-    @pendingProcessController.off 'backend-idle'
-
-  # Building main completion database
-  createCompletionDatabase: ->
-    @mainCDB = new MainCompletionDatabase this
-    @localCDB = {} # completion databases for uri
 
 
 module.exports = {

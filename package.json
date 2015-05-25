@@ -6,19 +6,18 @@
   "repository": "https://github.com/atom-haskell/ide-haskell",
   "license": "MIT",
   "engines": {
-    "atom": ">=0.177.0"
+    "atom": ">=0.174.0 <2.0.0"
   },
-  "providedServices": {
-    "autocomplete.provider": {
+  "consumedServices": {
+    "haskell-ide-backend": {
       "versions": {
-        "1.0.0": "provideAutocomplete"
+        "0.1.0": "consumeBackend_0_1_0"
       }
     }
   },
   "dependencies": {
-    "fuzzaldrin": "~1.0.0",
-    "emissary": "~1.2.1",
-    "jquery": "^2",
-    "atom-space-pen-views": "^2.0.3"
+    "atom-space-pen-views": "^2.0.3",
+    "sub-atom": "^1.0.0",
+    "atom-backend-helper": "^0.0.1"
   }
 }

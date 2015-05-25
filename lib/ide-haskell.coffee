@@ -1,24 +1,34 @@
-$ = require 'jquery'
-
 {PluginManager} = require './plugin-manager'
-{isCabalProject, getCabalProjectDir} = require './utils'
+{TooltipMessage,TooltipElement} = require './tooltip-view'
+{getCabalProjectDir} = require './utils'
 {CompositeDisposable} = require 'atom'
-{getProjectSettings} = require './project-settings'
+BackendHelper = require 'atom-backend-helper'
 
 
 module.exports = IdeHaskell =
-  _pluginManager: null
-  _disposables: new CompositeDisposable
+  pluginManager: null
+  disposables: null
+  menu: null
 
   config:
-    checkOnFileSave:
+    activateStandalone:
       type: "boolean"
       default: true
-      description: "Check file after save"
-    lintOnFileSave:
+      description: "Activate package on standalone Haskell files, not
+                    requiring a cabal project"
+    onSaveCheck:
       type: "boolean"
       default: true
-      description: "Lint file after save"
+      description: "Check file on save"
+    onSaveLint:
+      type: "boolean"
+      default: true
+      description: "Lint file on save"
+    onSavePrettify:
+      type: "boolean"
+      default: false
+      description: "Run file through stylish-haskell before save"
+
     switchTabOnCheck:
       type: "boolean"
       default: true
@@ -28,109 +38,238 @@ module.exports = IdeHaskell =
       default: 300
       description: "After this period of time the process of getting the
                     expression type will be started"
-    ghcModPath:
-      type: "string"
-      default: 'ghc-mod'
-      description: "Path to `ghc-mod` utility"
+    onMouseHoverShow:
+      type: 'string'
+      default: 'Type'
+      enum: ['Nothing', 'Type', 'Info']
+    closeTooltipsOnCursorMove:
+      type: 'boolean'
+      default: false
     stylishHaskellPath:
       type: "string"
       default: 'stylish-haskell'
       description: "Path to `stylish-haskell` utility"
+    startupMessageAutocomplete:
+      type: "boolean"
+      default: true
+      description: "Show info message about autocomplete-haskell
+                    on activation"
+    startupMessageIdeBackend:
+      type: "boolean"
+      default: true
+      description: "Show info message about haskell-ide-backend service on
+                    activation"
+    useBackend:
+      type: "string"
+      default: ''
+      description: 'Name of backend to use. Leave empty for any. Consult
+                    backend provider documentation for name.'
+
+    hotkeyToggleOutput:
+      type: "string"
+      default: ''
+      description: 'Hotkey to toggle output'
+    hotkeyShutdownBackend:
+      type: "string"
+      default: ''
+    hotkeyCheckFile:
+      type: "string"
+      default: ''
+    hotkeyLintFile:
+      type: "string"
+      default: ''
+    hotkeyPrettifyFile:
+      type: "string"
+      default: ''
+    hotkeyShowType:
+      type: "string"
+      default: ''
+    hotkeyShowInfo:
+      type: "string"
+      default: ''
+    hotkeyInsertType:
+      type: "string"
+      default: ''
+    hotkeyCloseTooltip:
+      type: "string"
+      default: 'escape'
+
+  hotkeys: {}
+
+  watchKB: (option, source, command) ->
+    @disposables.add atom.config.observe "ide-haskell.hotkey#{option}",
+      (value) =>
+        @hotkeys[option]?.dispose()
+        if !value
+          atom.menu.update()
+          return
+        kb = {}
+        kb[value] = command
+        kbb = {}
+        kbb[source] = kb
+        @hotkeys[option] = atom.keymaps.add 'ide-haskell.hotkeys', kbb
+        atom.menu.update()
+
+  setKB: (source, kbs) ->
+    for o,c of kbs
+      @watchKB o,source,c
+
+  setHotkeys: ->
+    @setKB 'atom-workspace',
+      ToggleOutput: 'ide-haskell:toggle-output'
+      ShutdownBackend: 'ide-haskell:shutdown-backend'
+    @setKB 'atom-text-editor[data-grammar~="haskell"]',
+      CheckFile: 'ide-haskell:check-file'
+      LintFile: 'ide-haskell:lint-file'
+      PrettifyFile: 'ide-haskell:prettify-file'
+      ShowType: 'ide-haskell:show-type'
+      ShowInfo: 'ide-haskell:show-info'
+      InsertType: 'ide-haskell:insert-type'
+      CloseTooltip: 'ide-haskell:close-tooltip'
+
+  unsetHotkeys: ->
+    d.dispose() for o,d of @hotkeys
 
   isActive: ->
-    !!@_pluginManager
+    !!@pluginManager
 
   activate: (state) ->
+    @disposables = new CompositeDisposable
+
+    @disposables.add atom.views.addViewProvider TooltipMessage, (message) ->
+      (new TooltipElement).setMessage message
+
+    if atom.config.get('ide-haskell.startupMessageAutocomplete')
+      autocompleteHaskellInstalled =
+        atom.packages.getAvailablePackageNames().some (pn) ->
+          pn == 'autocomplete-haskell'
+      unless autocompleteHaskellInstalled
+        message = "
+          Ide-haskell:
+          Autocompletion has been delegated to autocomplete-haskell package.
+          Please, install it, if you want autocompletion.
+          You can disable this message in ide-haskell settings.
+          "
+        atom.notifications.addInfo message, dismissable: true
+        console.log message
+
+    @backend = null
+
+    @backendHelper = new BackendHelper 'ide-haskell',
+      main: IdeHaskell
+      backendInfo: 'startupMessageIdeBackend'
+      backendName: 'haskell-ide-backend'
+
+    @backendHelper.init()
+
     @initIdeHaskell(state)
+    @setHotkeys()
 
     # if we did not activate (no cabal project),
     # set up an event to activate when a haskell file is opened
-    @_disposables.add atom.workspace.onDidOpen (event) =>
-      if not @isActive()
-        item = event.item
-        if item && item.getGrammar &&
-           item.getGrammar().scopeName == "source.haskell"
-          @initIdeHaskell(state)
+    if not @isActive()
+      @disposables.add myself=atom.workspace.onDidOpen (event) =>
+        if not @isActive()
+          item = event.item
+          if item?.getGrammar?()?.scopeName == "source.haskell"
+            @initIdeHaskell state
+            if @isActive()
+              myself.dispose()
 
   initIdeHaskell: (state) ->
     return if @isActive()
 
-    settings = getProjectSettings()
-    settings.root = getCabalProjectDir()
-    settings.isCabalProject = (settings.root != null)
+    canActivate = getCabalProjectDir()?
 
-    return unless settings.isCabalProject
+    if atom.config.get('ide-haskell.activateStandalone')
+      canActivate = atom.workspace.getTextEditors().some (e) ->
+        e.getGrammar()?.scopeName == "source.haskell"
 
-    $(window).on 'focus', => @updateMenu()
+    return unless canActivate
 
-    @_pluginManager = new PluginManager(state)
+    @pluginManager = new PluginManager state, @backend
+    @updateMenu()
 
     # global commands
-    @_disposables.add atom.commands.add 'atom-workspace',
+    @disposables.add atom.commands.add 'atom-workspace',
       'ide-haskell:toggle-output': =>
-        @_pluginManager.togglePanel()
-      'ide-haskell:check-file': =>
-        @_pluginManager.checkFile()
-      'ide-haskell:lint-file': =>
-        @_pluginManager.lintFile()
-      'ide-haskell:prettify-file': =>
-        @_pluginManager.prettifyFile(true)
+        @pluginManager.togglePanel()
+      'ide-haskell:shutdown-backend': =>
+        @backend.shutdownBackend()
+
+    @disposables.add \
+      atom.commands.add 'atom-text-editor[data-grammar~="haskell"]',
+        'ide-haskell:check-file': ({target}) =>
+          @pluginManager.checkFile target.getModel()
+        'ide-haskell:lint-file': ({target}) =>
+          @pluginManager.lintFile target.getModel()
+        'ide-haskell:prettify-file': ({target}) =>
+          @pluginManager.prettifyFile target.getModel()
+        'ide-haskell:show-type': ({target}) =>
+          @pluginManager.controller(target.getModel()).showExpressionType()
+        'ide-haskell:show-info': ({target}) =>
+          @pluginManager.controller(target.getModel()).showExpressionType null,
+            'getInfo'
+        'ide-haskell:insert-type': ({target}) =>
+          @pluginManager.controller(target.getModel()).insertType()
+        'ide-haskell:close-tooltip': ({target}) =>
+          @pluginManager.controller(target.getModel()).closeTooltips()
 
     @updateMenu()
 
   deactivate: ->
     return unless @isActive()
 
-    $(window).off 'focus', => @updateMenu()
+    @unsetHotkeys()
 
-    @_pluginManager.deactivate()
-    @_pluginManager = null
+    @pluginManager.deactivate()
+    @pluginManager = null
 
     # clear commands
-    @_disposables.dispose()
-    @_disposables = new CompositeDisposable
+    @disposables.dispose()
+    @disposables = null
 
-    clearMenu()
+    @clearMenu()
 
   serialize: ->
-    return unless getProjectSettings().isCabalProject
-    @_pluginManager.serialize()
+    @pluginManager?.serialize()
 
   updateMenu: ->
-    @clearMenu()
-    return unless getProjectSettings().isCabalProject
+    return if @menu?
 
-    atom.menu.add [
-      {
-        label: 'Haskell IDE'
-        submenu : [
-          {label: 'Check', command: 'ide-haskell:check-file'},
-          {label: 'Linter', command: 'ide-haskell:lint-file'},
-          {label: 'Separator1', type: 'separator'},
-          {label: 'Prettify', command: 'ide-haskell:prettify-file'},
-          {label: 'Separator2', type: 'separator'},
-          {label: 'Toggle Panel', command: 'ide-haskell:toggle-output'}
-        ]
-      }
+    @menu = new CompositeDisposable
+    @menu.add atom.menu.add [
+      label: 'Haskell IDE'
+      submenu : [
+        {label: 'Check', command: 'ide-haskell:check-file'},
+        {label: 'Linter', command: 'ide-haskell:lint-file'},
+        {label: 'Prettify', command: 'ide-haskell:prettify-file'},
+        {label: 'Toggle Panel', command: 'ide-haskell:toggle-output'},
+        {label: 'Stop Backend', command: 'ide-haskell:shutdown-backend'}
+      ]
     ]
 
+    @menu.add atom.contextMenu.add
+      'atom-text-editor[data-grammar~="haskell"]': [
+        'label': 'Haskell IDE'
+        'submenu': [
+            'label': 'Show Type'
+            'command': 'ide-haskell:show-type'
+          ,
+            'label': 'Show Info'
+            'command': 'ide-haskell:show-info'
+          ,
+            'label': 'Insert Type'
+            'command': 'ide-haskell:insert-type'
+        ]
+      ]
+
   clearMenu: ->
-    atom.menu.template = (
-      obj for obj in atom.menu.template when obj.label isnt "Haskell IDE"
-    )
+    @menu.dispose()
+    @menu=null
     atom.menu.update()
 
-  provideAutocomplete: ->
-    # register a single "provider" with autocomplete;
-    # then we create one of our own CompleteProvider objects for each
-    # editor. requestHandler forwards requests to the appropriate object.
-    provider =
-      selector: '.source.haskell',
-      blacklist: '.source.haskell .comment'
-      requestHandler: (options) ->
-        return [] unless @_pluginManager
-        @_pluginManager
-          .autocompleteProviderForEditor(options.editor)
-          ?.buildSuggestions()
-
-    return {provider: provider}
+  consumeBackend_0_1_0: (service) ->
+    @backendHelper.consume service, dispose: =>
+      @pluginManager?.setBackend null
+    @pluginManager?.setBackend service

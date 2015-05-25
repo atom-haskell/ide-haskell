@@ -1,7 +1,5 @@
-{View} = require 'atom-space-pen-views'
-$ = require 'jquery'
+{$, View} = require 'atom-space-pen-views'
 {ResultView} = require './result-view'
-{ResultType} = require './util-data'
 
 class OutputView extends View
 
@@ -16,10 +14,22 @@ class OutputView extends View
             @div class: 'btn-group btn-cell', =>
               @div outlet: 'statusIcon', class: 'status-icon'
             @div class: 'btn-group btn-cell', =>
-              @button click: 'switchTabView', outlet: 'errorsButton', class: 'btn tab-btn selected', id: 'tab1', 'Errors'
-              @button click: 'switchTabView', outlet: 'warningsButton', class: 'btn tab-btn', id: 'tab2', 'Warnings'
+              @button
+                click: 'switchTabView'
+                outlet: 'errorsButton'
+                class: 'btn tab-btn selected'
+                id: 'tab1', 'Errors'
+              @button
+                click: 'switchTabView'
+                outlet: 'warningsButton'
+                class: 'btn tab-btn'
+                id: 'tab2', 'Warnings'
             @div class: 'btn-group btn-cell', =>
-              @button click: 'switchTabView', outlet: 'lintsButton', class: 'btn tab-btn', id: 'tab3', 'Lints'
+              @button
+                click: 'switchTabView'
+                outlet: 'lintsButton'
+                class: 'btn tab-btn'
+                id: 'tab3', 'Lints'
           @div class: 'btn-toolbar pull-right', =>
             @button outlet: 'closeButton', class: 'btn', 'Close'
         @div class: 'panel-body padding', =>
@@ -37,15 +47,25 @@ class OutputView extends View
     @switchCounter = 0   # if counter is 0 the error tab is switched
 
     # prepare arrays for errors, warnings and lints data
-    @checkControl = [
-      { v: @errorsListView, b: @errorsButton, t: @errorsButton.text() },
-      { v: @warningsListView, b: @warningsButton, t: @warningsButton.text() },
-      { v: @lintsListView, b: @lintsButton, t: @lintsButton.text() },
-    ]
+    @checkControl =
+      error:
+        v: @errorsListView
+        b: @errorsButton
+        t: @errorsButton.text()
+      warning:
+        v: @warningsListView
+        b: @warningsButton
+        t: @warningsButton.text()
+      lint:
+        v: @lintsListView
+        b: @lintsButton
+        t: @lintsButton.text()
 
     # events
     @resizeHandle.on 'mousedown', (e) => @resizeStarted e
     @closeButton.on 'click', => @toggle()
+
+    @manager.onResultsUpdated @updateResults
 
   deactivate: ->
     @remove()
@@ -87,20 +107,15 @@ class OutputView extends View
     @switchCounter++
 
   # update current results
-  resultsUpdated: (types) ->
+  updateResults: ({res, types}) =>
+    for t in types
+      count = res[t].length
 
-    # update result views if everything is ok
-    if types?
-      for t in types
-        # button name calculation
-        count = @manager.checkResults[t].length
-        buttonName = @checkControl[t].t + (
-          if count > 0 then " (#{count})" else ""
-        )
-
-        # update buttons and views
-        @checkControl[t].v.update @manager.checkResults[t]
-        @checkControl[t].b.text buttonName
+      # update buttons and views
+      @checkControl[t].v.update res[t]
+      @checkControl[t].b.text @checkControl[t].t + (
+        if count > 0 then " (#{count})" else ""
+      )
 
     @autoSwitchTabView()
 
@@ -108,7 +123,7 @@ class OutputView extends View
   autoSwitchTabView: ->
     @switchCounter = @switchCounter - 1
     if atom.config.get('ide-haskell.switchTabOnCheck') and @switchCounter is 0
-      for btn, t in @checkControl
+      for t, btn in @checkControl
         if @manager.checkResults[t]?.length > 0
           @switchTabView null, btn.b
           break
