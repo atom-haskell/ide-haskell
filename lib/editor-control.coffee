@@ -117,16 +117,13 @@ class EditorControl
   showExpressionType: (e,fun = "getType") ->
     @hideExpressionType()
 
-    selRange = @editor.getLastSelection().getBufferRange()
-
     if e?
       pixelPt = pixelPositionFromMouseEvent(@editor, e)
       screenPt = @editor.screenPositionForPixelPosition(pixelPt)
       bufferPt = @editor.bufferPositionForScreenPosition(screenPt)
-      if selRange.containsPoint bufferPt
-        crange = selRange
-      else
-        crange = bufferPt
+      [selRange] = @editor.getSelections().filter (sel) ->
+        sel.getBufferRange().containsPoint bufferPt
+      crange = selRange ? bufferPt
       if bufferPt.isEqual @editor.bufferRangeForBufferRow(bufferPt.row).end
         return
     else
