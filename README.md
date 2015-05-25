@@ -1,58 +1,88 @@
-# Haskell IDE
+# IDE-Haskell [![Join the chat at https://gitter.im/atom-haskell/ide-haskell](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/atom-haskell/ide-haskell?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![Join the chat at https://gitter.im/atom-haskell/ide-haskell](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/atom-haskell/ide-haskell?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
-Welcome to Haskell IDE plugin for amazing [Atom](http://atom.io) editor! This plugin is intended to help you in [Haskell](http://haskell.org) developing.
-
-*Haskell IDE is currently in active development state.*
+Welcome to IDE-Haskell plugin for amazing [Atom](http://atom.io) editor! This
+plugin is intended to help you with development in
+[Haskell](http://haskell.org).
 
 ## Implemented features
 
-#### Cabal project autodetection
+#### Haskell project autodetection
 
-Haskell IDE works only with cabal projects. You can simply start [Atom](http://atom.io) from cabal project root or drag and drop cabal project folder on editor and plugin will be started automatically.
+IDE-Haskell works only with Haskell projects. When you open Cabal project in
+Atom, or simply open a Haskell source file, IDE-Haskell will start
+automatically.
 
 #### Errors, warnings and linter
 
-After saving the current file the check and linter processes will be executed. After processes are finished the results can be seen in plugin output panel. You can see different kind of results by switching `Errors`, `Warnings` and `Lints` tab buttons. By pressing with mouse button on any result inside output panel the Atom editor will open the appropriate file with cursor already at the position of this result.
+After saving the current file the check and linter processes will be executed.
+After processes are finished the results can be seen in output panel. You can
+see different kind of results by switching `Errors`, `Warnings` and `Lints` tab
+buttons. If you click on message's file name in output panel, Atom will open
+this file and put cursor near problem that triggered output message.
 
-Also all the results can be seen near the line numbers if you position the mouse cursor over the handsome icon. And of course the results are highlighted inside editor view so you can easily locate where the problem is.
+Check results can also be seen in left editor gutter (near line numbers) as
+icons. If you hover mouse pointer over such an icon, a tooltip will be shown
+with problem description. Results are highlighted inside editor as well, so you
+can easily determine where the problem is.
 
 ![Errors, warnings and linter](http://atom-haskell.github.io/ide-haskell/images/check.gif)
 
-#### Get type at point
+#### Get type/info
 
-Just position your mouse cursor above expression you want to know the type of and wait for some time. Tooltip will appear with everything you want to know.
+You can get type of any expression and get info on any symbol.
+
+There are two options to do so.
+
+First one is to hover mouse pointer over any Haskell source in editor, or any
+selection. By default, this will show type for expression/selecton under cursor.
+You can change this behavior to show info for symbol, or disable it completely
+in IDE-Haskell settings.
+
+Another option is to use keyboard to get type/info under cursor. No default
+bindings are specified, but you can specify them in IDE-Haskell settings.
+
+See [Configuration](#configuration) for more information.
 
 ![Get type at point](http://atom-haskell.github.io/ide-haskell/images/types.gif)
 
 #### Autocompletion
 
-Autocompletion facilities have been moved to [autocomplete-haskell](https://atom.io/packages/autocomplete-haskell) package.
+Autocompletion facilities have been moved to
+[autocomplete-haskell](https://atom.io/packages/autocomplete-haskell) package.
+
+Please install it if you want autocompletion.
 
 #### Code beautify
 
-Now you can use `stylish-haskell` utility to indent pragmas, imports and data type definitions. Simply select `Prettify` from Haskel IDE menu or press magic combination of buttons to apply `stylish-haskell` to current file.
+You can use `stylish-haskell` utility to indent pragmas, imports and data type
+definitions. Simply select `Prettify` from Haskel IDE menu to apply
+`stylish-haskell` to current file.
 
 ![Code beautify](http://atom-haskell.github.io/ide-haskell/images/beautify.gif)
 
 ## Requirements
 
-* [ghc-mod](https://github.com/kazu-yamamoto/ghc-mod)
-* [stylish-haskell](https://github.com/jaspervdj/stylish-haskell)
-* [autocomplete-plus](https://atom.io/packages/autocomplete-plus)
+Atom packages:
+* [haskell-ghc-mod](https://atom.io/packages/haskell-ghc-mod)
 * [language-haskell](https://atom.io/packages/language-haskell)
+* [autocomplete-haskell](https://atom.io/packages/autocomplete-haskell) (optional, recommended)
+
+Binaries:
+* [stylish-haskell](https://github.com/jaspervdj/stylish-haskell)
 
 ## Installation
 
-    $ apm install ide-haskell
+```
+$ apm install language-haskell haskell-ghc-mod ide-haskell autocomplete-haskell
+```
 
 ## Configuration
 
 Package is fully configurable via **Edit → Preferences → Packages → ide-haskell
 → Settings**
 
-You will likely need to specify full paths to `ghc-mod` and `stylish-haskell`, if those are not in `PATH`, at the very least.
+You will likely need to specify full paths to `stylish-haskell`, if it is not in
+your `PATH`, at the very least.
 
 ## TODO
 
@@ -69,16 +99,18 @@ You will likely need to specify full paths to `ghc-mod` and `stylish-haskell`, i
 
 ## Changelog
 
-Changelog is available [here](https://github.com/atom-haskell/ide-haskell/blob/master/CHANGELOG.md).
+Changelog is available [here][CHANGELOG].
 
 ## License
 
-Copyright © 2015 Alexander Chaika
+Copyright © 2015 Alexander Chaika, Nikolay Yakimov
 
 Contributors:
 * Daniel Beskin
 * John Quigley
 * Luka Horvat
-* Nikolay Yakimov
 
-See the [LICENSE.md](https://github.com/atom-haskell/ide-haskell/blob/master/LICENSE.md) for details.
+See the [LICENSE.md][LICENSE] for details.
+
+[CHANGELOG]: https://github.com/atom-haskell/ide-haskell/blob/master/CHANGELOG.md
+[LICENSE]: https://github.com/atom-haskell/ide-haskell/blob/master/LICENSE.md
