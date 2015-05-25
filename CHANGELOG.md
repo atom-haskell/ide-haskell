@@ -1,3 +1,6 @@
+## 0.5.4
+* Preserve cursor position on prettify (#58)
+
 ## 0.5.3
 * Make closeTooltipsOnCursorMove matter
 * More accurate fix for error on close (#56)
