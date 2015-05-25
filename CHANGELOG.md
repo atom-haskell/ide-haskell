@@ -2,6 +2,12 @@
 * Specify Atom version according to docs
 * Migration to haskell-ide-backend service
 * Autocompletion delegated to autocomplete-haskell
+* Stop backend menu option
+* Hotkeys configurable from settings window
+* Most commands are bound to haskell grammar editors
+* Option to prettify file on save (some problems exist)
+* Command to insert type
+* Now works on standalone Haskell files!
 
 ## 0.4.2
 * Allowing text selection in bottom pane (Daniel Beskin)
