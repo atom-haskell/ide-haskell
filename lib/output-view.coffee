@@ -132,7 +132,15 @@ class OutputView extends View
     @statusIcon.attr 'data-status', 'progress'
 
   backendIdle: ->
-    @statusIcon.attr 'data-status', 'ready'
+    switch @statusIcon.attr 'data-status'
+      when 'error', 'warning' then return
+      else @statusIcon.attr 'data-status', 'ready'
+
+  backendWarning: ->
+    @statusIcon.attr 'data-status', 'warning'
+
+  backendError: ->
+    @statusIcon.attr 'data-status', 'error'
 
 
 module.exports = {

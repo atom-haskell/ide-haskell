@@ -63,6 +63,10 @@
         color: @text-color-error;
         content: @alert;
       }
+      &[data-status=warning]:before {
+        content: @stop;
+        color: @text-color-warning;
+      }
     }
   }
 
