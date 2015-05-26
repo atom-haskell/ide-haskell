@@ -18,6 +18,6 @@
   "dependencies": {
     "atom-space-pen-views": "^2.0.3",
     "sub-atom": "^1.0.0",
-    "atom-backend-helper": "^0.0.3"
+    "atom-backend-helper": "^0.0.4"
   }
 }
