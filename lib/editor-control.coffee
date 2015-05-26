@@ -143,6 +143,9 @@ class EditorControl
     @manager.backend?[fun] @editor.getBuffer(), crange, ({range,type,info}) =>
       type ?= info
       @hideExpressionType()
+      unless type?
+        @manager.backendWarning()
+        return
       tooltipMarker = @editor.markBufferPosition bufferPt
       highlightMarker = @editor.markBufferRange range
       @tooltipMarkers.add new Disposable ->
