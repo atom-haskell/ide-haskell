@@ -1,3 +1,7 @@
+## 0.5.5
+* Show warning state in outputView on fail to get info/type
+* Bump to haskell-ide-backend-0.1.1
+
 ## 0.5.4
 * Preserve cursor position on prettify (#58)
 
