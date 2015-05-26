@@ -137,7 +137,9 @@ class OutputView extends View
       else @statusIcon.attr 'data-status', 'ready'
 
   backendWarning: ->
-    @statusIcon.attr 'data-status', 'warning'
+    switch @statusIcon.attr 'data-status'
+      when 'error' then return
+      else @statusIcon.attr 'data-status', 'warning'
 
   backendError: ->
     @statusIcon.attr 'data-status', 'error'
