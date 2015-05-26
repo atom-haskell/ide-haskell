@@ -37,6 +37,9 @@ class PluginManager
       @disposables.add @backend.onBackendIdle =>
         @outputView.backendIdle()
 
+  backendWarning: =>
+    @outputView.backendWarning()
+
   togglePanel: ->
     @outputView?.toggle()
 
