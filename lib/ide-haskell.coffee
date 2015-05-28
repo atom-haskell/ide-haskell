@@ -36,8 +36,7 @@ module.exports = IdeHaskell =
     expressionTypeInterval:
       type: "integer"
       default: 300
-      description: "After this period of time the process of getting the
-                    expression type will be started"
+      description: "Type/Info tooltip show delay, in ms"
     onMouseHoverShow:
       type: 'string'
       default: 'Type'
