@@ -1,3 +1,13 @@
+## 0.5.6
+* Tooltip behavior updates (#62):
+    - Don't hide tooltip unless new is
+      ready, or none is expected
+    - Show tooltip at the start of expression,
+      and not at mouse position (only when invoked
+      by mouse)
+    - Set pointer-events:none on atom-overlay
+    - Disable fade-in to reduce flicker
+
 ## 0.5.5
 * Show warning state in outputView on fail to get info/type
 * Bump to haskell-ide-backend-0.1.1
