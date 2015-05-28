@@ -1,3 +1,6 @@
+## 0.5.7
+* Run context menu commands on last mouse position
+
 ## 0.5.6
 * Tooltip behavior updates (#62):
     - Don't hide tooltip unless new is
