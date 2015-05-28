@@ -84,6 +84,8 @@ Package is fully configurable via **Edit → Preferences → Packages → ide-ha
 You will likely need to specify full paths to `stylish-haskell`, if it is not in
 your `PATH`, at the very least.
 
+You might also want look into configuring haskell-ghc-mod: [haskell-ghc-mod README](https://github.com/atom-haskell/haskell-ghc-mod#haskell-ghc-mod-atom-package)
+
 ## TODO
 
 - [x] Cabal project autodetection
