@@ -6,7 +6,7 @@ class TooltipMessage
 class TooltipView extends HTMLElement
   setMessage: (message) ->
     @inner.textContent=message.text
-    $(this).fadeTo(100,1)
+    $(this).fadeTo(0,1)
     this
 
   createdCallback: ->

@@ -62,12 +62,14 @@ class EditorControl
     @disposables.add @editor.onDidChangeCursorPosition =>
       if atom.config.get('ide-haskell.closeTooltipsOnCursorMove')
         @clearExprTypeTimeout()
+        @hideExpressionType()
 
     # update all results from manager
     @updateResults {}
 
   deactivate: ->
     @clearExprTypeTimeout()
+    @hideExpressionType()
     @hideCheckResult()
     @disposables.dispose()
     @tooltipMarkers.dispose()
@@ -83,7 +85,6 @@ class EditorControl
     if @exprTypeTimeout?
       clearTimeout @exprTypeTimeout
       @exprTypeTimeout = null
-    @hideExpressionType()
 
   updateResults: ({res, types}) =>
     res ?= @manager.checkResults
@@ -121,8 +122,6 @@ class EditorControl
 
   # get expression type under mouse cursor and show it
   showExpressionType: (e,fun = "getType") ->
-    @hideExpressionType()
-
     if e?
       pixelPt = pixelPositionFromMouseEvent(@editor, e)
       screenPt = @editor.screenPositionForPixelPosition(pixelPt)
@@ -134,6 +133,7 @@ class EditorControl
           sel.containsPoint bufferPt
       crange = selRange ? bufferPt
       if bufferPt.isEqual @editor.bufferRangeForBufferRow(bufferPt.row).end
+        @hideExpressionType()
         return
     else
       crange = @editor.getLastSelection().getBufferRange()
@@ -142,11 +142,22 @@ class EditorControl
     # process start
     @manager.backend?[fun] @editor.getBuffer(), crange, ({range,type,info}) =>
       type ?= info
+      if range.isEqual(@tooltipHighlightRange)
+        # if @tooltipMarkerId?
+        #   tooltipMarker = @editor.getMarker(@tooltipMarkerId)
+        #   tooltipMarker.setBufferRange new Range(bufferPt,bufferPt)
+        return
+      @tooltipHighlightRange = range
       @hideExpressionType()
       unless type?
         @manager.backendWarning()
         return
-      tooltipMarker = @editor.markBufferPosition bufferPt
+      @markerBufferRange=range
+      if e?
+        tooltipMarker = @editor.markBufferPosition range.start
+      else
+        tooltipMarker = @editor.markBufferPosition bufferPt
+      # @tooltipMarkerId = tooltipMarker.id
       highlightMarker = @editor.markBufferRange range
       @tooltipMarkers.add new Disposable ->
         tooltipMarker.destroy()
@@ -160,6 +171,7 @@ class EditorControl
         class: 'ide-haskell-type'
 
   hideExpressionType: ->
+    @tooltipHighlightRange=null
     @tooltipMarkers.dispose()
     @tooltipMarkers = new CompositeDisposable
 
