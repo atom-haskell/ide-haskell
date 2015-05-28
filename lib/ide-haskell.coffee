@@ -204,13 +204,15 @@ module.exports = IdeHaskell =
           @pluginManager.lintFile target.getModel()
         'ide-haskell:prettify-file': ({target}) =>
           @pluginManager.prettifyFile target.getModel()
-        'ide-haskell:show-type': ({target}) =>
-          @pluginManager.controller(target.getModel()).showExpressionType()
-        'ide-haskell:show-info': ({target}) =>
+        'ide-haskell:show-type': ({target,detail}) =>
           @pluginManager.controller(target.getModel()).showExpressionType null,
-            'getInfo'
-        'ide-haskell:insert-type': ({target}) =>
-          @pluginManager.controller(target.getModel()).insertType()
+            'getType', detail?.contextCommand?
+        'ide-haskell:show-info': ({target,detail}) =>
+          @pluginManager.controller(target.getModel()).showExpressionType null,
+            'getInfo', detail?.contextCommand?
+        'ide-haskell:insert-type': ({target,detail}) =>
+          @pluginManager.controller(target.getModel())
+            .insertType detail?.contextCommand?
         'ide-haskell:close-tooltip': ({target}) =>
           @pluginManager.controller(target.getModel()).closeTooltips()
 

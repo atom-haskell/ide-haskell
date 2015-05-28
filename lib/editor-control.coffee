@@ -42,14 +42,16 @@ class EditorControl
 
     # show expression type if mouse stopped somewhere
     @disposables.add @editorElement, 'mousemove', '.scroll-view', (e) =>
-      action = atom.config.get('ide-haskell.onMouseHoverShow')
-      return if action == 'Nothing'
       pixelPt = pixelPositionFromMouseEvent @editor, e
       screenPt = @editor.screenPositionForPixelPosition pixelPt
       bufferPt = @editor.bufferPositionForScreenPosition screenPt
-      return if @lastExprTypeBufferPt?.isEqual(bufferPt)
 
-      @lastExprTypeBufferPt = bufferPt
+      return if @lastMouseBufferPt?.isEqual(bufferPt)
+      @lastMouseBufferPt = bufferPt
+
+      action = atom.config.get('ide-haskell.onMouseHoverShow')
+      return if action == 'Nothing'
+
       @clearExprTypeTimeout()
       @exprTypeTimeout = setTimeout (=>
         @showExpressionType e, 'get'+action
@@ -77,7 +79,7 @@ class EditorControl
     @disposables = null
     @editorElement = null
     @editor = null
-    @lastExprTypeBufferPt = null
+    @lastMouseBufferPt = null
     @tooltipMarkers=null
 
   # helper function to hide tooltip and stop timeout
@@ -121,7 +123,7 @@ class EditorControl
     @editor.decorateMarker m, type: 'line', class: cls
 
   # get expression type under mouse cursor and show it
-  showExpressionType: (e,fun = "getType") ->
+  showExpressionType: (e,fun = "getType",lastPos) ->
     if e?
       pixelPt = pixelPositionFromMouseEvent(@editor, e)
       screenPt = @editor.screenPositionForPixelPosition(pixelPt)
@@ -135,6 +137,10 @@ class EditorControl
       if bufferPt.isEqual @editor.bufferRangeForBufferRow(bufferPt.row).end
         @hideExpressionType()
         return
+    else if lastPos
+      e = {} #emulate mouse event
+      bufferPt = @lastMouseBufferPt
+      crange = bufferPt
     else
       crange = @editor.getLastSelection().getBufferRange()
       bufferPt = crange.start
@@ -195,8 +201,11 @@ class EditorControl
       @checkResultTooltip.destroy()
       @checkResultTooltip = null
 
-  insertType: ->
-    crange = @editor.getLastSelection().getBufferRange()
+  insertType: (lastPos) ->
+    if lastPos
+      crange = @lastMouseBufferPt
+    else
+      crange = @editor.getLastSelection().getBufferRange()
     @manager.backend.getType @editor.getBuffer(), crange, ({range,type}) =>
       n = @editor.indentationForBufferRow(range.start.row)
       indent = ' '.repeat n*@editor.getTabLength()
