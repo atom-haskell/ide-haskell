@@ -1,6 +1,7 @@
 {OutputView} = require './output-view'
 {EditorControl} = require './editor-control'
 utilStylishHaskell = require './util-stylish-haskell'
+utilCabalFormat = require './util-cabal-format'
 {CompositeDisposable, Emitter} = require 'atom'
 
 class PluginManager
@@ -60,10 +61,14 @@ class PluginManager
     @emitter.on 'results-updated', callback
 
   # File prettify
-  prettifyFile: (editor) ->
+  prettifyFile: (editor, format='haskell') ->
     [firstCursor, cursors...] = editor.getCursors().map (cursor) ->
       cursor.getBufferPosition()
-    utilStylishHaskell.prettify editor.getText(),
+    util = switch format
+      when 'haskell' then utilStylishHaskell
+      when 'cabal' then utilCabalFormat
+      else throw new Error "Unknown format #{format}"
+    util.prettify editor.getText(),
       onComplete: (text) ->
         editor.setText(text)
         editor.getLastCursor().setBufferPosition firstCursor,

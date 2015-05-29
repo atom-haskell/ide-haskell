@@ -48,6 +48,10 @@ module.exports = IdeHaskell =
       type: "string"
       default: 'stylish-haskell'
       description: "Path to `stylish-haskell` utility"
+    cabalPath:
+      type: "string"
+      default: 'cabal'
+      description: "Path to `cabal` utility, for `cabal format`"
     startupMessageAutocomplete:
       type: "boolean"
       default: true
@@ -224,6 +228,11 @@ module.exports = IdeHaskell =
             .insertImport getEventType(detail)
         'ide-haskell:close-tooltip': ({target}) =>
           @pluginManager.controller(target.getModel()).closeTooltips()
+
+    @disposables.add \
+      atom.commands.add 'atom-text-editor[data-grammar~="cabal"]',
+        'ide-haskell:prettify-file': ({target}) =>
+          @pluginManager.prettifyFile target.getModel(), 'cabal'
 
     @updateMenu()
 
