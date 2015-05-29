@@ -213,6 +213,9 @@ module.exports = IdeHaskell =
         'ide-haskell:insert-type': ({target,detail}) =>
           @pluginManager.controller(target.getModel())
             .insertType detail?.contextCommand?
+        'ide-haskell:insert-import': ({target,detail}) =>
+          @pluginManager.controller(target.getModel())
+            .insertImport detail?.contextCommand?
         'ide-haskell:close-tooltip': ({target}) =>
           @pluginManager.controller(target.getModel()).closeTooltips()
 
@@ -229,6 +232,9 @@ module.exports = IdeHaskell =
     # clear commands
     @disposables.dispose()
     @disposables = null
+
+    @backendHelper = null
+    @backend = null
 
     @clearMenu()
 
@@ -262,6 +268,9 @@ module.exports = IdeHaskell =
           ,
             'label': 'Insert Type'
             'command': 'ide-haskell:insert-type'
+          # ,
+          #   'label': 'Insert Import'
+          #   'command': 'ide-haskell:insert-import'
         ]
       ]
 
@@ -270,7 +279,8 @@ module.exports = IdeHaskell =
     @menu=null
     atom.menu.update()
 
-  consumeBackend_0_1_1: (service) ->
-    @backendHelper.consume service, dispose: =>
+  consumeBackend_0_1_2: (service) ->
+    @disposables.add @backendHelper.consume service, dispose: =>
       @pluginManager?.setBackend null
+      helper?.dispose()
     @pluginManager?.setBackend service

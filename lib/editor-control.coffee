@@ -216,6 +216,15 @@ class EditorControl
           indent+symbol+" :: "+type+"\n"
         stop()
 
+  insertImport: (lastPos) ->
+    if lastPos
+      crange = @lastMouseBufferPt
+    else
+      crange = @editor.getLastSelection().getBufferRange()
+    @manager.backend.getModulesExportingSymbolAt @editor.getBuffer(),
+      crange, (lines) ->
+        console.log line for line in lines
+
   closeTooltips: () ->
     @hideExpressionType()
     @hideCheckResult()

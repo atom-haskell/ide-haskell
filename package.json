@@ -11,13 +11,13 @@
   "consumedServices": {
     "haskell-ide-backend": {
       "versions": {
-        "0.1.1": "consumeBackend_0_1_1"
+        "0.1.2": "consumeBackend_0_1_2"
       }
     }
   },
   "dependencies": {
     "atom-space-pen-views": "^2.0.3",
     "sub-atom": "^1.0.0",
-    "atom-backend-helper": "^0.0.4"
+    "atom-backend-helper": "^0.0.5"
   }
 }
