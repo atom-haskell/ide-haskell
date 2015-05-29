@@ -196,6 +196,12 @@ module.exports = IdeHaskell =
       'ide-haskell:shutdown-backend': =>
         @backend.shutdownBackend()
 
+    getEventType = (detail) ->
+      if detail?.contextCommand?
+        'context'
+      else
+        'keyboard'
+
     @disposables.add \
       atom.commands.add 'atom-text-editor[data-grammar~="haskell"]',
         'ide-haskell:check-file': ({target}) =>
@@ -206,16 +212,16 @@ module.exports = IdeHaskell =
           @pluginManager.prettifyFile target.getModel()
         'ide-haskell:show-type': ({target,detail}) =>
           @pluginManager.controller(target.getModel()).showExpressionType null,
-            'getType', detail?.contextCommand?
+            getEventType(detail),'getType'
         'ide-haskell:show-info': ({target,detail}) =>
           @pluginManager.controller(target.getModel()).showExpressionType null,
-            'getInfo', detail?.contextCommand?
+            getEventType(detail),'getInfo'
         'ide-haskell:insert-type': ({target,detail}) =>
           @pluginManager.controller(target.getModel())
-            .insertType detail?.contextCommand?
+            .insertType getEventType(detail)
         'ide-haskell:insert-import': ({target,detail}) =>
           @pluginManager.controller(target.getModel())
-            .insertImport detail?.contextCommand?
+            .insertImport getEventType(detail)
         'ide-haskell:close-tooltip': ({target}) =>
           @pluginManager.controller(target.getModel()).closeTooltips()
 

@@ -54,7 +54,7 @@ class EditorControl
 
       @clearExprTypeTimeout()
       @exprTypeTimeout = setTimeout (=>
-        @showExpressionType e, 'get'+action
+        @showExpressionType bufferPt, 'mouse', 'get'+action
       ), atom.config.get('ide-haskell.expressionTypeInterval')
     @disposables.add @editorElement, 'mouseout', '.scroll-view', (e) =>
       action = atom.config.get('ide-haskell.onMouseHoverShow')
@@ -123,58 +123,76 @@ class EditorControl
     @editor.decorateMarker m, type: 'line', class: cls
 
   # get expression type under mouse cursor and show it
-  showExpressionType: (e,fun = "getType",lastPos) ->
-    if e?
-      pixelPt = pixelPositionFromMouseEvent(@editor, e)
-      screenPt = @editor.screenPositionForPixelPosition(pixelPt)
-      bufferPt = @editor.bufferPositionForScreenPosition(screenPt)
-      [selRange] = @editor.getSelections()
-        .map (sel) ->
-          sel.getBufferRange()
-        .filter (sel) ->
-          sel.containsPoint bufferPt
-      crange = selRange ? bufferPt
-      if bufferPt.isEqual @editor.bufferRangeForBufferRow(bufferPt.row).end
-        @hideExpressionType()
-        return
-    else if lastPos
-      e = {} #emulate mouse event
-      bufferPt = @lastMouseBufferPt
-      crange = bufferPt
-    else
-      crange = @editor.getLastSelection().getBufferRange()
-      bufferPt = crange.start
-
-    # process start
-    @manager.backend?[fun] @editor.getBuffer(), crange, ({range,type,info}) =>
-      type ?= info
-      if range.isEqual(@tooltipHighlightRange)
-        # if @tooltipMarkerId?
-        #   tooltipMarker = @editor.getMarker(@tooltipMarkerId)
-        #   tooltipMarker.setBufferRange new Range(bufferPt,bufferPt)
-        return
-      @tooltipHighlightRange = range
-      @hideExpressionType()
-      unless type?
-        @manager.backendWarning()
-        return
-      @markerBufferRange=range
-      if e?
-        tooltipMarker = @editor.markBufferPosition range.start
+  showExpressionType: (bufferPt, eventType, fun = 'getType') ->
+    mouseEvent = contextEvent = keyboardEvent = false
+    switch eventType
+      when 'mouse'
+        [selRange] = @editor.getSelections()
+          .map (sel) ->
+            sel.getBufferRange()
+          .filter (sel) ->
+            sel.containsPoint bufferPt
+        crange = selRange ? bufferPt
+        mouseEvent = true
+      when 'context'
+        bufferPt = @lastMouseBufferPt
+        crange = bufferPt
+        contextEvent = true
+      when 'keyboard'
+        crange = @editor.getLastSelection().getBufferRange()
+        bufferPt = crange.start
+        keyboardEvent = true
       else
-        tooltipMarker = @editor.markBufferPosition bufferPt
-      # @tooltipMarkerId = tooltipMarker.id
-      highlightMarker = @editor.markBufferRange range
-      @tooltipMarkers.add new Disposable ->
-        tooltipMarker.destroy()
-      @tooltipMarkers.add new Disposable ->
-        highlightMarker.destroy()
-      @editor.decorateMarker tooltipMarker,
-        type: 'overlay'
-        item: new TooltipMessage type
-      @editor.decorateMarker highlightMarker,
-        type: 'highlight'
-        class: 'ide-haskell-type'
+        throw new Error "unknown event type #{eventType}"
+
+    if bufferPt.isEqual @editor.bufferRangeForBufferRow(bufferPt.row).end
+      @hideExpressionType()
+      return
+
+    runPendingEvent = ({fun,crange}) =>
+      @showExpressionTypePendingEvent = null
+      @showExpressionTypeRunning = true
+      @manager.backend?[fun] @editor.getBuffer(), crange, ({range,type,info}) =>
+        if @showExpressionTypePendingEvent?
+          runPendingEvent @showExpressionTypePendingEvent
+          return
+        @showExpressionTypeRunning = false
+        type ?= info
+        if range.isEqual(@tooltipHighlightRange)
+          # if @tooltipMarkerId?
+          #   tooltipMarker = @editor.getMarker(@tooltipMarkerId)
+          #   tooltipMarker.setBufferRange new Range(bufferPt,bufferPt)
+          return
+        #exit if mouse moved away
+        if mouseEvent
+          unless range.containsPoint(@lastMouseBufferPt)
+            return
+        @tooltipHighlightRange = range
+        @hideExpressionType()
+        unless type?
+          @manager.backendWarning()
+          return
+        @markerBufferRange=range
+        if mouseEvent or contextEvent
+          tooltipMarker = @editor.markBufferPosition range.start
+        else
+          tooltipMarker = @editor.markBufferPosition bufferPt
+        # @tooltipMarkerId = tooltipMarker.id
+        highlightMarker = @editor.markBufferRange range
+        @tooltipMarkers.add new Disposable ->
+          tooltipMarker.destroy()
+        @tooltipMarkers.add new Disposable ->
+          highlightMarker.destroy()
+        @editor.decorateMarker tooltipMarker,
+          type: 'overlay'
+          item: new TooltipMessage type
+        @editor.decorateMarker highlightMarker,
+          type: 'highlight'
+          class: 'ide-haskell-type'
+
+    @showExpressionTypePendingEvent = {fun, crange}
+    unless @showExpressionTypeRunning
+      runPendingEvent @showExpressionTypePendingEvent
 
   hideExpressionType: ->
     @tooltipHighlightRange=null
@@ -201,11 +219,14 @@ class EditorControl
       @checkResultTooltip.destroy()
       @checkResultTooltip = null
 
-  insertType: (lastPos) ->
-    if lastPos
-      crange = @lastMouseBufferPt
-    else
-      crange = @editor.getLastSelection().getBufferRange()
+  insertType: (eventType) ->
+    switch eventType
+      when 'context'
+        crange = @lastMouseBufferPt
+      when 'keyboard'
+        crange = @editor.getLastSelection().getBufferRange()
+      else
+        throw new Error "unknown event type #{eventType}"
     @manager.backend.getType @editor.getBuffer(), crange, ({range,type}) =>
       n = @editor.indentationForBufferRow(range.start.row)
       indent = ' '.repeat n*@editor.getTabLength()
@@ -216,11 +237,14 @@ class EditorControl
           indent+symbol+" :: "+type+"\n"
         stop()
 
-  insertImport: (lastPos) ->
-    if lastPos
-      crange = @lastMouseBufferPt
-    else
-      crange = @editor.getLastSelection().getBufferRange()
+  insertImport: (eventType) ->
+    switch eventType
+      when 'context'
+        crange = @lastMouseBufferPt
+      when 'keyboard'
+        crange = @editor.getLastSelection().getBufferRange()
+      else
+        throw new Error "unknown event type #{eventType}"
     @manager.backend.getModulesExportingSymbolAt @editor.getBuffer(),
       crange, (lines) ->
         console.log line for line in lines
