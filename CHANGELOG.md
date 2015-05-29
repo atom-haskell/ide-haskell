@@ -1,3 +1,9 @@
+## 0.5.8
+* Version bump to haskell-ide-backend
+* Version bump to backend-helper
+* Deactivation cleanup
+* Insert import stubs
+
 ## 0.5.7
 * Run context menu commands on last mouse position
 
