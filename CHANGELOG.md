@@ -1,11 +1,12 @@
-## 0.5.8
+## 0.5.7
+* Run context menu commands on last mouse position
 * Version bump to haskell-ide-backend
 * Version bump to backend-helper
 * Deactivation cleanup
 * Insert import stubs
-
-## 0.5.7
-* Run context menu commands on last mouse position
+* CSS hack to catch mouse events only on .scroll-view (specialized to atom-text-editor[data-grammar~="haskell"])
+* Don't queue more than one type/info request (#63)
+* Check if mouse is still in expression range before showing tooltip (#63)
 
 ## 0.5.6
 * Tooltip behavior updates (#62):
