@@ -8,10 +8,10 @@ class PluginManager
   constructor: (state, backend) ->
     @checkResults = {}            # all errors, warings and lints here
 
-    @emitter = new Emitter
-
     @disposables = new CompositeDisposable
     @controllers = new WeakMap
+
+    @disposables.add @emitter=new Emitter
 
     @createOutputViewPanel(state)
     @subscribeEditorController()
