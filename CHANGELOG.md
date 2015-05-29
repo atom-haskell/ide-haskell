@@ -7,6 +7,7 @@
 * CSS hack to catch mouse events only on .scroll-view (specialized to atom-text-editor[data-grammar~="haskell"])
 * Don't queue more than one type/info request (#63)
 * Check if mouse is still in expression range before showing tooltip (#63)
+* Cabal format (#24)
 
 ## 0.5.6
 * Tooltip behavior updates (#62):
