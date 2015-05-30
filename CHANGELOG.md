@@ -1,3 +1,7 @@
+## 0.5.8
+* Fix an error when editor is closed while waiting
+    for an operation to complete.
+
 ## 0.5.7
 * Run context menu commands on last mouse position
 * Version bump to haskell-ide-backend
