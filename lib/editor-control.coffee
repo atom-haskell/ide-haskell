@@ -153,6 +153,7 @@ class EditorControl
       @showExpressionTypePendingEvent = null
       @showExpressionTypeRunning = true
       @manager.backend?[fun] @editor.getBuffer(), crange, ({range,type,info}) =>
+        return unless @editor
         if @showExpressionTypePendingEvent?
           runPendingEvent @showExpressionTypePendingEvent
           return
@@ -228,6 +229,7 @@ class EditorControl
       else
         throw new Error "unknown event type #{eventType}"
     @manager.backend.getType @editor.getBuffer(), crange, ({range,type}) =>
+      return unless @editor
       n = @editor.indentationForBufferRow(range.start.row)
       indent = ' '.repeat n*@editor.getTabLength()
       @editor.scanInBufferRange /[\w'.]+/, range, ({matchText,stop}) =>
@@ -247,6 +249,7 @@ class EditorControl
         throw new Error "unknown event type #{eventType}"
     @manager.backend.getModulesExportingSymbolAt @editor.getBuffer(),
       crange, (lines) ->
+        return unless @editor
         console.log line for line in lines
 
   closeTooltips: () ->
