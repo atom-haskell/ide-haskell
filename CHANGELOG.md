@@ -1,3 +1,7 @@
+## 0.5.9
+* Run check and lint in onDidSave
+* Limit max panel height to 50% viewport
+
 ## 0.5.8
 * Fix an error when editor is closed while waiting
     for an operation to complete.
