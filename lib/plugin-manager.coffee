@@ -71,11 +71,12 @@ class PluginManager
     util.prettify editor.getText(),
       onComplete: (text) ->
         editor.setText(text)
-        editor.getLastCursor().setBufferPosition firstCursor,
-          autoscroll: false
-        cursors.forEach (cursor) ->
-          editor.addCursorAtBufferPosition cursor,
+        if editor.getLastCursor()?
+          editor.getLastCursor().setBufferPosition firstCursor,
             autoscroll: false
+          cursors.forEach (cursor) ->
+            editor.addCursorAtBufferPosition cursor,
+              autoscroll: false
 
 
   controller: (editor) ->
