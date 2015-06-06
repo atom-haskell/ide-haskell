@@ -1,3 +1,6 @@
+## 0.5.10
+* Don't try to restore cursor positions on prettify if no cursor
+
 ## 0.5.9
 * Run check and lint in onDidSave
 * Limit max panel height to 50% viewport
