@@ -93,6 +93,9 @@ module.exports = IdeHaskell =
     hotkeyInsertType:
       type: "string"
       default: ''
+    hotkeyInsertImport:
+      type: "string"
+      default: ''
     hotkeyCloseTooltip:
       type: "string"
       default: 'escape'
@@ -128,6 +131,7 @@ module.exports = IdeHaskell =
       ShowType: 'ide-haskell:show-type'
       ShowInfo: 'ide-haskell:show-info'
       InsertType: 'ide-haskell:insert-type'
+      InsertImport: 'ide-haskell:insert-import'
       CloseTooltip: 'ide-haskell:close-tooltip'
 
   unsetHotkeys: ->
@@ -283,9 +287,9 @@ module.exports = IdeHaskell =
           ,
             'label': 'Insert Type'
             'command': 'ide-haskell:insert-type'
-          # ,
-          #   'label': 'Insert Import'
-          #   'command': 'ide-haskell:insert-import'
+          ,
+            'label': 'Insert Import'
+            'command': 'ide-haskell:insert-import'
         ]
       ]
 

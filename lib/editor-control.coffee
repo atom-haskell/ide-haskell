@@ -1,4 +1,5 @@
 SubAtom = require 'sub-atom'
+ImportListView = require './import-list-view'
 
 {screenPositionFromMouseEvent,
 pixelPositionFromMouseEvent} = require './utils'
@@ -156,7 +157,7 @@ class EditorControl
       @showExpressionTypePendingEvent = null
       @showExpressionTypeRunning = true
       @manager.backend?[fun] @editor.getBuffer(), crange, ({range,type,info}) =>
-        return unless @editor
+        return unless @editor?
         if @showExpressionTypePendingEvent?
           runPendingEvent @showExpressionTypePendingEvent
           return
@@ -232,7 +233,7 @@ class EditorControl
       else
         throw new Error "unknown event type #{eventType}"
     @manager.backend.getType @editor.getBuffer(), crange, ({range,type}) =>
-      return unless @editor
+      return unless @editor?
       n = @editor.indentationForBufferRow(range.start.row)
       indent = ' '.repeat n*@editor.getTabLength()
       @editor.scanInBufferRange /[\w'.]+/, range, ({matchText,stop}) =>
@@ -251,9 +252,20 @@ class EditorControl
       else
         throw new Error "unknown event type #{eventType}"
     @manager.backend.getModulesExportingSymbolAt @editor.getBuffer(),
-      crange, (lines) ->
-        return unless @editor
-        console.log line for line in lines
+      crange, (lines) =>
+        return unless @editor?
+        new ImportListView
+          items: lines
+          onConfirmed: (mod) =>
+            match = false
+            # rx=RegExp("^\\s*import(\\s+qualified)?\\s+#{mod}"+
+            #           "(\\s+as\\s+[\\w.']+)?(\\s+hiding)?"+
+            #           "(\\s+\\((.*)\\))")
+            buffer = @editor.getBuffer()
+            buffer.backwardsScan /^(\s*)import/, ({match,range}) =>
+              r = buffer.rangeForRow range.start.row
+              @editor.setTextInBufferRange [r.end,r.end],
+                "\n#{match[1]}import #{mod}"
 
   closeTooltips: () ->
     @hideExpressionType()
