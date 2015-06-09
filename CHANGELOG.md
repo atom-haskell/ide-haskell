@@ -1,3 +1,6 @@
+## 0.5.11
+* Fix #67 (trying to get row length beyond last row)
+
 ## 0.5.10
 * Don't try to restore cursor positions on prettify if no cursor
 
