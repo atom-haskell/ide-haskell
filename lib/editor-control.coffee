@@ -149,7 +149,9 @@ class EditorControl
       else
         throw new Error "unknown event type #{eventType}"
 
-    if bufferPt.isEqual @editor.bufferRangeForBufferRow(bufferPt.row).end
+    if bufferPt.row < 0 or
+       bufferPt.row >= @editor.getLineCount() or
+       bufferPt.isEqual @editor.bufferRangeForBufferRow(bufferPt.row).end
       @hideExpressionType()
       return
 
