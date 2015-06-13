@@ -8,11 +8,12 @@ class ResultView extends View
       @ul outlet: 'resultList', class: 'list-group'
 
   initialize: (state) ->
-    @on 'click', '.position',  ->
-      pos = new Point $(this).attr('row'), $(this).attr('col')
+    @on 'click', '.position', ->
+      pos = new Point parseInt($(this).attr('row'), 10),
+                      parseInt($(this).attr('col'), 10)
       uri = $(this).attr('uri')
       atom.workspace.open(uri).then (editor) ->
-        editor.setCursorBufferPosition(pos)
+        editor.setCursorBufferPosition pos
 
   update: (results) ->
     @resultList.empty()
