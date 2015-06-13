@@ -1,3 +1,6 @@
+## 0.5.12
+* Fix #73
+
 ## 0.5.11
 * Fix #67 (trying to get row length beyond last row)
 * Initial implementation of insert-import
