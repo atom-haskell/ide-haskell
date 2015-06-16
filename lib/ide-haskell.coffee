@@ -300,5 +300,4 @@ module.exports = IdeHaskell =
   consumeBackend_0_1_2: (service) ->
     @disposables.add @backendHelper.consume service, dispose: =>
       @pluginManager?.setBackend null
-      helper?.dispose()
     @pluginManager?.setBackend service
