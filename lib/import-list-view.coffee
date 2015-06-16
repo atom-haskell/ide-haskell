@@ -3,7 +3,7 @@
 
 module.exports=
 class ImportListView extends SelectListView
-  initialize: ({@onConfirmed,items}) ->
+  initialize: ({@onConfirmed, items}) ->
     super
     @panel = atom.workspace.addModalPanel
       item: this

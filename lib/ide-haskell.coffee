@@ -1,5 +1,5 @@
 {PluginManager} = require './plugin-manager'
-{TooltipMessage,TooltipElement} = require './tooltip-view'
+{TooltipMessage, TooltipElement} = require './tooltip-view'
 {getCabalProjectDir} = require './utils'
 {CompositeDisposable} = require 'atom'
 BackendHelper = require 'atom-backend-helper'
@@ -117,8 +117,8 @@ module.exports = IdeHaskell =
         atom.menu.update()
 
   setKB: (source, kbs) ->
-    for o,c of kbs
-      @watchKB o,source,c
+    for o, c of kbs
+      @watchKB o, source, c
 
   setHotkeys: ->
     @setKB 'atom-workspace',
@@ -135,7 +135,7 @@ module.exports = IdeHaskell =
       CloseTooltip: 'ide-haskell:close-tooltip'
 
   unsetHotkeys: ->
-    d.dispose() for o,d of @hotkeys
+    d.dispose() for o, d of @hotkeys
 
   isActive: ->
     !!@pluginManager
@@ -174,7 +174,7 @@ module.exports = IdeHaskell =
     # if we did not activate (no cabal project),
     # set up an event to activate when a haskell file is opened
     if not @isActive()
-      @disposables.add myself=atom.workspace.onDidOpen (event) =>
+      @disposables.add myself = atom.workspace.onDidOpen (event) =>
         if not @isActive()
           item = event.item
           if item?.getGrammar?()?.scopeName == "source.haskell"
@@ -217,16 +217,16 @@ module.exports = IdeHaskell =
           @pluginManager.lintFile target.getModel()
         'ide-haskell:prettify-file': ({target}) =>
           @pluginManager.prettifyFile target.getModel()
-        'ide-haskell:show-type': ({target,detail}) =>
+        'ide-haskell:show-type': ({target, detail}) =>
           @pluginManager.controller(target.getModel()).showExpressionType null,
-            getEventType(detail),'getType'
-        'ide-haskell:show-info': ({target,detail}) =>
+            getEventType(detail), 'getType'
+        'ide-haskell:show-info': ({target, detail}) =>
           @pluginManager.controller(target.getModel()).showExpressionType null,
-            getEventType(detail),'getInfo'
-        'ide-haskell:insert-type': ({target,detail}) =>
+            getEventType(detail), 'getInfo'
+        'ide-haskell:insert-type': ({target, detail}) =>
           @pluginManager.controller(target.getModel())
             .insertType getEventType(detail)
-        'ide-haskell:insert-import': ({target,detail}) =>
+        'ide-haskell:insert-import': ({target, detail}) =>
           @pluginManager.controller(target.getModel())
             .insertImport getEventType(detail)
         'ide-haskell:close-tooltip': ({target}) =>
@@ -294,7 +294,7 @@ module.exports = IdeHaskell =
 
   clearMenu: ->
     @menu.dispose()
-    @menu=null
+    @menu = null
     atom.menu.update()
 
   consumeBackend_0_1_2: (service) ->

@@ -3,15 +3,15 @@ path = require 'path'
 Temp = require 'temp'
 FS = require 'fs'
 
-withTempFile = (contents,callback) ->
+withTempFile = (contents, callback) ->
   Temp.open
     prefix:'haskell-ghc-mod',
     suffix:'.hs',
-    (err,info) ->
+    (err, info) ->
       if err
         console.log(err)
         return
-      FS.writeSync info.fd,contents
+      FS.writeSync info.fd, contents
       callback info.path, ->
         FS.close info.fd, -> FS.unlink info.path
 
@@ -19,10 +19,10 @@ withTempFile = (contents,callback) ->
 prettify = (text, {onComplete, onFailure}) ->
   shpath = atom.config.get('ide-haskell.cabalPath')
 
-  withTempFile text, (path,close) ->
+  withTempFile text, (path, close) ->
     proc = new BufferedProcess
       command: shpath
-      args: ['format',path]
+      args: ['format', path]
       exit: ->
         FS.readFile path, encoding: 'utf-8', (error, text) ->
           if error?

@@ -12,7 +12,7 @@ class PluginManager
     @disposables = new CompositeDisposable
     @controllers = new WeakMap
 
-    @disposables.add @emitter=new Emitter
+    @disposables.add @emitter = new Emitter
 
     @createOutputViewPanel(state)
     @subscribeEditorController()
@@ -45,23 +45,23 @@ class PluginManager
     @outputView?.toggle()
 
   checkFile: (editor) ->
-    @checkOrLint editor,@backend?.checkBuffer,['error', 'warning']
+    @checkOrLint editor, @backend?.checkBuffer, ['error', 'warning']
 
   lintFile: (editor) ->
-    @checkOrLint editor,@backend?.lintBuffer,['lint']
+    @checkOrLint editor, @backend?.lintBuffer, ['lint']
 
   checkOrLint: (editor, func, types) =>
     return unless func?
     @outputView?.pendingCheck()
     func editor.getBuffer(), (res) =>
-      @checkResults[t] = (res.filter ({severity}) -> severity==t) for t in types
+      @checkResults[t] = (res.filter ({severity}) -> severity == t) for t in types
       @emitter.emit 'results-updated', {res: @checkResults, types}
 
   onResultsUpdated: (callback) =>
     @emitter.on 'results-updated', callback
 
   # File prettify
-  prettifyFile: (editor, format='haskell') ->
+  prettifyFile: (editor, format = 'haskell') ->
     [firstCursor, cursors...] = editor.getCursors().map (cursor) ->
       cursor.getBufferPosition()
     util = switch format
@@ -98,7 +98,7 @@ class PluginManager
   addController: (editor) ->
     unless @controllers.get(editor)?
       @controllers.set(editor, new EditorControl(editor, this))
-      @disposables.add editor.onDidDestroy () =>
+      @disposables.add editor.onDidDestroy =>
         @controllers.delete(editor) #deactivation is handled in EditorControl
 
   removeController: (editor) ->

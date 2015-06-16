@@ -3,7 +3,7 @@ ImportListView = require './import-list-view'
 
 {bufferPositionFromMouseEvent} = require './utils'
 {TooltipMessage} = require './tooltip-view'
-{Range,CompositeDisposable,Disposable} = require 'atom'
+{Range, CompositeDisposable, Disposable} = require 'atom'
 
 class EditorControl
   constructor: (@editor, @manager) ->
@@ -31,12 +31,12 @@ class EditorControl
     # buffer events for automatic check
     buffer = @editor.getBuffer()
     editorElement = atom.views.getView(@editor)
-    @disposables.add buffer.onWillSave () ->
+    @disposables.add buffer.onWillSave ->
       # TODO if uri was changed, then we have to remove all current markers
       if atom.config.get('ide-haskell.onSavePrettify')
         atom.commands.dispatch editorElement, 'ide-haskell:prettify-file'
 
-    @disposables.add buffer.onDidSave () ->
+    @disposables.add buffer.onDidSave ->
       # TODO if uri was changed, then we have to remove all current markers
       if atom.config.get('ide-haskell.onSaveCheck')
         atom.commands.dispatch editorElement, 'ide-haskell:check-file'
@@ -56,7 +56,7 @@ class EditorControl
       @clearExprTypeTimeout()
       @exprTypeTimeout = setTimeout (=>
         (@showCheckResult e) or
-          (@showExpressionType bufferPt, 'mouse', 'get'+action)
+          (@showExpressionType bufferPt, 'mouse', 'get' + action)
       ), atom.config.get('ide-haskell.expressionTypeInterval')
     @disposables.add @editorElement, 'mouseout', '.scroll-view', (e) =>
       action = atom.config.get('ide-haskell.onMouseHoverShow')
@@ -82,7 +82,7 @@ class EditorControl
     @editorElement = null
     @editor = null
     @lastMouseBufferPt = null
-    @tooltipMarkers=null
+    @tooltipMarkers = null
 
   # helper function to hide tooltip and stop timeout
   clearExprTypeTimeout: ->
@@ -107,7 +107,7 @@ class EditorControl
     return unless uri is @editor.getURI()
 
     # create a new marker
-    range = new Range position, {row: position.row, column: position.column+1}
+    range = new Range position, {row: position.row, column: position.column + 1}
     marker = @editor.markBufferRange range,
       type: 'check-result'
       severity: severity
@@ -119,7 +119,7 @@ class EditorControl
         @decorateMarker(m)
 
   decorateMarker: (m) ->
-    cls = 'ide-haskell-'+m.getProperties().severity
+    cls = 'ide-haskell-' + m.getProperties().severity
     @gutter.decorateMarker m, type: 'line-number', class: cls
     @editor.decorateMarker m, type: 'highlight', class: cls
     @editor.decorateMarker m, type: 'line', class: cls
@@ -153,10 +153,10 @@ class EditorControl
       @hideExpressionType()
       return
 
-    runPendingEvent = ({fun,crange}) =>
+    runPendingEvent = ({fun, crange}) =>
       @showExpressionTypePendingEvent = null
       @showExpressionTypeRunning = true
-      @manager.backend?[fun] @editor.getBuffer(), crange, ({range,type,info}) =>
+      @manager.backend?[fun] @editor.getBuffer(), crange, ({range, type, info}) =>
         return unless @editor?
         if @showExpressionTypePendingEvent?
           runPendingEvent @showExpressionTypePendingEvent
@@ -177,7 +177,7 @@ class EditorControl
         unless type?
           @manager.backendWarning()
           return
-        @markerBufferRange=range
+        @markerBufferRange = range
         if mouseEvent or contextEvent
           tooltipMarker = @editor.markBufferPosition range.start
         else
@@ -200,7 +200,7 @@ class EditorControl
       runPendingEvent @showExpressionTypePendingEvent
 
   hideExpressionType: ->
-    @tooltipHighlightRange=null
+    @tooltipHighlightRange = null
     @tooltipMarkers.dispose()
     @tooltipMarkers = new CompositeDisposable
 
@@ -241,15 +241,15 @@ class EditorControl
         crange = @editor.getLastSelection().getBufferRange()
       else
         throw new Error "unknown event type #{eventType}"
-    @manager.backend.getType @editor.getBuffer(), crange, ({range,type}) =>
+    @manager.backend.getType @editor.getBuffer(), crange, ({range, type}) =>
       return unless @editor?
       n = @editor.indentationForBufferRow(range.start.row)
-      indent = ' '.repeat n*@editor.getTabLength()
-      @editor.scanInBufferRange /[\w'.]+/, range, ({matchText,stop}) =>
+      indent = ' '.repeat n * @editor.getTabLength()
+      @editor.scanInBufferRange /[\w'.]+/, range, ({matchText, stop}) =>
         symbol = matchText
-        pos=[range.start.row,0]
-        @editor.setTextInBufferRange [pos,pos],
-          indent+symbol+" :: "+type+"\n"
+        pos = [range.start.row, 0]
+        @editor.setTextInBufferRange [pos, pos],
+          indent + symbol + " :: " + type + "\n"
         stop()
 
   insertImport: (eventType) ->
@@ -271,12 +271,12 @@ class EditorControl
             #           "(\\s+as\\s+[\\w.']+)?(\\s+hiding)?"+
             #           "(\\s+\\((.*)\\))")
             buffer = @editor.getBuffer()
-            buffer.backwardsScan /^(\s*)import/, ({match,range}) =>
+            buffer.backwardsScan /^(\s*)import/, ({match, range}) =>
               r = buffer.rangeForRow range.start.row
-              @editor.setTextInBufferRange [r.end,r.end],
+              @editor.setTextInBufferRange [r.end, r.end],
                 "\n#{match[1]}import #{mod}"
 
-  closeTooltips: () ->
+  closeTooltips: ->
     @hideExpressionType()
     @hideCheckResult()
 

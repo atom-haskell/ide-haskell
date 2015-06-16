@@ -5,7 +5,7 @@ path = require 'path'
 # run stylish-haskell backend
 prettify = (text, {onComplete, onFailure}) ->
 
-  lines=[]
+  lines = []
 
   shpath = atom.config.get('ide-haskell.stylishHaskellPath')
 
