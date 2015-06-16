@@ -8,16 +8,7 @@ module.exports = Utils =
     dir ?= null
     dir
 
-  # pixel position from mouse event
-  pixelPositionFromMouseEvent: (editor, event) ->
-    {clientX, clientY} = event
-    lines = atom.views.getView(editor).rootElement.querySelector('.lines')
-    linesClientRect = lines.getBoundingClientRect()
-    top = clientY - linesClientRect.top
-    left = clientX - linesClientRect.left
-    {top, left}
-
   # screen position from mouse event
-  screenPositionFromMouseEvent: (editor, event) ->
-    editor.screenPositionForPixelPosition(
-      Utils.pixelPositionFromMouseEvent(editor, event))
+  bufferPositionFromMouseEvent: (editor, event) ->
+    editor.bufferPositionForScreenPosition (
+      atom.views.getView(editor).component.screenPositionForMouseEvent event)

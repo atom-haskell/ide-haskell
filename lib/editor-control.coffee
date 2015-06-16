@@ -1,8 +1,7 @@
 SubAtom = require 'sub-atom'
 ImportListView = require './import-list-view'
 
-{screenPositionFromMouseEvent,
-pixelPositionFromMouseEvent} = require './utils'
+{bufferPositionFromMouseEvent} = require './utils'
 {TooltipMessage} = require './tooltip-view'
 {Range,CompositeDisposable,Disposable} = require 'atom'
 
@@ -19,7 +18,7 @@ class EditorControl
 
     gutterElement = atom.views.getView(@gutter)
     @disposables.add gutterElement, 'mouseenter', ".decoration", (e) =>
-      @showCheckResult e
+      @showCheckResult e, true
     @disposables.add gutterElement, 'mouseleave', ".decoration", (e) =>
       @hideCheckResult()
 
@@ -46,9 +45,7 @@ class EditorControl
 
     # show expression type if mouse stopped somewhere
     @disposables.add @editorElement, 'mousemove', '.scroll-view', (e) =>
-      pixelPt = pixelPositionFromMouseEvent @editor, e
-      screenPt = @editor.screenPositionForPixelPosition pixelPt
-      bufferPt = @editor.bufferPositionForScreenPosition screenPt
+      bufferPt = bufferPositionFromMouseEvent @editor, e
 
       return if @lastMouseBufferPt?.isEqual(bufferPt)
       @lastMouseBufferPt = bufferPt
@@ -58,7 +55,8 @@ class EditorControl
 
       @clearExprTypeTimeout()
       @exprTypeTimeout = setTimeout (=>
-        @showExpressionType bufferPt, 'mouse', 'get'+action
+        (@showCheckResult e) or
+          (@showExpressionType bufferPt, 'mouse', 'get'+action)
       ), atom.config.get('ide-haskell.expressionTypeInterval')
     @disposables.add @editorElement, 'mouseout', '.scroll-view', (e) =>
       action = atom.config.get('ide-haskell.onMouseHoverShow')
@@ -206,20 +204,29 @@ class EditorControl
     @tooltipMarkers.dispose()
     @tooltipMarkers = new CompositeDisposable
 
+  findCheckResultMarkers: (pos, gutter) ->
+    if gutter
+      @editor.findMarkers {type: 'check-result', startBufferRow: pos.row}
+    else
+      @editor.findMarkers {type: 'check-result', containsPoint: pos}
+
   # show check result when mouse over gutter icon
-  showCheckResult: (e) ->
+  showCheckResult: (e, gutter) ->
     @hideCheckResult()
-    row = @editor.bufferPositionForScreenPosition(
-      screenPositionFromMouseEvent(@editor, e)).row
+    pos = bufferPositionFromMouseEvent(@editor, e)
 
-    [marker] = @editor.findMarkers {type: 'check-result', startBufferRow: row}
+    markers = @findCheckResultMarkers pos, gutter
+    [marker] = markers
 
-    return unless marker?
+    return false unless marker?
 
     @checkResultTooltip = @editor.decorateMarker marker,
       type: 'overlay'
       position: 'tail'
-      item: new TooltipMessage marker.getProperties().desc
+      item: new TooltipMessage (markers.map (marker) ->
+        marker.getProperties().desc).join('\n\n')
+
+    return true
 
   hideCheckResult: ->
     if @checkResultTooltip?
