@@ -148,8 +148,7 @@ module.exports = IdeHaskell =
 
     if atom.config.get('ide-haskell.startupMessageAutocomplete')
       autocompleteHaskellInstalled =
-        atom.packages.getAvailablePackageNames().some (pn) ->
-          pn == 'autocomplete-haskell'
+        'autocomplete-haskell' in atom.packages.getAvailablePackageNames()
       unless autocompleteHaskellInstalled
         message = "
           Ide-haskell:
