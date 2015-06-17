@@ -167,11 +167,6 @@ module.exports = IdeHaskell =
       backendInfo: 'startupMessageIdeBackend'
       backendName: 'haskell-ide-backend'
 
-    Object.observe @, (changes) =>
-      changes.forEach ({name}) =>
-        return unless name is "backend"
-        @pluginManager?.setBackend @backend
-
     @backendHelper.init()
 
     @initIdeHaskell(state)
@@ -250,6 +245,8 @@ module.exports = IdeHaskell =
 
     @unsetHotkeys()
 
+    @backendHelperDisp?.dispose()
+
     @pluginManager.deactivate()
     @pluginManager = null
 
@@ -257,9 +254,7 @@ module.exports = IdeHaskell =
     @disposables.dispose()
     @disposables = null
 
-    @backendHelperDisp?.dispose()
     @backendHelper = null
-    @backend = null
 
     @clearMenu()
 
@@ -305,4 +300,8 @@ module.exports = IdeHaskell =
     atom.menu.update()
 
   consumeBackend_0_1_2: (service) ->
-    @backendHelperDisp = @backendHelper.consume service
+    @backendHelperDisp = @backendHelper.consume service,
+      success: =>
+        @pluginManager?.setBackend @backend
+      dispose: =>
+        @pluginManager?.setBackend null
