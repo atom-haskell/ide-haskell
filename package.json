@@ -19,6 +19,6 @@
     "temp": "^0.8.1",
     "atom-space-pen-views": "^2.0.3",
     "sub-atom": "^1.0.0",
-    "atom-backend-helper": "^0.0.6"
+    "atom-backend-helper": "^1.0.0"
   }
 }

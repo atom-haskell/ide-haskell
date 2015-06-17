@@ -9,6 +9,7 @@ module.exports = IdeHaskell =
   pluginManager: null
   disposables: null
   menu: null
+  backendHelperDisp: null
 
   config:
     activateStandalone:
@@ -166,6 +167,11 @@ module.exports = IdeHaskell =
       backendInfo: 'startupMessageIdeBackend'
       backendName: 'haskell-ide-backend'
 
+    Object.observe @, (changes) =>
+      changes.forEach ({name}) =>
+        return unless name is "backend"
+        @pluginManager?.setBackend @backend
+
     @backendHelper.init()
 
     @initIdeHaskell(state)
@@ -251,6 +257,7 @@ module.exports = IdeHaskell =
     @disposables.dispose()
     @disposables = null
 
+    @backendHelperDisp?.dispose()
     @backendHelper = null
     @backend = null
 
@@ -298,6 +305,4 @@ module.exports = IdeHaskell =
     atom.menu.update()
 
   consumeBackend_0_1_2: (service) ->
-    @disposables.add @backendHelper.consume service, dispose: =>
-      @pluginManager?.setBackend null
-    @pluginManager?.setBackend service
+    @backendHelperDisp = @backendHelper.consume service
