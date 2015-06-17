@@ -202,7 +202,7 @@ module.exports = IdeHaskell =
       'ide-haskell:toggle-output': =>
         @pluginManager.togglePanel()
       'ide-haskell:shutdown-backend': =>
-        @backend.shutdownBackend()
+        @backend?.shutdownBackend?()
 
     getEventType = (detail) ->
       if detail?.contextCommand?
