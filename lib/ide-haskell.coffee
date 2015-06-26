@@ -178,7 +178,7 @@ module.exports = IdeHaskell =
       @disposables.add myself = atom.workspace.onDidOpen (event) =>
         if not @isActive()
           item = event.item
-          if item?.getGrammar?()?.scopeName == "source.haskell"
+          if item?.getGrammar?()?.scopeName.match /haskell$/
             @initIdeHaskell state
             if @isActive()
               myself.dispose()
@@ -190,7 +190,7 @@ module.exports = IdeHaskell =
 
     if atom.config.get('ide-haskell.activateStandalone')
       canActivate = atom.workspace.getTextEditors().some (e) ->
-        e.getGrammar()?.scopeName == "source.haskell"
+        e.getGrammar()?.scopeName.match /haskell$/
 
     return unless canActivate
 

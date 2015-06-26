@@ -106,7 +106,7 @@ class PluginManager
     @controllers.delete(editor)
 
   controllerOnGrammar: (editor, grammar) ->
-    if grammar.scopeName == 'source.haskell'
+    if grammar.scopeName.match /haskell$/
       @addController editor
     else
       @removeController editor
