@@ -175,8 +175,8 @@ ide-haskell-tooltip {
 }
 
 // A hack to catch mouse events only on .scroll-view
-atom-text-editor[data-grammar~="haskell"] {
-  &::shadow .scroll-view>.lines, atom-overlay {
+atom-text-editor {
+  &::shadow .scroll-view>.lines, atom-overlay.ide-haskell {
     pointer-events: none;
   }
 }
