@@ -1,3 +1,6 @@
+## 0.5.14
+* Initial support for literate Haskell
+
 ## 0.5.13
 * Fixes for Atom 0.209 API change w.r.t. mouse position
 * Better error tooltips
