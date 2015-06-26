@@ -11,16 +11,17 @@ class EditorControl
     @tooltipMarkers = new CompositeDisposable
     @editorElement = atom.views.getView(@editor).rootElement
 
-    @gutter = @editor.gutterWithName "ide-haskell-check-results"
-    @gutter ?= @editor.addGutter
-      name: "ide-haskell-check-results"
-      priority: 10
+    unless atom.config.get 'haskell-ghc-mod.useLinter'
+      @gutter = @editor.gutterWithName "ide-haskell-check-results"
+      @gutter ?= @editor.addGutter
+        name: "ide-haskell-check-results"
+        priority: 10
 
-    gutterElement = atom.views.getView(@gutter)
-    @disposables.add gutterElement, 'mouseenter', ".decoration", (e) =>
-      @showCheckResult e, true
-    @disposables.add gutterElement, 'mouseleave', ".decoration", (e) =>
-      @hideCheckResult()
+      gutterElement = atom.views.getView(@gutter)
+      @disposables.add gutterElement, 'mouseenter', ".decoration", (e) =>
+        @showCheckResult e, true
+      @disposables.add gutterElement, 'mouseleave', ".decoration", (e) =>
+        @hideCheckResult()
 
     # event for editor updates
     @disposables.add @editor.onDidDestroy =>
@@ -119,6 +120,7 @@ class EditorControl
         @decorateMarker(m)
 
   decorateMarker: (m) ->
+    return unless @gutter?
     cls = 'ide-haskell-' + m.getProperties().severity
     @gutter.decorateMarker m, type: 'line-number', class: cls
     @editor.decorateMarker m, type: 'highlight', class: cls
