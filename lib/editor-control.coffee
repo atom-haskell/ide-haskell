@@ -11,7 +11,7 @@ class EditorControl
     @tooltipMarkers = new CompositeDisposable
     @editorElement = atom.views.getView(@editor).rootElement
 
-    unless atom.config.get 'haskell-ghc-mod.useLinter'
+    unless atom.config.get 'ide-haskell.useLinter'
       @gutter = @editor.gutterWithName "ide-haskell-check-results"
       @gutter ?= @editor.addGutter
         name: "ide-haskell-check-results"

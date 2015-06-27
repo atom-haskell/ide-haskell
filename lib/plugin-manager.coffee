@@ -52,7 +52,7 @@ class PluginManager
 
   checkOrLint: (editor, func, types) =>
     return unless func?
-    if atom.config.get 'haskell-ghc-mod.useLinter'
+    if atom.config.get 'ide-haskell.useLinter'
       return atom.commands.dispatch atom.views.getView(editor), 'linter:lint'
     @outputView?.pendingCheck()
     func editor.getBuffer(), (res) =>
