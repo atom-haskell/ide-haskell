@@ -304,7 +304,7 @@ module.exports = IdeHaskell =
     @menu = null
     atom.menu.update()
 
-  consumeBackend_0_1_2: (service) ->
+  consumeBackend: (service) ->
     @backendHelperDisp = @backendHelper.consume service,
       success: =>
         @pluginManager?.setBackend @backend

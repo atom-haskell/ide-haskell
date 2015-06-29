@@ -11,7 +11,8 @@
   "consumedServices": {
     "haskell-ide-backend": {
       "versions": {
-        "0.1.2": "consumeBackend_0_1_2"
+        "0.1.2": "consumeBackend",
+        "^1.0.0": "consumeBackend"
       }
     }
   },
