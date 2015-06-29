@@ -1,3 +1,6 @@
+## 0.6.0
+* Optional support for AtomLinter for showing project messages, support for haskell-ghc-mod 0.8.0
+
 ## 0.5.14
 * Initial support for literate Haskell
 

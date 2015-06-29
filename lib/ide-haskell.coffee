@@ -68,6 +68,11 @@ module.exports = IdeHaskell =
       default: ''
       description: 'Name of backend to use. Leave empty for any. Consult
                     backend provider documentation for name.'
+    useLinter:
+      type: 'boolean'
+      default: false
+      description: 'Use Atom Linter service for check and lint
+                    (requires restart)'
 
     hotkeyToggleOutput:
       type: "string"
@@ -299,7 +304,7 @@ module.exports = IdeHaskell =
     @menu = null
     atom.menu.update()
 
-  consumeBackend_0_1_2: (service) ->
+  consumeBackend: (service) ->
     @backendHelperDisp = @backendHelper.consume service,
       success: =>
         @pluginManager?.setBackend @backend
