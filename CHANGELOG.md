@@ -1,3 +1,6 @@
+## 0.6.1
+* Make ide-backend commands optional (i.e. check if those exist before calling)
+
 ## 0.6.0
 * Optional support for AtomLinter for showing project messages, support for haskell-ghc-mod 0.8.0
 
