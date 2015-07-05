@@ -21,7 +21,7 @@ class PluginManager
 
   deactivate: ->
     @disposables.dispose()
-    @backend?.shutdownBackend()
+    @backend?.shutdownBackend?()
 
     @deleteEditorControllers()
     @deleteOutputViewPanel()
@@ -32,9 +32,10 @@ class PluginManager
   setBackend: (backend) =>
     @backend = backend
 
-    if @backend?
+    if @backend?.onBackendActive?
       @disposables.add @backend.onBackendActive =>
         @outputView.backendActive()
+    if @backend?.onBackendIdle?
       @disposables.add @backend.onBackendIdle =>
         @outputView.backendIdle()
 
@@ -45,10 +46,18 @@ class PluginManager
     @outputView?.toggle()
 
   checkFile: (editor) ->
-    @checkOrLint editor, @backend?.checkBuffer, ['error', 'warning']
+    if @backend?.checkBuffer?
+      @checkOrLint editor, @backend.checkBuffer, ['error', 'warning']
+    else if @backend?
+      atom.notifications.addWarning "Backend #{@backend.name()} doesn't support
+                                    checkFile command"
 
   lintFile: (editor) ->
-    @checkOrLint editor, @backend?.lintBuffer, ['lint']
+    if @backend?.lintBuffer?
+      @checkOrLint editor, @backend.lintBuffer, ['lint']
+    else if @backend?
+      atom.notifications.addWarning "Backend #{@backend.name()} doesn't support
+                                    lintFile command"
 
   checkOrLint: (editor, func, types) =>
     return unless func?

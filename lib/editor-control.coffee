@@ -156,6 +156,10 @@ class EditorControl
       return
 
     runPendingEvent = ({fun, crange}) =>
+      unless @manager.backend?[fun]?
+        atom.notifications.addWarning "Backend #{@manager.backend.name()} doesn't support
+                                      #{fun} command" if @manager.backend?
+        return
       @showExpressionTypePendingEvent = null
       @showExpressionTypeRunning = true
       @manager.backend?[fun] @editor.getBuffer(), crange, ({range, type, info}) =>
@@ -236,6 +240,10 @@ class EditorControl
       @checkResultTooltip = null
 
   insertType: (eventType) ->
+    unless @manager.backend?.getType?
+      atom.notifications.addWarning "Backend #{@manager.backend.name()} doesn't support
+                                    getType command" if @manager.backend?
+      return
     switch eventType
       when 'context'
         crange = @lastMouseBufferPt
@@ -255,6 +263,10 @@ class EditorControl
         stop()
 
   insertImport: (eventType) ->
+    unless @manager.backend?.getModulesExportingSymbolAt?
+      atom.notifications.addWarning "Backend #{@manager.backend.name()} doesn't support
+                                    getModulesExportingSymbolAt command" if @manager.backend?
+      return
     switch eventType
       when 'context'
         crange = @lastMouseBufferPt
