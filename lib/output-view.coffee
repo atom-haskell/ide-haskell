@@ -152,8 +152,14 @@ class OutputView extends View
       else
         @activeError = @activeError.closest('.tab-view').next().find('.result-block').first()
     unless @activeError?.length
-      @activeError = $(@).find('.result-block').first()
+      @activeError = @find('.result-block').first()
+    return unless @activeError?.length
     @activeError.find('.position').click()
+    id = '#' + @activeError.closest('.tab-view').attr('id')
+    @find("#{id}.btn").click()
+    panelDiv = @activeError.closest('.panel-body')
+    panelDiv.animate
+      scrollTop: panelDiv.scrollTop() + @activeError.position().top
 
   prev: ->
     if @activeError?
@@ -162,8 +168,14 @@ class OutputView extends View
       else
         @activeError = @activeError.closest('.tab-view').prev().find('.result-block').last()
     unless @activeError?.length
-      @activeError = $(@).find('.result-block').last()
+      @activeError = @find('.result-block').last()
+    return unless @activeError?.length
     @activeError.find('.position').click()
+    id = '#' + @activeError.closest('.tab-view').attr('id')
+    @find("#{id}.btn").click()
+    panelDiv = @activeError.closest('.panel-body')
+    panelDiv.animate
+      scrollTop: panelDiv.scrollTop() + @activeError.position().top
 
 module.exports = {
   OutputView
