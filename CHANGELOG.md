@@ -1,3 +1,6 @@
+## 0.6.2
+* Pass-through `escape` keybinding for close-tooltip if there are no tooltips
+
 ## 0.6.1
 * Make ide-backend commands optional (i.e. check if those exist before calling)
 
