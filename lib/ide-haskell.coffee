@@ -235,8 +235,11 @@ module.exports = IdeHaskell =
         'ide-haskell:insert-import': ({target, detail}) =>
           @pluginManager.controller(target.getModel())
             .insertImport getEventType(detail)
-        'ide-haskell:close-tooltip': ({target}) =>
-          @pluginManager.controller(target.getModel()).closeTooltips()
+        'ide-haskell:close-tooltip': ({target, abortKeyBinding}) =>
+          if @pluginManager.controller(target.getModel()).hasTooltips()
+            @pluginManager.controller(target.getModel()).closeTooltips()
+          else
+            abortKeyBinding?()
 
     @disposables.add \
       atom.commands.add 'atom-text-editor[data-grammar~="cabal"]',

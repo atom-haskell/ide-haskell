@@ -290,6 +290,9 @@ class EditorControl
               @editor.setTextInBufferRange [r.end, r.end],
                 "\n#{match[1]}import #{mod}"
 
+  hasTooltips: ->
+    @checkResultTooltip? or !!@tooltipMarkers.disposables.size
+
   closeTooltips: ->
     @hideExpressionType()
     @hideCheckResult()
