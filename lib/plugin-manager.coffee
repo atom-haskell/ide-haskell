@@ -8,6 +8,7 @@ class PluginManager
 
   constructor: (state, backend) ->
     @checkResults = {}            # all errors, warings and lints here
+    @currentError = null
 
     @disposables = new CompositeDisposable
     @controllers = new WeakMap
@@ -64,6 +65,7 @@ class PluginManager
     if atom.config.get 'ide-haskell.useLinter'
       return atom.commands.dispatch atom.views.getView(editor), 'linter:lint'
     @outputView?.pendingCheck()
+    @currentError = null
     func editor.getBuffer(), (res) =>
       @checkResults[t] = (res.filter ({severity}) -> severity == t) for t in types
       @emitter.emit 'results-updated', {res: @checkResults, types}
@@ -132,6 +134,12 @@ class PluginManager
   deleteEditorControllers: ->
     for editor in atom.workspace.getTextEditors()
       @removeController editor
+
+  nextError: ->
+    @outputView?.next()
+
+  prevError: ->
+    @outputView?.prev()
 
 
 module.exports = {

@@ -108,6 +108,7 @@ class OutputView extends View
 
   # update current results
   updateResults: ({res, types}) =>
+    @activeError = null
     for t in types
       count = res[t].length
 
@@ -144,6 +145,17 @@ class OutputView extends View
   backendError: ->
     @statusIcon.attr 'data-status', 'error'
 
+  next: ->
+    @activeError = @activeError?.next?()
+    unless @activeError?.length
+      @activeError = $(@).find('.result-block').first()
+    @activeError.find('.position').click()
+
+  prev: ->
+    @activeError = @activeError?.prev?()
+    unless @activeError?.length
+      @activeError = $(@).find('.result-block').last()
+    @activeError.find('.position').click()
 
 module.exports = {
   OutputView

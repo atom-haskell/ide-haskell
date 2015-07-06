@@ -105,6 +105,12 @@ module.exports = IdeHaskell =
     hotkeyCloseTooltip:
       type: "string"
       default: 'escape'
+    hotkeyNextError:
+      type: "string"
+      default: ''
+    hotkeyPrevError:
+      type: "string"
+      default: ''
 
   hotkeys: {}
 
@@ -139,6 +145,8 @@ module.exports = IdeHaskell =
       InsertType: 'ide-haskell:insert-type'
       InsertImport: 'ide-haskell:insert-import'
       CloseTooltip: 'ide-haskell:close-tooltip'
+      PrevError: 'ide-haskell:prev-error'
+      NextError: 'ide-haskell:next-error'
 
   unsetHotkeys: ->
     d.dispose() for o, d of @hotkeys
@@ -240,6 +248,10 @@ module.exports = IdeHaskell =
             @pluginManager.controller(target.getModel()).closeTooltips()
           else
             abortKeyBinding?()
+        'ide-haskell:next-error': ({target}) =>
+          @pluginManager.nextError()
+        'ide-haskell:prev-error': ({target}) =>
+          @pluginManager.prevError()
 
     @disposables.add \
       atom.commands.add 'atom-text-editor[data-grammar~="cabal"]',
