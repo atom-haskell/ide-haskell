@@ -146,13 +146,21 @@ class OutputView extends View
     @statusIcon.attr 'data-status', 'error'
 
   next: ->
-    @activeError = @activeError?.next?()
+    if @activeError?
+      if @activeError.next().length
+        @activeError = @activeError.next()
+      else
+        @activeError = @activeError.closest('.tab-view').next().find('.result-block').first()
     unless @activeError?.length
       @activeError = $(@).find('.result-block').first()
     @activeError.find('.position').click()
 
   prev: ->
-    @activeError = @activeError?.prev?()
+    if @activeError?
+      if @activeError.prev().length
+        @activeError = @activeError.prev()
+      else
+        @activeError = @activeError.closest('.tab-view').prev().find('.result-block').last()
     unless @activeError?.length
       @activeError = $(@).find('.result-block').last()
     @activeError.find('.position').click()
