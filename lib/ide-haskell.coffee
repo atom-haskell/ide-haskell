@@ -10,6 +10,7 @@ module.exports = IdeHaskell =
   disposables: null
   menu: null
   backendHelperDisp: null
+  buildBackendHelperDisp: null
 
   config:
     activateStandalone:
@@ -67,6 +68,11 @@ module.exports = IdeHaskell =
       type: "string"
       default: ''
       description: 'Name of backend to use. Leave empty for any. Consult
+                    backend provider documentation for name.'
+    useBuildBackend:
+      type: "string"
+      default: ''
+      description: 'Name of build backend to use. Leave empty for any. Consult
                     backend provider documentation for name.'
     useLinter:
       type: 'boolean'
@@ -174,13 +180,23 @@ module.exports = IdeHaskell =
         console.log message
 
     @backend = null
+    @buildBackend = null
 
     @backendHelper = new BackendHelper 'ide-haskell',
       main: IdeHaskell
       backendInfo: 'startupMessageIdeBackend'
       backendName: 'haskell-ide-backend'
+      backendVar: 'backend'
+
+    @buildBackendHelper = new BackendHelper 'ide-haskell',
+      main: IdeHaskell
+      backendInfo: 'startupMessageIdeBackend'
+      backendName: 'haskell-build-backend'
+      backendVar: 'buildBackend'
+      useBackend: 'useBuildBackend'
 
     @backendHelper.init()
+    @buildBackendHelper.init()
 
     @initIdeHaskell(state)
     @setHotkeys()
@@ -207,7 +223,7 @@ module.exports = IdeHaskell =
 
     return unless canActivate
 
-    @pluginManager = new PluginManager state, @backend
+    @pluginManager = new PluginManager state, @backend, @buildBackend
     @updateMenu()
 
     # global commands
@@ -216,6 +232,10 @@ module.exports = IdeHaskell =
         @pluginManager.togglePanel()
       'ide-haskell:shutdown-backend': =>
         @backend?.shutdownBackend?()
+      'ide-haskell:build': =>
+        @pluginManager.buildProject()
+      'ide-haskell:clean': =>
+        @pluginManager.cleanProject()
 
     getEventType = (detail) ->
       if detail?.contextCommand?
@@ -266,6 +286,7 @@ module.exports = IdeHaskell =
     @unsetHotkeys()
 
     @backendHelperDisp?.dispose()
+    @buildBackendHelperDisp?.dispose()
 
     @pluginManager.deactivate()
     @pluginManager = null
@@ -288,6 +309,8 @@ module.exports = IdeHaskell =
     @menu.add atom.menu.add [
       label: 'Haskell IDE'
       submenu : [
+        {label: 'Build', command: 'ide-haskell:build'},
+        {label: 'Clean', command: 'ide-haskell:clean'},
         {label: 'Check', command: 'ide-haskell:check-file'},
         {label: 'Linter', command: 'ide-haskell:lint-file'},
         {label: 'Prettify', command: 'ide-haskell:prettify-file'},
@@ -325,3 +348,10 @@ module.exports = IdeHaskell =
         @pluginManager?.setBackend @backend
       dispose: =>
         @pluginManager?.setBackend null
+
+  consumeBuildBackend: (service) ->
+    @buildBackendHelperDisp = @buildBackendHelper.consume service,
+      success: =>
+        @pluginManager?.setBuildBackend @backend
+      dispose: =>
+        @pluginManager?.setBuildBackend null

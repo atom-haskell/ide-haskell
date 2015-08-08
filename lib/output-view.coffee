@@ -30,6 +30,12 @@ class OutputView extends View
                 outlet: 'lintsButton'
                 class: 'btn tab-btn'
                 id: 'tab3', 'Lints'
+            @div class: 'btn-group btn-cell', =>
+              @button
+                click: 'switchTabView'
+                outlet: 'buildButton'
+                class: 'btn tab-btn'
+                id: 'tab4', 'Build'
           @div class: 'btn-toolbar pull-right', =>
             @button outlet: 'closeButton', class: 'btn', 'Close'
         @div class: 'panel-body padding', =>
@@ -39,6 +45,8 @@ class OutputView extends View
             @subview 'warningsListView', new ResultView()
           @div class: 'tab-view', id: 'tab3', style: 'display: none;', =>
             @subview 'lintsListView', new ResultView()
+          @div class: 'tab-view', id: 'tab4', style: 'display: none;', =>
+            @subview 'buildListView', new ResultView()
 
   initialize: (state, @manager) ->
     @height state?.height
@@ -60,6 +68,10 @@ class OutputView extends View
         v: @lintsListView
         b: @lintsButton
         t: @lintsButton.text()
+      build:
+        v: @buildListView
+        b: @buildButton
+        t: @buildButton.text()
 
     # events
     @resizeHandle.on 'mousedown', (e) => @resizeStarted e

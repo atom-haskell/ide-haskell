@@ -14,6 +14,11 @@
         "0.1.2": "consumeBackend",
         "^1.0.0": "consumeBackend"
       }
+    },
+    "haskell-build-backend": {
+      "versions": {
+        "~0.0.1": "consumeBuildBackend"
+      }
     }
   },
   "dependencies": {

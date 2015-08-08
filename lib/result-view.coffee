@@ -21,13 +21,14 @@ class ResultView extends View
     for r in results
       @resultList.append $$$ ->
         @li class: 'result-block', =>
-          @div
-            class: 'position'
-            row: r.position.row
-            col: r.position.column
-            uri: r.uri
-            "#{r.uri}: #{r.position.row + 1}, #{r.position.column + 1}"
-          @div class: 'description', r.message
+          if r.uri?
+            @div
+              class: 'position'
+              row: r.position.row
+              col: r.position.column
+              uri: r.uri
+              "#{r.uri}: #{r.position.row + 1}, #{r.position.column + 1}"
+          @div class: 'description', r.message ? r
 
 
 module.exports = {

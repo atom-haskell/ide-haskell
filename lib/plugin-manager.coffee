@@ -6,7 +6,7 @@ utilCabalFormat = require './util-cabal-format'
 
 class PluginManager
 
-  constructor: (state, backend) ->
+  constructor: (state, backend, buildBackend) ->
     @checkResults = {}            # all errors, warings and lints here
     @currentError = null
 
@@ -19,6 +19,7 @@ class PluginManager
     @subscribeEditorController()
 
     @setBackend backend if backend?
+    @setBuildBackend buildBackend if buildBackend?
 
   deactivate: ->
     @disposables.dispose()
@@ -30,9 +31,7 @@ class PluginManager
   serialize: ->
     outputView: @outputView?.serialize()
 
-  setBackend: (backend) =>
-    @backend = backend
-
+  setBackend: (@backend) =>
     if @backend?.onBackendActive?
       @disposables.add @backend.onBackendActive =>
         @outputView.backendActive()
@@ -40,11 +39,45 @@ class PluginManager
       @disposables.add @backend.onBackendIdle =>
         @outputView.backendIdle()
 
+  setBuildBackend: (@buildBackend) =>
+    if @buildBackend?.onBackendActive?
+      @disposables.add @buildBackend.onBackendActive =>
+        @outputView.backendActive()
+    if @buildBackend?.onBackendIdle?
+      @disposables.add @buildBackend.onBackendIdle =>
+        @outputView.backendIdle()
+    if @buildBackend?.onBackendWarning?
+      @disposables.add @buildBackend.onBackendWarning =>
+        @outputView.backendWarning()
+    if @buildBackend?.onBackendError?
+      @disposables.add @buildBackend.onBackendError =>
+        @outputView.backendError()
+
   backendWarning: =>
     @outputView.backendWarning()
 
   togglePanel: ->
     @outputView?.toggle()
+
+  buildProject: =>
+    return unless @buildBackend?
+
+    types = ['error', 'warning', 'build']
+    @checkResults[t] = [] for t in types
+    @emitter.emit 'results-updated', {res: @checkResults, types}
+
+    @outputView?.pendingCheck()
+
+    @buildBackend.build 'target', # TODO: target selection
+      onMessage: (message, progress) =>
+        @checkResults[message.severity].push message
+        @emitter.emit 'results-updated', {res: @checkResults, types}
+        #TODO: display progress
+
+  cleanProject: =>
+    return unless @buildBackend?
+
+    @buildBackend.clean()
 
   checkFile: (editor) ->
     if @backend?.checkBuffer?
