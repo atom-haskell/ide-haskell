@@ -104,7 +104,7 @@ class OutputView extends View
 
   # method is called before start of any check commands
   pendingCheck: ->
-    @switchCounter++
+    @switchCounter = 1
 
   # update current results
   updateResults: ({res, types}) =>
@@ -124,7 +124,7 @@ class OutputView extends View
   autoSwitchTabView: ->
     @switchCounter = @switchCounter - 1
     if atom.config.get('ide-haskell.switchTabOnCheck') and @switchCounter is 0
-      for t, btn in @checkControl
+      for t, btn of @checkControl
         if @manager.checkResults[t]?.length > 0
           @switchTabView null, btn.b
           break
