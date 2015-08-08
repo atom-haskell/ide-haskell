@@ -1,3 +1,6 @@
+## 0.7.0
+* Go-to-next/prev error
+
 ## 0.6.2
 * Pass-through `escape` keybinding for close-tooltip if there are no tooltips
 
