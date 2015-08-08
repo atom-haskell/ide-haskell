@@ -1,3 +1,6 @@
+## 0.7.1
+* Fix auto-switch to tab
+
 ## 0.7.0
 * Go-to-next/prev error
 
