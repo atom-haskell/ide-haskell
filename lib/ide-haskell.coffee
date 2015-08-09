@@ -53,11 +53,6 @@ module.exports = IdeHaskell =
       type: "string"
       default: 'cabal'
       description: "Path to `cabal` utility, for `cabal format`"
-    startupMessageAutocomplete:
-      type: "boolean"
-      default: true
-      description: "Show info message about autocomplete-haskell
-                    on activation"
     startupMessageIdeBackend:
       type: "boolean"
       default: true
@@ -159,19 +154,6 @@ module.exports = IdeHaskell =
 
     @disposables.add atom.views.addViewProvider TooltipMessage, (message) ->
       (new TooltipElement).setMessage message
-
-    if atom.config.get('ide-haskell.startupMessageAutocomplete')
-      autocompleteHaskellInstalled =
-        'autocomplete-haskell' in atom.packages.getAvailablePackageNames()
-      unless autocompleteHaskellInstalled
-        message = "
-          Ide-haskell:
-          Autocompletion has been delegated to autocomplete-haskell package.
-          Please, install it, if you want autocompletion.
-          You can disable this message in ide-haskell settings.
-          "
-        atom.notifications.addInfo message, dismissable: true
-        console.log message
 
     @backend = null
 
