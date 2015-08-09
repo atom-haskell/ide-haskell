@@ -20,7 +20,9 @@ class EditorControl
 
       gutterElement = atom.views.getView(@gutter)
       @disposables.add gutterElement, 'mouseenter', ".decoration", (e) =>
-        @showCheckResult e, true
+        bufferPt = bufferPositionFromMouseEvent @editor, e
+        @lastMouseBufferPt = bufferPt
+        @showCheckResult bufferPt, true
       @disposables.add gutterElement, 'mouseleave', ".decoration", (e) =>
         @hideTooltip()
 
@@ -184,13 +186,20 @@ class EditorControl
     markers = @findCheckResultMarkers pos, gutter
     [marker] = markers
 
-    return false unless marker?
+    unless marker?
+      @hideTooltip() if @checkResultShowing
+      @checkResultShowing = false
+      return false
 
     text = (markers.map (marker) ->
       marker.getProperties().desc).join('\n\n')
 
-    @showTooltip pos, marker.getBufferRange(), text, 'mouse'
+    if gutter
+      @showTooltip pos, new Range(pos, pos), text, 'mouse'
+    else
+      @showTooltip pos, marker.getBufferRange(), text, 'mouse'
 
+    @checkResultShowing = true
     return true
 
   findImportsPos: ->
