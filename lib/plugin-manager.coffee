@@ -195,7 +195,6 @@ class PluginManager
       @disposables.add controller.onShouldShowTooltip ({ed, pos}) =>
         action = atom.config.get('ide-haskell.onMouseHoverShow')
         return if action == 'Nothing'
-        console.log '1'
         @['show' + action + 'Tooltip'] ed, bufferPt, 'mouse'
         # @showExpressionType bufferPt, 'mouse', 'get' + action
       controller.updateResults @checkResults
