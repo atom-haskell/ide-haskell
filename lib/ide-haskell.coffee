@@ -12,11 +12,6 @@ module.exports = IdeHaskell =
   backendHelperDisp: null
 
   config:
-    activateStandalone:
-      type: "boolean"
-      default: true
-      description: "Activate package on standalone Haskell files, not
-                    requiring a cabal project"
     onSaveCheck:
       type: "boolean"
       default: true
@@ -146,9 +141,6 @@ module.exports = IdeHaskell =
   unsetHotkeys: ->
     d.dispose() for o, d of @hotkeys
 
-  isActive: ->
-    !!@pluginManager
-
   activate: (state) ->
     @disposables = new CompositeDisposable
 
@@ -163,31 +155,6 @@ module.exports = IdeHaskell =
       backendName: 'haskell-ide-backend'
 
     @backendHelper.init()
-
-    @initIdeHaskell(state)
-    @setHotkeys()
-
-    # if we did not activate (no cabal project),
-    # set up an event to activate when a haskell file is opened
-    if not @isActive()
-      @disposables.add myself = atom.workspace.onDidOpen (event) =>
-        if not @isActive()
-          item = event.item
-          if item?.getGrammar?()?.scopeName.match /haskell$/
-            @initIdeHaskell state
-            if @isActive()
-              myself.dispose()
-
-  initIdeHaskell: (state) ->
-    return if @isActive()
-
-    canActivate = getCabalProjectDir()?
-
-    if atom.config.get('ide-haskell.activateStandalone')
-      canActivate = atom.workspace.getTextEditors().some (e) ->
-        e.getGrammar()?.scopeName.match /haskell$/
-
-    return unless canActivate
 
     @pluginManager = new PluginManager state, @backend
     @updateMenu()
@@ -241,6 +208,8 @@ module.exports = IdeHaskell =
           @pluginManager.prettifyFile target.getModel(), 'cabal'
 
     @updateMenu()
+
+    @setHotkeys()
 
   deactivate: ->
     return unless @isActive()

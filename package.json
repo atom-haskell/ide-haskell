@@ -5,6 +5,9 @@
   "description": "Haskell IDE",
   "repository": "https://github.com/atom-haskell/ide-haskell",
   "license": "MIT",
+  "activationHooks": [
+    "language-haskell:grammar-used"
+  ],
   "engines": {
     "atom": ">=0.174.0 <2.0.0"
   },
