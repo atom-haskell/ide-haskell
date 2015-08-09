@@ -1,6 +1,6 @@
 {PluginManager} = require './plugin-manager'
 {TooltipMessage, TooltipElement} = require './tooltip-view'
-{getCabalProjectDir} = require './utils'
+{getEventType} = require './utils'
 {CompositeDisposable} = require 'atom'
 BackendHelper = require 'atom-backend-helper'
 
@@ -87,12 +87,6 @@ module.exports = IdeHaskell =
         @pluginManager.togglePanel()
       'ide-haskell:shutdown-backend': =>
         @backend?.shutdownBackend?()
-
-    getEventType = (detail) ->
-      if detail?.contextCommand?
-        'context'
-      else
-        'keyboard'
 
     @disposables.add \
       atom.commands.add 'atom-text-editor[data-grammar~="haskell"]',

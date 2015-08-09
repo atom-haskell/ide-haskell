@@ -8,6 +8,12 @@ module.exports = Utils =
     dir ?= null
     dir
 
+  getEventType: (detail) ->
+    if detail?.contextCommand?
+      'context'
+    else
+      'keyboard'
+
   # screen position from mouse event
   bufferPositionFromMouseEvent: (editor, event) ->
     editor.bufferPositionForScreenPosition (
