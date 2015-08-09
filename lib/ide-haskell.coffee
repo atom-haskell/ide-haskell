@@ -133,10 +133,6 @@ module.exports = IdeHaskell =
     ]
 
   deactivate: ->
-    return unless @isActive()
-
-    @unsetHotkeys()
-
     @backendHelperDisp?.dispose()
 
     @pluginManager.deactivate()
