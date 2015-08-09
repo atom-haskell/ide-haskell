@@ -79,11 +79,8 @@ class EditorControl
       @exprTypeTimeout = null
 
   updateResults: (res) =>
-    types = Object.keys(res)
-    for t in types
-      for m in @editor.findMarkers {type: 'check-result', severity: t}
-        m.destroy()
-      @markerFromCheckResult(r) for r in res[t]
+    m.destroy() for m in @editor.findMarkers {type: 'check-result'}
+    @markerFromCheckResult(r) for r in res
 
   markerFromCheckResult: ({uri, severity, message, position}) ->
     return unless uri is @editor.getURI()

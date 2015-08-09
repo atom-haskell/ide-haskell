@@ -3,11 +3,12 @@
 utilStylishHaskell = require './util-stylish-haskell'
 utilCabalFormat = require './util-cabal-format'
 ImportListView = require './import-list-view'
+ResultsDB = require './results-db'
 {CompositeDisposable, Emitter} = require 'atom'
 
 class PluginManager
   constructor: (state, backend) ->
-    @checkResults = {}            # all errors, warings and lints here
+    @checkResults = new ResultsDB
 
     @disposables = new CompositeDisposable
     @controllers = new WeakMap
@@ -65,14 +66,16 @@ class PluginManager
       return atom.commands.dispatch atom.views.getView(editor), 'linter:lint'
     @outputView?.pendingCheck()
     func editor.getBuffer(), (res) =>
-      @checkResults[t] = (res.filter ({severity}) -> severity == t) for t in types
-      @emitter.emit 'results-updated', {res: @checkResults, types}
+      @checkResults.setResults res, types
+      res = {}
+      res[t] = @checkResults.resultsWithSeverity(t) for t in types
+      @emitter.emit 'results-updated', {res, types}
       @updateEditorsWithResults()
 
   updateEditorsWithResults: ->
     types = Object.keys(@checkResults)
     for ed in atom.workspace.getTextEditors()
-      @controller(ed)?.updateResults?(@checkResults)
+      @controller(ed)?.updateResults?(@checkResults.resultsForURI(ed.getPath()))
 
   onResultsUpdated: (callback) =>
     @emitter.on 'results-updated', callback
