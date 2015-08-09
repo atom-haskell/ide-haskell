@@ -64,83 +64,6 @@ module.exports = IdeHaskell =
       description: 'Use Atom Linter service for check and lint
                     (requires restart)'
 
-    hotkeyToggleOutput:
-      type: "string"
-      default: ''
-      description: 'Hotkey to toggle output'
-    hotkeyShutdownBackend:
-      type: "string"
-      default: ''
-    hotkeyCheckFile:
-      type: "string"
-      default: ''
-    hotkeyLintFile:
-      type: "string"
-      default: ''
-    hotkeyPrettifyFile:
-      type: "string"
-      default: ''
-    hotkeyShowType:
-      type: "string"
-      default: ''
-    hotkeyShowInfo:
-      type: "string"
-      default: ''
-    hotkeyInsertType:
-      type: "string"
-      default: ''
-    hotkeyInsertImport:
-      type: "string"
-      default: ''
-    hotkeyCloseTooltip:
-      type: "string"
-      default: 'escape'
-    hotkeyNextError:
-      type: "string"
-      default: ''
-    hotkeyPrevError:
-      type: "string"
-      default: ''
-
-  hotkeys: {}
-
-  watchKB: (option, source, command) ->
-    @disposables.add atom.config.observe "ide-haskell.hotkey#{option}",
-      (value) =>
-        @hotkeys[option]?.dispose()
-        if !value
-          atom.menu.update()
-          return
-        kb = {}
-        kb[value] = command
-        kbb = {}
-        kbb[source] = kb
-        @hotkeys[option] = atom.keymaps.add 'ide-haskell.hotkeys', kbb
-        atom.menu.update()
-
-  setKB: (source, kbs) ->
-    for o, c of kbs
-      @watchKB o, source, c
-
-  setHotkeys: ->
-    @setKB 'atom-workspace',
-      ToggleOutput: 'ide-haskell:toggle-output'
-      ShutdownBackend: 'ide-haskell:shutdown-backend'
-    @setKB 'atom-text-editor[data-grammar~="haskell"]',
-      CheckFile: 'ide-haskell:check-file'
-      LintFile: 'ide-haskell:lint-file'
-      PrettifyFile: 'ide-haskell:prettify-file'
-      ShowType: 'ide-haskell:show-type'
-      ShowInfo: 'ide-haskell:show-info'
-      InsertType: 'ide-haskell:insert-type'
-      InsertImport: 'ide-haskell:insert-import'
-      CloseTooltip: 'ide-haskell:close-tooltip'
-      PrevError: 'ide-haskell:prev-error'
-      NextError: 'ide-haskell:next-error'
-
-  unsetHotkeys: ->
-    d.dispose() for o, d of @hotkeys
-
   activate: (state) ->
     @disposables = new CompositeDisposable
 
@@ -214,8 +137,6 @@ module.exports = IdeHaskell =
         {label: 'Toggle Panel', command: 'ide-haskell:toggle-output'}
       ]
     ]
-
-    @setHotkeys()
 
   deactivate: ->
     return unless @isActive()
