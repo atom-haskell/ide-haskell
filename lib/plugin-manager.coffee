@@ -4,7 +4,7 @@ utilStylishHaskell = require './util-stylish-haskell'
 utilCabalFormat = require './util-cabal-format'
 ImportListView = require './import-list-view'
 ResultsDB = require './results-db'
-{CompositeDisposable, Emitter} = require 'atom'
+{CompositeDisposable} = require 'atom'
 
 class PluginManager
   constructor: (state, backend) ->
@@ -13,14 +13,13 @@ class PluginManager
     @disposables = new CompositeDisposable
     @controllers = new WeakMap
 
-    @disposables.add @emitter = new Emitter
-
     @createOutputViewPanel(state)
     @subscribeEditorController()
 
     @setBackend backend if backend?
 
   deactivate: ->
+    @checkResults.destroy()
     @disposables.dispose()
     @backend?.shutdownBackend?()
 
@@ -67,18 +66,14 @@ class PluginManager
     @outputView?.pendingCheck()
     func editor.getBuffer(), (res) =>
       @checkResults.setResults res, types
-      res = {}
-      res[t] = @checkResults.resultsWithSeverity(t) for t in types
-      @emitter.emit 'results-updated', {res, types}
       @updateEditorsWithResults()
 
   updateEditorsWithResults: ->
-    types = Object.keys(@checkResults)
     for ed in atom.workspace.getTextEditors()
       @controller(ed)?.updateResults?(@checkResults.resultsForURI(ed.getPath()))
 
   onResultsUpdated: (callback) =>
-    @emitter.on 'results-updated', callback
+    @checkResults.onDidUpdate callback
 
   # File prettify
   prettifyFile: (editor, format = 'haskell') ->
@@ -173,11 +168,6 @@ class PluginManager
 
   controller: (editor) ->
     @controllers?.get? editor
-
-  # Update internals with results.
-  updateResults: (types, results) ->
-    @checkResults[t] = [] for t in types
-    @checkResults[r.type].push(r) for r in results
 
   # Create and delete output view panel.
   createOutputViewPanel: (state) ->

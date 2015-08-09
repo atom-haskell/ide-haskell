@@ -110,10 +110,11 @@ class OutputView extends View
   updateResults: ({res, types}) =>
     @activeError = null
     for t in types
-      count = res[t].length
+      rest = res.resultsWithSeverity(t)
+      count = rest.length
 
       # update buttons and views
-      @checkControl[t].v.update res[t]
+      @checkControl[t].v.update rest
       @checkControl[t].b.text @checkControl[t].t + (
         if count > 0 then " (#{count})" else ""
       )
