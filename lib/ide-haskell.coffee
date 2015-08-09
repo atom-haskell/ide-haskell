@@ -240,7 +240,7 @@ module.exports = IdeHaskell =
       label: 'Haskell IDE'
       submenu : [
         {label: 'Check', command: 'ide-haskell:check-file'},
-        {label: 'Linter', command: 'ide-haskell:lint-file'},
+        {label: 'Lint', command: 'ide-haskell:lint-file'},
         {label: 'Prettify', command: 'ide-haskell:prettify-file'},
         {label: 'Toggle Panel', command: 'ide-haskell:toggle-output'},
         {label: 'Stop Backend', command: 'ide-haskell:shutdown-backend'}
