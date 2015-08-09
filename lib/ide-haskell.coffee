@@ -157,7 +157,6 @@ module.exports = IdeHaskell =
     @backendHelper.init()
 
     @pluginManager = new PluginManager state, @backend
-    @updateMenu()
 
     # global commands
     @disposables.add atom.commands.add 'atom-workspace',
@@ -207,7 +206,14 @@ module.exports = IdeHaskell =
         'ide-haskell:prettify-file': ({target}) =>
           @pluginManager.prettifyFile target.getModel(), 'cabal'
 
-    @updateMenu()
+    @menu = new CompositeDisposable
+    @menu.add atom.menu.add [
+      label: 'Haskell IDE'
+      submenu : [
+        {label: 'Prettify', command: 'ide-haskell:prettify-file'}
+        {label: 'Toggle Panel', command: 'ide-haskell:toggle-output'}
+      ]
+    ]
 
     @setHotkeys()
 
@@ -232,39 +238,6 @@ module.exports = IdeHaskell =
   serialize: ->
     @pluginManager?.serialize()
 
-  updateMenu: ->
-    return if @menu?
-
-    @menu = new CompositeDisposable
-    @menu.add atom.menu.add [
-      label: 'Haskell IDE'
-      submenu : [
-        {label: 'Check', command: 'ide-haskell:check-file'},
-        {label: 'Lint', command: 'ide-haskell:lint-file'},
-        {label: 'Prettify', command: 'ide-haskell:prettify-file'},
-        {label: 'Toggle Panel', command: 'ide-haskell:toggle-output'},
-        {label: 'Stop Backend', command: 'ide-haskell:shutdown-backend'}
-      ]
-    ]
-
-    @menu.add atom.contextMenu.add
-      'atom-text-editor[data-grammar~="haskell"]': [
-        'label': 'Haskell IDE'
-        'submenu': [
-            'label': 'Show Type'
-            'command': 'ide-haskell:show-type'
-          ,
-            'label': 'Show Info'
-            'command': 'ide-haskell:show-info'
-          ,
-            'label': 'Insert Type'
-            'command': 'ide-haskell:insert-type'
-          ,
-            'label': 'Insert Import'
-            'command': 'ide-haskell:insert-import'
-        ]
-      ]
-
   clearMenu: ->
     @menu.dispose()
     @menu = null
@@ -274,5 +247,31 @@ module.exports = IdeHaskell =
     @backendHelperDisp = @backendHelper.consume service,
       success: =>
         @pluginManager?.setBackend @backend
+        @menu.add atom.menu.add [
+          label: 'Haskell IDE'
+          submenu : [
+            {label: 'Check', command: 'ide-haskell:check-file'}
+            {label: 'Lint', command: 'ide-haskell:lint-file'}
+            {label: 'Stop Backend', command: 'ide-haskell:shutdown-backend'}
+          ]
+        ]
+
+        @menu.add atom.contextMenu.add
+          'atom-text-editor[data-grammar~="haskell"]': [
+            'label': 'Haskell IDE'
+            'submenu': [
+                'label': 'Show Type'
+                'command': 'ide-haskell:show-type'
+              ,
+                'label': 'Show Info'
+                'command': 'ide-haskell:show-info'
+              ,
+                'label': 'Insert Type'
+                'command': 'ide-haskell:insert-type'
+              ,
+                'label': 'Insert Import'
+                'command': 'ide-haskell:insert-import'
+            ]
+          ]
       dispose: =>
         @pluginManager?.setBackend null
