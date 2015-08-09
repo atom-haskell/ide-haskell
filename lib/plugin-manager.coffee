@@ -1,8 +1,9 @@
-{OutputView} = require './output-view'
+{OutputView} = require './views/output-view'
 {EditorControl} = require './editor-control'
-utilStylishHaskell = require './util-stylish-haskell'
-utilCabalFormat = require './util-cabal-format'
-ImportListView = require './import-list-view'
+utilStylishHaskell = require './binutils/util-stylish-haskell'
+utilCabalFormat = require './binutils/util-cabal-format'
+ImportListView = require './views/import-list-view'
+{TooltipMessage, TooltipElement} = require './views/tooltip-view'
 ResultsDB = require './results-db'
 {CompositeDisposable} = require 'atom'
 
@@ -12,6 +13,9 @@ class PluginManager
 
     @disposables = new CompositeDisposable
     @controllers = new WeakMap
+
+    @disposables.add atom.views.addViewProvider TooltipMessage, (message) ->
+      (new TooltipElement).setMessage message
 
     @createOutputViewPanel(state)
     @subscribeEditorController()

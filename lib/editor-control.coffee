@@ -1,7 +1,7 @@
 SubAtom = require 'sub-atom'
 
 {bufferPositionFromMouseEvent} = require './utils'
-{TooltipMessage} = require './tooltip-view'
+{TooltipMessage} = require './views/tooltip-view'
 {Range, CompositeDisposable, Disposable, Emitter} = require 'atom'
 
 class EditorControl

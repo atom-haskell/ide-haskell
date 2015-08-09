@@ -1,5 +1,4 @@
 {PluginManager} = require './plugin-manager'
-{TooltipMessage, TooltipElement} = require './tooltip-view'
 {getEventType} = require './utils'
 {CompositeDisposable} = require 'atom'
 BackendHelper = require 'atom-backend-helper'
@@ -66,9 +65,6 @@ module.exports = IdeHaskell =
 
   activate: (state) ->
     @disposables = new CompositeDisposable
-
-    @disposables.add atom.views.addViewProvider TooltipMessage, (message) ->
-      (new TooltipElement).setMessage message
 
     @backend = null
 
