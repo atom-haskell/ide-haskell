@@ -97,20 +97,16 @@ module.exports = IdeHaskell =
         'ide-haskell:prettify-file': ({target}) =>
           @pluginManager.prettifyFile target.getModel()
         'ide-haskell:show-type': ({target, detail}) =>
-          @pluginManager.controller(target.getModel()).showExpressionType null,
-            getEventType(detail), 'getType'
+          @pluginManager.showTypeTooltip target.getModel(), null, getEventType(detail)
         'ide-haskell:show-info': ({target, detail}) =>
-          @pluginManager.controller(target.getModel()).showExpressionType null,
-            getEventType(detail), 'getInfo'
+          @pluginManager.showInfoTooltip target.getModel(), null, getEventType(detail)
         'ide-haskell:insert-type': ({target, detail}) =>
-          @pluginManager.controller(target.getModel())
-            .insertType getEventType(detail)
+          @pluginManager.insertType target.getModel(), getEventType(detail)
         'ide-haskell:insert-import': ({target, detail}) =>
-          @pluginManager.controller(target.getModel())
-            .insertImport getEventType(detail)
+          @pluginManager.insertImport target.getModel(), getEventType(detail)
         'ide-haskell:close-tooltip': ({target, abortKeyBinding}) =>
           if @pluginManager.controller(target.getModel()).hasTooltips()
-            @pluginManager.controller(target.getModel()).closeTooltips()
+            @pluginManager.controller(target.getModel()).hideTooltip()
           else
             abortKeyBinding?()
         'ide-haskell:next-error': ({target}) =>
