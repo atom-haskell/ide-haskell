@@ -24,6 +24,9 @@ class OutputPanelButtons extends HTMLElement
       v.classList.remove 'active'
     @buttons[btn].classList.add 'active'
 
+  setCount: (btn, count) ->
+    @buttons[btn].setAttribute 'data-count', count
+
   destroy: ->
     @emitter.dispose()
     @rootElement.destroy()

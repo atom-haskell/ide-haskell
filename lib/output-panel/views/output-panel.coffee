@@ -8,6 +8,8 @@ class OutputPanelView extends HTMLElement
     @model.results.onDidUpdate =>
       if atom.config.get('ide-haskell.switchTabOnCheck')
         @activateFirstNonEmptyTab()
+      for btn in @buttons.buttonNames()
+        @buttons.setCount btn, @model.results.filter(severity: btn).length
     @items.setModel @model.results
 
     @style.height = @model.state.height if @model.state?.height?
