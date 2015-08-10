@@ -12,7 +12,7 @@ class OutputPanel
 
     @disposables.add @results.onDidUpdate => @currentResult = null
 
-    @backendStatus 'ready'
+    @backendStatus status: 'ready'
 
   toggle: ->
     p = atom.workspace.panelForItem(@)

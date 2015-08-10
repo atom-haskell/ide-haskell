@@ -45,10 +45,10 @@ class PluginManager
   setBackend: (@backend) =>
     if @backend?.onBackendActive?
       @disposables.add @backend.onBackendActive =>
-        @outputView.backendStatus 'progress'
+        @outputView.backendStatus status: 'progress'
     if @backend?.onBackendIdle?
       @disposables.add @backend.onBackendIdle =>
-        @outputView.backendStatus 'ready'
+        @outputView.backendStatus status: 'ready'
 
   setBuildBackend: (@buildBackend) =>
     if @buildBackend?.onBackendStatus?
@@ -56,7 +56,7 @@ class PluginManager
         @outputView.backendStatus o
 
   backendWarning: =>
-    @outputView.backendStatus 'warning'
+    @outputView.backendStatus status: 'warning'
 
   togglePanel: ->
     @outputView?.toggle()
