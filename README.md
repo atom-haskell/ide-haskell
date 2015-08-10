@@ -111,6 +111,8 @@ You can edit Atom keybindings by opening 'Edit → Open Your Keymap'. Here is a 
 'atom-workspace':
   '': 'ide-haskell:toggle-output'
   '': 'ide-haskell:shutdown-backend'
+  '': 'ide-haskell:build'
+  '': 'ide-haskell:clean'
 ```
 
 ## TODO
