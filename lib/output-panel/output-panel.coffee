@@ -12,7 +12,7 @@ class OutputPanel
 
     @disposables.add @results.onDidUpdate => @currentResult = null
 
-    @backendIdle()
+    @backendStatus 'ready'
 
   toggle: ->
     p = atom.workspace.panelForItem(@)
@@ -38,17 +38,8 @@ class OutputPanel
     @status = status
     @emitter.emit 'status-changed', {@status, oldStatus}
 
-  backendActive: ->
-    @emitStatus 'progress'
-
-  backendIdle: ->
-    @emitStatus 'ready'
-
-  backendWarning: ->
-    @emitStatus 'warning'
-
-  backendError: ->
-    @emitStatus 'error'
+  backendStatus: ({status}) ->
+    @emitStatus status
 
   showNextError: ->
     rs = @results.resultsWithURI()

@@ -45,27 +45,18 @@ class PluginManager
   setBackend: (@backend) =>
     if @backend?.onBackendActive?
       @disposables.add @backend.onBackendActive =>
-        @outputView.backendActive()
+        @outputView.backendStatus 'progress'
     if @backend?.onBackendIdle?
       @disposables.add @backend.onBackendIdle =>
-        @outputView.backendIdle()
+        @outputView.backendStatus 'ready'
 
   setBuildBackend: (@buildBackend) =>
-    if @buildBackend?.onBackendActive?
-      @disposables.add @buildBackend.onBackendActive =>
-        @outputView.backendActive()
-    if @buildBackend?.onBackendIdle?
-      @disposables.add @buildBackend.onBackendIdle =>
-        @outputView.backendIdle()
-    if @buildBackend?.onBackendWarning?
-      @disposables.add @buildBackend.onBackendWarning =>
-        @outputView.backendWarning()
-    if @buildBackend?.onBackendError?
-      @disposables.add @buildBackend.onBackendError =>
-        @outputView.backendError()
+    if @buildBackend?.onBackendStatus?
+      @disposables.add @buildBackend.onBackendStatus (o) =>
+        @outputView.backendStatus o
 
   backendWarning: =>
-    @outputView.backendWarning()
+    @outputView.backendStatus 'warning'
 
   togglePanel: ->
     @outputView?.toggle()
@@ -76,8 +67,8 @@ class PluginManager
     @checkResults.setResults []
 
     @buildBackend.build 'target', # TODO: target selection
-      onMessage: (message, progress) =>
-        @checkResults.appendResults message
+      onMessages: (messages) =>
+        @checkResults.appendResults messages
         #TODO: display progress
 
   cleanProject: =>
