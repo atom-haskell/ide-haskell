@@ -80,8 +80,12 @@ class EditorControl
       clearTimeout @exprTypeTimeout
       @exprTypeTimeout = null
 
-  updateResults: (res) =>
-    m.destroy() for m in @editor.findMarkers {type: 'check-result'}
+  updateResults: (res, types) =>
+    if types?
+      for t in types
+        m.destroy() for m in @editor.findMarkers {type: 'check-result', severity: t}
+    else
+      m.destroy() for m in @editor.findMarkers {type: 'check-result'}
     @markerFromCheckResult(r) for r in res
 
   markerFromCheckResult: ({uri, severity, message, position}) ->

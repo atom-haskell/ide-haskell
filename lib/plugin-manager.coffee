@@ -23,7 +23,7 @@ class PluginManager
       (new OutputPanelElement).setModel panel
     @disposables.add atom.views.addViewProvider ResultItem, (resultitem) ->
       (new OutputPanelItemElement).setModel resultitem
-    @disposables.add @onResultsUpdated => @updateEditorsWithResults()
+    @disposables.add @onResultsUpdated ({types}) => @updateEditorsWithResults(types)
 
     @createOutputViewPanel(state)
     @subscribeEditorController()
@@ -97,9 +97,9 @@ class PluginManager
     func editor.getBuffer(), (res) =>
       @checkResults.setResults res, types
 
-  updateEditorsWithResults: ->
+  updateEditorsWithResults: (types) ->
     for ed in atom.workspace.getTextEditors()
-      @controller(ed)?.updateResults?(@checkResults.filter uri: ed.getPath())
+      @controller(ed)?.updateResults?(@checkResults.filter uri: ed.getPath(), types)
 
   onResultsUpdated: (callback) =>
     @checkResults.onDidUpdate callback
