@@ -24,10 +24,10 @@ class OutputPanelButtons extends HTMLElement
     Object.keys @buttons
 
   clickButton: (btn) ->
-    @emitter.emit 'button-clicked', btn
     for v in @getElementsByClassName 'active'
       v.classList.remove 'active'
     @buttons[btn].classList.add 'active'
+    @emitter.emit 'button-clicked', btn
 
   setFileFilter: (state) ->
     if state
