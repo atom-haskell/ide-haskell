@@ -70,6 +70,9 @@ class OutputPanelView extends HTMLElement
     @activateTab item.severity
     @items.showItem item
 
+  getActiveTab: ->
+    @buttons.getActive()
+
 OutputPanelElement =
   document.registerElement 'ide-haskell-panel',
     prototype: OutputPanelView.prototype

@@ -87,8 +87,12 @@ ide-haskell-panel {
           background: @button-background-color;
         }
 
-        .count {
-          margin-left: .2em;
+        &:before {
+          content: attr(data-caption);
+        }
+
+        &:not([data-count="0"]):before {
+          content: attr(data-caption) ' (' attr(data-count) ')';
         }
       }
     }

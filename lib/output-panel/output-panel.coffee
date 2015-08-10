@@ -18,17 +18,17 @@ class OutputPanel
     p = atom.workspace.panelForItem(@)
     if p.isVisible()
       p.hide()
-      @state.visibility = false
     else
       p.show()
-      @state.visibility = true
 
   destroy: ->
     @disposables.dispose()
     atom.workspace.panelForItem(@).destroy()
 
   serialize: ->
-    @state
+    visibility: atom.workspace.panelForItem(@).isVisible()
+    height: atom.views.getView(@).style.height
+    activeTab: atom.views.getView(@).getActiveTab()
 
   onStatusChanged: (callback) ->
     @emitter.on 'status-changed', callback

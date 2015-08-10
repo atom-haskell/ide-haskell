@@ -8,7 +8,8 @@ class OutputPanelButtons extends HTMLElement
     @buttons = {}
     ['error', 'warning', 'lint', 'build'].forEach (btn) =>
       @appendChild @buttons[btn] = document.createElement 'ide-haskell-button'
-      @buttons[btn].innerText = btn
+      @buttons[btn].setAttribute 'data-caption', btn
+      @buttons[btn].setAttribute 'data-count', 0
       @buttons[btn].addEventListener 'click', => @clickButton btn
 
   onButtonClicked: (callback) ->
@@ -26,6 +27,9 @@ class OutputPanelButtons extends HTMLElement
   destroy: ->
     @emitter.dispose()
     @rootElement.destroy()
+
+  getActive: ->
+    @getElementsByClassName('active')[0]?.getAttribute?('data-caption')
 
 OutputPanelButtonsElement =
   document.registerElement 'ide-haskell-panel-buttons',
