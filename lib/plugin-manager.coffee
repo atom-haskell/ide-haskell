@@ -1,19 +1,28 @@
-{OutputView} = require './output-view'
+OutputPanel = require './output-panel/output-panel'
+OutputPanelElement = require './output-panel/views/output-panel'
 {EditorControl} = require './editor-control'
-utilStylishHaskell = require './util-stylish-haskell'
-utilCabalFormat = require './util-cabal-format'
-{CompositeDisposable, Emitter} = require 'atom'
+utilStylishHaskell = require './binutils/util-stylish-haskell'
+utilCabalFormat = require './binutils/util-cabal-format'
+ImportListView = require './views/import-list-view'
+{TooltipMessage, TooltipElement} = require './views/tooltip-view'
+ResultsDB = require './results-db'
+ResultItem = require './result-item'
+OutputPanelItemElement = require './output-panel/views/output-panel-item'
+{CompositeDisposable} = require 'atom'
 
 class PluginManager
-
-  constructor: (state, backend, buildBackend) ->
-    @checkResults = {}            # all errors, warings and lints here
-    @currentError = null
+  constructor: (state, backend) ->
+    @checkResults = new ResultsDB
 
     @disposables = new CompositeDisposable
     @controllers = new WeakMap
 
-    @disposables.add @emitter = new Emitter
+    @disposables.add atom.views.addViewProvider TooltipMessage, (message) ->
+      (new TooltipElement).setMessage message
+    @disposables.add atom.views.addViewProvider OutputPanel, (panel) ->
+      (new OutputPanelElement).setModel panel
+    @disposables.add atom.views.addViewProvider ResultItem, (resultitem) ->
+      (new OutputPanelItemElement).setModel resultitem
 
     @createOutputViewPanel(state)
     @subscribeEditorController()
@@ -22,6 +31,7 @@ class PluginManager
     @setBuildBackend buildBackend if buildBackend?
 
   deactivate: ->
+    @checkResults.destroy()
     @disposables.dispose()
     @backend?.shutdownBackend?()
 
@@ -97,14 +107,16 @@ class PluginManager
     return unless func?
     if atom.config.get 'ide-haskell.useLinter'
       return atom.commands.dispatch atom.views.getView(editor), 'linter:lint'
-    @outputView?.pendingCheck()
-    @currentError = null
     func editor.getBuffer(), (res) =>
-      @checkResults[t] = (res.filter ({severity}) -> severity == t) for t in types
-      @emitter.emit 'results-updated', {res: @checkResults, types}
+      @checkResults.setResults res, types
+      @updateEditorsWithResults()
+
+  updateEditorsWithResults: ->
+    for ed in atom.workspace.getTextEditors()
+      @controller(ed)?.updateResults?(@checkResults.filter uri: ed.getPath())
 
   onResultsUpdated: (callback) =>
-    @emitter.on 'results-updated', callback
+    @checkResults.onDidUpdate callback
 
   # File prettify
   prettifyFile: (editor, format = 'haskell') ->
@@ -124,28 +136,100 @@ class PluginManager
             editor.addCursorAtBufferPosition cursor,
               autoscroll: false
 
+  showTypeTooltip: (editor, pos, eventType) ->
+    @queueTooltipAction editor, pos, eventType, 'getType'
+
+  showInfoTooltip: (editor, pos, eventType) ->
+    @queueTooltipAction editor, pos, eventType, 'getInfo'
+
+  insertType: (editor, eventType) ->
+    unless @backend?.getType?
+      atom.notifications.addWarning "Backend #{@manager.backend.name()} doesn't support
+                                    getType command" if @manager.backend?
+      return
+
+    controller = @controller editor
+    return unless controller?
+
+    {crange} = controller.getEventRange null, eventType
+
+    @backend.getType editor.getBuffer(), crange, ({range, type}) ->
+      n = editor.indentationForBufferRow(range.start.row)
+      indent = ' '.repeat n * editor.getTabLength()
+      editor.scanInBufferRange /[\w'.]+/, range, ({matchText, stop}) ->
+        symbol = matchText
+        pos = [range.start.row, 0]
+        editor.setTextInBufferRange [pos, pos],
+          indent + symbol + " :: " + type + "\n"
+        stop()
+
+  insertImport: (editor, eventType) ->
+    unless @backend?.getModulesExportingSymbolAt?
+      atom.notifications.addWarning "Backend #{@backend.name()} doesn't support
+                                    getModulesExportingSymbolAt command" if @backend?
+      return
+
+    controller = @controller editor
+    return unless controller?
+
+    {crange} = controller.getEventRange null, eventType
+    @backend.getModulesExportingSymbolAt editor.getBuffer(), crange, (lines) ->
+      new ImportListView
+        items: lines
+        onConfirmed: (mod) ->
+          pi = controller.findImportsPos()
+          if pi?
+            editor.setTextInBufferRange [pi.pos, pi.pos], "\n#{pi.indent}import #{mod}"
+
+
+  queueTooltipAction: (editor, pos, eventType, fun) ->
+    controller = @controller editor
+    return unless controller?
+    {crange, pos} = controller.getEventRange pos, eventType
+
+    runPendingEvent = ({fun, crange}) =>
+      unless @backend?[fun]?
+        atom.notifications.addWarning "Backend #{@backend.name()} doesn't support
+                                      #{fun} command" if @backend?
+        return
+      @pendingTooltipAction = null
+      @tooltipActionRunning = true
+      @backend?[fun] editor.getBuffer(), crange, ({range, type, info}) =>
+        if @pendingTooltipAction?
+          runPendingEvent @pendingTooltipAction
+          return
+        @tooltipActionRunning = false
+        text = type ? info
+        unless text?
+          @backendWarning()
+          return
+        controller.showTooltip pos, range, text, eventType
+
+    @pendingTooltipAction = {fun, crange}
+    unless @tooltipActionRunning
+      runPendingEvent @pendingTooltipAction
 
   controller: (editor) ->
     @controllers?.get? editor
 
-  # Update internals with results.
-  updateResults: (types, results) ->
-    @checkResults[t] = [] for t in types
-    @checkResults[r.type].push(r) for r in results
-
   # Create and delete output view panel.
   createOutputViewPanel: (state) ->
-    @outputView = new OutputView(state.outputView, this)
+    @outputView = new OutputPanel(state.outputView, @checkResults)
 
   deleteOutputViewPanel: ->
-    @outputView?.deactivate()
+    @outputView.destroy()
     @outputView = null
 
   addController: (editor) ->
     unless @controllers.get(editor)?
-      @controllers.set(editor, new EditorControl(editor, this))
+      @controllers.set editor, controller = new EditorControl(editor)
       @disposables.add editor.onDidDestroy =>
         @controllers.delete(editor) #deactivation is handled in EditorControl
+      @disposables.add controller.onShouldShowTooltip ({ed, pos}) =>
+        action = atom.config.get('ide-haskell.onMouseHoverShow')
+        return if action == 'Nothing'
+        @['show' + action + 'Tooltip'] ed, bufferPt, 'mouse'
+      controller.updateResults @checkResults
 
   removeController: (editor) ->
     @controllers.get(editor)?.deactivate()
@@ -169,10 +253,10 @@ class PluginManager
       @removeController editor
 
   nextError: ->
-    @outputView?.next()
+    @outputView?.showNextError()
 
   prevError: ->
-    @outputView?.prev()
+    @outputView?.showPrevError()
 
 
 module.exports = {

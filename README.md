@@ -86,6 +86,33 @@ your `PATH`, at the very least.
 
 You might also want look into configuring haskell-ghc-mod: [haskell-ghc-mod README](https://github.com/atom-haskell/haskell-ghc-mod#haskell-ghc-mod-atom-package)
 
+### Keyboard shortcuts
+
+Ide-Haskell comes with little pre-specified keybindings, so you will need to specify your own, if you want those.
+
+You can edit Atom keybindings by opening 'Edit → Open Your Keymap'. Here is a template for all commands, provided by ide-haskell:
+
+```cson
+'atom-text-editor[data-grammar~="haskell"]':
+  '':'ide-haskell:check-file'
+  '':'ide-haskell:lint-file'
+  '':'ide-haskell:prettify-file'
+  'ctrl-alt-t': 'ide-haskell:show-type' #this is an example binding
+  'ctrl-alt-i': 'ide-haskell:show-info' #this is an example binding
+  'ctrl-alt-T': 'ide-haskell:insert-type' #this is an example binding
+  '':'ide-haskell:insert-import'
+  'escape': 'ide-haskell:close-tooltip' #this is set by default
+  '':'ide-haskell:next-error'
+  '':'ide-haskell:prev-error'
+
+'atom-text-editor[data-grammar~="cabal"]':
+  '': 'ide-haskell:prettify-file'
+
+'atom-workspace':
+  '': 'ide-haskell:toggle-output'
+  '': 'ide-haskell:shutdown-backend'
+```
+
 ## TODO
 
 - [x] Cabal project autodetection

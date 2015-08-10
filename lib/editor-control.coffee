@@ -1,14 +1,15 @@
 SubAtom = require 'sub-atom'
-ImportListView = require './import-list-view'
 
 {bufferPositionFromMouseEvent} = require './utils'
-{TooltipMessage} = require './tooltip-view'
-{Range, CompositeDisposable, Disposable} = require 'atom'
+{TooltipMessage} = require './views/tooltip-view'
+{Range, CompositeDisposable, Disposable, Emitter} = require 'atom'
 
 class EditorControl
-  constructor: (@editor, @manager) ->
+  constructor: (@editor) ->
     @disposables = new SubAtom
     @tooltipMarkers = new CompositeDisposable
+    @disposables.add @emitter = new Emitter
+
     @editorElement = atom.views.getView(@editor).rootElement
 
     unless atom.config.get 'ide-haskell.useLinter'
@@ -19,15 +20,15 @@ class EditorControl
 
       gutterElement = atom.views.getView(@gutter)
       @disposables.add gutterElement, 'mouseenter', ".decoration", (e) =>
-        @showCheckResult e, true
+        bufferPt = bufferPositionFromMouseEvent @editor, e
+        @lastMouseBufferPt = bufferPt
+        @showCheckResult bufferPt, true
       @disposables.add gutterElement, 'mouseleave', ".decoration", (e) =>
-        @hideCheckResult()
+        @hideTooltip()
 
     # event for editor updates
     @disposables.add @editor.onDidDestroy =>
       @deactivate()
-
-    @disposables.add @manager.onResultsUpdated @updateResults
 
     # buffer events for automatic check
     buffer = @editor.getBuffer()
@@ -51,34 +52,22 @@ class EditorControl
       return if @lastMouseBufferPt?.isEqual(bufferPt)
       @lastMouseBufferPt = bufferPt
 
-      action = atom.config.get('ide-haskell.onMouseHoverShow')
-      return if action == 'Nothing'
-
       @clearExprTypeTimeout()
-      @exprTypeTimeout = setTimeout (=>
-        (@showCheckResult e) or
-          (@showExpressionType bufferPt, 'mouse', 'get' + action)
-      ), atom.config.get('ide-haskell.expressionTypeInterval')
+      @exprTypeTimeout = setTimeout (=> @shouldShowTooltip bufferPt),
+        atom.config.get('ide-haskell.expressionTypeInterval')
     @disposables.add @editorElement, 'mouseout', '.scroll-view', (e) =>
-      action = atom.config.get('ide-haskell.onMouseHoverShow')
-      return if action == 'Nothing'
       @clearExprTypeTimeout()
 
     @disposables.add @editor.onDidChangeCursorPosition =>
       if atom.config.get('ide-haskell.closeTooltipsOnCursorMove')
         @clearExprTypeTimeout()
-        @hideExpressionType()
-
-    # update all results from manager
-    @updateResults {}
+        @hideTooltip()
 
   deactivate: ->
     @clearExprTypeTimeout()
-    @hideExpressionType()
-    @hideCheckResult()
+    @hideTooltip()
     @disposables.dispose()
     @tooltipMarkers.dispose()
-    @manager = null
     @disposables = null
     @editorElement = null
     @editor = null
@@ -91,18 +80,9 @@ class EditorControl
       clearTimeout @exprTypeTimeout
       @exprTypeTimeout = null
 
-  updateResults: ({res, types}) =>
-    res ?= @manager.checkResults
-    types ?= Object.keys(res)
-    @destroyMarkersForTypes types
-    for t in types
-      @markerFromCheckResult(r) for r in res[t]
-    @renderResults types
-
-  destroyMarkersForTypes: (types) ->
-    for t in types
-      for m in @editor.findMarkers {type: 'check-result', severity: t}
-        m.destroy()
+  updateResults: (res) =>
+    m.destroy() for m in @editor.findMarkers {type: 'check-result'}
+    @markerFromCheckResult(r) for r in res
 
   markerFromCheckResult: ({uri, severity, message, position}) ->
     return unless uri is @editor.getURI()
@@ -114,10 +94,7 @@ class EditorControl
       severity: severity
       desc: message
 
-  renderResults: (types) ->
-    for t in types
-      for m in @editor.findMarkers {type: 'check-result', severity: t}
-        @decorateMarker(m)
+    @decorateMarker(marker)
 
   decorateMarker: (m) ->
     return unless @gutter?
@@ -126,89 +103,77 @@ class EditorControl
     @editor.decorateMarker m, type: 'highlight', class: cls
     @editor.decorateMarker m, type: 'line', class: cls
 
-  # get expression type under mouse cursor and show it
-  showExpressionType: (bufferPt, eventType, fun = 'getType') ->
-    mouseEvent = contextEvent = keyboardEvent = false
+  onShouldShowTooltip: (callback) ->
+    @emitter.on 'should-show-tooltip', callback
+
+  shouldShowTooltip: (pos) ->
+    return if @showCheckResult pos
+
+    if pos.row < 0 or
+       pos.row >= @editor.getLineCount() or
+       pos.isEqual @editor.bufferRangeForBufferRow(pos.row).end
+      @hideTooltip()
+    else
+      @emitter.emit 'should-show-tooltip', {@editor, pos: pos}
+
+  showTooltip: (pos, range, text, eventType) ->
+    return unless @editor?
+
+    if range.isEqual(@tooltipHighlightRange)
+      # if @tooltipMarkerId?
+      #   tooltipMarker = @editor.getMarker(@tooltipMarkerId)
+      #   tooltipMarker.setBufferRange new Range(bufferPt,bufferPt)
+      return
+    @hideTooltip()
+    #exit if mouse moved away
+    if eventType is 'mouse'
+      unless range.containsPoint(@lastMouseBufferPt)
+        return
+    @tooltipHighlightRange = range
+    @markerBufferRange = range
+    console.log pos
+    if eventType is 'keyboard'
+      tooltipMarker = @editor.markBufferPosition pos
+    else
+      tooltipMarker = @editor.markBufferPosition range.start
+    # @tooltipMarkerId = tooltipMarker.id
+    highlightMarker = @editor.markBufferRange range
+    @tooltipMarkers.add new Disposable ->
+      tooltipMarker.destroy()
+    @tooltipMarkers.add new Disposable ->
+      highlightMarker.destroy()
+    @editor.decorateMarker tooltipMarker,
+      type: 'overlay'
+      item: new TooltipMessage text
+    @editor.decorateMarker highlightMarker,
+      type: 'highlight'
+      class: 'ide-haskell-type'
+
+  hideTooltip: ->
+    @tooltipHighlightRange = null
+    if @tooltipMarkers?
+      @tooltipMarkers.dispose()
+      @tooltipMarkers = new CompositeDisposable
+
+  getEventRange: (pos, eventType) ->
     switch eventType
       when 'mouse'
         [selRange] = @editor.getSelections()
           .map (sel) ->
             sel.getBufferRange()
           .filter (sel) ->
-            sel.containsPoint bufferPt
-        crange = selRange ? bufferPt
-        mouseEvent = true
+            sel.containsPoint pos
+        crange = selRange ? pos
       when 'context'
-        bufferPt = @lastMouseBufferPt
-        crange = bufferPt
-        contextEvent = true
+        pos = @lastMouseBufferPt
+        crange = pos
       when 'keyboard'
         crange = @editor.getLastSelection().getBufferRange()
-        bufferPt = crange.start
-        keyboardEvent = true
+        pos = crange.start
       else
         throw new Error "unknown event type #{eventType}"
 
-    if bufferPt.row < 0 or
-       bufferPt.row >= @editor.getLineCount() or
-       bufferPt.isEqual @editor.bufferRangeForBufferRow(bufferPt.row).end
-      @hideExpressionType()
-      return
-
-    runPendingEvent = ({fun, crange}) =>
-      unless @manager.backend?[fun]?
-        atom.notifications.addWarning "Backend #{@manager.backend.name()} doesn't support
-                                      #{fun} command" if @manager.backend?
-        return
-      @showExpressionTypePendingEvent = null
-      @showExpressionTypeRunning = true
-      @manager.backend?[fun] @editor.getBuffer(), crange, ({range, type, info}) =>
-        return unless @editor?
-        if @showExpressionTypePendingEvent?
-          runPendingEvent @showExpressionTypePendingEvent
-          return
-        @showExpressionTypeRunning = false
-        type ?= info
-        if range.isEqual(@tooltipHighlightRange)
-          # if @tooltipMarkerId?
-          #   tooltipMarker = @editor.getMarker(@tooltipMarkerId)
-          #   tooltipMarker.setBufferRange new Range(bufferPt,bufferPt)
-          return
-        #exit if mouse moved away
-        if mouseEvent
-          unless range.containsPoint(@lastMouseBufferPt)
-            return
-        @tooltipHighlightRange = range
-        @hideExpressionType()
-        unless type?
-          @manager.backendWarning()
-          return
-        @markerBufferRange = range
-        if mouseEvent or contextEvent
-          tooltipMarker = @editor.markBufferPosition range.start
-        else
-          tooltipMarker = @editor.markBufferPosition bufferPt
-        # @tooltipMarkerId = tooltipMarker.id
-        highlightMarker = @editor.markBufferRange range
-        @tooltipMarkers.add new Disposable ->
-          tooltipMarker.destroy()
-        @tooltipMarkers.add new Disposable ->
-          highlightMarker.destroy()
-        @editor.decorateMarker tooltipMarker,
-          type: 'overlay'
-          item: new TooltipMessage type
-        @editor.decorateMarker highlightMarker,
-          type: 'highlight'
-          class: 'ide-haskell-type'
-
-    @showExpressionTypePendingEvent = {fun, crange}
-    unless @showExpressionTypeRunning
-      runPendingEvent @showExpressionTypePendingEvent
-
-  hideExpressionType: ->
-    @tooltipHighlightRange = null
-    @tooltipMarkers.dispose()
-    @tooltipMarkers = new CompositeDisposable
+    return {crange, pos}
 
   findCheckResultMarkers: (pos, gutter) ->
     if gutter
@@ -217,85 +182,43 @@ class EditorControl
       @editor.findMarkers {type: 'check-result', containsPoint: pos}
 
   # show check result when mouse over gutter icon
-  showCheckResult: (e, gutter) ->
-    @hideCheckResult()
-    pos = bufferPositionFromMouseEvent(@editor, e)
-
+  showCheckResult: (pos, gutter) ->
     markers = @findCheckResultMarkers pos, gutter
     [marker] = markers
 
-    return false unless marker?
+    unless marker?
+      @hideTooltip() if @checkResultShowing
+      @checkResultShowing = false
+      return false
 
-    @checkResultTooltip = @editor.decorateMarker marker,
-      type: 'overlay'
-      position: 'tail'
-      item: new TooltipMessage (markers.map (marker) ->
-        marker.getProperties().desc).join('\n\n')
+    text = (markers.map (marker) ->
+      marker.getProperties().desc).join('\n\n')
 
+    if gutter
+      @showTooltip pos, new Range(pos, pos), text, 'mouse'
+    else
+      @showTooltip pos, marker.getBufferRange(), text, 'mouse'
+
+    @checkResultShowing = true
     return true
 
-  hideCheckResult: ->
-    if @checkResultTooltip?
-      @checkResultTooltip.destroy()
-      @checkResultTooltip = null
-
-  insertType: (eventType) ->
-    unless @manager.backend?.getType?
-      atom.notifications.addWarning "Backend #{@manager.backend.name()} doesn't support
-                                    getType command" if @manager.backend?
-      return
-    switch eventType
-      when 'context'
-        crange = @lastMouseBufferPt
-      when 'keyboard'
-        crange = @editor.getLastSelection().getBufferRange()
-      else
-        throw new Error "unknown event type #{eventType}"
-    @manager.backend.getType @editor.getBuffer(), crange, ({range, type}) =>
-      return unless @editor?
-      n = @editor.indentationForBufferRow(range.start.row)
-      indent = ' '.repeat n * @editor.getTabLength()
-      @editor.scanInBufferRange /[\w'.]+/, range, ({matchText, stop}) =>
-        symbol = matchText
-        pos = [range.start.row, 0]
-        @editor.setTextInBufferRange [pos, pos],
-          indent + symbol + " :: " + type + "\n"
-        stop()
-
-  insertImport: (eventType) ->
-    unless @manager.backend?.getModulesExportingSymbolAt?
-      atom.notifications.addWarning "Backend #{@manager.backend.name()} doesn't support
-                                    getModulesExportingSymbolAt command" if @manager.backend?
-      return
-    switch eventType
-      when 'context'
-        crange = @lastMouseBufferPt
-      when 'keyboard'
-        crange = @editor.getLastSelection().getBufferRange()
-      else
-        throw new Error "unknown event type #{eventType}"
-    @manager.backend.getModulesExportingSymbolAt @editor.getBuffer(),
-      crange, (lines) =>
-        return unless @editor?
-        new ImportListView
-          items: lines
-          onConfirmed: (mod) =>
-            match = false
-            # rx=RegExp("^\\s*import(\\s+qualified)?\\s+#{mod}"+
-            #           "(\\s+as\\s+[\\w.']+)?(\\s+hiding)?"+
-            #           "(\\s+\\((.*)\\))")
-            buffer = @editor.getBuffer()
-            buffer.backwardsScan /^(\s*)import/, ({match, range}) =>
-              r = buffer.rangeForRow range.start.row
-              @editor.setTextInBufferRange [r.end, r.end],
-                "\n#{match[1]}import #{mod}"
+  findImportsPos: ->
+    # rx=RegExp("^\\s*import(\\s+qualified)?\\s+#{mod}"+
+    #           "(\\s+as\\s+[\\w.']+)?(\\s+hiding)?"+
+    #           "(\\s+\\((.*)\\))")
+    buffer = @editor.getBuffer()
+    pos = null
+    indent = null
+    buffer.backwardsScan /^(\s*)import/, ({match, range}) ->
+      r = buffer.rangeForRow range.start.row
+      pos = r.end
+      indent = match[1]
+    console.log pos
+    if pos?
+      {pos, indent}
 
   hasTooltips: ->
-    @checkResultTooltip? or !!@tooltipMarkers.disposables.size
-
-  closeTooltips: ->
-    @hideExpressionType()
-    @hideCheckResult()
+    !!@tooltipMarkers.disposables.size
 
 module.exports = {
   EditorControl
