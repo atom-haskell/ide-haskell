@@ -215,7 +215,7 @@ class PluginManager
         action = atom.config.get('ide-haskell.onMouseHoverShow')
         return if action == 'Nothing'
         @['show' + action + 'Tooltip'] ed, bufferPt, 'mouse'
-      controller.updateResults @checkResults
+      controller.updateResults @checkResults.filter uri: editor.getPath()
 
   removeController: (editor) ->
     @controllers.get(editor)?.deactivate()
