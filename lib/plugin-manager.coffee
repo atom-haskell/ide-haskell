@@ -211,10 +211,10 @@ class PluginManager
       @controllers.set editor, controller = new EditorControl(editor)
       @disposables.add editor.onDidDestroy =>
         @controllers.delete(editor) #deactivation is handled in EditorControl
-      @disposables.add controller.onShouldShowTooltip ({ed, pos}) =>
+      @disposables.add controller.onShouldShowTooltip ({editor, pos}) =>
         action = atom.config.get('ide-haskell.onMouseHoverShow')
         return if action == 'Nothing'
-        @['show' + action + 'Tooltip'] ed, bufferPt, 'mouse'
+        @['show' + action + 'Tooltip'] editor, pos, 'mouse'
       controller.updateResults @checkResults.filter uri: editor.getPath()
 
   removeController: (editor) ->
