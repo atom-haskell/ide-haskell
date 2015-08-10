@@ -1,18 +1,19 @@
 {Emitter} = require 'atom'
+SubAtom = require 'sub-atom'
 
 module.exports=
 class OutputPanelButtons extends HTMLElement
   createdCallback: ->
-    @rootElement = this
-    @emitter = new Emitter
+    @disposables = new SubAtom
+    @disposables.add @emitter = new Emitter
     @buttons = {}
     ['error', 'warning', 'lint', 'build'].forEach (btn) =>
       @appendChild @buttons[btn] = document.createElement 'ide-haskell-button'
       @buttons[btn].setAttribute 'data-caption', btn
       @buttons[btn].setAttribute 'data-count', 0
-      @buttons[btn].addEventListener 'click', => @clickButton btn
+      @disposables.add @buttons[btn], 'click', => @clickButton btn
     @appendChild @cbCurrentFile = document.createElement 'ide-haskell-checkbox'
-    @cbCurrentFile.addEventListener 'click', => @toggleFileFilter()
+    @disposables.add @cbCurrentFile, 'click', => @toggleFileFilter()
 
   onButtonClicked: (callback) ->
     @emitter.on 'button-clicked', callback
@@ -46,9 +47,8 @@ class OutputPanelButtons extends HTMLElement
   setCount: (btn, count) ->
     @buttons[btn].setAttribute 'data-count', count
 
-  destroy: ->
-    @emitter.dispose()
-    @rootElement.destroy()
+  detachedCallback: ->
+    @disposables.dispose()
 
   getActive: ->
     @getElementsByClassName('active')[0]?.getAttribute?('data-caption')

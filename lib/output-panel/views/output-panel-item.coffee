@@ -1,15 +1,26 @@
+SubAtom = require 'sub-atom'
+
 class OutputPanelItemView extends HTMLElement
-  setModel: ({uri, severity, message, position}) ->
+  setModel: (@model) ->
     @innerHTML = ''
-    if uri? and position?
+    if @model.uri? and @model.position?
       @appendChild @position = document.createElement 'ide-haskell-item-position'
-      @position.innerText = "#{uri}: #{position.row + 1}, #{position.column + 1}"
-      @position.addEventListener 'click', ->
-        atom.workspace.open(uri).then (editor) ->
-          editor.setCursorBufferPosition position
+      @position.innerText = "#{@model.uri}: #{@model.position.row + 1}, #{@model.position.column + 1}"
     @appendChild @description = document.createElement 'ide-haskell-item-description'
-    @description.innerText = message
+    @description.innerText = @model.message
     @
+
+  attachedCallback: ->
+    @disposables = new SubAtom
+    if @position?
+      @disposables.add @position, 'click', =>
+        atom.workspace.open(@model.uri).then (editor) =>
+          editor.setCursorBufferPosition @model.position
+
+  detachedCallback: ->
+    @disposables.dispose()
+    @disposables = null
+
 
 OutputPanelItemElement =
   document.registerElement 'ide-haskell-panel-item',

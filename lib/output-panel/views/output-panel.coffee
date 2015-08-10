@@ -1,11 +1,12 @@
 OutputPanelButtonsElement = require './output-panel-buttons'
 OutputPanelItemsElement = require './output-panel-items'
+SubAtom = require 'sub-atom'
 
 module.exports=
 class OutputPanelView extends HTMLElement
   setModel: (@model) ->
-    @model.onStatusChanged (o) => @statusChanged o
-    @model.results.onDidUpdate =>
+    @disposables.add @model.onStatusChanged (o) => @statusChanged o
+    @disposables.add @model.results.onDidUpdate =>
       if atom.config.get('ide-haskell.switchTabOnCheck')
         @activateFirstNonEmptyTab()
       @updateItems()
@@ -18,7 +19,7 @@ class OutputPanelView extends HTMLElement
     @
 
   createdCallback: ->
-    @rootElement = this
+    @disposables = new SubAtom
     @classList.add 'native-key-bindings'
     @appendChild @resizeHandle = document.createElement 'resize-handle'
     @initResizeHandle()
@@ -27,15 +28,18 @@ class OutputPanelView extends HTMLElement
     @status.setAttribute 'data-status', 'ready'
     @heading.appendChild @buttons = new OutputPanelButtonsElement
     @appendChild @items = new OutputPanelItemsElement
-    @buttons.onButtonClicked =>
+    @disposables.add @buttons.onButtonClicked =>
       @updateItems()
-    @buttons.onCheckboxSwitched =>
+    @disposables.add @buttons.onCheckboxSwitched =>
       @updateItems()
-    atom.workspace.onDidChangeActivePaneItem =>
+    @disposables.add atom.workspace.onDidChangeActivePaneItem =>
       @updateItems() if @buttons.getFileFilter()
 
+  detachedCallback: ->
+    @disposables.dispose()
+
   initResizeHandle: ->
-    initDrag = (e) =>
+    @disposables.add @resizeHandle, 'mousedown', (e) =>
       startY = e.clientY
       startHeight = parseInt document.defaultView.getComputedStyle(@).height, 10
 
@@ -48,8 +52,6 @@ class OutputPanelView extends HTMLElement
 
       document.documentElement.addEventListener 'mousemove', doDrag
       document.documentElement.addEventListener 'mouseup', stopDrag
-
-    @resizeHandle.addEventListener 'mousedown', initDrag
 
   updateItems: ->
     filter = severity: @getActiveTab()
@@ -71,9 +73,6 @@ class OutputPanelView extends HTMLElement
       if (@model.results.filter severity: name).length > 0
         @activateTab name
         break
-
-  destroy: ->
-    @rootElement.destroy()
 
   statusChanged: ({status, oldStatus}) ->
     prio =

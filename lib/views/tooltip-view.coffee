@@ -10,15 +10,11 @@ class TooltipView extends HTMLElement
     this
 
   createdCallback: ->
-    @rootElement = this
     @inner = document.createElement 'div'
     @appendChild @inner
 
   attachedCallback: ->
     @parentElement.classList.add 'ide-haskell'
-
-  destroy: ->
-    @rootElement.destroy()
 
 TooltipElement =
   document.registerElement 'ide-haskell-tooltip',

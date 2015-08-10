@@ -135,7 +135,6 @@ class EditorControl
         return
     @tooltipHighlightRange = range
     @markerBufferRange = range
-    console.log pos
     if eventType is 'keyboard'
       tooltipMarker = @editor.markBufferPosition pos
     else
