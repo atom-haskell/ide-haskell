@@ -20,9 +20,6 @@ class OutputPanelButtons extends HTMLElement
       v.classList.remove 'active'
     @buttons[btn].classList.add 'active'
 
-  attachedCallback: ->
-    # @parentElement.classList.add 'ide-haskell'
-
   destroy: ->
     @emitter.dispose()
     @rootElement.destroy()

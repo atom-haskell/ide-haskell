@@ -42,9 +42,6 @@ class OutputPanelView extends HTMLElement
   activateTab: (tab) ->
     @buttons.clickButton tab
 
-  attachedCallback: ->
-    # @parentElement.classList.add 'ide-haskell'
-
   destroy: ->
     @rootElement.destroy()
 
