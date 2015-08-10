@@ -91,7 +91,7 @@ module.exports = IdeHaskell =
     @backendHelper.init()
     @buildBackendHelper.init()
 
-    @pluginManager = new PluginManager state, @backend
+    @pluginManager = new PluginManager state, @backend, @buildBackend
 
     # global commands
     @disposables.add atom.commands.add 'atom-workspace',
@@ -203,6 +203,14 @@ module.exports = IdeHaskell =
   consumeBuildBackend: (service) ->
     @buildBackendHelperDisp = @buildBackendHelper.consume service,
       success: =>
-        @pluginManager?.setBuildBackend @backend
+        @pluginManager?.setBuildBackend @buildBackend
+
+        @menu.add atom.menu.add [
+          label: 'Haskell IDE'
+          submenu : [
+            {label: 'Build Project', command: 'ide-haskell:build'}
+            {label: 'Clean Project', command: 'ide-haskell:clean'}
+          ]
+        ]
       dispose: =>
         @pluginManager?.setBuildBackend null

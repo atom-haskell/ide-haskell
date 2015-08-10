@@ -11,7 +11,7 @@ OutputPanelItemElement = require './output-panel/views/output-panel-item'
 {CompositeDisposable} = require 'atom'
 
 class PluginManager
-  constructor: (state, backend) ->
+  constructor: (state, backend, buildBackend) ->
     @checkResults = new ResultsDB
 
     @disposables = new CompositeDisposable
@@ -23,6 +23,7 @@ class PluginManager
       (new OutputPanelElement).setModel panel
     @disposables.add atom.views.addViewProvider ResultItem, (resultitem) ->
       (new OutputPanelItemElement).setModel resultitem
+    @disposables.add @onResultsUpdated => @updateEditorsWithResults()
 
     @createOutputViewPanel(state)
     @subscribeEditorController()
@@ -72,16 +73,11 @@ class PluginManager
   buildProject: =>
     return unless @buildBackend?
 
-    types = ['error', 'warning', 'build']
-    @checkResults[t] = [] for t in types
-    @emitter.emit 'results-updated', {res: @checkResults, types}
-
-    @outputView?.pendingCheck()
+    @checkResults.setResults []
 
     @buildBackend.build 'target', # TODO: target selection
       onMessage: (message, progress) =>
-        @checkResults[message.severity].push message
-        @emitter.emit 'results-updated', {res: @checkResults, types}
+        @checkResults.appendResults message
         #TODO: display progress
 
   cleanProject: =>
@@ -109,7 +105,6 @@ class PluginManager
       return atom.commands.dispatch atom.views.getView(editor), 'linter:lint'
     func editor.getBuffer(), (res) =>
       @checkResults.setResults res, types
-      @updateEditorsWithResults()
 
   updateEditorsWithResults: ->
     for ed in atom.workspace.getTextEditors()

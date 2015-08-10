@@ -30,6 +30,14 @@ class ResultsDB
 
     @emitter.emit 'did-update', {res: @, types: severityArr}
 
+  appendResults: (res) ->
+    @results.push new ResultItem res
+
+    severityArr = []
+    severityArr.push severity for {severity} in @results when not (severity in severityArr)
+
+    @emitter.emit 'did-update', {res: @, types: severityArr}
+
   resultsWithURI: ->
     @results.filter ({uri}) -> uri?
 
