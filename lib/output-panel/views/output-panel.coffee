@@ -4,9 +4,15 @@ OutputPanelItemsElement = require './output-panel-items'
 module.exports=
 class OutputPanelView extends HTMLElement
   setModel: (@model) ->
-    @style.height = @model.state.height if @model.state?.height?
     @model.onStatusChanged (o) => @statusChanged o
+    @model.results.onDidUpdate =>
+      if atom.config.get('ide-haskell.switchTabOnCheck')
+        @activateFirstNonEmptyTab()
     @items.setModel @model.results
+
+    @style.height = @model.state.height if @model.state?.height?
+    @activateTab(@model.state.activeTab ? @buttons.buttonNames()[0])
+
     @
 
   createdCallback: ->
@@ -41,6 +47,12 @@ class OutputPanelView extends HTMLElement
 
   activateTab: (tab) ->
     @buttons.clickButton tab
+
+  activateFirstNonEmptyTab: ->
+    for name in @buttons.buttonNames()
+      if (@model.results.filter severity: name).length > 0
+        @activateTab name
+        break
 
   destroy: ->
     @rootElement.destroy()

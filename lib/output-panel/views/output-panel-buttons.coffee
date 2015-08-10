@@ -14,6 +14,9 @@ class OutputPanelButtons extends HTMLElement
   onButtonClicked: (callback) ->
     @emitter.on 'button-clicked', callback
 
+  buttonNames: ->
+    Object.keys @buttons
+
   clickButton: (btn) ->
     @emitter.emit 'button-clicked', btn
     for v in @getElementsByClassName 'active'
