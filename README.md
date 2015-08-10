@@ -8,9 +8,7 @@ plugin is intended to help you with development in
 
 #### Haskell project autodetection
 
-IDE-Haskell works only with Haskell projects. When you open Cabal project in
-Atom, or simply open a Haskell source file, IDE-Haskell will start
-automatically.
+IDE-Haskell works only with Haskell projects. When you open a Haskell source file, IDE-Haskell will start automatically.
 
 #### Errors, warnings and linter
 
@@ -39,7 +37,7 @@ You can change this behavior to show info for symbol, or disable it completely
 in IDE-Haskell settings.
 
 Another option is to use keyboard to get type/info under cursor. No default
-bindings are specified, but you can specify them in IDE-Haskell settings.
+bindings are specified, but you can specify them in your Atom keymap.
 
 See [Configuration](#configuration) for more information.
 
