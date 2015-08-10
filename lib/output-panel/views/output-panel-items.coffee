@@ -1,5 +1,3 @@
-OutputPanelItemElement = require './output-panel-item.coffee'
-
 class OutputPanelItemsView extends HTMLElement
   setModel: (@model) ->
     @model.onDidUpdate =>
@@ -9,7 +7,14 @@ class OutputPanelItemsView extends HTMLElement
     @innerHTML = ''
     @items = @model.filter @activeFilter
     for i in @items
-      @appendChild (new OutputPanelItemElement).setModel i
+      @appendChild atom.views.getView i
+
+  showItem: (item) ->
+    view = atom.views.getView item
+    view.position.click()
+    view.scrollIntoView
+      block: "start"
+      behavior: "smooth"
 
 OutputPanelItemsElement =
   document.registerElement 'ide-haskell-panel-items',

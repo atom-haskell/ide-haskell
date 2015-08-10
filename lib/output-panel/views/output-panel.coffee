@@ -57,6 +57,9 @@ class OutputPanelView extends HTMLElement
     if prio[status] >= prio[oldStatus] or status is 'progress'
       @status.setAttribute 'data-status', status
 
+  showItem: (item) ->
+    @activateTab item.severity
+    @items.showItem item
 
 OutputPanelElement =
   document.registerElement 'ide-haskell-panel',

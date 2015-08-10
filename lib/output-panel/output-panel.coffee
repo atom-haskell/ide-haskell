@@ -1,12 +1,16 @@
-{Emitter} = require 'atom'
+{CompositeDisposable, Emitter} = require 'atom'
 
 module.exports=
 class OutputPanel
   constructor: (@state = {}, @results) ->
-    @emitter = new Emitter
+    @disposables = new CompositeDisposable
+    @disposables.add @emitter = new Emitter
+
     atom.workspace.addBottomPanel
       item: @
       visible: @state?.visibility ? true
+
+    @disposables.add @results.onDidUpdate => @currentResult = null
 
     @backendIdle()
 
@@ -20,7 +24,7 @@ class OutputPanel
       @state.visibility = true
 
   destroy: ->
-    @emitter.dispose()
+    @disposables.dispose()
     atom.workspace.panelForItem(@).destroy()
 
   serialize: ->
@@ -45,3 +49,27 @@ class OutputPanel
 
   backendError: ->
     @emitStatus 'error'
+
+  showNextError: ->
+    rs = @results.resultsWithURI()
+    return if rs.length is 0
+
+    if @currentResult?
+      @currentResult++
+    else
+      @currentResult = 0
+    @currentResult = 0 if @currentResult >= rs.length
+
+    atom.views.getView(@).showItem rs[@currentResult]
+
+  showPrevError: ->
+    rs = @results.resultsWithURI()
+    return if rs.length is 0
+
+    if @currentResult?
+      @currentResult--
+    else
+      @currentResult = rs.length - 1
+    @currentResult = rs.length - 1 if @currentResult < 0
+
+    atom.views.getView(@).showItem rs[@currentResult]

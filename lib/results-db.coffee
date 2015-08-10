@@ -1,4 +1,5 @@
 {CompositeDisposable, Emitter} = require 'atom'
+ResultItem = require './result-item'
 
 module.exports =
 class ResultsDB
@@ -17,7 +18,9 @@ class ResultsDB
 
   setResults: (res, severityArr) ->
     if severityArr?
-      @results = @results.filter(({severity}) -> not (severity in severityArr)).concat res
+      @results =
+        @results.filter(({severity}) -> not (severity in severityArr))
+        .concat(res.map (i) -> new ResultItem i)
     else
       @results = res
 
@@ -26,6 +29,9 @@ class ResultsDB
       severityArr.push severity for {severity} in res when not (severity in severityArr)
 
     @emitter.emit 'did-update', {res: @, types: severityArr}
+
+  resultsWithURI: ->
+    @results.filter ({uri}) -> uri?
 
   filter: (template) ->
     @results.filter (item) ->

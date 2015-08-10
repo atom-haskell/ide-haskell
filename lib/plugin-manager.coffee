@@ -6,6 +6,8 @@ utilCabalFormat = require './binutils/util-cabal-format'
 ImportListView = require './views/import-list-view'
 {TooltipMessage, TooltipElement} = require './views/tooltip-view'
 ResultsDB = require './results-db'
+ResultItem = require './result-item'
+OutputPanelItemElement = require './output-panel/views/output-panel-item'
 {CompositeDisposable} = require 'atom'
 
 class PluginManager
@@ -19,6 +21,8 @@ class PluginManager
       (new TooltipElement).setMessage message
     @disposables.add atom.views.addViewProvider OutputPanel, (panel) ->
       (new OutputPanelElement).setModel panel
+    @disposables.add atom.views.addViewProvider ResultItem, (resultitem) ->
+      (new OutputPanelItemElement).setModel resultitem
 
     @createOutputViewPanel(state)
     @subscribeEditorController()
@@ -70,7 +74,6 @@ class PluginManager
     return unless func?
     if atom.config.get 'ide-haskell.useLinter'
       return atom.commands.dispatch atom.views.getView(editor), 'linter:lint'
-    # @outputView?.pendingCheck()
     func editor.getBuffer(), (res) =>
       @checkResults.setResults res, types
       @updateEditorsWithResults()
@@ -183,8 +186,6 @@ class PluginManager
   deleteOutputViewPanel: ->
     @outputView.destroy()
     @outputView = null
-    # @outputView?.deactivate()
-    # @outputView = null
 
   addController: (editor) ->
     unless @controllers.get(editor)?
@@ -195,7 +196,6 @@ class PluginManager
         action = atom.config.get('ide-haskell.onMouseHoverShow')
         return if action == 'Nothing'
         @['show' + action + 'Tooltip'] ed, bufferPt, 'mouse'
-        # @showExpressionType bufferPt, 'mouse', 'get' + action
       controller.updateResults @checkResults
 
   removeController: (editor) ->
@@ -220,10 +220,10 @@ class PluginManager
       @removeController editor
 
   nextError: ->
-    @outputView?.next()
+    @outputView?.showNextError()
 
   prevError: ->
-    @outputView?.prev()
+    @outputView?.showPrevError()
 
 
 module.exports = {

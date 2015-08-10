@@ -22,6 +22,7 @@ ide-haskell-panel {
   ide-haskell-panel-heading {
     display: flex;
     flex-direction: row;
+    flex-shrink: 0;
 
     ide-haskell-status-icon {
       padding-top: 3px;
@@ -94,12 +95,11 @@ ide-haskell-panel {
   }
 
   ide-haskell-panel-items {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
+    display: block;
     overflow-y: scroll;
     padding: 3px @component-padding;
-    position: relative;
+    height: 100%;
+    flex-grow: 1;
 
     ide-haskell-panel-item {
       padding: 4px 0px;
