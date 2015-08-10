@@ -27,8 +27,7 @@ class ResultsDB
 
     @emitter.emit 'did-update', {res: @, types: severityArr}
 
-  resultsForURI: (forURI) ->
-    @results.filter ({uri}) -> forURI is uri
-
-  resultsWithSeverity: (forSeverity) ->
-    @results.filter ({severity}) -> forSeverity is severity
+  filter: (template) ->
+    @results.filter (item) ->
+      b = (item[k] is v for k, v of template)
+      b.every (v) -> v

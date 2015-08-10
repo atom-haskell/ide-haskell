@@ -1,4 +1,5 @@
-{OutputView} = require './views/output-view'
+OutputPanel = require './output-panel/output-panel'
+OutputPanelElement = require './output-panel/views/output-panel'
 {EditorControl} = require './editor-control'
 utilStylishHaskell = require './binutils/util-stylish-haskell'
 utilCabalFormat = require './binutils/util-cabal-format'
@@ -16,6 +17,8 @@ class PluginManager
 
     @disposables.add atom.views.addViewProvider TooltipMessage, (message) ->
       (new TooltipElement).setMessage message
+    @disposables.add atom.views.addViewProvider OutputPanel, (panel) ->
+      (new OutputPanelElement).setModel panel
 
     @createOutputViewPanel(state)
     @subscribeEditorController()
@@ -67,14 +70,14 @@ class PluginManager
     return unless func?
     if atom.config.get 'ide-haskell.useLinter'
       return atom.commands.dispatch atom.views.getView(editor), 'linter:lint'
-    @outputView?.pendingCheck()
+    # @outputView?.pendingCheck()
     func editor.getBuffer(), (res) =>
       @checkResults.setResults res, types
       @updateEditorsWithResults()
 
   updateEditorsWithResults: ->
     for ed in atom.workspace.getTextEditors()
-      @controller(ed)?.updateResults?(@checkResults.resultsForURI(ed.getPath()))
+      @controller(ed)?.updateResults?(@checkResults.filter uri: ed.getPath())
 
   onResultsUpdated: (callback) =>
     @checkResults.onDidUpdate callback
@@ -175,11 +178,13 @@ class PluginManager
 
   # Create and delete output view panel.
   createOutputViewPanel: (state) ->
-    @outputView = new OutputView(state.outputView, this)
+    @outputView = new OutputPanel(state.outputView, @checkResults)
 
   deleteOutputViewPanel: ->
-    @outputView?.deactivate()
+    @outputView.destroy()
     @outputView = null
+    # @outputView?.deactivate()
+    # @outputView = null
 
   addController: (editor) ->
     unless @controllers.get(editor)?
