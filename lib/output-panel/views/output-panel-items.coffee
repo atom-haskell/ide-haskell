@@ -1,7 +1,5 @@
 class OutputPanelItemsView extends HTMLElement
   setModel: (@model) ->
-    @model.onDidUpdate =>
-      @filter @activeFilter
 
   filter: (@activeFilter) ->
     @innerHTML = ''

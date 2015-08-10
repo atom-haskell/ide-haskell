@@ -8,12 +8,12 @@ class OutputPanelView extends HTMLElement
     @model.results.onDidUpdate =>
       if atom.config.get('ide-haskell.switchTabOnCheck')
         @activateFirstNonEmptyTab()
-      for btn in @buttons.buttonNames()
-        @buttons.setCount btn, @model.results.filter(severity: btn).length
+      @updateItems()
     @items.setModel @model.results
 
     @style.height = @model.state.height if @model.state?.height?
     @activateTab(@model.state.activeTab ? @buttons.buttonNames()[0])
+    @buttons.setFileFilter @model.state.fileFilter
 
     @
 
@@ -27,8 +27,12 @@ class OutputPanelView extends HTMLElement
     @status.setAttribute 'data-status', 'ready'
     @heading.appendChild @buttons = new OutputPanelButtonsElement
     @appendChild @items = new OutputPanelItemsElement
-    @buttons.onButtonClicked (btn) =>
-      @items.filter severity: btn
+    @buttons.onButtonClicked =>
+      @updateItems()
+    @buttons.onCheckboxSwitched =>
+      @updateItems()
+    atom.workspace.onDidChangeActivePaneItem =>
+      @updateItems() if @buttons.getFileFilter()
 
   initResizeHandle: ->
     initDrag = (e) =>
@@ -46,6 +50,18 @@ class OutputPanelView extends HTMLElement
       document.documentElement.addEventListener 'mouseup', stopDrag
 
     @resizeHandle.addEventListener 'mousedown', initDrag
+
+  updateItems: ->
+    filter = severity: @getActiveTab()
+    if @buttons.getFileFilter()
+      uri = atom.workspace.getActiveTextEditor()?.getPath?()
+      filter.uri = uri if uri?
+    @items.filter filter
+
+    for btn in @buttons.buttonNames()
+      f = severity: btn
+      f.uri = uri if uri?
+      @buttons.setCount btn, @model.results.filter(f).length
 
   activateTab: (tab) ->
     @buttons.clickButton tab

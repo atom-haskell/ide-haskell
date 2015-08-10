@@ -29,6 +29,7 @@ class OutputPanel
     visibility: atom.workspace.panelForItem(@).isVisible()
     height: atom.views.getView(@).style.height
     activeTab: atom.views.getView(@).getActiveTab()
+    fileFilter: atom.views.getView(@).buttons.getFileFilter()
 
   onStatusChanged: (callback) ->
     @emitter.on 'status-changed', callback

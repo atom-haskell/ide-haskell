@@ -5,6 +5,16 @@
 @import "octicon-utf-codes";
 @import "ui-variables";
 
+.icon() {
+  font-family: 'Octicons Regular';
+  font-weight: normal;
+  font-style: normal;
+  display: inline-block;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  text-decoration: none;
+}
+
 ide-haskell-panel {
   display: flex;
   flex-direction: column;
@@ -29,12 +39,10 @@ ide-haskell-panel {
       margin: 0px 0.5em;
 
       &:before {
-        font-family: 'Octicons Regular';
-        font-weight: normal;
-        font-style: normal;
-        -webkit-font-smoothing: antialiased;
-        text-decoration: none;
-        font-size: 10pt;
+        .icon;
+        display: block;
+        text-align: center;
+        font-size: 1.3em;
         content: @check;
         width: 15pt;
       }
@@ -55,20 +63,28 @@ ide-haskell-panel {
       }
     }
 
+    .clickable() {
+      display: inline-block;
+      line-height: 1.8em;
+      color: @text-color-subtle;
+      border: 1px solid @button-border-color;
+      background: fade(@button-background-color,33%);
+      cursor: pointer;
+      vertical-align: middle;
+
+      &:active {
+        background: transparent;
+      }
+    }
+
     ide-haskell-panel-buttons {
       display: flex;
       flex-direction: row;
       ide-haskell-button {
-        display: inline-block;
+        .clickable;
         text-transform: capitalize;
         margin-right: -1px; // hide left border
         padding: 0 .6em;
-        line-height: 1.8em;
-        color: @text-color-subtle;
-        border: 1px solid @button-border-color;
-        background: fade(@button-background-color,33%);
-        cursor: pointer;
-        vertical-align: middle;
         &:first-of-type {
           border-top-left-radius: @component-border-radius;
           border-bottom-left-radius: @component-border-radius;
@@ -79,9 +95,6 @@ ide-haskell-panel {
           border-bottom-right-radius: @component-border-radius;
         }
 
-        &:active {
-          background: transparent;
-        }
         &.active {
           color: @text-color-highlight;
           background: @button-background-color;
@@ -94,6 +107,21 @@ ide-haskell-panel {
         &:not([data-count="0"]):before {
           content: attr(data-caption) ' (' attr(data-count) ')';
         }
+      }
+      ide-haskell-checkbox {
+        .clickable;
+        &:before {
+          .icon;
+          display: block;
+          text-align: center;
+          font-size: 1.7em;
+          content: @file-directory;
+        }
+        &.enabled:before {
+          content: @file-text;
+        }
+        border-radius: @component-border-radius;
+        width: 1.9em;
       }
     }
   }
@@ -151,13 +179,7 @@ atom-text-editor::shadow {
 
   .gutter[gutter-name="ide-haskell-check-results"] .decoration {
     &:before {
-      font-family: 'Octicons Regular';
-      font-weight: normal;
-      font-style: normal;
-      display: inline-block;
-      line-height: 1;
-      -webkit-font-smoothing: antialiased;
-      text-decoration: none;
+      .icon;
       font-size:0.8em;
       width:0.8em;
       height:0.8em;

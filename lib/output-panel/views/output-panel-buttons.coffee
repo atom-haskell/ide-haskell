@@ -11,9 +11,14 @@ class OutputPanelButtons extends HTMLElement
       @buttons[btn].setAttribute 'data-caption', btn
       @buttons[btn].setAttribute 'data-count', 0
       @buttons[btn].addEventListener 'click', => @clickButton btn
+    @appendChild @cbCurrentFile = document.createElement 'ide-haskell-checkbox'
+    @cbCurrentFile.addEventListener 'click', => @toggleFileFilter()
 
   onButtonClicked: (callback) ->
     @emitter.on 'button-clicked', callback
+
+  onCheckboxSwitched: (callback) ->
+    @emitter.on 'checkbox-switched', callback
 
   buttonNames: ->
     Object.keys @buttons
@@ -23,6 +28,20 @@ class OutputPanelButtons extends HTMLElement
     for v in @getElementsByClassName 'active'
       v.classList.remove 'active'
     @buttons[btn].classList.add 'active'
+
+  setFileFilter: (state) ->
+    if state
+      @cbCurrentFile.classList.add 'enabled'
+      @emitter.emit 'checkbox-switched', true
+    else
+      @cbCurrentFile.classList.remove 'enabled'
+      @emitter.emit 'checkbox-switched', false
+
+  getFileFilter: ->
+    @cbCurrentFile.classList.contains 'enabled'
+
+  toggleFileFilter: ->
+    @setFileFilter not @getFileFilter()
 
   setCount: (btn, count) ->
     @buttons[btn].setAttribute 'data-count', count
