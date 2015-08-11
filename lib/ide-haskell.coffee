@@ -97,29 +97,11 @@ module.exports = IdeHaskell =
     @disposables.add atom.commands.add 'atom-workspace',
       'ide-haskell:toggle-output': =>
         @pluginManager.togglePanel()
-      'ide-haskell:shutdown-backend': =>
-        @backend?.shutdownBackend?()
-      'ide-haskell:build': =>
-        @pluginManager.buildProject()
-      'ide-haskell:clean': =>
-        @pluginManager.cleanProject()
 
     @disposables.add \
       atom.commands.add 'atom-text-editor[data-grammar~="haskell"]',
-        'ide-haskell:check-file': ({target}) =>
-          @pluginManager.checkFile target.getModel()
-        'ide-haskell:lint-file': ({target}) =>
-          @pluginManager.lintFile target.getModel()
         'ide-haskell:prettify-file': ({target}) =>
           @pluginManager.prettifyFile target.getModel()
-        'ide-haskell:show-type': ({target, detail}) =>
-          @pluginManager.showTypeTooltip target.getModel(), null, getEventType(detail)
-        'ide-haskell:show-info': ({target, detail}) =>
-          @pluginManager.showInfoTooltip target.getModel(), null, getEventType(detail)
-        'ide-haskell:insert-type': ({target, detail}) =>
-          @pluginManager.insertType target.getModel(), getEventType(detail)
-        'ide-haskell:insert-import': ({target, detail}) =>
-          @pluginManager.insertImport target.getModel(), getEventType(detail)
         'ide-haskell:close-tooltip': ({target, abortKeyBinding}) =>
           if @pluginManager.controller(target.getModel()).hasTooltips()
             @pluginManager.controller(target.getModel()).hideTooltip()
@@ -171,6 +153,26 @@ module.exports = IdeHaskell =
     @backendHelperDisp = @backendHelper.consume service,
       success: =>
         @pluginManager?.setBackend @backend
+
+        @disposables.add atom.commands.add 'atom-workspace',
+          'ide-haskell:shutdown-backend': =>
+            @backend?.shutdownBackend?()
+
+        @disposables.add \
+          atom.commands.add 'atom-text-editor[data-grammar~="haskell"]',
+            'ide-haskell:check-file': ({target}) =>
+              @pluginManager.checkFile target.getModel()
+            'ide-haskell:lint-file': ({target}) =>
+              @pluginManager.lintFile target.getModel()
+            'ide-haskell:show-type': ({target, detail}) =>
+              @pluginManager.showTypeTooltip target.getModel(), null, getEventType(detail)
+            'ide-haskell:show-info': ({target, detail}) =>
+              @pluginManager.showInfoTooltip target.getModel(), null, getEventType(detail)
+            'ide-haskell:insert-type': ({target, detail}) =>
+              @pluginManager.insertType target.getModel(), getEventType(detail)
+            'ide-haskell:insert-import': ({target, detail}) =>
+              @pluginManager.insertImport target.getModel(), getEventType(detail)
+
         @menu.add atom.menu.add [
           label: 'Haskell IDE'
           submenu : [
@@ -204,6 +206,12 @@ module.exports = IdeHaskell =
     @buildBackendHelperDisp = @buildBackendHelper.consume service,
       success: =>
         @pluginManager?.setBuildBackend @buildBackend
+
+        @disposables.add atom.commands.add 'atom-workspace',
+          'ide-haskell:build': =>
+            @pluginManager.buildProject()
+          'ide-haskell:clean': =>
+            @pluginManager.cleanProject()
 
         @menu.add atom.menu.add [
           label: 'Haskell IDE'
