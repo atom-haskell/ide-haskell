@@ -2,12 +2,11 @@ SubAtom = require 'sub-atom'
 
 {bufferPositionFromMouseEvent} = require './utils'
 {TooltipMessage} = require './views/tooltip-view'
-{Range, CompositeDisposable, Disposable, Emitter} = require 'atom'
+{Range, Disposable, Emitter} = require 'atom'
 
 class EditorControl
   constructor: (@editor) ->
     @disposables = new SubAtom
-    @tooltipMarkers = new CompositeDisposable
     @disposables.add @emitter = new Emitter
 
     @editorElement = atom.views.getView(@editor).rootElement
@@ -67,12 +66,10 @@ class EditorControl
     @clearExprTypeTimeout()
     @hideTooltip()
     @disposables.dispose()
-    @tooltipMarkers.dispose()
     @disposables = null
     @editorElement = null
     @editor = null
     @lastMouseBufferPt = null
-    @tooltipMarkers = null
 
   # helper function to hide tooltip and stop timeout
   clearExprTypeTimeout: ->
@@ -116,7 +113,7 @@ class EditorControl
     if pos.row < 0 or
        pos.row >= @editor.getLineCount() or
        pos.isEqual @editor.bufferRangeForBufferRow(pos.row).end
-      @hideTooltip()
+      @hideTooltip 'mouse'
     else
       @emitter.emit 'should-show-tooltip', {@editor, pos: pos}
 
@@ -124,9 +121,6 @@ class EditorControl
     return unless @editor?
 
     if range.isEqual(@tooltipHighlightRange)
-      # if @tooltipMarkerId?
-      #   tooltipMarker = @editor.getMarker(@tooltipMarkerId)
-      #   tooltipMarker.setBufferRange new Range(bufferPt,bufferPt)
       return
     @hideTooltip()
     #exit if mouse moved away
@@ -135,16 +129,16 @@ class EditorControl
         return
     @tooltipHighlightRange = range
     @markerBufferRange = range
-    if eventType is 'keyboard'
-      tooltipMarker = @editor.markBufferPosition pos
-    else
-      tooltipMarker = @editor.markBufferPosition range.start
-    # @tooltipMarkerId = tooltipMarker.id
-    highlightMarker = @editor.markBufferRange range
-    @tooltipMarkers.add new Disposable ->
-      tooltipMarker.destroy()
-    @tooltipMarkers.add new Disposable ->
-      highlightMarker.destroy()
+    markerPos =
+      switch eventType
+        when 'keyboard' then pos
+        else range.start
+    tooltipMarker = @editor.markBufferPosition markerPos,
+      type: 'tooltip'
+      eventType: eventType
+    highlightMarker = @editor.markBufferRange range,
+      type: 'tooltip'
+      eventType: eventType
     @editor.decorateMarker tooltipMarker,
       type: 'overlay'
       item: new TooltipMessage text
@@ -152,11 +146,12 @@ class EditorControl
       type: 'highlight'
       class: 'ide-haskell-type'
 
-  hideTooltip: ->
+  hideTooltip: (eventType) ->
     @tooltipHighlightRange = null
-    if @tooltipMarkers?
-      @tooltipMarkers.dispose()
-      @tooltipMarkers = new CompositeDisposable
+    template = type: 'tooltip'
+    if eventType?
+      template.eventType = eventType
+    m.destroy() for m in @editor.findMarkers template
 
   getEventRange: (pos, eventType) ->
     switch eventType
@@ -221,7 +216,7 @@ class EditorControl
       {pos, indent}
 
   hasTooltips: ->
-    !!@tooltipMarkers.disposables.size
+    !!@editor.findMarkers(type: 'tooltip').length
 
 module.exports = {
   EditorControl
