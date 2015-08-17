@@ -54,11 +54,13 @@ class OutputPanelView extends HTMLElement
       document.documentElement.addEventListener 'mouseup', stopDrag
 
   updateItems: ->
-    filter = severity: @getActiveTab()
-    if @buttons.getFileFilter()
+    activeTab = @getActiveTab()
+    filter = severity: activeTab
+    if @buttons.getFileFilter() and activeTab isnt 'build'
       uri = atom.workspace.getActiveTextEditor()?.getPath?()
       filter.uri = uri if uri?
     @items.filter filter
+    @items.scrollToEnd() if activeTab is 'build'
 
     for btn in @buttons.buttonNames()
       f = severity: btn
