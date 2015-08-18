@@ -56,16 +56,16 @@ class OutputPanelView extends HTMLElement
   updateItems: ->
     activeTab = @getActiveTab()
     filter = severity: activeTab
-    if @buttons.getFileFilter() and activeTab isnt 'build'
+    if @buttons.getFileFilter()
       uri = atom.workspace.getActiveTextEditor()?.getPath?()
-      filter.uri = uri if uri?
-    scroll = activeTab is 'build' and @items.atEnd()
+      filter.uri = uri if uri? and @buttons.options(activeTab).uriFilter
+    scroll = @buttons.options(activeTab).autoScroll and @items.atEnd()
     @items.filter filter
     @items.scrollToEnd() if scroll
 
     for btn in @buttons.buttonNames()
       f = severity: btn
-      f.uri = uri if uri?
+      f.uri = uri if uri? and @buttons.options(btn).uriFilter
       @buttons.setCount btn, @model.results.filter(f).length
 
   activateTab: (tab) ->
@@ -92,6 +92,10 @@ class OutputPanelView extends HTMLElement
 
   getActiveTab: ->
     @buttons.getActive()
+
+  createTab: (name, opts) ->
+    unless name in @buttons.buttonNames()
+      @buttons.createButton name, opts
 
 OutputPanelElement =
   document.registerElement 'ide-haskell-panel',

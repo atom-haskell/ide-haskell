@@ -25,6 +25,9 @@ class OutputPanel
     @disposables.dispose()
     atom.workspace.panelForItem(@).destroy()
 
+  createTab: (name, opts) ->
+    atom.views.getView(@).createTab name, opts
+
   serialize: ->
     visibility: atom.workspace.panelForItem(@).isVisible()
     height: atom.views.getView(@).style.height
