@@ -2,10 +2,12 @@ class OutputPanelItemsView extends HTMLElement
   setModel: (@model) ->
 
   filter: (@activeFilter) ->
+    scrollTop = @scrollTop
     @innerHTML = ''
     @items = @model.filter @activeFilter
     for i in @items
       @appendChild atom.views.getView i
+    @scrollTop = scrollTop
 
   showItem: (item) ->
     view = atom.views.getView item
