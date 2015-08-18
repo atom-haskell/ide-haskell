@@ -80,32 +80,34 @@ ide-haskell-panel {
     ide-haskell-panel-buttons {
       display: flex;
       flex-direction: row;
-      ide-haskell-button {
-        .clickable;
-        text-transform: capitalize;
-        margin-right: -1px; // hide left border
-        padding: 0 .6em;
-        &:first-of-type {
-          border-top-left-radius: @component-border-radius;
-          border-bottom-left-radius: @component-border-radius;
-        }
-        &:last-of-type {
-          margin-right: .6em;
-          border-top-right-radius: @component-border-radius;
-          border-bottom-right-radius: @component-border-radius;
-        }
+      ide-haskell-buttons-container {
+        ide-haskell-button {
+          .clickable;
+          text-transform: capitalize;
+          margin-right: -1px; // hide left border
+          padding: 0 .6em;
+          &:first-of-type {
+            border-top-left-radius: @component-border-radius;
+            border-bottom-left-radius: @component-border-radius;
+          }
+          &:last-of-type {
+            margin-right: .6em;
+            border-top-right-radius: @component-border-radius;
+            border-bottom-right-radius: @component-border-radius;
+          }
 
-        &.active {
-          color: @text-color-highlight;
-          background: @button-background-color;
-        }
+          &.active {
+            color: @text-color-highlight;
+            background: @button-background-color;
+          }
 
-        &:before {
-          content: attr(data-caption);
-        }
+          &:before {
+            content: attr(data-caption);
+          }
 
-        &:not([data-count="0"]):before {
-          content: attr(data-caption) ' (' attr(data-count) ')';
+          &:not([data-count="0"]):before {
+            content: attr(data-caption) ' (' attr(data-count) ')';
+          }
         }
       }
       ide-haskell-checkbox {

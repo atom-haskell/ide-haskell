@@ -7,13 +7,17 @@ class OutputPanelButtons extends HTMLElement
     @disposables = new SubAtom
     @disposables.add @emitter = new Emitter
     @buttons = {}
+    @appendChild @buttonsContainer = document.createElement 'ide-haskell-buttons-container'
     ['error', 'warning', 'lint', 'build'].forEach (btn) =>
-      @appendChild @buttons[btn] = document.createElement 'ide-haskell-button'
-      @buttons[btn].setAttribute 'data-caption', btn
-      @buttons[btn].setAttribute 'data-count', 0
-      @disposables.add @buttons[btn], 'click', => @clickButton btn
+      @createButton btn
     @appendChild @cbCurrentFile = document.createElement 'ide-haskell-checkbox'
     @disposables.add @cbCurrentFile, 'click', => @toggleFileFilter()
+
+  createButton: (btn) ->
+    @buttonsContainer.appendChild @buttons[btn] = document.createElement 'ide-haskell-button'
+    @buttons[btn].setAttribute 'data-caption', btn
+    @buttons[btn].setAttribute 'data-count', 0
+    @disposables.add @buttons[btn], 'click', => @clickButton btn
 
   onButtonClicked: (callback) ->
     @emitter.on 'button-clicked', callback
