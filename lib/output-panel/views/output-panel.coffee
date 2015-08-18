@@ -59,8 +59,9 @@ class OutputPanelView extends HTMLElement
     if @buttons.getFileFilter() and activeTab isnt 'build'
       uri = atom.workspace.getActiveTextEditor()?.getPath?()
       filter.uri = uri if uri?
+    scroll = activeTab is 'build' and @items.atEnd()
     @items.filter filter
-    @items.scrollToEnd() if activeTab is 'build'
+    @items.scrollToEnd() if scroll
 
     for btn in @buttons.buttonNames()
       f = severity: btn

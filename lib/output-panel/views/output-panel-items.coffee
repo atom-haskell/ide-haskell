@@ -19,6 +19,9 @@ class OutputPanelItemsView extends HTMLElement
   scrollToEnd: ->
     @scrollTop = @scrollHeight
 
+  atEnd: ->
+    @scrollTop >= (@scrollHeight - @clientHeight)
+
 OutputPanelItemsElement =
   document.registerElement 'ide-haskell-panel-items',
     prototype: OutputPanelItemsView.prototype
