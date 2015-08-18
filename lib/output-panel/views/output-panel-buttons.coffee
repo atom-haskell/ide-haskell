@@ -26,7 +26,10 @@ class OutputPanelButtons extends HTMLElement
     @disposables.add @buttons[btn].element, 'click', => @clickButton btn
 
   options: (btn) ->
-    opts = @buttons[btn].options
+    opts = if @buttons[btn]?
+      @buttons[btn].options
+    else
+      {}
     opts['uriFilter'] ?= true
     opts['autoScroll'] ?= false
     opts
@@ -41,10 +44,11 @@ class OutputPanelButtons extends HTMLElement
     Object.keys @buttons
 
   clickButton: (btn) ->
-    for v in @getElementsByClassName 'active'
-      v.classList.remove 'active'
-    @buttons[btn].element.classList.add 'active'
-    @emitter.emit 'button-clicked', btn
+    if @buttons[btn]?
+      for v in @getElementsByClassName 'active'
+        v.classList.remove 'active'
+      @buttons[btn].element.classList.add 'active'
+      @emitter.emit 'button-clicked', btn
 
   setFileFilter: (state) ->
     if state
@@ -61,7 +65,8 @@ class OutputPanelButtons extends HTMLElement
     @setFileFilter not @getFileFilter()
 
   setCount: (btn, count) ->
-    @buttons[btn].element.setAttribute 'data-count', count
+    if @buttons[btn]?
+      @buttons[btn].element.setAttribute 'data-count', count
 
   detachedCallback: ->
     @disposables.dispose()

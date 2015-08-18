@@ -53,7 +53,17 @@ class PluginManager
   setBuildBackend: (@buildBackend) =>
     if @buildBackend?.onBackendStatus?
       @disposables.add @buildBackend.onBackendStatus (o) =>
-        @outputView.backendStatus o
+        @outputView.backendStatus o #TODO: display progress
+    if @buildBackend?.onMessages?
+      @disposables.add @buildBackend.onMessages (msgs) =>
+        @checkResults.appendResults msgs
+    if @buildBackend?.onClearMessages?
+      @disposables.add @buildBackend.onClearMessages (types) =>
+        @checkResults.setResults [], types
+    if @buildBackend?.getPossibleMessageTypes?
+      types = @buildBackend.getPossibleMessageTypes()
+      for type, opts of types
+        @outputView.createTab type, opts
 
   backendWarning: =>
     @outputView.backendStatus status: 'warning'
@@ -63,13 +73,7 @@ class PluginManager
 
   buildProject: =>
     return unless @buildBackend?
-
-    @checkResults.setResults []
-
-    @buildBackend.build 'target', # TODO: target selection
-      onMessages: (messages) =>
-        @checkResults.appendResults messages
-        #TODO: display progress
+    @buildBackend.build 'target' # TODO: target selection
 
   cleanProject: =>
     return unless @buildBackend?

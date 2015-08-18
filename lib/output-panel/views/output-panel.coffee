@@ -96,6 +96,8 @@ class OutputPanelView extends HTMLElement
   createTab: (name, opts) ->
     unless name in @buttons.buttonNames()
       @buttons.createButton name, opts
+    unless @getActiveTab()?
+      @activateTab @buttons.buttonNames()[0]
 
 OutputPanelElement =
   document.registerElement 'ide-haskell-panel',
