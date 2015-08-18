@@ -69,7 +69,115 @@ module.exports = IdeHaskell =
       description: 'Use Atom Linter service for check and lint
                     (requires restart)'
 
+  cleanConfig: ->
+    [ 'activateStandalone'
+    , 'startupMessageAutocomplete' ].forEach (item) ->
+      atom.config.unset "ide-haskell.#{item}"
+
+    set = (config, confkey, group, command) ->
+      if binding = atom.config.get("ide-haskell.#{confkey}")
+        console.log binding
+        config[group]         ?= {}
+        config[group][binding] = "ide-haskell:#{command}"
+      atom.config.unset "ide-haskell.#{confkey}"
+      config
+    db = [
+        key: 'hotkeyToggleOutput'
+        modify: (config, key) ->
+          set config, key,
+          'atom-workspace',
+          'toggle-output'
+      ,
+        key: 'hotkeyShutdownBackend'
+        modify: (config, key) ->
+          set config, key,
+          'atom-workspace',
+          'shutdown-backend'
+      ,
+        key: 'hotkeyCheckFile'
+        modify: (config, key) ->
+          set config, key,
+          'atom-text-editor[data-grammar~="haskell"]',
+          'check-file'
+      ,
+        key: 'hotkeyLintFile'
+        modify: (config, key) ->
+          set config, key,
+          'atom-text-editor[data-grammar~="haskell"]',
+          'lint-file'
+      ,
+        key: 'hotkeyPrettifyFile'
+        modify: (config, key) ->
+          config = set config, key,
+          'atom-text-editor[data-grammar~="haskell"]',
+          'prettify-file'
+          set config, key,
+          'atom-text-editor[data-grammar~="cabal"]',
+          'prettify-file'
+      ,
+        key: 'hotkeyShowType'
+        modify: (config, key) ->
+          set config, key,
+          'atom-text-editor[data-grammar~="haskell"]',
+          'show-type'
+      ,
+        key: 'hotkeyShowInfo'
+        modify: (config, key) ->
+          set config, key,
+          'atom-text-editor[data-grammar~="haskell"]',
+          'show-info'
+      ,
+        key: 'hotkeyInsertType'
+        modify: (config, key) ->
+          set config, key,
+          'atom-text-editor[data-grammar~="haskell"]',
+          'insert-type'
+      ,
+        key: 'hotkeyInsertImport'
+        modify: (config, key) ->
+          set config, key,
+          'atom-text-editor[data-grammar~="haskell"]',
+          'insert-import'
+      ,
+        key: 'hotkeyCloseTooltip'
+        modify: (config, key) ->
+          set config, key,
+          'atom-text-editor[data-grammar~="haskell"]',
+          'close-tooltip'
+      ,
+        key: 'hotkeyNextError'
+        modify: (config, key) ->
+          set config, key,
+          'atom-text-editor[data-grammar~="haskell"]',
+          'next-error'
+      ,
+        key: 'hotkeyPrevError'
+        modify: (config, key) ->
+          set config, key,
+          'atom-text-editor[data-grammar~="haskell"]',
+          'prev-error'
+    ]
+    if (db.map(({key}) -> atom.config.get "ide-haskell.#{key}").some (val) -> val?)
+      CSON = require 'season'
+      kmp = atom.keymaps.getUserKeymapPath()
+      config = {}
+      console.log "updating keys"
+      db.forEach ({key, modify}) ->
+        console.log "updating #{key}"
+        config = modify(config, key)
+      cs = CSON.stringify config
+      editorPromise = atom.workspace.open 'ide-haskell-keymap.cson'
+      editorPromise.then (editor) ->
+        editor.setText """# This is ide-haskell system message
+        # Please add the following to your keymap
+        # in order to preserve existing keybindings.
+        # WARNING: This message will NOT be shown again!
+        #{cs}
+        """
+
   activate: (state) ->
+    @cleanConfig()
+
     @disposables = new CompositeDisposable
 
     @backend = null
