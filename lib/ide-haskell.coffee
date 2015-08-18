@@ -258,6 +258,7 @@ module.exports = IdeHaskell =
     atom.menu.update()
 
   consumeBackend: (service) ->
+    backendMenu = new CompositeDisposable
     @backendHelperDisp = @backendHelper.consume service,
       success: =>
         @pluginManager?.setBackend @backend
@@ -281,7 +282,7 @@ module.exports = IdeHaskell =
             'ide-haskell:insert-import': ({target, detail}) =>
               @pluginManager.insertImport target.getModel(), getEventType(detail)
 
-        @menu.add atom.menu.add [
+        backendMenu.add atom.menu.add [
           label: 'Haskell IDE'
           submenu : [
             {label: 'Check', command: 'ide-haskell:check-file'}
@@ -290,7 +291,7 @@ module.exports = IdeHaskell =
           ]
         ]
 
-        @menu.add atom.contextMenu.add
+        backendMenu.add atom.contextMenu.add
           'atom-text-editor[data-grammar~="haskell"]': [
             'label': 'Haskell IDE'
             'submenu': [
@@ -308,9 +309,11 @@ module.exports = IdeHaskell =
             ]
           ]
       dispose: =>
+        backendMenu.dispose()
         @pluginManager?.setBackend null
 
   consumeBuildBackend: (service) ->
+    backendMenu = new CompositeDisposable
     @buildBackendHelperDisp = @buildBackendHelper.consume service,
       success: =>
         @pluginManager?.setBuildBackend @buildBackend
@@ -321,12 +324,18 @@ module.exports = IdeHaskell =
           'ide-haskell:clean': =>
             @pluginManager.cleanProject()
 
-        @menu.add atom.menu.add [
+        backendMenu.add atom.menu.add [
           label: 'Haskell IDE'
           submenu : [
             {label: 'Build Project', command: 'ide-haskell:build'}
             {label: 'Clean Project', command: 'ide-haskell:clean'}
           ]
         ]
+        if @buildBackend.getMenu?
+          backendMenu.add atom.menu.add [
+            label: 'Haskell IDE'
+            submenu : [ @buildBackend.getMenu() ]
+          ]
       dispose: =>
+        backendMenu.dispose()
         @pluginManager?.setBuildBackend null
