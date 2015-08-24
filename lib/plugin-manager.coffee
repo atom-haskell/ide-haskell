@@ -52,8 +52,8 @@ class PluginManager
 
   setBuildBackend: (@buildBackend) =>
     if @buildBackend?.onBackendStatus?
-      @disposables.add @buildBackend.onBackendStatus (o) =>
-        @outputView.backendStatus o #TODO: display progress
+      @disposables.add @buildBackend.onBackendStatus ({status, opts}) =>
+        @outputView.backendStatus {status, progress: opts}
     if @buildBackend?.onMessages?
       @disposables.add @buildBackend.onMessages (msgs) =>
         @checkResults.appendResults msgs

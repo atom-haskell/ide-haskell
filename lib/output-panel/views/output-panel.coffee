@@ -1,11 +1,13 @@
 OutputPanelButtonsElement = require './output-panel-buttons'
 OutputPanelItemsElement = require './output-panel-items'
+ProgressBar = require './progress-bar'
 SubAtom = require 'sub-atom'
 
 module.exports=
 class OutputPanelView extends HTMLElement
   setModel: (@model) ->
     @disposables.add @model.onStatusChanged (o) => @statusChanged o
+    @disposables.add @model.onProgressChanged (o) => @setProgress o
     @disposables.add @model.results.onDidUpdate =>
       if atom.config.get('ide-haskell.switchTabOnCheck')
         @activateFirstNonEmptyTab()
@@ -27,6 +29,8 @@ class OutputPanelView extends HTMLElement
     @heading.appendChild @status = document.createElement 'ide-haskell-status-icon'
     @status.setAttribute 'data-status', 'ready'
     @heading.appendChild @buttons = new OutputPanelButtonsElement
+    @heading.appendChild @progressBar = new ProgressBar
+    @progressBar.setProgress 0
     @appendChild @items = new OutputPanelItemsElement
     @disposables.add @buttons.onButtonClicked =>
       @updateItems()
@@ -98,6 +102,9 @@ class OutputPanelView extends HTMLElement
       @buttons.createButton name, opts
     unless @getActiveTab()?
       @activateTab @buttons.buttonNames()[0]
+
+  setProgress: (progress) ->
+    @progressBar.setProgress progress
 
 OutputPanelElement =
   document.registerElement 'ide-haskell-panel',

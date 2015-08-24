@@ -42,8 +42,17 @@ class OutputPanel
     @status = status
     @emitter.emit 'status-changed', {@status, oldStatus}
 
-  backendStatus: ({status}) ->
+  onProgressChanged: (callback) ->
+    @emitter.on 'progress-changed', callback
+
+  emitProgress: (progress) ->
+    @emitter.emit 'progress-changed', progress
+
+  backendStatus: ({status, progress}) ->
     @emitStatus status
+    unless status is 'progress'
+      progress ?= 0
+    @emitProgress progress if progress?
 
   showNextError: ->
     rs = @results.resultsWithURI()
