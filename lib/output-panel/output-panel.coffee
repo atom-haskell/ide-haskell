@@ -48,6 +48,9 @@ class OutputPanel
   emitProgress: (progress) ->
     @emitter.emit 'progress-changed', progress
 
+  onActionCancelled: (callback) ->
+    atom.views.getView(@).onActionCancelled callback
+
   backendStatus: ({status, progress}) ->
     @emitStatus status
     unless status is 'progress'

@@ -20,7 +20,7 @@
     },
     "haskell-build-backend": {
       "versions": {
-        "~0.2.0": "consumeBuildBackend"
+        "~0.3.0": "consumeBuildBackend"
       }
     }
   },

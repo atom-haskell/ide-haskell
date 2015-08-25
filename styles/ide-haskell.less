@@ -86,12 +86,27 @@ ide-haskell-panel {
       }
     }
 
+    ide-haskell-button {
+      .clickable;
+      &.cancel {
+        width: 2em;
+        border-radius: @component-border-radius;
+        margin-left: 5px;
+        &:before {
+          .icon;
+          display: block;
+          text-align: center;
+          font-size: 1.7em;
+          content: @x;
+        }
+      }
+    }
+
     ide-haskell-panel-buttons {
       display: flex;
       flex-direction: row;
       ide-haskell-buttons-container {
         ide-haskell-button {
-          .clickable;
           text-transform: capitalize;
           margin-right: -1px; // hide left border
           padding: 0 .6em;
@@ -132,7 +147,7 @@ ide-haskell-panel {
           content: @file-text;
         }
         border-radius: @component-border-radius;
-        width: 1.9em;
+        width: 2em;
       }
     }
   }

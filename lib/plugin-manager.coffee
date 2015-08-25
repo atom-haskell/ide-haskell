@@ -73,7 +73,9 @@ class PluginManager
 
   buildProject: =>
     return unless @buildBackend?
-    @buildBackend.build 'target' # TODO: target selection
+    @buildBackend.build 'target', # TODO: target selection
+      setCancelAction: (action) =>
+        @outputView.onActionCancelled action
 
   cleanProject: =>
     return unless @buildBackend?

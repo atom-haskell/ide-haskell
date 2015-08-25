@@ -2,6 +2,7 @@ OutputPanelButtonsElement = require './output-panel-buttons'
 OutputPanelItemsElement = require './output-panel-items'
 ProgressBar = require './progress-bar'
 SubAtom = require 'sub-atom'
+{Disposable} = require 'atom'
 
 module.exports=
 class OutputPanelView extends HTMLElement
@@ -29,6 +30,9 @@ class OutputPanelView extends HTMLElement
     @heading.appendChild @status = document.createElement 'ide-haskell-status-icon'
     @status.setAttribute 'data-status', 'ready'
     @heading.appendChild @buttons = new OutputPanelButtonsElement
+    @heading.appendChild @cancelBtn = document.createElement 'ide-haskell-button'
+    @cancelBtn.classList.add 'cancel'
+    @cancelBtn.style.setProperty 'visibility', 'hidden'
     @heading.appendChild @progressBar = new ProgressBar
     @progressBar.setProgress 0
     @appendChild @items = new OutputPanelItemsElement
@@ -39,8 +43,14 @@ class OutputPanelView extends HTMLElement
     @disposables.add atom.workspace.onDidChangeActivePaneItem =>
       @updateItems() if @buttons.getFileFilter()
 
+  disposeCancelBtnClicked: ->
+    @cancelBtn.style.setProperty 'visibility', 'hidden'
+    @cancelBtnClick?.dispose?()
+    @cancelBtnClick = null
+
   detachedCallback: ->
     @disposables.dispose()
+    @disposeCancelBtnClicked()
 
   initResizeHandle: ->
     @disposables.add @resizeHandle, 'mousedown', (e) =>
@@ -89,6 +99,8 @@ class OutputPanelView extends HTMLElement
       ready: 0
     if prio[status] >= prio[oldStatus] or status is 'progress'
       @status.setAttribute 'data-status', status
+    unless status is 'progress'
+      @disposeCancelBtnClicked()
 
   showItem: (item) ->
     @activateTab item.severity
@@ -105,6 +117,13 @@ class OutputPanelView extends HTMLElement
 
   setProgress: (progress) ->
     @progressBar.setProgress progress
+
+  onActionCancelled: (callback) ->
+    @cancelBtnClick = new SubAtom
+    @cancelBtnClick.add @cancelBtn, 'click', -> callback()
+    @style.setProperty 'visibility', 'visible'
+    @cancelBtn.style.setProperty 'visibility', 'visible'
+    new Disposable => @disposeCancelBtnClicked()
 
 OutputPanelElement =
   document.registerElement 'ide-haskell-panel',
