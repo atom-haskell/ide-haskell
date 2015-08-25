@@ -9,9 +9,9 @@ class OutputPanelView extends HTMLElement
   setModel: (@model) ->
     @disposables.add @model.onStatusChanged (o) => @statusChanged o
     @disposables.add @model.onProgressChanged (o) => @setProgress o
-    @disposables.add @model.results.onDidUpdate =>
+    @disposables.add @model.results.onDidUpdate ({types}) =>
       if atom.config.get('ide-haskell.switchTabOnCheck')
-        @activateFirstNonEmptyTab()
+        @activateFirstNonEmptyTab types
       @updateItems()
     @items.setModel @model.results
 
@@ -85,8 +85,8 @@ class OutputPanelView extends HTMLElement
   activateTab: (tab) ->
     @buttons.clickButton tab
 
-  activateFirstNonEmptyTab: ->
-    for name in @buttons.buttonNames()
+  activateFirstNonEmptyTab: (types) ->
+    for name in @buttons.buttonNames() when (if types? then name in types else true)
       if (@model.results.filter severity: name).length > 0
         @activateTab name
         break

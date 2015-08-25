@@ -34,7 +34,7 @@ class ResultsDB
     @results = @results.concat res.map (r) -> new ResultItem r
 
     severityArr = []
-    severityArr.push severity for {severity} in @results when not (severity in severityArr)
+    severityArr.push severity for {severity} in res when not (severity in severityArr)
 
     @emitter.emit 'did-update', {res: @, types: severityArr}
 
