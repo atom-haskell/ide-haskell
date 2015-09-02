@@ -225,6 +225,10 @@ module.exports = IdeHaskell =
         'ide-haskell:prettify-file': ({target}) =>
           @pluginManager.prettifyFile target.getModel(), 'cabal'
 
+    atom.keymaps.add 'ide-haskell',
+      'atom-text-editor[data-grammar~="haskell"]':
+        'escape': 'ide-haskell:close-tooltip'
+
     @menu = new CompositeDisposable
     @menu.add atom.menu.add [
       label: 'Haskell IDE'
@@ -240,6 +244,8 @@ module.exports = IdeHaskell =
 
     @pluginManager.deactivate()
     @pluginManager = null
+
+    atom.keymaps.removeBindingsFromSource 'ide-haskell'
 
     # clear commands
     @disposables.dispose()

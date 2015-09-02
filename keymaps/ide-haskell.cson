@@ -1,2 +1,0 @@
-'atom-text-editor[data-grammar~="haskell"]':
-  'escape': 'ide-haskell:close-tooltip'
