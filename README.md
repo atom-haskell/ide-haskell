@@ -23,7 +23,8 @@ icons. If you hover mouse pointer over such an icon, a tooltip will be shown
 with problem description. Results are highlighted inside editor as well, so you
 can easily determine where the problem is.
 
-![Errors, warnings and linter](http://atom-haskell.github.io/ide-haskell/images/check.gif)
+
+![errors](https://cloud.githubusercontent.com/assets/7275622/9705079/52b38f7c-54c1-11e5-9b23-6b932100e876.gif)
 
 #### Get type/info
 
@@ -41,7 +42,9 @@ bindings are specified, but you can specify them in your Atom keymap.
 
 See [Configuration](#configuration) for more information.
 
-![Get type at point](http://atom-haskell.github.io/ide-haskell/images/types.gif)
+![typeinfo](https://cloud.githubusercontent.com/assets/7275622/9705082/52daa81e-54c1-11e5-88a8-99c8029eb14e.gif)
+
+![typeins](https://cloud.githubusercontent.com/assets/7275622/9705080/52cd7e64-54c1-11e5-8ee3-120641da2f85.gif)
 
 #### Autocompletion
 
@@ -56,7 +59,7 @@ You can use `stylish-haskell` utility to indent pragmas, imports and data type
 definitions. Simply select `Prettify` from Haskel IDE menu to apply
 `stylish-haskell` to current file.
 
-![Code beautify](http://atom-haskell.github.io/ide-haskell/images/beautify.gif)
+![prettify](https://cloud.githubusercontent.com/assets/7275622/9705081/52d97cf0-54c1-11e5-94f0-96f09e43ada3.gif)
 
 ## Requirements
 
