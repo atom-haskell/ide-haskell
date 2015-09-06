@@ -9,6 +9,7 @@ ResultsDB = require './results-db'
 ResultItem = require './result-item'
 OutputPanelItemElement = require './output-panel/views/output-panel-item'
 {CompositeDisposable} = require 'atom'
+TargetListView = require './views/target-list-view'
 
 class PluginManager
   constructor: (state, backend, buildBackend) ->
@@ -73,9 +74,13 @@ class PluginManager
 
   buildProject: =>
     return unless @buildBackend?
-    @buildBackend.build 'target', # TODO: target selection
-      setCancelAction: (action) =>
-        @outputView.onActionCancelled action
+    @buildBackend.getTargets().then (targets) =>
+      new TargetListView
+        items: targets.targets
+        onConfirmed: (target) =>
+          @buildBackend.build target, # TODO: target selection
+            setCancelAction: (action) =>
+              @outputView.onActionCancelled action
 
   cleanProject: =>
     return unless @buildBackend?
