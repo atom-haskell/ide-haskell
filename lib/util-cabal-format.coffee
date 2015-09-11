@@ -16,13 +16,15 @@ withTempFile = (contents, callback) ->
         FS.close info.fd, -> FS.unlink info.path
 
 # run cabal format
-prettify = (text, {onComplete, onFailure}) ->
+prettify = (text, workingDirectory, {onComplete, onFailure}) ->
   shpath = atom.config.get('ide-haskell.cabalPath')
 
   withTempFile text, (path, close) ->
     proc = new BufferedProcess
       command: shpath
       args: ['format', path]
+      options:
+        cwd: workingDirectory
       exit: ->
         FS.readFile path, encoding: 'utf-8', (error, text) ->
           if error?

@@ -3,6 +3,7 @@
 utilStylishHaskell = require './util-stylish-haskell'
 utilCabalFormat = require './util-cabal-format'
 {CompositeDisposable, Emitter} = require 'atom'
+path = require 'path'
 
 class PluginManager
 
@@ -81,7 +82,7 @@ class PluginManager
       when 'haskell' then utilStylishHaskell
       when 'cabal' then utilCabalFormat
       else throw new Error "Unknown format #{format}"
-    util.prettify editor.getText(),
+    util.prettify editor.getText(), path.dirname(editor.getPath()),
       onComplete: (text) ->
         editor.setText(text)
         if editor.getLastCursor()?
