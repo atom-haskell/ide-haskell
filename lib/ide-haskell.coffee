@@ -77,7 +77,7 @@ module.exports = IdeHaskell =
     hotkeyToggleOutput:
       type: "string"
       default: ''
-      description: 'Hotkey to toggle output'
+      description: 'Hotkey to toggle panel'
     hotkeyShutdownBackend:
       type: "string"
       default: ''
