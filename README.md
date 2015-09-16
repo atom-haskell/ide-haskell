@@ -111,6 +111,7 @@ Contributors:
 * Daniel Beskin
 * John Quigley
 * Luka Horvat
+* Ondřej Janošík
 
 See the [LICENSE.md][LICENSE] for details.
 
