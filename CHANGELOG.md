@@ -1,3 +1,6 @@
+## 0.7.2
+* Run `stylish-haskell` and `cabal format` in file directory to allow for more fine-grained control with `.stylish-haskell.yaml`
+
 ## 0.7.1
 * Fix auto-switch to tab
 
