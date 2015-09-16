@@ -10,6 +10,8 @@ ResultItem = require './result-item'
 OutputPanelItemElement = require './output-panel/views/output-panel-item'
 {CompositeDisposable} = require 'atom'
 TargetListView = require './views/target-list-view'
+{dirname} = require 'path'
+{statSync} = require 'fs'
 
 class PluginManager
   constructor: (state, backend, buildBackend) ->
@@ -123,7 +125,13 @@ class PluginManager
       when 'haskell' then utilStylishHaskell
       when 'cabal' then utilCabalFormat
       else throw new Error "Unknown format #{format}"
-    util.prettify editor.getText(),
+    try
+      workDir = dirname(editor.getPath())
+      if not statSync(workDir).isDirectory()
+        workDir = '.'
+    catch
+      workDir = '.'
+    util.prettify editor.getText(), workDir,
       onComplete: (text) ->
         editor.setText(text)
         if editor.getLastCursor()?
