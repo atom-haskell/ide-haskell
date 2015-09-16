@@ -3,7 +3,7 @@ path = require 'path'
 
 
 # run stylish-haskell backend
-prettify = (text, {onComplete, onFailure}) ->
+prettify = (text, workingDirectory, {onComplete, onFailure}) ->
 
   lines = []
 
@@ -12,6 +12,8 @@ prettify = (text, {onComplete, onFailure}) ->
   proc = new BufferedProcess
     command: shpath
     args: []
+    options:
+      cwd: workingDirectory
     stdout: (line) ->
       lines.push(line)
     exit: -> onComplete?(lines.join(''))
