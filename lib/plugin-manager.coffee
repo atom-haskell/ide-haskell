@@ -147,6 +147,10 @@ class PluginManager
   showInfoTooltip: (editor, pos, eventType) ->
     @queueTooltipAction editor, pos, eventType, 'getInfo'
 
+  showInfoTypeTooltip: (editor, pos, eventType) ->
+    @queueTooltipAction editor, pos, eventType, 'getInfo',
+      onFailure: => @queueTooltipAction editor, pos, eventType, 'getType'
+
   insertType: (editor, eventType) ->
     unless @backend?.getType?
       atom.notifications.addWarning "Backend #{@manager.backend.name()} doesn't support
@@ -187,7 +191,7 @@ class PluginManager
             editor.setTextInBufferRange [pi.pos, pi.pos], "\n#{pi.indent}import #{mod}"
 
 
-  queueTooltipAction: (editor, pos, eventType, fun) ->
+  queueTooltipAction: (editor, pos, eventType, fun, {onFailure} = {}) ->
     controller = @controller editor
     return unless controller?
     {crange, pos} = controller.getEventRange pos, eventType
@@ -206,7 +210,7 @@ class PluginManager
         @tooltipActionRunning = false
         text = type ? info
         unless text?
-          @backendWarning()
+          (onFailure or @backendWarning)()
           return
         controller.showTooltip pos, range, text, eventType
 
@@ -233,6 +237,7 @@ class PluginManager
       @disposables.add controller.onShouldShowTooltip ({editor, pos}) =>
         action = atom.config.get('ide-haskell.onMouseHoverShow')
         return if action == 'Nothing'
+        action = 'InfoType' if action is 'Info, fallback to Type'
         @['show' + action + 'Tooltip'] editor, pos, 'mouse'
       controller.updateResults @checkResults.filter uri: editor.getPath()
 

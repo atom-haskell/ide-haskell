@@ -36,7 +36,7 @@ module.exports = IdeHaskell =
     onMouseHoverShow:
       type: 'string'
       default: 'Type'
-      enum: ['Nothing', 'Type', 'Info']
+      enum: ['Nothing', 'Type', 'Info', 'Info, fallback to Type']
     closeTooltipsOnCursorMove:
       type: 'boolean'
       default: false
@@ -283,6 +283,8 @@ module.exports = IdeHaskell =
               @pluginManager.showTypeTooltip target.getModel(), null, getEventType(detail)
             'ide-haskell:show-info': ({target, detail}) =>
               @pluginManager.showInfoTooltip target.getModel(), null, getEventType(detail)
+            'ide-haskell:show-info-fallback-to-type': ({target, detail}) =>
+              @pluginManager.showInfoTypeTooltip target.getModel(), null, getEventType(detail)
             'ide-haskell:insert-type': ({target, detail}) =>
               @pluginManager.insertType target.getModel(), getEventType(detail)
             'ide-haskell:insert-import': ({target, detail}) =>
