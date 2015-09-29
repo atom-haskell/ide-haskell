@@ -24,7 +24,6 @@ class OutputPanelView extends HTMLElement
 
   createdCallback: ->
     @disposables = new SubAtom
-    @classList.add 'native-key-bindings'
     @appendChild @resizeHandle = document.createElement 'resize-handle'
     @initResizeHandle()
     @appendChild @heading = document.createElement 'ide-haskell-panel-heading'

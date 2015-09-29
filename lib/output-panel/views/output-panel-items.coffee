@@ -1,6 +1,10 @@
 class OutputPanelItemsView extends HTMLElement
   setModel: (@model) ->
 
+  createdCallback: ->
+    @classList.add 'native-key-bindings'
+    @setAttribute('tabindex', -1)
+
   filter: (@activeFilter) ->
     scrollTop = @scrollTop
     @innerHTML = ''
