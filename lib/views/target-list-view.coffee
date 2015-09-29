@@ -30,5 +30,5 @@ class TargetListView extends SelectListView
     "
 
   confirmed: (tgt) ->
-    @onConfirmed? tgt.target
+    @onConfirmed? tgt
     @cancel()

@@ -15,6 +15,7 @@ TargetListView = require './views/target-list-view'
 
 class PluginManager
   constructor: (state, backend, buildBackend) ->
+    @buildTarget = state.buildTarget
     @checkResults = new ResultsDB
 
     @disposables = new CompositeDisposable
@@ -34,6 +35,8 @@ class PluginManager
     @setBackend backend if backend?
     @setBuildBackend buildBackend if buildBackend?
 
+    @showBuildTarget()
+
   deactivate: ->
     @checkResults.destroy()
     @disposables.dispose()
@@ -44,6 +47,7 @@ class PluginManager
 
   serialize: ->
     outputView: @outputView?.serialize()
+    buildTarget: @buildTarget
 
   setBackend: (@backend) =>
     if @backend?.onBackendActive?
@@ -76,13 +80,22 @@ class PluginManager
 
   buildProject: =>
     return unless @buildBackend?
+    @buildBackend.build @buildTarget.target,
+      setCancelAction: (action) =>
+        @outputView.onActionCancelled action
+
+  showBuildTarget: ->
+    {type, name} = @buildTarget ? {name: "All"}
+    if type
+      @outputView.setBuildTarget "#{name} (#{type})"
+    else
+      @outputView.setBuildTarget "#{name}"
+
+  setTarget: =>
     @buildBackend.getTargets().then (targets) =>
       new TargetListView
         items: targets.targets
-        onConfirmed: (target) =>
-          @buildBackend.build target, # TODO: target selection
-            setCancelAction: (action) =>
-              @outputView.onActionCancelled action
+        onConfirmed: (@buildTarget) => @showBuildTarget()
 
   cleanProject: =>
     return unless @buildBackend?

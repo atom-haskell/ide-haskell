@@ -331,11 +331,14 @@ module.exports = IdeHaskell =
             @pluginManager.buildProject()
           'ide-haskell:clean': =>
             @pluginManager.cleanProject()
+          'ide-haskell:set-build-target': =>
+            @pluginManager.setTarget()
 
         backendMenu.add atom.menu.add [
           label: 'Haskell IDE'
           submenu : [
             {label: 'Build Project', command: 'ide-haskell:build'}
+            {label: 'Set Build Target', command: 'ide-haskell:set-build-target'}
             {label: 'Clean Project', command: 'ide-haskell:clean'}
           ]
         ]
