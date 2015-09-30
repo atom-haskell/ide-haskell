@@ -49,6 +49,7 @@ ide-haskell-panel {
     display: flex;
     flex-direction: row;
     flex-shrink: 0;
+    flex-wrap: wrap;
 
     ide-haskell-status-icon {
       padding-top: 3px;
@@ -95,6 +96,7 @@ ide-haskell-panel {
 
     ide-haskell-button {
       .clickable;
+      height: 1.7em;
       &.cancel {
         width: 2em;
         border-radius: @component-border-radius;
@@ -155,6 +157,7 @@ ide-haskell-panel {
         }
         border-radius: @component-border-radius;
         width: 2em;
+        height: 1.8em;
       }
     }
   }
@@ -169,7 +172,8 @@ ide-haskell-panel {
 
   ide-haskell-progress-bar {
     display: block;
-    width: 50%;
+    flex-grow: 1;
+    min-width: 50px;
     max-width: 300px;
     height: 1.25em;
     margin-top: 0.25em;
