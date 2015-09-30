@@ -80,7 +80,7 @@ class PluginManager
 
   buildProject: =>
     return unless @buildBackend?
-    @buildBackend.build @buildTarget.target,
+    @buildBackend.build @buildTarget?.target,
       setCancelAction: (action) =>
         @outputView.onActionCancelled action
 
