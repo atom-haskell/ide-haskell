@@ -3,13 +3,18 @@
   "main": "./lib/ide-haskell",
   "version": "0.7.2",
   "description": "Haskell IDE",
+  "keywords": [
+    "ide-haskell",
+    "ide",
+    "haskell"
+  ],
   "repository": "https://github.com/atom-haskell/ide-haskell",
   "license": "MIT",
   "activationHooks": [
     "language-haskell:grammar-used"
   ],
   "engines": {
-    "atom": ">=0.174.0 <2.0.0"
+    "atom": ">=1.0.0 <2.0.0"
   },
   "consumedServices": {
     "haskell-ide-backend": {
