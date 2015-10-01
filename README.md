@@ -28,7 +28,7 @@ can easily determine where the problem is.
 
 #### Get type/info
 
-You can get type of any expression and get info on any symbol.
+If you have `haskell-ghc-mod` or similar package installed, you can get type of any expression and get info on any symbol.
 
 There are two options to do so.
 
@@ -61,10 +61,16 @@ definitions. Simply select `Prettify` from Haskel IDE menu to apply
 
 ![prettify](https://cloud.githubusercontent.com/assets/7275622/9705081/52d97cf0-54c1-11e5-94f0-96f09e43ada3.gif)
 
+#### Build and test project
+
+If you have `ide-haskell-cabal` or similar package installed, you can build,
+clean and test your project from ide-haskell.
+
 ## Requirements
 
 Atom packages:
 * [haskell-ghc-mod](https://atom.io/packages/haskell-ghc-mod)
+* [ide-haskell-cabal](https://atom.io/packages/ide-haskell-cabal)
 * [language-haskell](https://atom.io/packages/language-haskell)
 * [autocomplete-haskell](https://atom.io/packages/autocomplete-haskell) (optional, recommended)
 
@@ -74,7 +80,7 @@ Binaries:
 ## Installation
 
 ```
-$ apm install language-haskell haskell-ghc-mod ide-haskell autocomplete-haskell
+$ apm install language-haskell haskell-ghc-mod ide-haskell-cabal ide-haskell autocomplete-haskell
 ```
 
 ## Configuration
@@ -85,7 +91,7 @@ Package is fully configurable via **Edit → Preferences → Packages → ide-ha
 You will likely need to specify full paths to `stylish-haskell`, if it is not in
 your `PATH`, at the very least.
 
-You might also want look into configuring haskell-ghc-mod: [haskell-ghc-mod README](https://github.com/atom-haskell/haskell-ghc-mod#haskell-ghc-mod-atom-package)
+You might also want look into configuring haskell-ghc-mod ([haskell-ghc-mod README](https://github.com/atom-haskell/haskell-ghc-mod#haskell-ghc-mod-atom-package)) and ide-haskell-cabal ([haskell-ghc-mod README](https://github.com/atom-haskell/ide-haskell-cabal#ide-haskell-cabal-package))
 
 ### Keyboard shortcuts
 
@@ -113,6 +119,7 @@ You can edit Atom keybindings by opening 'Edit → Open Your Keymap'. Here is a 
   '': 'ide-haskell:toggle-output'
   '': 'ide-haskell:shutdown-backend'
   '': 'ide-haskell:build'
+  '': 'ide-haskell:set-build-target'
   '': 'ide-haskell:clean'
 ```
 
