@@ -77,6 +77,11 @@ Atom packages:
 Binaries:
 * [stylish-haskell](https://github.com/jaspervdj/stylish-haskell)
 
+
+## Known conflicts
+
+This package relies on grammar defined by `language-haskell`. Any other Haskell grammar packages (such as `haskell-grammar`) may conflict with it.
+
 ## Installation
 
 ```
