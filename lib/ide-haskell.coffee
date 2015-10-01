@@ -195,6 +195,7 @@ module.exports = IdeHaskell =
       backendName: 'haskell-build-backend'
       backendVar: 'buildBackend'
       useBackend: 'useBuildBackend'
+      backendPackage: 'ide-haskell-cabal'
 
     @backendHelper.init()
     @buildBackendHelper.init()

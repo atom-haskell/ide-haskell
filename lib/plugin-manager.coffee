@@ -56,7 +56,7 @@ class PluginManager
         @outputView.backendStatus status: 'ready'
 
   setBuildBackend: (@buildBackend) =>
-    @showBuildTarget() if @buildBackend.getTargets?
+    @showBuildTarget() if @buildBackend?.getTargets?
 
     if @buildBackend?.onBackendStatus?
       @disposables.add @buildBackend.onBackendStatus ({status, opts}) =>
@@ -92,6 +92,7 @@ class PluginManager
       @outputView.setBuildTarget "#{name}"
 
   setTarget: =>
+    return unless @buildBackend?.getTargets?
     @buildBackend.getTargets().then (targets) =>
       new TargetListView
         items: targets.targets
