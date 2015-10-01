@@ -1,3 +1,19 @@
+## 0.8.0
+* Build backend support
+* Output panel revamped
+* Add 'show info fallback to type' command/mouseover option
+* Support for arbitrary message types
+* Config cleaned up
+* General code cleanup
+* Proper disposal in views, using SubAtom for event listeners
+* Filter based on current file
+* State save
+* Moved command registration to backend consumption
+* Moved menu initialization to after backend consumption
+* Renamed 'Linter' menu option to 'Lint'
+* Activation logic revamped
+* Removed autocomplete-haskell startup message
+
 ## 0.7.2
 * Run `stylish-haskell` and `cabal format` in file directory to allow for more fine-grained control with `.stylish-haskell.yaml`
 

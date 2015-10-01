@@ -8,9 +8,7 @@ plugin is intended to help you with development in
 
 #### Haskell project autodetection
 
-IDE-Haskell works only with Haskell projects. When you open Cabal project in
-Atom, or simply open a Haskell source file, IDE-Haskell will start
-automatically.
+IDE-Haskell works only with Haskell projects. When you open a Haskell source file, IDE-Haskell will start automatically.
 
 #### Errors, warnings and linter
 
@@ -25,11 +23,12 @@ icons. If you hover mouse pointer over such an icon, a tooltip will be shown
 with problem description. Results are highlighted inside editor as well, so you
 can easily determine where the problem is.
 
-![Errors, warnings and linter](http://atom-haskell.github.io/ide-haskell/images/check.gif)
+
+![errors](https://cloud.githubusercontent.com/assets/7275622/9705079/52b38f7c-54c1-11e5-9b23-6b932100e876.gif)
 
 #### Get type/info
 
-You can get type of any expression and get info on any symbol.
+If you have `haskell-ghc-mod` or similar package installed, you can get type of any expression and get info on any symbol.
 
 There are two options to do so.
 
@@ -39,11 +38,13 @@ You can change this behavior to show info for symbol, or disable it completely
 in IDE-Haskell settings.
 
 Another option is to use keyboard to get type/info under cursor. No default
-bindings are specified, but you can specify them in IDE-Haskell settings.
+bindings are specified, but you can specify them in your Atom keymap.
 
 See [Configuration](#configuration) for more information.
 
-![Get type at point](http://atom-haskell.github.io/ide-haskell/images/types.gif)
+![typeinfo](https://cloud.githubusercontent.com/assets/7275622/9705082/52daa81e-54c1-11e5-88a8-99c8029eb14e.gif)
+
+![typeins](https://cloud.githubusercontent.com/assets/7275622/9705080/52cd7e64-54c1-11e5-8ee3-120641da2f85.gif)
 
 #### Autocompletion
 
@@ -58,12 +59,18 @@ You can use `stylish-haskell` utility to indent pragmas, imports and data type
 definitions. Simply select `Prettify` from Haskel IDE menu to apply
 `stylish-haskell` to current file.
 
-![Code beautify](http://atom-haskell.github.io/ide-haskell/images/beautify.gif)
+![prettify](https://cloud.githubusercontent.com/assets/7275622/9705081/52d97cf0-54c1-11e5-94f0-96f09e43ada3.gif)
+
+#### Build and test project
+
+If you have `ide-haskell-cabal` or similar package installed, you can build,
+clean and test your project from ide-haskell.
 
 ## Requirements
 
 Atom packages:
 * [haskell-ghc-mod](https://atom.io/packages/haskell-ghc-mod)
+* [ide-haskell-cabal](https://atom.io/packages/ide-haskell-cabal)
 * [language-haskell](https://atom.io/packages/language-haskell)
 * [autocomplete-haskell](https://atom.io/packages/autocomplete-haskell) (optional, recommended)
 
@@ -73,7 +80,7 @@ Binaries:
 ## Installation
 
 ```
-$ apm install language-haskell haskell-ghc-mod ide-haskell autocomplete-haskell
+$ apm install language-haskell haskell-ghc-mod ide-haskell-cabal ide-haskell autocomplete-haskell
 ```
 
 ## Configuration
@@ -84,7 +91,37 @@ Package is fully configurable via **Edit → Preferences → Packages → ide-ha
 You will likely need to specify full paths to `stylish-haskell`, if it is not in
 your `PATH`, at the very least.
 
-You might also want look into configuring haskell-ghc-mod: [haskell-ghc-mod README](https://github.com/atom-haskell/haskell-ghc-mod#haskell-ghc-mod-atom-package)
+You might also want look into configuring haskell-ghc-mod ([haskell-ghc-mod README](https://github.com/atom-haskell/haskell-ghc-mod#haskell-ghc-mod-atom-package)) and ide-haskell-cabal ([haskell-ghc-mod README](https://github.com/atom-haskell/ide-haskell-cabal#ide-haskell-cabal-package))
+
+### Keyboard shortcuts
+
+Ide-Haskell comes with little pre-specified keybindings, so you will need to specify your own, if you want those.
+
+You can edit Atom keybindings by opening 'Edit → Open Your Keymap'. Here is a template for all commands, provided by ide-haskell:
+
+```cson
+'atom-text-editor[data-grammar~="haskell"]':
+  '':'ide-haskell:check-file'
+  '':'ide-haskell:lint-file'
+  '':'ide-haskell:prettify-file'
+  'ctrl-alt-t': 'ide-haskell:show-type' #this is an example binding
+  'ctrl-alt-i': 'ide-haskell:show-info' #this is an example binding
+  'ctrl-alt-T': 'ide-haskell:insert-type' #this is an example binding
+  '':'ide-haskell:insert-import'
+  'escape': 'ide-haskell:close-tooltip' #this is set by default
+  '':'ide-haskell:next-error'
+  '':'ide-haskell:prev-error'
+
+'atom-text-editor[data-grammar~="cabal"]':
+  '': 'ide-haskell:prettify-file'
+
+'atom-workspace':
+  '': 'ide-haskell:toggle-output'
+  '': 'ide-haskell:shutdown-backend'
+  '': 'ide-haskell:build'
+  '': 'ide-haskell:set-build-target'
+  '': 'ide-haskell:clean'
+```
 
 ## TODO
 

@@ -3,10 +3,18 @@
   "main": "./lib/ide-haskell",
   "version": "0.7.2",
   "description": "Haskell IDE",
+  "keywords": [
+    "ide-haskell",
+    "ide",
+    "haskell"
+  ],
   "repository": "https://github.com/atom-haskell/ide-haskell",
   "license": "MIT",
+  "activationHooks": [
+    "language-haskell:grammar-used"
+  ],
   "engines": {
-    "atom": ">=0.174.0 <2.0.0"
+    "atom": ">=1.0.0 <2.0.0"
   },
   "consumedServices": {
     "haskell-ide-backend": {
@@ -14,12 +22,18 @@
         "0.1.2": "consumeBackend",
         "^1.0.0": "consumeBackend"
       }
+    },
+    "haskell-build-backend": {
+      "versions": {
+        "~0.3.0": "consumeBuildBackend"
+      }
     }
   },
   "dependencies": {
     "temp": "^0.8.1",
     "atom-space-pen-views": "^2.0.3",
     "sub-atom": "^1.0.0",
-    "atom-backend-helper": "~1.1.0"
+    "atom-backend-helper": "~1.2.0",
+    "season": "^5.3.0"
   }
 }

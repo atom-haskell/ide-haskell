@@ -5,13 +5,39 @@
 @import "octicon-utf-codes";
 @import "ui-variables";
 
-.ide-haskell-panel {
-  display: -webkit-flex;
-  -webkit-flex-direction: column;
+.icon() {
+  font-family: 'Octicons Regular';
+  font-weight: normal;
+  font-style: normal;
+  display: inline-block;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  text-decoration: none;
+}
+
+@-webkit-keyframes ide-haskell-move {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 50px 50px;
+  }
+}
+
+.select-list.ide-haskell {
+  .type {
+    float: right;
+    color: @text-color-subtle;
+  }
+}
+
+ide-haskell-panel {
+  display: flex;
+  flex-direction: column;
   min-height: 120px;
   max-height: 50vh;
 
-  .resize-handle {
+  resize-handle {
     position: absolute;
     left: 0;
     right: 0;
@@ -19,37 +45,21 @@
     cursor: row-resize;
   }
 
-  .panel {
-    -webkit-flex-grow: 1;
-    display: -webkit-flex;
-    -webkit-flex-direction: column;
-    margin: 0;
-  }
+  ide-haskell-panel-heading {
+    display: flex;
+    flex-direction: row;
+    flex-shrink: 0;
+    flex-wrap: wrap;
 
-  .panel-heading {
-    -webkit-flex-shrink: 0;
-    padding-top: 5px;
-    padding-bottom: 5px;
-
-    .btn-cell {
-      display: table-cell;
-      padding: 0px 1px;
-    }
-
-    .btn {
-      top: 0px;
-    }
-
-    .status-icon {
+    ide-haskell-status-icon {
       padding-top: 3px;
+      margin: 0px 0.5em;
 
       &:before {
-        font-family: 'Octicons Regular';
-        font-weight: normal;
-        font-style: normal;
-        -webkit-font-smoothing: antialiased;
-        text-decoration: none;
-        font-size: 10pt;
+        .icon;
+        display: block;
+        text-align: center;
+        font-size: 1.3em;
         content: @check;
         width: 15pt;
       }
@@ -69,26 +79,164 @@
         color: @text-color-warning;
       }
     }
+
+    .clickable() {
+      display: inline-block;
+      line-height: 1.8em;
+      color: @text-color-subtle;
+      border: 1px solid @button-border-color;
+      background: fade(@button-background-color,33%);
+      cursor: pointer;
+      vertical-align: middle;
+
+      &:active {
+        background: transparent;
+      }
+    }
+
+    ide-haskell-button {
+      .clickable;
+      height: 1.7em;
+      &.cancel {
+        width: 2em;
+        border-radius: @component-border-radius;
+        margin-left: 5px;
+        &:before {
+          .icon;
+          display: block;
+          text-align: center;
+          font-size: 1.7em;
+          content: @x;
+        }
+      }
+    }
+
+    ide-haskell-panel-buttons {
+      display: flex;
+      flex-direction: row;
+      ide-haskell-buttons-container {
+        ide-haskell-button {
+          text-transform: capitalize;
+          margin-right: -1px; // hide left border
+          padding: 0 .6em;
+          &:first-of-type {
+            border-top-left-radius: @component-border-radius;
+            border-bottom-left-radius: @component-border-radius;
+          }
+          &:last-of-type {
+            margin-right: .6em;
+            border-top-right-radius: @component-border-radius;
+            border-bottom-right-radius: @component-border-radius;
+          }
+
+          &.active {
+            color: @text-color-highlight;
+            background: @button-background-color;
+          }
+
+          &:before {
+            content: attr(data-caption);
+          }
+
+          &:not([data-count="0"]):before {
+            content: attr(data-caption) ' (' attr(data-count) ')';
+          }
+        }
+      }
+      ide-haskell-checkbox {
+        .clickable;
+        &:before {
+          .icon;
+          display: block;
+          text-align: center;
+          font-size: 1.7em;
+          content: @file-directory;
+        }
+        &.enabled:before {
+          content: @file-text;
+        }
+        border-radius: @component-border-radius;
+        width: 2em;
+        height: 1.8em;
+      }
+    }
   }
 
-  .panel-body {
-    -webkit-flex-grow: 1;
-    overflow-y: scroll;
-    padding: 3px @component-padding;
-    position: relative;
+  ide-haskell-target {
+    font-size: 1.2em;
+    margin: 0 0.5em;
+    &:before {
+      content: "Target: "
+    }
+  }
 
-    .result-block {
+  ide-haskell-progress-bar {
+    display: block;
+    flex-grow: 1;
+    min-width: 50px;
+    max-width: 300px;
+    height: 1.25em;
+    margin-top: 0.25em;
+    border: 1px solid;
+    border-radius: 3px;
+    position: relative;
+    margin-left: 1em;
+    &>span {
+      display: block;
+      background-color: @background-color-info;
+      position: absolute;
+      height: 100%;
+      background-image: -webkit-linear-gradient(
+        right,
+        darken(@background-color-info, 10%) 37%,
+        @background-color-info 69%
+      );
+      box-shadow:
+        inset 0 2px 9px  rgba(255,255,255,0.3),
+        inset 0 -2px 6px rgba(0,0,0,0.4);
+      transition: width 0.1s linear;
+      &:after {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; bottom: 0; right: 0;
+        background-image: -webkit-linear-gradient(
+          -45deg,
+          rgba(255, 255, 255, .2) 25%,
+          transparent 25%,
+          transparent 50%,
+          rgba(255, 255, 255, .2) 50%,
+          rgba(255, 255, 255, .2) 75%,
+          transparent 75%,
+          transparent
+        );
+        z-index: 1;
+        background-size: 50px 50px;
+        -webkit-animation: ide-haskell-move 2s linear infinite;
+      }
+    }
+  }
+
+  ide-haskell-panel-items {
+    display: block;
+    overflow-y: auto;
+    padding: 3px @component-padding;
+    height: 100%;
+    flex-grow: 1;
+
+    ide-haskell-panel-item {
       padding: 4px 0px;
       margin: 0px;
       font-size: 8pt;
       line-height: 12pt;
       white-space: normal;
 
-      .position {
+      ide-haskell-item-position {
         cursor: pointer;
+        display: block;
       }
 
-      .description {
+      ide-haskell-item-description {
+        display: block;
         padding: 5px 8px 3px 8px;
         color: lighten(@text-color, 15%);
         background-color: @tool-panel-background-color;
@@ -121,13 +269,7 @@ atom-text-editor::shadow {
 
   .gutter[gutter-name="ide-haskell-check-results"] .decoration {
     &:before {
-      font-family: 'Octicons Regular';
-      font-weight: normal;
-      font-style: normal;
-      display: inline-block;
-      line-height: 1;
-      -webkit-font-smoothing: antialiased;
-      text-decoration: none;
+      .icon;
       font-size:0.8em;
       width:0.8em;
       height:0.8em;
@@ -183,8 +325,8 @@ atom-text-editor {
 }
 
 .platform-win32 {
-  .ide-haskell-panel {
-    .resize-handle {
+  ide-haskell-panel {
+    resize-handle {
       cursor: ns-resize;
     }
   }
