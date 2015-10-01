@@ -9,7 +9,9 @@ class OutputPanelView extends HTMLElement
   setModel: (@model) ->
     @disposables.add @model.onStatusChanged (o) => @statusChanged o
     @disposables.add @model.onProgressChanged (o) => @setProgress o
-    @disposables.add @model.onSetBuildTarget (o) => @target.innerText = o
+    @disposables.add @model.onSetBuildTarget (o) =>
+      @target.style.setProperty 'display', ''
+      @target.innerText = o
     @disposables.add @model.results.onDidUpdate ({types}) =>
       if atom.config.get('ide-haskell.switchTabOnCheck')
         @activateFirstNonEmptyTab types
@@ -31,6 +33,7 @@ class OutputPanelView extends HTMLElement
     @status.setAttribute 'data-status', 'ready'
     @heading.appendChild @buttons = new OutputPanelButtonsElement
     @heading.appendChild @target = document.createElement 'ide-haskell-target'
+    @target.style.setProperty 'display', 'none'
     @disposables.add @target, 'click', ->
       atom.commands.dispatch atom.views.getView(atom.workspace),
         'ide-haskell:set-build-target'

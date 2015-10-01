@@ -269,11 +269,11 @@ module.exports = IdeHaskell =
       success: =>
         @pluginManager?.setBackend @backend
 
-        @disposables.add atom.commands.add 'atom-workspace',
+        backendMenu.add atom.commands.add 'atom-workspace',
           'ide-haskell:shutdown-backend': =>
             @backend?.shutdownBackend?()
 
-        @disposables.add \
+        backendMenu.add \
           atom.commands.add 'atom-text-editor[data-grammar~="haskell"]',
             'ide-haskell:check-file': ({target}) =>
               @pluginManager.checkFile target.getModel()
@@ -326,22 +326,31 @@ module.exports = IdeHaskell =
       success: =>
         @pluginManager?.setBuildBackend @buildBackend
 
-        @disposables.add atom.commands.add 'atom-workspace',
+        backendMenu.add atom.commands.add 'atom-workspace',
           'ide-haskell:build': =>
             @pluginManager.buildProject()
           'ide-haskell:clean': =>
             @pluginManager.cleanProject()
-          'ide-haskell:set-build-target': =>
-            @pluginManager.setTarget()
 
         backendMenu.add atom.menu.add [
           label: 'Haskell IDE'
           submenu : [
             {label: 'Build Project', command: 'ide-haskell:build'}
-            {label: 'Set Build Target', command: 'ide-haskell:set-build-target'}
             {label: 'Clean Project', command: 'ide-haskell:clean'}
           ]
         ]
+
+        if @buildBackend.getTargets?
+          backendMenu.add atom.commands.add 'atom-workspace',
+            'ide-haskell:set-build-target': =>
+              @pluginManager.setTarget()
+          backendMenu.add atom.menu.add [
+            label: 'Haskell IDE'
+            submenu : [
+              {label: 'Set Build Target', command: 'ide-haskell:set-build-target'}
+            ]
+          ]
+
         if @buildBackend.getMenu?
           backendMenu.add atom.menu.add [
             label: 'Haskell IDE'

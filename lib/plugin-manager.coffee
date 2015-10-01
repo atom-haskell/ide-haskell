@@ -35,8 +35,6 @@ class PluginManager
     @setBackend backend if backend?
     @setBuildBackend buildBackend if buildBackend?
 
-    @showBuildTarget()
-
   deactivate: ->
     @checkResults.destroy()
     @disposables.dispose()
@@ -58,6 +56,8 @@ class PluginManager
         @outputView.backendStatus status: 'ready'
 
   setBuildBackend: (@buildBackend) =>
+    @showBuildTarget() if @buildBackend.getTargets?
+
     if @buildBackend?.onBackendStatus?
       @disposables.add @buildBackend.onBackendStatus ({status, opts}) =>
         @outputView.backendStatus {status, progress: opts}
