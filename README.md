@@ -77,6 +77,11 @@ Atom packages:
 Binaries:
 * [stylish-haskell](https://github.com/jaspervdj/stylish-haskell)
 
+
+## Known conflicts
+
+This package relies on grammar defined by `language-haskell`. Any other Haskell grammar packages (such as `haskell-grammar`) may conflict with it.
+
 ## Installation
 
 ```
@@ -91,7 +96,7 @@ Package is fully configurable via **Edit → Preferences → Packages → ide-ha
 You will likely need to specify full paths to `stylish-haskell`, if it is not in
 your `PATH`, at the very least.
 
-You might also want look into configuring haskell-ghc-mod ([haskell-ghc-mod README](https://github.com/atom-haskell/haskell-ghc-mod#haskell-ghc-mod-atom-package)) and ide-haskell-cabal ([haskell-ghc-mod README](https://github.com/atom-haskell/ide-haskell-cabal#ide-haskell-cabal-package))
+You might also want look into configuring haskell-ghc-mod ([haskell-ghc-mod README](https://github.com/atom-haskell/haskell-ghc-mod#haskell-ghc-mod-atom-package)) and ide-haskell-cabal ([ide-haskell-cabal README](https://github.com/atom-haskell/ide-haskell-cabal#ide-haskell-cabal-package))
 
 ### Keyboard shortcuts
 
