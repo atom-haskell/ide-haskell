@@ -25,10 +25,6 @@ class EditorControl
       @disposables.add gutterElement, 'mouseleave', ".decoration", (e) =>
         @hideTooltip()
 
-    # event for editor updates
-    @disposables.add @editor.onDidDestroy =>
-      @deactivate()
-
     # buffer events for automatic check
     buffer = @editor.getBuffer()
     editorElement = atom.views.getView(@editor)
@@ -115,7 +111,7 @@ class EditorControl
        pos.isEqual @editor.bufferRangeForBufferRow(pos.row).end
       @hideTooltip 'mouse'
     else
-      @emitter.emit 'should-show-tooltip', {@editor, pos: pos}
+      @emitter.emit 'should-show-tooltip', {@editor, pos}
 
   showTooltip: (pos, range, text, eventType) ->
     return unless @editor?
@@ -199,21 +195,6 @@ class EditorControl
 
     @checkResultShowing = true
     return true
-
-  findImportsPos: ->
-    # rx=RegExp("^\\s*import(\\s+qualified)?\\s+#{mod}"+
-    #           "(\\s+as\\s+[\\w.']+)?(\\s+hiding)?"+
-    #           "(\\s+\\((.*)\\))")
-    buffer = @editor.getBuffer()
-    pos = null
-    indent = null
-    buffer.backwardsScan /^(\s*)import/, ({match, range}) ->
-      r = buffer.rangeForRow range.start.row
-      pos = r.end
-      indent = match[1]
-    console.log pos
-    if pos?
-      {pos, indent}
 
   hasTooltips: ->
     !!@editor.findMarkers(type: 'tooltip').length

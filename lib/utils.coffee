@@ -1,6 +1,8 @@
 path = require 'path'
 
 module.exports = Utils =
+  MainMenuLabel: 'Haskell IDE'
+
   getEventType: (detail) ->
     if detail?.contextCommand?
       'context'

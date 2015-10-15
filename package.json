@@ -16,16 +16,11 @@
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
   },
-  "consumedServices": {
-    "haskell-ide-backend": {
+  "providedServices": {
+    "ide-haskell-upi":{
+      "description": "Universal pluggable interface",
       "versions": {
-        "0.1.2": "consumeBackend",
-        "^1.0.0": "consumeBackend"
-      }
-    },
-    "haskell-build-backend": {
-      "versions": {
-        "~0.3.0": "consumeBuildBackend"
+        "0.0.1": "provideUpi"
       }
     }
   },
