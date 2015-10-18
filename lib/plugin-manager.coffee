@@ -1,7 +1,6 @@
 OutputPanel = require './output-panel/output-panel'
 OutputPanelElement = require './output-panel/views/output-panel'
 {EditorControl} = require './editor-control'
-ImportListView = require './views/import-list-view'
 {TooltipMessage, TooltipElement} = require './views/tooltip-view'
 ResultsDB = require './results-db'
 ResultItem = require './result-item'
