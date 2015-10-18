@@ -53,3 +53,6 @@ class UPI
   onWillSaveBuffer: ->
 
   onDidSaveBuffer: ->
+
+  addPanelControl: (element, opts) ->
+    @pluginManager.outputView.addPanelControl element, opts

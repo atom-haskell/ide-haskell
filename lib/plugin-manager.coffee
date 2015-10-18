@@ -49,13 +49,6 @@ class PluginManager
   togglePanel: ->
     @outputView?.toggle()
 
-  showBuildTarget: ->
-    {type, name} = @buildTarget ? {name: "All"}
-    if type
-      @outputView.setBuildTarget "#{name} (#{type})"
-    else
-      @outputView.setBuildTarget "#{name}"
-
   updateEditorsWithResults: (types) ->
     for ed in atom.workspace.getTextEditors()
       @controller(ed)?.updateResults?(@checkResults.filter uri: ed.getPath(), types)

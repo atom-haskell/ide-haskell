@@ -9,7 +9,6 @@ module.exports = IdeHaskell =
   pluginManager: null
   disposables: null
   menu: null
-  buildBackendHelperDisp: null
 
   config:
     onSaveCheck:
@@ -220,8 +219,6 @@ module.exports = IdeHaskell =
     ]
 
   deactivate: ->
-    @buildBackendHelperDisp?.dispose()
-
     @pluginManager.deactivate()
     @pluginManager = null
 
@@ -237,46 +234,6 @@ module.exports = IdeHaskell =
 
   serialize: ->
     @pluginManager?.serialize()
-
-  consumeBuildBackend: (service) ->
-    backendMenu = new CompositeDisposable
-    @buildBackendHelperDisp = @buildBackendHelper.consume service,
-      success: =>
-        @pluginManager?.setBuildBackend @buildBackend
-
-        backendMenu.add atom.commands.add 'atom-workspace',
-          'ide-haskell:build': =>
-            @pluginManager.buildProject()
-          'ide-haskell:clean': =>
-            @pluginManager.cleanProject()
-
-        backendMenu.add atom.menu.add [
-          label: MainMenuLabel
-          submenu : [
-            {label: 'Build Project', command: 'ide-haskell:build'}
-            {label: 'Clean Project', command: 'ide-haskell:clean'}
-          ]
-        ]
-
-        if @buildBackend.getTargets?
-          backendMenu.add atom.commands.add 'atom-workspace',
-            'ide-haskell:set-build-target': =>
-              @pluginManager.setTarget()
-          backendMenu.add atom.menu.add [
-            label: MainMenuLabel
-            submenu : [
-              {label: 'Set Build Target', command: 'ide-haskell:set-build-target'}
-            ]
-          ]
-
-        if @buildBackend.getMenu?
-          backendMenu.add atom.menu.add [
-            label: MainMenuLabel
-            submenu : [ @buildBackend.getMenu() ]
-          ]
-      dispose: =>
-        backendMenu.dispose()
-        @pluginManager?.setBuildBackend null
 
   provideUpi: ->
     new UPI(@pluginManager)
