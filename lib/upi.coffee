@@ -16,8 +16,8 @@ class UPI
   setStatus: (status) ->
     @pluginManager.outputView.backendStatus status
 
-  addMessages: (messages) ->
-    @pluginManager.checkResults.appendResults messages
+  addMessages: (messages, types) ->
+    @pluginManager.checkResults.appendResults messages, types
 
   setMessages: (messages, types) ->
     @pluginManager.checkResults.setResults messages, types

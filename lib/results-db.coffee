@@ -30,11 +30,12 @@ class ResultsDB
 
     @emitter.emit 'did-update', {res: @, types: severityArr}
 
-  appendResults: (res) ->
+  appendResults: (res, severityArr) ->
     @results = @results.concat res.map (r) -> new ResultItem r
 
-    severityArr = []
-    severityArr.push severity for {severity} in res when not (severity in severityArr)
+    unless severityArr?
+      severityArr = []
+      severityArr.push severity for {severity} in res when not (severity in severityArr)
 
     @emitter.emit 'did-update', {res: @, types: severityArr}
 
