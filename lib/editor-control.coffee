@@ -28,17 +28,13 @@ class EditorControl
     # buffer events for automatic check
     buffer = @editor.getBuffer()
     editorElement = atom.views.getView(@editor)
-    @disposables.add buffer.onWillSave ->
-      # TODO if uri was changed, then we have to remove all current markers
+    @disposables.add buffer.onWillSave =>
+      @emitter.emit 'will-save-buffer', buffer
       if atom.config.get('ide-haskell.onSavePrettify')
         atom.commands.dispatch editorElement, 'ide-haskell:prettify-file'
 
-    @disposables.add buffer.onDidSave ->
-      # TODO if uri was changed, then we have to remove all current markers
-      if atom.config.get('ide-haskell.onSaveCheck')
-        atom.commands.dispatch editorElement, 'ide-haskell:check-file'
-      if atom.config.get('ide-haskell.onSaveLint')
-        atom.commands.dispatch editorElement, 'ide-haskell:lint-file'
+    @disposables.add buffer.onDidSave =>
+      @emitter.emit 'did-save-buffer', buffer
 
     # show expression type if mouse stopped somewhere
     @disposables.add @editorElement, 'mousemove', '.scroll-view', (e) =>
@@ -102,6 +98,12 @@ class EditorControl
 
   onShouldShowTooltip: (callback) ->
     @emitter.on 'should-show-tooltip', callback
+
+  onWillSaveBuffer: (callback) ->
+    @emitter.on 'will-save-buffer', callback
+
+  onDidSaveBuffer: (callback) ->
+    @emitter.on 'did-save-buffer', callback
 
   shouldShowTooltip: (pos) ->
     return if @showCheckResult pos

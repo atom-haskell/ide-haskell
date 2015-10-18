@@ -45,6 +45,12 @@ class PluginManager
   onShouldShowTooltip: (callback) ->
     @emitter.on 'should-show-tooltip', callback
 
+  onWillSaveBuffer: (callback) ->
+    @emitter.on 'will-save-buffer', callback
+
+  onDidSaveBuffer: (callback) ->
+    @emitter.on 'did-save-buffer', callback
+
   togglePanel: ->
     @outputView?.toggle()
 
@@ -73,6 +79,10 @@ class PluginManager
         @removeController editor
       @disposables.add controller.onShouldShowTooltip ({editor, pos}) =>
         @emitter.emit 'should-show-tooltip', {editor, pos, eventType: 'mouse'}
+      @disposables.add controller.onWillSaveBuffer (buffer) =>
+        @emitter.emit 'will-save-buffer', buffer
+      @disposables.add controller.onDidSaveBuffer (buffer) =>
+        @emitter.emit 'did-save-buffer', buffer
       controller.updateResults @checkResults.filter uri: editor.getPath()
 
   removeController: (editor) ->

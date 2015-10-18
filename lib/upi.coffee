@@ -51,9 +51,11 @@ class UPI
         controller.hideTooltip eventType
         @setStatus status
 
-  onWillSaveBuffer: ->
+  onWillSaveBuffer: (callback) ->
+    @pluginManager.onWillSaveBuffer callback
 
-  onDidSaveBuffer: ->
+  onDidSaveBuffer: (callback) ->
+    @pluginManager.onDidSaveBuffer callback
 
   addPanelControl: (element, opts) ->
     @pluginManager.outputView.addPanelControl element, opts
