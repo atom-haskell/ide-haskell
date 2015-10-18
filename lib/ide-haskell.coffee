@@ -46,7 +46,8 @@ module.exports = IdeHaskell =
     , 'onMouseHoverShow'
     , 'useLinter'
     ].forEach (item) ->
-      atom.config.set "haskell-ghc-mod.#{item}", atom.config.get "ide-haskell.#{item}"
+      if atom.config.get("ide-haskell.#{item}")?
+        atom.config.set "haskell-ghc-mod.#{item}", atom.config.get "ide-haskell.#{item}"
       atom.config.unset "ide-haskell.#{item}"
 
     [ 'useBackend'
