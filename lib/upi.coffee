@@ -1,5 +1,5 @@
 {CompositeDisposable} = require 'atom'
-{MainMenuLabel} = require './utils'
+{MainMenuLabel, getEventType} = require './utils'
 
 module.exports =
 class UPI
@@ -39,17 +39,14 @@ class UPI
     disp
 
   showTooltip: ({editor, pos, eventType, detail, tooltip}) ->
-    eventType ?= getEventType detail
     controller = @pluginManager.controller(editor)
-    return unless controller?
-    {crange, pos} = controller.getEventRange pos, eventType
-
-    tooltip(crange).then ({range, text}) ->
-      controller.showTooltip pos, range, text, eventType
-    .catch (status = {status: 'warning'}) =>
-      if status.status?
-        controller.hideTooltip eventType
-        @setStatus status
+    @withEventRange {controller, pos, detail, eventType}, ({crange, pos}) =>
+      tooltip(crange).then ({range, text}) ->
+        controller.showTooltip pos, range, text, eventType
+      .catch (status = {status: 'warning'}) =>
+        if status.status?
+          controller.hideTooltip eventType
+          @setStatus status
 
   onWillSaveBuffer: (callback) ->
     @pluginManager.onWillSaveBuffer callback
@@ -59,3 +56,10 @@ class UPI
 
   addPanelControl: (element, opts) ->
     @pluginManager.outputView.addPanelControl element, opts
+
+  withEventRange: ({editor, detail, eventType, pos, controller}, callback) ->
+    eventType ?= getEventType detail
+    controller ?= @pluginManager.controller(editor)
+    return unless controller?
+
+    callback (controller.getEventRange pos, eventType)
