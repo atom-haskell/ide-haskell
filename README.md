@@ -98,7 +98,15 @@ your `PATH`, at the very least.
 
 You might also want look into configuring haskell-ghc-mod ([haskell-ghc-mod README](https://github.com/atom-haskell/haskell-ghc-mod#haskell-ghc-mod-atom-package)) and ide-haskell-cabal ([ide-haskell-cabal README](https://github.com/atom-haskell/ide-haskell-cabal#ide-haskell-cabal-package))
 
+***NOTE***: Since version 1.0.0, some configuration options have been moved to
+backends, in particular, haskell-ghc-mod. Migration should be automatic, but
+please check if your configuration is correct just in case.
+
 ### Keyboard shortcuts
+
+***NOTE***: Since version 1.0.0, most commands are provided by
+backends, in particular, haskell-ghc-mod and ide-haskell-cabal. Please revise
+your keymap accordingly. Refer to ([haskell-ghc-mod README](https://github.com/atom-haskell/haskell-ghc-mod#haskell-ghc-mod-atom-package)) and ([ide-haskell-cabal README](https://github.com/atom-haskell/ide-haskell-cabal#ide-haskell-cabal-package)) for details
 
 Ide-Haskell comes with little pre-specified keybindings, so you will need to specify your own, if you want those.
 
@@ -106,14 +114,8 @@ You can edit Atom keybindings by opening 'Edit → Open Your Keymap'. Here is a 
 
 ```cson
 'atom-text-editor[data-grammar~="haskell"]':
-  '':'ide-haskell:check-file'
-  '':'ide-haskell:lint-file'
-  '':'ide-haskell:prettify-file'
-  'ctrl-alt-t': 'ide-haskell:show-type' #this is an example binding
-  'ctrl-alt-i': 'ide-haskell:show-info' #this is an example binding
-  'ctrl-alt-T': 'ide-haskell:insert-type' #this is an example binding
-  '':'ide-haskell:insert-import'
   'escape': 'ide-haskell:close-tooltip' #this is set by default
+  '':'ide-haskell:prettify-file'
   '':'ide-haskell:next-error'
   '':'ide-haskell:prev-error'
 
@@ -122,10 +124,6 @@ You can edit Atom keybindings by opening 'Edit → Open Your Keymap'. Here is a 
 
 'atom-workspace':
   '': 'ide-haskell:toggle-output'
-  '': 'ide-haskell:shutdown-backend'
-  '': 'ide-haskell:build'
-  '': 'ide-haskell:set-build-target'
-  '': 'ide-haskell:clean'
 ```
 
 ## TODO
