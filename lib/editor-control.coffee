@@ -78,7 +78,7 @@ class EditorControl
     @markerFromCheckResult(r) for r in res
 
   markerFromCheckResult: ({uri, severity, message, position}) ->
-    return unless uri is @editor.getURI()
+    return unless uri? and uri is @editor.getURI()
 
     # create a new marker
     range = new Range position, {row: position.row, column: position.column + 1}
