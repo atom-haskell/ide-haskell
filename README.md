@@ -133,10 +133,10 @@ You can edit Atom keybindings by opening 'Edit → Open Your Keymap'. Here is a 
 - [x] Get type at point
 - [x] Autocompletion
 - [x] Code beautify
+- [x] Cabal project management
 - [ ] Jump to definition
 - [ ] Who calls and vice versa
 - [ ] Interactive REPL
-- [ ] Cabal project management
 - [ ] Documentation support
 
 ## Changelog
