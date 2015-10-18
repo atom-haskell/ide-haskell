@@ -7,7 +7,6 @@ ResultsDB = require './results-db'
 ResultItem = require './result-item'
 OutputPanelItemElement = require './output-panel/views/output-panel-item'
 {CompositeDisposable, Emitter} = require 'atom'
-TargetListView = require './views/target-list-view'
 {dirname} = require 'path'
 {statSync} = require 'fs'
 
