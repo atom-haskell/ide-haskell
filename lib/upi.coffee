@@ -44,7 +44,7 @@ class UPI
       tooltip(crange).then ({range, text}) ->
         controller.showTooltip pos, range, text, eventType
       .catch (status = {status: 'warning'}) =>
-        if status.status?
+        unless status.ignore
           controller.hideTooltip eventType
           @setStatus status
 
