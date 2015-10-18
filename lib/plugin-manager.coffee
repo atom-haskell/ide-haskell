@@ -11,7 +11,6 @@ OutputPanelItemElement = require './output-panel/views/output-panel-item'
 
 class PluginManager
   constructor: (state) ->
-    @buildTarget = state.buildTarget
     @checkResults = new ResultsDB
 
     @disposables = new CompositeDisposable
@@ -39,7 +38,6 @@ class PluginManager
 
   serialize: ->
     outputView: @outputView?.serialize()
-    buildTarget: @buildTarget
 
   onShouldShowTooltip: (callback) ->
     @emitter.on 'should-show-tooltip', callback
