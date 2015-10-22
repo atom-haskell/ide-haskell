@@ -55,6 +55,59 @@ module.exports = IdeHaskell =
     ].forEach (item) ->
       atom.config.unset "ide-haskell.#{item}"
 
+    setTimeout (->
+      newconf = {}
+
+      serialize = (obj, indent = "") ->
+        (for k, v of obj
+          if typeof(v) is 'object'
+            """
+            #{indent}'#{k.replace /'/g, '\\\''}':
+            #{serialize(v, indent+'  ')}
+            """
+          else
+            """
+            #{indent}'#{k.replace /'/g, '\\\''}': '#{v.replace /'/g, '\\\''}'
+            """).join '\n'
+
+
+      [ 'check-file'
+      , 'lint-file'
+      , 'show-type'
+      , 'show-info'
+      , 'show-info-fallback-to-type'
+      , 'insert-type'
+      , 'insert-import'
+      ].forEach (item) ->
+        kbs = atom.keymaps.findKeyBindings command: "ide-haskell:#{item}"
+        kbs.forEach ({selector, keystrokes}) ->
+          newconf[selector] ?= {}
+          newconf[selector][keystrokes] = "haskell-ghc-mod:#{item}"
+
+      [ 'build'
+      , 'clean'
+      , 'test'
+      , 'set-build-target'
+      ].forEach (item) ->
+        kbs = atom.keymaps.findKeyBindings command: "ide-haskell:#{item}"
+        kbs.forEach ({selector, keystrokes}) ->
+          newconf[selector] ?= {}
+          newconf[selector][keystrokes] = "ide-haskell-cabal:#{item}"
+
+      cs = serialize(newconf)
+      if cs
+        atom.workspace.open('ide-haskell-keymap.cson').then (editor) ->
+          editor.setText """
+          # This is ide-haskell system message
+          # Most keybinding commands have been moved to backend packages
+          # Please add the following to your keymap
+          # in order to preserve existing keybindings.
+          # This message won't be shown once there are no obsolete keybindings
+          # anymore
+          #{cs}
+          """
+      ), 1000
+
   activate: (state) ->
     @cleanConfig()
 
