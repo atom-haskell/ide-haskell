@@ -126,6 +126,14 @@ You can edit Atom keybindings by opening 'Edit → Open Your Keymap'. Here is a 
   '': 'ide-haskell:toggle-output'
 ```
 
+## API
+
+Ide-haskell provides service-hub API with `ide-haskell-upi` service.
+
+More information is available in [lib/upi.coffee][upi] source file
+
+[upi]: https://github.com/atom-haskell/ide-haskell/blob/master/lib/upi.coffee
+
 ## TODO
 
 - [x] Cabal project autodetection
