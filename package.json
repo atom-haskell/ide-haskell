@@ -1,7 +1,7 @@
 {
   "name": "ide-haskell",
   "main": "./lib/ide-haskell",
-  "version": "0.8.0",
+  "version": "1.0.0",
   "description": "Haskell IDE",
   "keywords": [
     "ide-haskell",
@@ -17,7 +17,7 @@
     "atom": ">=1.0.0 <2.0.0"
   },
   "providedServices": {
-    "ide-haskell-upi":{
+    "ide-haskell-upi": {
       "description": "Universal pluggable interface",
       "versions": {
         "0.0.1": "provideUpi"
