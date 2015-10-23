@@ -1,4 +1,4 @@
-{CompositeDisposable} = require 'atom'
+{CompositeDisposable, Point} = require 'atom'
 {MainMenuLabel, getEventType} = require './utils'
 
 module.exports =
@@ -34,7 +34,7 @@ class UPI
   Add messages to ide-haskell output
   messages: Array of Object
     uri: String, File URI message relates to
-    position: Point, position to which message relates
+    position: Point, or Point-like Object, position to which message relates
     message: String, message
     severity: String, one of 'error', 'warning', 'lint', 'build',
               or user-defined, see `setMessageTypes`
@@ -42,6 +42,9 @@ class UPI
          will be taken from `messages`
   ###
   addMessages: (messages, types) ->
+    messages = messages.map (m) ->
+      m.position = Point.fromObject m.position if m.position?
+      m
     @pluginManager.checkResults.appendResults messages, types
 
   ###
@@ -49,7 +52,7 @@ class UPI
   `severity` in `types`
   messages: Array of Object
     uri: String, File URI message relates to
-    position: Point, position to which message relates
+    position: Point, or Point-like Object, position to which message relates
     message: String, message
     severity: String, one of 'error', 'warning', 'lint', 'build',
               or user-defined, see `setMessageTypes`
@@ -57,6 +60,9 @@ class UPI
          will be taken from `messages`
   ###
   setMessages: (messages, types) ->
+    messages = messages.map (m) ->
+      m.position = Point.fromObject m.position if m.position?
+      m
     @pluginManager.checkResults.setResults messages, types
 
   ###
@@ -167,7 +173,7 @@ class UPI
   editor: TextEditor, editor that generated event
   detail: event detail, ignored if eventType is set
   eventType: String, event type, one of 'keyboard', 'context', 'mouse'
-  pos: Point, event position, can be undefined
+  pos: Point, or Point-like Object, event position, can be undefined
   controller: leave undefined, this is internal field
 
   callback: callback({pos, crange}, eventType)
@@ -176,6 +182,7 @@ class UPI
     eventType: String, event type, one of 'keyboard', 'context', 'mouse'
   ###
   withEventRange: ({editor, detail, eventType, pos, controller}, callback) ->
+    pos = Point.fromObject pos if pos?
     eventType ?= getEventType detail
     controller ?= @pluginManager.controller(editor)
     return unless controller?
