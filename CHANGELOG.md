@@ -1,3 +1,6 @@
+## 1.0.0
+* UPI interface
+
 ## 0.8.0
 * Build backend support
 * Output panel revamped
