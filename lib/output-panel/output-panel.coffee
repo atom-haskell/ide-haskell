@@ -48,14 +48,8 @@ class OutputPanel
   emitProgress: (progress) ->
     @emitter.emit 'progress-changed', progress
 
-  onActionCancelled: (callback) ->
-    atom.views.getView(@).onActionCancelled callback
-
-  setBuildTarget: (target) ->
-    @emitter.emit 'set-build-target', target
-
-  onSetBuildTarget: (callback) ->
-    @emitter.on 'set-build-target', callback
+  addPanelControl: (element, opts) ->
+    atom.views.getView(@).addPanelControl element, opts
 
   backendStatus: ({status, progress}) ->
     @emitStatus status

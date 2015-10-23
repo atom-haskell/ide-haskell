@@ -1,25 +1,15 @@
 {PluginManager} = require './plugin-manager'
-{getEventType} = require './utils'
+{MainMenuLabel, getEventType} = require './utils'
 {CompositeDisposable} = require 'atom'
-BackendHelper = require 'atom-backend-helper'
-
+{prettifyFile} = require './binutils/prettify'
+UPI = require './upi'
 
 module.exports = IdeHaskell =
   pluginManager: null
   disposables: null
   menu: null
-  backendHelperDisp: null
-  buildBackendHelperDisp: null
 
   config:
-    onSaveCheck:
-      type: "boolean"
-      default: true
-      description: "Check file on save"
-    onSaveLint:
-      type: "boolean"
-      default: true
-      description: "Lint file on save"
     onSavePrettify:
       type: "boolean"
       default: false
@@ -33,10 +23,6 @@ module.exports = IdeHaskell =
       type: "integer"
       default: 300
       description: "Type/Info tooltip show delay, in ms"
-    onMouseHoverShow:
-      type: 'string'
-      default: 'Type'
-      enum: ['Nothing', 'Type', 'Info', 'Info, fallback to Type']
     closeTooltipsOnCursorMove:
       type: 'boolean'
       default: false
@@ -53,154 +39,93 @@ module.exports = IdeHaskell =
       default: true
       description: "Show info message about haskell-ide-backend service on
                     activation"
-    useBackend:
-      type: "string"
-      default: ''
-      description: 'Name of backend to use. Leave empty for any. Consult
-                    backend provider documentation for name.'
-    useBuildBackend:
-      type: "string"
-      default: ''
-      description: 'Name of build backend to use. Leave empty for any. Consult
-                    backend provider documentation for name.'
-    useLinter:
-      type: 'boolean'
-      default: false
-      description: 'Use Atom Linter service for check and lint
-                    (requires restart)'
 
   cleanConfig: ->
-    [ 'activateStandalone'
-    , 'startupMessageAutocomplete' ].forEach (item) ->
+    [ 'onSaveCheck'
+    , 'onSaveLint'
+    , 'onMouseHoverShow'
+    , 'useLinter'
+    ].forEach (item) ->
+      if atom.config.get("ide-haskell.#{item}")?
+        atom.config.set "haskell-ghc-mod.#{item}", atom.config.get "ide-haskell.#{item}"
       atom.config.unset "ide-haskell.#{item}"
 
-    set = (config, confkey, group, command) ->
-      if binding = atom.config.get("ide-haskell.#{confkey}")
-        console.log binding
-        config[group]         ?= {}
-        config[group][binding] = "ide-haskell:#{command}"
-      atom.config.unset "ide-haskell.#{confkey}"
-      config
-    db = [
-        key: 'hotkeyToggleOutput'
-        modify: (config, key) ->
-          set config, key,
-          'atom-workspace',
-          'toggle-output'
-      ,
-        key: 'hotkeyShutdownBackend'
-        modify: (config, key) ->
-          set config, key,
-          'atom-workspace',
-          'shutdown-backend'
-      ,
-        key: 'hotkeyCheckFile'
-        modify: (config, key) ->
-          set config, key,
-          'atom-text-editor[data-grammar~="haskell"]',
-          'check-file'
-      ,
-        key: 'hotkeyLintFile'
-        modify: (config, key) ->
-          set config, key,
-          'atom-text-editor[data-grammar~="haskell"]',
-          'lint-file'
-      ,
-        key: 'hotkeyPrettifyFile'
-        modify: (config, key) ->
-          config = set config, key,
-          'atom-text-editor[data-grammar~="haskell"]',
-          'prettify-file'
-          set config, key,
-          'atom-text-editor[data-grammar~="cabal"]',
-          'prettify-file'
-      ,
-        key: 'hotkeyShowType'
-        modify: (config, key) ->
-          set config, key,
-          'atom-text-editor[data-grammar~="haskell"]',
-          'show-type'
-      ,
-        key: 'hotkeyShowInfo'
-        modify: (config, key) ->
-          set config, key,
-          'atom-text-editor[data-grammar~="haskell"]',
-          'show-info'
-      ,
-        key: 'hotkeyInsertType'
-        modify: (config, key) ->
-          set config, key,
-          'atom-text-editor[data-grammar~="haskell"]',
-          'insert-type'
-      ,
-        key: 'hotkeyInsertImport'
-        modify: (config, key) ->
-          set config, key,
-          'atom-text-editor[data-grammar~="haskell"]',
-          'insert-import'
-      ,
-        key: 'hotkeyCloseTooltip'
-        modify: (config, key) ->
-          set config, key,
-          'atom-text-editor[data-grammar~="haskell"]',
-          'close-tooltip'
-      ,
-        key: 'hotkeyNextError'
-        modify: (config, key) ->
-          set config, key,
-          'atom-text-editor[data-grammar~="haskell"]',
-          'next-error'
-      ,
-        key: 'hotkeyPrevError'
-        modify: (config, key) ->
-          set config, key,
-          'atom-text-editor[data-grammar~="haskell"]',
-          'prev-error'
-    ]
-    if (db.map(({key}) -> atom.config.get "ide-haskell.#{key}").some (val) -> val?)
-      CSON = require 'season'
-      kmp = atom.keymaps.getUserKeymapPath()
-      config = {}
-      console.log "updating keys"
-      db.forEach ({key, modify}) ->
-        console.log "updating #{key}"
-        config = modify(config, key)
-      cs = CSON.stringify config
-      editorPromise = atom.workspace.open 'ide-haskell-keymap.cson'
-      editorPromise.then (editor) ->
-        editor.setText """# This is ide-haskell system message
-        # Please add the following to your keymap
-        # in order to preserve existing keybindings.
-        # WARNING: This message will NOT be shown again!
-        #{cs}
-        """
+    [ 'useBackend'
+    , 'useBuildBackend'
+    ].forEach (item) ->
+      atom.config.unset "ide-haskell.#{item}"
+
+    setTimeout (->
+      newconf = {}
+
+      serialize = (obj, indent = "") ->
+        (for k, v of obj
+          if typeof(v) is 'object'
+            """
+            #{indent}'#{k.replace /'/g, '\\\''}':
+            #{serialize(v, indent+'  ')}
+            """
+          else
+            """
+            #{indent}'#{k.replace /'/g, '\\\''}': '#{v.replace /'/g, '\\\''}'
+            """).join '\n'
+
+
+      [ 'check-file'
+      , 'lint-file'
+      , 'show-type'
+      , 'show-info'
+      , 'show-info-fallback-to-type'
+      , 'insert-type'
+      , 'insert-import'
+      ].forEach (item) ->
+        kbs = atom.keymaps.findKeyBindings command: "ide-haskell:#{item}"
+        kbs.forEach ({selector, keystrokes}) ->
+          newconf[selector] ?= {}
+          newconf[selector][keystrokes] = "haskell-ghc-mod:#{item}"
+
+      [ 'build'
+      , 'clean'
+      , 'test'
+      , 'set-build-target'
+      ].forEach (item) ->
+        kbs = atom.keymaps.findKeyBindings command: "ide-haskell:#{item}"
+        kbs.forEach ({selector, keystrokes}) ->
+          newconf[selector] ?= {}
+          newconf[selector][keystrokes] = "ide-haskell-cabal:#{item}"
+
+      cs = serialize(newconf)
+      if cs
+        atom.workspace.open('ide-haskell-keymap.cson').then (editor) ->
+          editor.setText """
+          # This is ide-haskell system message
+          # Most keybinding commands have been moved to backend packages
+          # Please add the following to your keymap
+          # in order to preserve existing keybindings.
+          # This message won't be shown once there are no obsolete keybindings
+          # anymore
+          #{cs}
+          """
+      ), 1000
 
   activate: (state) ->
     @cleanConfig()
 
+    @upiProvided = false
+
+    if atom.config.get 'ide-haskell.startupMessageIdeBackend'
+      setTimeout (=>
+        unless @upiProvided
+          atom.notifications.addWarning """
+          Ide-Haskell needs backends that provide most of functionality.
+          Please refer to README for details
+          """,
+          dismissable: true
+        ), 5000
+
     @disposables = new CompositeDisposable
 
-    @backend = null
-    @buildBackend = null
-
-    @backendHelper = new BackendHelper 'ide-haskell',
-      main: IdeHaskell
-      backendInfo: 'startupMessageIdeBackend'
-      backendName: 'haskell-ide-backend'
-      backendVar: 'backend'
-
-    @buildBackendHelper = new BackendHelper 'ide-haskell',
-      main: IdeHaskell
-      backendInfo: 'startupMessageIdeBackend'
-      backendName: 'haskell-build-backend'
-      backendVar: 'buildBackend'
-      useBackend: 'useBuildBackend'
-      backendPackage: 'ide-haskell-cabal'
-
-    @backendHelper.init()
-    @buildBackendHelper.init()
-
-    @pluginManager = new PluginManager state, @backend, @buildBackend
+    @pluginManager = new PluginManager state
 
     # global commands
     @disposables.add atom.commands.add 'atom-workspace',
@@ -209,8 +134,8 @@ module.exports = IdeHaskell =
 
     @disposables.add \
       atom.commands.add 'atom-text-editor[data-grammar~="haskell"]',
-        'ide-haskell:prettify-file': ({target}) =>
-          @pluginManager.prettifyFile target.getModel()
+        'ide-haskell:prettify-file': ({target}) ->
+          prettifyFile target.getModel()
         'ide-haskell:close-tooltip': ({target, abortKeyBinding}) =>
           if @pluginManager.controller(target.getModel()).hasTooltips()
             @pluginManager.controller(target.getModel()).hideTooltip()
@@ -223,8 +148,8 @@ module.exports = IdeHaskell =
 
     @disposables.add \
       atom.commands.add 'atom-text-editor[data-grammar~="cabal"]',
-        'ide-haskell:prettify-file': ({target}) =>
-          @pluginManager.prettifyFile target.getModel(), 'cabal'
+        'ide-haskell:prettify-file': ({target}) ->
+          prettifyFile target.getModel(), 'cabal'
 
     atom.keymaps.add 'ide-haskell',
       'atom-text-editor[data-grammar~="haskell"]':
@@ -232,7 +157,7 @@ module.exports = IdeHaskell =
 
     @menu = new CompositeDisposable
     @menu.add atom.menu.add [
-      label: 'Haskell IDE'
+      label: MainMenuLabel
       submenu : [
         {label: 'Prettify', command: 'ide-haskell:prettify-file'}
         {label: 'Toggle Panel', command: 'ide-haskell:toggle-output'}
@@ -240,9 +165,6 @@ module.exports = IdeHaskell =
     ]
 
   deactivate: ->
-    @backendHelperDisp?.dispose()
-    @buildBackendHelperDisp?.dispose()
-
     @pluginManager.deactivate()
     @pluginManager = null
 
@@ -252,111 +174,13 @@ module.exports = IdeHaskell =
     @disposables.dispose()
     @disposables = null
 
-    @backendHelper = null
-
-    @clearMenu()
-
-  serialize: ->
-    @pluginManager?.serialize()
-
-  clearMenu: ->
     @menu.dispose()
     @menu = null
     atom.menu.update()
 
-  consumeBackend: (service) ->
-    backendMenu = new CompositeDisposable
-    @backendHelperDisp = @backendHelper.consume service,
-      success: =>
-        @pluginManager?.setBackend @backend
+  serialize: ->
+    @pluginManager?.serialize()
 
-        backendMenu.add atom.commands.add 'atom-workspace',
-          'ide-haskell:shutdown-backend': =>
-            @backend?.shutdownBackend?()
-
-        backendMenu.add \
-          atom.commands.add 'atom-text-editor[data-grammar~="haskell"]',
-            'ide-haskell:check-file': ({target}) =>
-              @pluginManager.checkFile target.getModel()
-            'ide-haskell:lint-file': ({target}) =>
-              @pluginManager.lintFile target.getModel()
-            'ide-haskell:show-type': ({target, detail}) =>
-              @pluginManager.showTypeTooltip target.getModel(), null, getEventType(detail)
-            'ide-haskell:show-info': ({target, detail}) =>
-              @pluginManager.showInfoTooltip target.getModel(), null, getEventType(detail)
-            'ide-haskell:show-info-fallback-to-type': ({target, detail}) =>
-              @pluginManager.showInfoTypeTooltip target.getModel(), null, getEventType(detail)
-            'ide-haskell:insert-type': ({target, detail}) =>
-              @pluginManager.insertType target.getModel(), getEventType(detail)
-            'ide-haskell:insert-import': ({target, detail}) =>
-              @pluginManager.insertImport target.getModel(), getEventType(detail)
-
-        backendMenu.add atom.menu.add [
-          label: 'Haskell IDE'
-          submenu : [
-            {label: 'Check', command: 'ide-haskell:check-file'}
-            {label: 'Lint', command: 'ide-haskell:lint-file'}
-            {label: 'Stop Backend', command: 'ide-haskell:shutdown-backend'}
-          ]
-        ]
-
-        backendMenu.add atom.contextMenu.add
-          'atom-text-editor[data-grammar~="haskell"]': [
-            'label': 'Haskell IDE'
-            'submenu': [
-                'label': 'Show Type'
-                'command': 'ide-haskell:show-type'
-              ,
-                'label': 'Show Info'
-                'command': 'ide-haskell:show-info'
-              ,
-                'label': 'Insert Type'
-                'command': 'ide-haskell:insert-type'
-              ,
-                'label': 'Insert Import'
-                'command': 'ide-haskell:insert-import'
-            ]
-          ]
-      dispose: =>
-        backendMenu.dispose()
-        @pluginManager?.setBackend null
-
-  consumeBuildBackend: (service) ->
-    backendMenu = new CompositeDisposable
-    @buildBackendHelperDisp = @buildBackendHelper.consume service,
-      success: =>
-        @pluginManager?.setBuildBackend @buildBackend
-
-        backendMenu.add atom.commands.add 'atom-workspace',
-          'ide-haskell:build': =>
-            @pluginManager.buildProject()
-          'ide-haskell:clean': =>
-            @pluginManager.cleanProject()
-
-        backendMenu.add atom.menu.add [
-          label: 'Haskell IDE'
-          submenu : [
-            {label: 'Build Project', command: 'ide-haskell:build'}
-            {label: 'Clean Project', command: 'ide-haskell:clean'}
-          ]
-        ]
-
-        if @buildBackend.getTargets?
-          backendMenu.add atom.commands.add 'atom-workspace',
-            'ide-haskell:set-build-target': =>
-              @pluginManager.setTarget()
-          backendMenu.add atom.menu.add [
-            label: 'Haskell IDE'
-            submenu : [
-              {label: 'Set Build Target', command: 'ide-haskell:set-build-target'}
-            ]
-          ]
-
-        if @buildBackend.getMenu?
-          backendMenu.add atom.menu.add [
-            label: 'Haskell IDE'
-            submenu : [ @buildBackend.getMenu() ]
-          ]
-      dispose: =>
-        backendMenu.dispose()
-        @pluginManager?.setBuildBackend null
+  provideUpi: ->
+    @upiProvided = true
+    new UPI(@pluginManager)

@@ -9,9 +9,6 @@ class OutputPanelView extends HTMLElement
   setModel: (@model) ->
     @disposables.add @model.onStatusChanged (o) => @statusChanged o
     @disposables.add @model.onProgressChanged (o) => @setProgress o
-    @disposables.add @model.onSetBuildTarget (o) =>
-      @target.style.setProperty 'display', ''
-      @target.innerText = o
     @disposables.add @model.results.onDidUpdate ({types}) =>
       if atom.config.get('ide-haskell.switchTabOnCheck')
         @activateFirstNonEmptyTab types
@@ -29,19 +26,16 @@ class OutputPanelView extends HTMLElement
     @appendChild @resizeHandle = document.createElement 'resize-handle'
     @initResizeHandle()
     @appendChild @heading = document.createElement 'ide-haskell-panel-heading'
-    @heading.appendChild @status = document.createElement 'ide-haskell-status-icon'
-    @status.setAttribute 'data-status', 'ready'
-    @heading.appendChild @buttons = new OutputPanelButtonsElement
-    @heading.appendChild @target = document.createElement 'ide-haskell-target'
-    @target.style.setProperty 'display', 'none'
-    @disposables.add @target, 'click', ->
-      atom.commands.dispatch atom.views.getView(atom.workspace),
-        'ide-haskell:set-build-target'
-    @heading.appendChild @cancelBtn = document.createElement 'ide-haskell-button'
-    @cancelBtn.classList.add 'cancel'
-    @cancelBtn.style.setProperty 'visibility', 'hidden'
-    @heading.appendChild @progressBar = new ProgressBar
+    @disposables.add @addPanelControl 'ide-haskell-status-icon',
+      id: 'status'
+      attrs:
+        'data-status': 'ready'
+    @disposables.add @addPanelControl new OutputPanelButtonsElement,
+      id: 'buttons'
+    @disposables.add @addPanelControl new ProgressBar,
+      id: 'progressBar'
     @progressBar.setProgress 0
+
     @appendChild @items = new OutputPanelItemsElement
     @disposables.add @buttons.onButtonClicked =>
       @updateItems()
@@ -50,14 +44,41 @@ class OutputPanelView extends HTMLElement
     @disposables.add atom.workspace.onDidChangeActivePaneItem =>
       @updateItems() if @buttons.getFileFilter()
 
-  disposeCancelBtnClicked: ->
-    @cancelBtn.style.setProperty 'visibility', 'hidden'
-    @cancelBtnClick?.dispose?()
-    @cancelBtnClick = null
+  addPanelControl: (element, {events, classes, style, attrs, before, id}) ->
+    if id? and @[id]
+      return new Disposable ->
+    element = document.createElement element if typeof element is 'string'
+    if id?
+      element.id = id
+      @[id] = element
+    disp = new SubAtom
+    disp.add new Disposable ->
+      if id?
+        delete @[id]
+      element.parentElement?.removeChild? element
+    if classes?
+      for cls in classes
+        element.classList.add cls
+    if style?
+      for s, v of style
+        element.style.setProperty s, v
+    if attrs?
+      for a, v of attrs
+        element.setAttribute a, v
+    if events?
+      for event, action of events
+        disp.add element, event, action
+
+    before = @heading.querySelector(before) if before?
+    if before?
+      before.parentElement.insertBefore element, before
+    else
+      @heading.appendChild element
+
+    disp
 
   detachedCallback: ->
     @disposables.dispose()
-    @disposeCancelBtnClicked()
 
   initResizeHandle: ->
     @disposables.add @resizeHandle, 'mousedown', (e) =>
@@ -106,8 +127,6 @@ class OutputPanelView extends HTMLElement
       ready: 0
     if prio[status] >= prio[oldStatus] or status is 'progress'
       @status.setAttribute 'data-status', status
-    unless status is 'progress'
-      @disposeCancelBtnClicked()
 
   showItem: (item) ->
     @activateTab item.severity
@@ -124,13 +143,6 @@ class OutputPanelView extends HTMLElement
 
   setProgress: (progress) ->
     @progressBar.setProgress progress
-
-  onActionCancelled: (callback) ->
-    @cancelBtnClick = new SubAtom
-    @cancelBtnClick.add @cancelBtn, 'click', -> callback()
-    @style.setProperty 'visibility', 'visible'
-    @cancelBtn.style.setProperty 'visibility', 'visible'
-    new Disposable => @disposeCancelBtnClicked()
 
 OutputPanelElement =
   document.registerElement 'ide-haskell-panel',

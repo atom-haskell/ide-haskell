@@ -25,24 +25,16 @@ class EditorControl
       @disposables.add gutterElement, 'mouseleave', ".decoration", (e) =>
         @hideTooltip()
 
-    # event for editor updates
-    @disposables.add @editor.onDidDestroy =>
-      @deactivate()
-
     # buffer events for automatic check
     buffer = @editor.getBuffer()
     editorElement = atom.views.getView(@editor)
-    @disposables.add buffer.onWillSave ->
-      # TODO if uri was changed, then we have to remove all current markers
+    @disposables.add buffer.onWillSave =>
+      @emitter.emit 'will-save-buffer', buffer
       if atom.config.get('ide-haskell.onSavePrettify')
         atom.commands.dispatch editorElement, 'ide-haskell:prettify-file'
 
-    @disposables.add buffer.onDidSave ->
-      # TODO if uri was changed, then we have to remove all current markers
-      if atom.config.get('ide-haskell.onSaveCheck')
-        atom.commands.dispatch editorElement, 'ide-haskell:check-file'
-      if atom.config.get('ide-haskell.onSaveLint')
-        atom.commands.dispatch editorElement, 'ide-haskell:lint-file'
+    @disposables.add buffer.onDidSave =>
+      @emitter.emit 'did-save-buffer', buffer
 
     # show expression type if mouse stopped somewhere
     @disposables.add @editorElement, 'mousemove', '.scroll-view', (e) =>
@@ -86,7 +78,7 @@ class EditorControl
     @markerFromCheckResult(r) for r in res
 
   markerFromCheckResult: ({uri, severity, message, position}) ->
-    return unless uri is @editor.getURI()
+    return unless uri? and uri is @editor.getURI()
 
     # create a new marker
     range = new Range position, {row: position.row, column: position.column + 1}
@@ -107,6 +99,12 @@ class EditorControl
   onShouldShowTooltip: (callback) ->
     @emitter.on 'should-show-tooltip', callback
 
+  onWillSaveBuffer: (callback) ->
+    @emitter.on 'will-save-buffer', callback
+
+  onDidSaveBuffer: (callback) ->
+    @emitter.on 'did-save-buffer', callback
+
   shouldShowTooltip: (pos) ->
     return if @showCheckResult pos
 
@@ -115,7 +113,7 @@ class EditorControl
        pos.isEqual @editor.bufferRangeForBufferRow(pos.row).end
       @hideTooltip 'mouse'
     else
-      @emitter.emit 'should-show-tooltip', {@editor, pos: pos}
+      @emitter.emit 'should-show-tooltip', {@editor, pos}
 
   showTooltip: (pos, range, text, eventType) ->
     return unless @editor?
@@ -155,16 +153,14 @@ class EditorControl
 
   getEventRange: (pos, eventType) ->
     switch eventType
-      when 'mouse'
+      when 'mouse', 'context'
+        pos ?= @lastMouseBufferPt
         [selRange] = @editor.getSelections()
           .map (sel) ->
             sel.getBufferRange()
           .filter (sel) ->
             sel.containsPoint pos
-        crange = selRange ? pos
-      when 'context'
-        pos = @lastMouseBufferPt
-        crange = pos
+        crange = selRange ? Range.fromPointWithDelta(pos, 0, 0)
       when 'keyboard'
         crange = @editor.getLastSelection().getBufferRange()
         pos = crange.start
@@ -199,21 +195,6 @@ class EditorControl
 
     @checkResultShowing = true
     return true
-
-  findImportsPos: ->
-    # rx=RegExp("^\\s*import(\\s+qualified)?\\s+#{mod}"+
-    #           "(\\s+as\\s+[\\w.']+)?(\\s+hiding)?"+
-    #           "(\\s+\\((.*)\\))")
-    buffer = @editor.getBuffer()
-    pos = null
-    indent = null
-    buffer.backwardsScan /^(\s*)import/, ({match, range}) ->
-      r = buffer.rangeForRow range.start.row
-      pos = r.end
-      indent = match[1]
-    console.log pos
-    if pos?
-      {pos, indent}
 
   hasTooltips: ->
     !!@editor.findMarkers(type: 'tooltip').length
