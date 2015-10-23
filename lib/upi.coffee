@@ -4,7 +4,18 @@
 module.exports =
 class UPI
   constructor: (@pluginManager) ->
-    @disposables = new CompositeDisposable
+
+  ###
+  Call this function in consumer to get actual interface
+
+  disposables: CompositeDisposable, one you will return in consumer
+  ###
+  registerPlugin: (disposables) ->
+    new UPIInstance(@pluginManager, disposables)
+
+class UPIInstance
+  constructor: (@pluginManager, disposables) ->
+    disposables.add @disposables = new CompositeDisposable
 
   ###
   Adds new sumbenu to 'Haskell IDE' menu item
