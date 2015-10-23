@@ -153,16 +153,14 @@ class EditorControl
 
   getEventRange: (pos, eventType) ->
     switch eventType
-      when 'mouse'
+      when 'mouse', 'context'
+        pos ?= @lastMouseBufferPt
         [selRange] = @editor.getSelections()
           .map (sel) ->
             sel.getBufferRange()
           .filter (sel) ->
             sel.containsPoint pos
-        crange = selRange ? pos
-      when 'context'
-        pos = @lastMouseBufferPt
-        crange = pos
+        crange = selRange ? Range.fromPointWithDelta(pos, 0, 0)
       when 'keyboard'
         crange = @editor.getLastSelection().getBufferRange()
         pos = crange.start

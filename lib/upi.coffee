@@ -85,9 +85,7 @@ class UPI
 
   callback: callback(editor, crange)
     editor: TextEditor, editor that generated event
-    crange: Point or Range, cursor range that generated event.
-            Can be either Point or Range (in case of mouse hovering over
-            selection)
+    crange: Range, cursor range that generated event.
 
   returns Disposable
   ###
@@ -169,12 +167,12 @@ class UPI
   editor: TextEditor, editor that generated event
   detail: event detail, ignored if eventType is set
   eventType: String, event type, one of 'keyboard', 'context', 'mouse'
-  pos: Point, event position, can be undefined if eventType isnt 'mouse'
+  pos: Point, event position, can be undefined
   controller: leave undefined, this is internal field
 
   callback: callback({pos, crange}, eventType)
     pos: Point, event position
-    crange: Point or Range, event range
+    crange: Range, event range
     eventType: String, event type, one of 'keyboard', 'context', 'mouse'
   ###
   withEventRange: ({editor, detail, eventType, pos, controller}, callback) ->
