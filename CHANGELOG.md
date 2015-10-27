@@ -1,3 +1,7 @@
+## 1.1.0
+* Handle controller-specific event disposal in controller dtor
+* EditorController.onDidStopChanging
+
 ## 1.0.0
 * UPI interface
 
