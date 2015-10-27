@@ -36,6 +36,9 @@ class EditorControl
     @disposables.add buffer.onDidSave =>
       @emitter.emit 'did-save-buffer', buffer
 
+    @disposables.add @editor.onDidStopChanging =>
+      @emitter.emit 'did-stop-changing', @editor
+
     # show expression type if mouse stopped somewhere
     @disposables.add @editorElement, 'mousemove', '.scroll-view', (e) =>
       bufferPt = bufferPositionFromMouseEvent @editor, e
@@ -104,6 +107,9 @@ class EditorControl
 
   onDidSaveBuffer: (callback) ->
     @emitter.on 'did-save-buffer', callback
+
+  onDidStopChanging: (callback) ->
+    @emitter.on 'did-stop-changing', callback
 
   shouldShowTooltip: (pos) ->
     return if @showCheckResult pos

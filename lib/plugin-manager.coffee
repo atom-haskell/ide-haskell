@@ -48,6 +48,9 @@ class PluginManager
   onDidSaveBuffer: (callback) ->
     @emitter.on 'did-save-buffer', callback
 
+  onDidStopChanging: (callback) ->
+    @emitter.on 'did-stop-changing', callback
+
   togglePanel: ->
     @outputView?.toggle()
 
@@ -80,6 +83,8 @@ class PluginManager
         @emitter.emit 'will-save-buffer', buffer
       @disposables.add controller.onDidSaveBuffer (buffer) =>
         @emitter.emit 'did-save-buffer', buffer
+      @disposables.add controller.onDidStopChanging (editor) =>
+        @emitter.emit 'did-stop-changing', editor.getBuffer()
       controller.updateResults @checkResults.filter uri: editor.getPath()
 
   removeController: (editor) ->

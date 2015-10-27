@@ -159,6 +159,10 @@ class UPIInstance
     @disposables.add disp = @pluginManager.onDidSaveBuffer callback
     disp
 
+  onDidStopChanging: (callback) ->
+    @disposables.add disp = @pluginManager.onDidStopChanging callback
+    disp
+
   ###
   Add a new control to ouptut panel heading.
 
