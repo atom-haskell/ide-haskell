@@ -75,15 +75,15 @@ class PluginManager
   addController: (editor) ->
     unless @controllers.get(editor)?
       @controllers.set editor, controller = new EditorControl(editor)
-      @disposables.add editor.onDidDestroy =>
+      controller.disposables.add editor.onDidDestroy =>
         @removeController editor
-      @disposables.add controller.onShouldShowTooltip ({editor, pos}) =>
+      controller.disposables.add controller.onShouldShowTooltip ({editor, pos}) =>
         @emitter.emit 'should-show-tooltip', {editor, pos, eventType: 'mouse'}
-      @disposables.add controller.onWillSaveBuffer (buffer) =>
+      controller.disposables.add controller.onWillSaveBuffer (buffer) =>
         @emitter.emit 'will-save-buffer', buffer
-      @disposables.add controller.onDidSaveBuffer (buffer) =>
+      controller.disposables.add controller.onDidSaveBuffer (buffer) =>
         @emitter.emit 'did-save-buffer', buffer
-      @disposables.add controller.onDidStopChanging (editor) =>
+      controller.disposables.add controller.onDidStopChanging (editor) =>
         @emitter.emit 'did-stop-changing', editor.getBuffer()
       controller.updateResults @checkResults.filter uri: editor.getPath()
 
