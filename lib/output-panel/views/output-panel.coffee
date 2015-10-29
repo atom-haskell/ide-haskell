@@ -7,8 +7,6 @@ SubAtom = require 'sub-atom'
 module.exports=
 class OutputPanelView extends HTMLElement
   setModel: (@model) ->
-    @disposables.add @model.onStatusChanged (o) => @statusChanged o
-    @disposables.add @model.onProgressChanged (o) => @setProgress o
     @disposables.add @model.results.onDidUpdate ({types}) =>
       if atom.config.get('ide-haskell.switchTabOnCheck')
         @activateFirstNonEmptyTab types
@@ -55,7 +53,8 @@ class OutputPanelView extends HTMLElement
     disp.add new Disposable ->
       if id?
         delete @[id]
-      element.parentElement?.removeChild? element
+      element.remove()
+      element.destroy?()
     if classes?
       for cls in classes
         element.classList.add cls
@@ -75,9 +74,18 @@ class OutputPanelView extends HTMLElement
     else
       @heading.appendChild element
 
+    @disposables.add disp
+
     disp
 
-  detachedCallback: ->
+  ###
+  Note: can't use detachedCallback here, since when panel
+  is reattached, it is called, and panel items are
+  detached
+  ###
+  destroy: ->
+    @remove()
+    @items.destroy()
     @disposables.dispose()
 
   initResizeHandle: ->

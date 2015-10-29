@@ -4,58 +4,49 @@ module.exports=
 class OutputPanel
   constructor: (@state = {}, @results) ->
     @disposables = new CompositeDisposable
-    @disposables.add @emitter = new Emitter
 
-    atom.workspace.addBottomPanel
+    @element = atom.views.getView(@)
+
+    @panel = atom.workspace.addPanel atom.config.get('ide-haskell.panelPosition'),
       item: @
       visible: @state?.visibility ? true
+
+    atom.config.onDidChange 'ide-haskell.panelPosition', ({newValue}) =>
+      atom.workspace.addPanel newValue, item: @
 
     @disposables.add @results.onDidUpdate => @currentResult = null
 
     @backendStatus status: 'ready'
 
   toggle: ->
-    p = atom.workspace.panelForItem(@)
-    if p.isVisible()
-      p.hide()
+    if @panel.isVisible()
+      @panel.hide()
     else
-      p.show()
+      @panel.show()
 
   destroy: ->
     @disposables.dispose()
-    atom.workspace.panelForItem(@).destroy()
+    @panel.destroy()
+    @element.destroy()
 
   createTab: (name, opts) ->
-    atom.views.getView(@).createTab name, opts
+    @element.createTab name, opts
 
   serialize: ->
-    visibility: atom.workspace.panelForItem(@).isVisible()
-    height: atom.views.getView(@).style.height
-    activeTab: atom.views.getView(@).getActiveTab()
-    fileFilter: atom.views.getView(@).buttons.getFileFilter()
-
-  onStatusChanged: (callback) ->
-    @emitter.on 'status-changed', callback
-
-  emitStatus: (status) ->
-    oldStatus = @status ? 'ready'
-    @status = status
-    @emitter.emit 'status-changed', {@status, oldStatus}
-
-  onProgressChanged: (callback) ->
-    @emitter.on 'progress-changed', callback
-
-  emitProgress: (progress) ->
-    @emitter.emit 'progress-changed', progress
+    visibility: @panel.isVisible()
+    height: @element.style.height
+    activeTab: @element.getActiveTab()
+    fileFilter: @element.buttons.getFileFilter()
 
   addPanelControl: (element, opts) ->
-    atom.views.getView(@).addPanelControl element, opts
+    @element.addPanelControl element, opts
 
   backendStatus: ({status, progress}) ->
-    @emitStatus status
+    @element.statusChanged {status, oldStatus: @status ? 'ready'}
+    @status = status
     unless status is 'progress'
       progress ?= 0
-    @emitProgress progress if progress?
+    @element.setProgress progress if progress?
 
   showNextError: ->
     rs = @results.resultsWithURI()
@@ -67,7 +58,7 @@ class OutputPanel
       @currentResult = 0
     @currentResult = 0 if @currentResult >= rs.length
 
-    atom.views.getView(@).showItem rs[@currentResult]
+    @element.showItem rs[@currentResult]
 
   showPrevError: ->
     rs = @results.resultsWithURI()
@@ -79,4 +70,4 @@ class OutputPanel
       @currentResult = rs.length - 1
     @currentResult = rs.length - 1 if @currentResult < 0
 
-    atom.views.getView(@).showItem rs[@currentResult]
+    @element.showItem rs[@currentResult]

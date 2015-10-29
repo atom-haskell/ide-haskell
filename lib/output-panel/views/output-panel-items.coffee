@@ -4,12 +4,13 @@ class OutputPanelItemsView extends HTMLElement
   createdCallback: ->
     @classList.add 'native-key-bindings'
     @setAttribute('tabindex', -1)
+    @itemViews = []
 
   filter: (@activeFilter) ->
     scrollTop = @scrollTop
-    @innerHTML = ''
+    @clear()
     @items = @model.filter @activeFilter
-    for i in @items
+    @itemViews = for i in @items
       @appendChild atom.views.getView i
     @scrollTop = scrollTop
 
@@ -25,6 +26,13 @@ class OutputPanelItemsView extends HTMLElement
 
   atEnd: ->
     @scrollTop >= (@scrollHeight - @clientHeight)
+
+  clear: ->
+    i.destroy() for i in @itemViews
+
+  destroy: ->
+    @remove()
+    @clear()
 
 OutputPanelItemsElement =
   document.registerElement 'ide-haskell-panel-items',

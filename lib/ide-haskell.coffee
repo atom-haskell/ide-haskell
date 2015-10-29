@@ -45,6 +45,13 @@ module.exports = IdeHaskell =
       default: true
       description: "Show info message about haskell-ide-backend service on
                     activation"
+    panelPosition:
+      type: 'string'
+      default: 'bottom'
+      description: '''
+      Output panel position
+      '''
+      enum: ['bottom', 'left', 'top', 'right']
 
   cleanConfig: ->
     [ 'onSaveCheck'

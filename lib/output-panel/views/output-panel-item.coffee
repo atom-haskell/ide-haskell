@@ -17,7 +17,8 @@ class OutputPanelItemView extends HTMLElement
         atom.workspace.open(@model.uri).then (editor) =>
           editor.setCursorBufferPosition @model.position
 
-  detachedCallback: ->
+  destroy: ->
+    @remove()
     @disposables.dispose()
     @disposables = null
 

@@ -68,7 +68,8 @@ class OutputPanelButtons extends HTMLElement
     if @buttons[btn]?
       @buttons[btn].element.setAttribute 'data-count', count
 
-  detachedCallback: ->
+  destroy: ->
+    @remove()
     @disposables.dispose()
 
   getActive: ->
