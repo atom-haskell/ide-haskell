@@ -1,3 +1,6 @@
+## 1.2.0
+* Show cursor position on cursor move (#120)
+
 ## 1.1.0
 * Handle controller-specific event disposal in controller dtor
 * EditorController.onDidStopChanging
