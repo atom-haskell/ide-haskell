@@ -14,6 +14,7 @@ class OutputPanelView extends HTMLElement
     @items.setModel @model.results
 
     @style.height = @model.state.height if @model.state?.height?
+    @style.width = @model.state.width if @model.state?.width?
     @activateTab(@model.state.activeTab ? @buttons.buttonNames()[0])
     @buttons.setFileFilter @model.state.fileFilter
 
@@ -88,13 +89,29 @@ class OutputPanelView extends HTMLElement
     @items.destroy()
     @disposables.dispose()
 
+  setPanelPosition: (@pos) ->
+    @setAttribute 'data-pos', @pos
+
   initResizeHandle: ->
     @disposables.add @resizeHandle, 'mousedown', (e) =>
-      startY = e.clientY
-      startHeight = parseInt document.defaultView.getComputedStyle(@).height, 10
-
-      doDrag = (e) =>
-        @style.height = (startHeight - e.clientY + startY) + 'px'
+      doDrag =
+        switch @pos
+          when 'top', 'bottom'
+            startY = e.clientY
+            startHeight = parseInt document.defaultView.getComputedStyle(@).height, 10
+            dir = switch @pos
+              when 'top' then 1
+              when 'bottom' then -1
+            (e) =>
+              @style.height = (startHeight + dir * (e.clientY - startY)) + 'px'
+          when 'left', 'right'
+            startX = e.clientX
+            startWidth = parseInt document.defaultView.getComputedStyle(@).width, 10
+            dir = switch @pos
+              when 'left' then 1
+              when 'right' then -1
+            (e) =>
+              @style.width = (startWidth + dir * (e.clientX - startX)) + 'px'
 
       stopDrag = (e) ->
         document.documentElement.removeEventListener 'mousemove', doDrag
@@ -102,7 +119,6 @@ class OutputPanelView extends HTMLElement
 
       document.documentElement.addEventListener 'mousemove', doDrag
       document.documentElement.addEventListener 'mouseup', stopDrag
-
   updateItems: ->
     activeTab = @getActiveTab()
     filter = severity: activeTab

@@ -6,13 +6,17 @@ class OutputPanel
   constructor: (@state = {}, @results) ->
     @disposables = new CompositeDisposable
 
-    @element = (new OutputPanelElement).setModel @
+    pos = atom.config.get('ide-haskell.panelPosition')
 
-    @panel = atom.workspace.addPanel atom.config.get('ide-haskell.panelPosition'),
+    @element = (new OutputPanelElement).setModel @
+    @element.setPanelPosition pos
+
+    @panel = atom.workspace.addPanel pos,
       item: @
       visible: @state?.visibility ? true
 
     atom.config.onDidChange 'ide-haskell.panelPosition', ({newValue}) =>
+      @element.setPanelPosition newValue
       atom.workspace.addPanel newValue, item: @
 
     @disposables.add @results.onDidUpdate => @currentResult = null
@@ -36,6 +40,7 @@ class OutputPanel
   serialize: ->
     visibility: @panel.isVisible()
     height: @element.style.height
+    width: @element.style.width
     activeTab: @element.getActiveTab()
     fileFilter: @element.buttons.getFileFilter()
 

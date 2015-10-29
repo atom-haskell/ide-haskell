@@ -34,15 +34,45 @@
 ide-haskell-panel {
   display: flex;
   flex-direction: column;
-  min-height: 120px;
-  max-height: 50vh;
 
   resize-handle {
     position: absolute;
-    left: 0;
+  }
+
+  &[data-pos=top], &[data-pos=bottom] {
+    min-height: 120px;
+    max-height: 50vh;
+    width: auto !important;
+    resize-handle {
+      cursor: row-resize;
+      height: 10px;
+      left: 0;
+      right: 0;
+    }
+  }
+  &[data-pos=left], &[data-pos=right] {
+    min-width: 120px;
+    max-width: 50vw;
+    height: auto !important;
+    resize-handle {
+      cursor: col-resize;
+      width: 10px;
+      top: 0;
+      bottom: 0;
+    }
+  }
+
+  &[data-pos=top] resize-handle {
+    bottom: 0;
+  }
+  &[data-pos=bottom] resize-handle {
+    top: 0;
+  }
+  &[data-pos=left] resize-handle {
     right: 0;
-    height: 10px;
-    cursor: row-resize;
+  }
+  &[data-pos=right] resize-handle {
+    left: 0;
   }
 
   ide-haskell-panel-heading {
@@ -81,6 +111,8 @@ ide-haskell-panel {
     }
 
     .clickable() {
+      flex-shrink: 0;
+      flex-grow: 0;
       display: inline-block;
       line-height: 1.8em;
       color: @text-color-subtle;
@@ -97,6 +129,7 @@ ide-haskell-panel {
     ide-haskell-button {
       .clickable;
       height: 1.7em;
+      white-space: nowrap;
       &.cancel {
         width: 2em;
         border-radius: @component-border-radius;
@@ -112,8 +145,6 @@ ide-haskell-panel {
     }
 
     ide-haskell-panel-buttons {
-      display: flex;
-      flex-direction: row;
       ide-haskell-buttons-container {
         ide-haskell-button {
           text-transform: capitalize;
