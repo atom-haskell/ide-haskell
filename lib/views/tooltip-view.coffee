@@ -1,9 +1,10 @@
 class TooltipMessage
-  constructor: (@text) ->
+  constructor: (text) ->
+    @element = (new TooltipElement).setMessage text
 
 class TooltipView extends HTMLElement
   setMessage: (message) ->
-    @inner.textContent = message.text
+    @inner.textContent = message
     @
 
   createdCallback: ->
@@ -17,6 +18,5 @@ TooltipElement =
     prototype: TooltipView.prototype
 
 module.exports = {
-  TooltipMessage,
-  TooltipElement
+  TooltipMessage
 }

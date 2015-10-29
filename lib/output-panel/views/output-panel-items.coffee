@@ -1,3 +1,5 @@
+OutputPanelItemElement = require './output-panel-item'
+
 class OutputPanelItemsView extends HTMLElement
   setModel: (@model) ->
 
@@ -11,11 +13,12 @@ class OutputPanelItemsView extends HTMLElement
     @clear()
     @items = @model.filter @activeFilter
     @itemViews = for i in @items
-      @appendChild atom.views.getView i
+      @appendChild (new OutputPanelItemElement).setModel i
     @scrollTop = scrollTop
 
   showItem: (item) ->
-    view = atom.views.getView item
+    view = @itemViews[@items.indexOf item]#atom.views.getView item
+    return unless view?
     view.position.click()
     view.scrollIntoView
       block: "start"
@@ -29,6 +32,7 @@ class OutputPanelItemsView extends HTMLElement
 
   clear: ->
     i.destroy() for i in @itemViews
+    @itemViews = []
 
   destroy: ->
     @remove()

@@ -1,10 +1,8 @@
 OutputPanel = require './output-panel/output-panel'
-OutputPanelElement = require './output-panel/views/output-panel'
 {EditorControl} = require './editor-control'
-{TooltipMessage, TooltipElement} = require './views/tooltip-view'
+{TooltipMessage} = require './views/tooltip-view'
 ResultsDB = require './results-db'
 ResultItem = require './result-item'
-OutputPanelItemElement = require './output-panel/views/output-panel-item'
 {CompositeDisposable, Emitter} = require 'atom'
 {dirname} = require 'path'
 {statSync} = require 'fs'
@@ -17,12 +15,6 @@ class PluginManager
     @controllers = new WeakMap
     @disposables.add @emitter = new Emitter
 
-    @disposables.add atom.views.addViewProvider TooltipMessage, (message) ->
-      (new TooltipElement).setMessage message
-    @disposables.add atom.views.addViewProvider OutputPanel, (panel) ->
-      (new OutputPanelElement).setModel panel
-    @disposables.add atom.views.addViewProvider ResultItem, (resultitem) ->
-      (new OutputPanelItemElement).setModel resultitem
     @disposables.add @onResultsUpdated ({types}) => @updateEditorsWithResults(types)
 
     @createOutputViewPanel(state)

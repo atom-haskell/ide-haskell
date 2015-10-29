@@ -1,3 +1,4 @@
+OutputPanelElement = require './views/output-panel'
 {CompositeDisposable, Emitter} = require 'atom'
 
 module.exports=
@@ -5,7 +6,7 @@ class OutputPanel
   constructor: (@state = {}, @results) ->
     @disposables = new CompositeDisposable
 
-    @element = atom.views.getView(@)
+    @element = (new OutputPanelElement).setModel @
 
     @panel = atom.workspace.addPanel atom.config.get('ide-haskell.panelPosition'),
       item: @
