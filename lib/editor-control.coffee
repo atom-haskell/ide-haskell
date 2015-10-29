@@ -52,10 +52,14 @@ class EditorControl
     @disposables.add @editorElement, 'mouseout', '.scroll-view', (e) =>
       @clearExprTypeTimeout()
 
-    @disposables.add @editor.onDidChangeCursorPosition =>
-      if atom.config.get('ide-haskell.closeTooltipsOnCursorMove')
-        @clearExprTypeTimeout()
-        @hideTooltip()
+    @disposables.add @editor.onDidChangeCursorPosition ({newBufferPosition}) =>
+      switch atom.config.get('ide-haskell.onCursorMove')
+        when 'Show Tooltip'
+          @clearExprTypeTimeout()
+          @showCheckResult newBufferPosition, false, 'keyboard'
+        when 'Hide Tooltip'
+          @clearExprTypeTimeout()
+          @hideTooltip()
 
   deactivate: ->
     @clearExprTypeTimeout()
@@ -175,19 +179,21 @@ class EditorControl
 
     return {crange, pos}
 
-  findCheckResultMarkers: (pos, gutter) ->
+  findCheckResultMarkers: (pos, gutter, keyboard) ->
     if gutter
       @editor.findMarkers {type: 'check-result', startBufferRow: pos.row}
+    else if keyboard
+      @editor.findMarkers {type: 'check-result', containsRange: Range.fromPointWithDelta pos, 0, 1}
     else
       @editor.findMarkers {type: 'check-result', containsPoint: pos}
 
   # show check result when mouse over gutter icon
-  showCheckResult: (pos, gutter) ->
-    markers = @findCheckResultMarkers pos, gutter
+  showCheckResult: (pos, gutter, eventType = 'mouse') ->
+    markers = @findCheckResultMarkers pos, gutter, eventType is 'keyboard'
     [marker] = markers
 
     unless marker?
-      @hideTooltip() if @checkResultShowing
+      @hideTooltip(eventType) if @checkResultShowing
       @checkResultShowing = false
       return false
 
@@ -195,9 +201,9 @@ class EditorControl
       marker.getProperties().desc).join('\n\n')
 
     if gutter
-      @showTooltip pos, new Range(pos, pos), text, 'mouse'
+      @showTooltip pos, new Range(pos, pos), text, eventType
     else
-      @showTooltip pos, marker.getBufferRange(), text, 'mouse'
+      @showTooltip pos, marker.getBufferRange(), text, eventType
 
     @checkResultShowing = true
     return true

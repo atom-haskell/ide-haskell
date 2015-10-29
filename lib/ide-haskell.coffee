@@ -23,9 +23,15 @@ module.exports = IdeHaskell =
       type: "integer"
       default: 300
       description: "Type/Info tooltip show delay, in ms"
-    closeTooltipsOnCursorMove:
-      type: 'boolean'
-      default: false
+    onCursorMove:
+      type: 'string'
+      description: '''
+      Show check results (error, lint) description tooltips
+      when text cursor is near marker, close open tooltips, or do
+      nothing?
+      '''
+      enum: ['Show Tooltip', 'Hide Tooltip', 'Nothing']
+      default: 'Nothing'
     stylishHaskellPath:
       type: "string"
       default: 'stylish-haskell'
@@ -50,8 +56,12 @@ module.exports = IdeHaskell =
         atom.config.set "haskell-ghc-mod.#{item}", atom.config.get "ide-haskell.#{item}"
       atom.config.unset "ide-haskell.#{item}"
 
+    if atom.config.get 'ide-haskell.closeTooltipsOnCursorMove'
+      atom.config.set 'ide-haskell.onCursorMove', 'Hide Tooltip'
+
     [ 'useBackend'
     , 'useBuildBackend'
+    , 'closeTooltipsOnCursorMove'
     ].forEach (item) ->
       atom.config.unset "ide-haskell.#{item}"
 
