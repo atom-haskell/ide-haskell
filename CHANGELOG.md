@@ -1,3 +1,8 @@
+## 1.3.0
+* Panel resizing for different positions
+* Use simpler view API
+* Initial support for setting output panel position
+
 ## 1.2.0
 * Show cursor position on cursor move (#120)
 
