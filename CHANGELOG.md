@@ -1,3 +1,6 @@
+## 1.3.1
+* Drop linter styles
+
 ## 1.3.0
 * Panel resizing for different positions
 * Use simpler view API
