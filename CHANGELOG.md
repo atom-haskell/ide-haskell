@@ -1,3 +1,6 @@
+## 1.3.2
+* More robust tooltip hiding
+
 ## 1.3.1
 * Drop linter styles
 
