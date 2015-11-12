@@ -129,10 +129,10 @@ class UPIInstance
     controller = @pluginManager.controller(editor)
     @withEventRange {controller, pos, detail, eventType}, ({crange, pos}) =>
       tooltip(crange).then ({range, text}) ->
-        controller.showTooltip pos, range, text, eventType
+        controller.showTooltip pos, range, text, {eventType, subtype: 'external'}
       .catch (status = {status: 'warning'}) =>
         unless status.ignore
-          controller.hideTooltip eventType
+          controller.hideTooltip {eventType}
           @setStatus status
 
   ###

@@ -39,6 +39,11 @@ class EditorControl
     @disposables.add @editor.onDidStopChanging =>
       @emitter.emit 'did-stop-changing', @editor
 
+    @disposables.add @editor.onDidChangeScrollLeft =>
+      @hideTooltip eventType: 'mouse'
+    @disposables.add @editor.onDidChangeScrollTop =>
+      @hideTooltip eventType: 'mouse'
+
     # show expression type if mouse stopped somewhere
     @disposables.add @editorElement, 'mousemove', '.scroll-view', (e) =>
       bufferPt = bufferPositionFromMouseEvent @editor, e
@@ -122,32 +127,29 @@ class EditorControl
     if pos.row < 0 or
        pos.row >= @editor.getLineCount() or
        pos.isEqual @editor.bufferRangeForBufferRow(pos.row).end
-      @hideTooltip 'mouse'
+      @hideTooltip eventType: 'mouse'
     else
       @emitter.emit 'should-show-tooltip', {@editor, pos}
 
-  showTooltip: (pos, range, text, eventType) ->
+  showTooltip: (pos, range, text, detail = {}) ->
     return unless @editor?
 
     if range.isEqual(@tooltipHighlightRange)
       return
     @hideTooltip()
     #exit if mouse moved away
-    if eventType is 'mouse'
+    if detail.eventType is 'mouse'
       unless range.containsPoint(@lastMouseBufferPt)
         return
     @tooltipHighlightRange = range
     @markerBufferRange = range
     markerPos =
-      switch eventType
+      switch detail.eventType
         when 'keyboard' then pos
         else range.start
-    tooltipMarker = @editor.markBufferPosition markerPos,
-      type: 'tooltip'
-      eventType: eventType
-    highlightMarker = @editor.markBufferRange range,
-      type: 'tooltip'
-      eventType: eventType
+    detail.type = 'tooltip'
+    tooltipMarker = @editor.markBufferPosition markerPos, detail
+    highlightMarker = @editor.markBufferRange range, detail
     @editor.decorateMarker tooltipMarker,
       type: 'overlay'
       item: new TooltipMessage text
@@ -155,16 +157,10 @@ class EditorControl
       type: 'highlight'
       class: 'ide-haskell-type'
 
-  hideTooltip: (eventType) ->
+  hideTooltip: (template = {}) ->
     @tooltipHighlightRange = null
-    template = type: 'tooltip'
-    if eventType?
-      template.eventType = eventType
+    template.type = 'tooltip'
     m.destroy() for m in @editor.findMarkers template
-
-  showingTooltip: ->
-    template = type: 'tooltip'
-    return @editor.findMarkers(template).length isnt 0
 
   getEventRange: (pos, eventType) ->
     switch eventType
@@ -198,20 +194,22 @@ class EditorControl
     [marker] = markers
 
     unless marker?
+      @hideTooltip subtype: 'check-result'
       return false
 
     text = (markers.map (marker) ->
       marker.getProperties().desc).join('\n\n')
 
     if gutter
-      @showTooltip pos, new Range(pos, pos), text, eventType
+      @showTooltip pos, new Range(pos, pos), text, {eventType, subtype: 'check-result'}
     else
-      @showTooltip pos, marker.getBufferRange(), text, eventType
+      @showTooltip pos, marker.getBufferRange(), text, {eventType, subtype: 'check-result'}
 
     return true
 
-  hasTooltips: ->
-    !!@editor.findMarkers(type: 'tooltip').length
+  hasTooltips: (template = {}) ->
+    template.type = 'tooltip'
+    !!@editor.findMarkers(template).length
 
 module.exports = {
   EditorControl
