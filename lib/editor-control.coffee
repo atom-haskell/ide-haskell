@@ -56,7 +56,8 @@ class EditorControl
       switch atom.config.get('ide-haskell.onCursorMove')
         when 'Show Tooltip'
           @clearExprTypeTimeout()
-          @showCheckResult newBufferPosition, false, 'keyboard'
+          unless @showCheckResult newBufferPosition, false, 'keyboard'
+            @hideTooltip()
         when 'Hide Tooltip'
           @clearExprTypeTimeout()
           @hideTooltip()
@@ -161,6 +162,10 @@ class EditorControl
       template.eventType = eventType
     m.destroy() for m in @editor.findMarkers template
 
+  showingTooltip: ->
+    template = type: 'tooltip'
+    return @editor.findMarkers(template).length isnt 0
+
   getEventRange: (pos, eventType) ->
     switch eventType
       when 'mouse', 'context'
@@ -193,8 +198,6 @@ class EditorControl
     [marker] = markers
 
     unless marker?
-      @hideTooltip(eventType) if @checkResultShowing
-      @checkResultShowing = false
       return false
 
     text = (markers.map (marker) ->
@@ -205,7 +208,6 @@ class EditorControl
     else
       @showTooltip pos, marker.getBufferRange(), text, eventType
 
-    @checkResultShowing = true
     return true
 
   hasTooltips: ->
