@@ -1,3 +1,6 @@
+## 1.3.3
+* Even more robust tooltip hiding (amend 1.3.2)
+
 ## 1.3.2
 * More robust tooltip hiding
 
