@@ -1,3 +1,6 @@
+## 1.3.4
+* Disable progress bar animation while invisible
+
 ## 1.3.3
 * Even more robust tooltip hiding (amend 1.3.2)
 
