@@ -5,9 +5,9 @@ class ProgressBar extends HTMLElement
   setProgress: (progress) ->
     @span.style.setProperty 'width', "#{progress * 100}%"
     if progress <= 0
-      @style.setProperty 'visibility', 'hidden'
+      @classList.remove 'visible'
     else
-      @style.setProperty 'visibility', 'visible'
+      @classList.add 'visible'
 
 
 ProgressBarElement =
