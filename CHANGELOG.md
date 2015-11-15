@@ -1,3 +1,6 @@
+## 1.3.5
+* Cleanup & Fix deprecation warnings
+
 ## 1.3.4
 * Disable progress bar animation while invisible
 
