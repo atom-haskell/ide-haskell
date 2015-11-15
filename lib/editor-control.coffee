@@ -9,25 +9,23 @@ class EditorControl
     @disposables = new SubAtom
     @disposables.add @emitter = new Emitter
 
-    @editorElement = atom.views.getView(@editor).rootElement
+    editorElement = atom.views.getView(@editor)
 
-    unless atom.config.get 'ide-haskell.useLinter'
-      @gutter = @editor.gutterWithName "ide-haskell-check-results"
-      @gutter ?= @editor.addGutter
-        name: "ide-haskell-check-results"
-        priority: 10
+    @gutter = @editor.gutterWithName "ide-haskell-check-results"
+    @gutter ?= @editor.addGutter
+      name: "ide-haskell-check-results"
+      priority: 10
 
-      gutterElement = atom.views.getView(@gutter)
-      @disposables.add gutterElement, 'mouseenter', ".decoration", (e) =>
-        bufferPt = bufferPositionFromMouseEvent @editor, e
-        @lastMouseBufferPt = bufferPt
-        @showCheckResult bufferPt, true
-      @disposables.add gutterElement, 'mouseleave', ".decoration", (e) =>
-        @hideTooltip()
+    gutterElement = atom.views.getView(@gutter)
+    @disposables.add gutterElement, 'mouseenter', ".decoration", (e) =>
+      bufferPt = bufferPositionFromMouseEvent @editor, e
+      @lastMouseBufferPt = bufferPt
+      @showCheckResult bufferPt, true
+    @disposables.add gutterElement, 'mouseleave', ".decoration", (e) =>
+      @hideTooltip()
 
     # buffer events for automatic check
     buffer = @editor.getBuffer()
-    editorElement = atom.views.getView(@editor)
     @disposables.add buffer.onWillSave =>
       @emitter.emit 'will-save-buffer', buffer
       if atom.config.get('ide-haskell.onSavePrettify')
@@ -39,13 +37,13 @@ class EditorControl
     @disposables.add @editor.onDidStopChanging =>
       @emitter.emit 'did-stop-changing', @editor
 
-    @disposables.add @editor.onDidChangeScrollLeft =>
+    @disposables.add editorElement.onDidChangeScrollLeft =>
       @hideTooltip eventType: 'mouse'
-    @disposables.add @editor.onDidChangeScrollTop =>
+    @disposables.add editorElement.onDidChangeScrollTop =>
       @hideTooltip eventType: 'mouse'
 
     # show expression type if mouse stopped somewhere
-    @disposables.add @editorElement, 'mousemove', '.scroll-view', (e) =>
+    @disposables.add editorElement.rootElement, 'mousemove', '.scroll-view', (e) =>
       bufferPt = bufferPositionFromMouseEvent @editor, e
 
       return if @lastMouseBufferPt?.isEqual(bufferPt)
@@ -54,7 +52,7 @@ class EditorControl
       @clearExprTypeTimeout()
       @exprTypeTimeout = setTimeout (=> @shouldShowTooltip bufferPt),
         atom.config.get('ide-haskell.expressionTypeInterval')
-    @disposables.add @editorElement, 'mouseout', '.scroll-view', (e) =>
+    @disposables.add editorElement.rootElement, 'mouseout', '.scroll-view', (e) =>
       @clearExprTypeTimeout()
 
     @disposables.add @editor.onDidChangeCursorPosition ({newBufferPosition}) =>
@@ -72,7 +70,6 @@ class EditorControl
     @hideTooltip()
     @disposables.dispose()
     @disposables = null
-    @editorElement = null
     @editor = null
     @lastMouseBufferPt = null
 
