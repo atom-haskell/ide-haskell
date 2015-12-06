@@ -1,3 +1,6 @@
+## 1.3.6
+* Fix tooltip fail reporting
+
 ## 1.3.5
 * Cleanup & Fix deprecation warnings
 
