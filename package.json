@@ -1,7 +1,7 @@
 {
   "name": "ide-haskell",
   "main": "./lib/ide-haskell",
-  "version": "1.3.5",
+  "version": "1.3.6",
   "description": "Haskell IDE",
   "keywords": [
     "ide-haskell",
