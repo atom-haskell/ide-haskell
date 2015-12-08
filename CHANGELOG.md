@@ -1,3 +1,6 @@
+## 1.3.7
+* Might be no controller on close-tooplip
+
 ## 1.3.6
 * Fix tooltip fail reporting
 
