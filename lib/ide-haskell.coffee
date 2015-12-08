@@ -154,7 +154,7 @@ module.exports = IdeHaskell =
         'ide-haskell:prettify-file': ({target}) ->
           prettifyFile target.getModel()
         'ide-haskell:close-tooltip': ({target, abortKeyBinding}) =>
-          if @pluginManager.controller(target.getModel()).hasTooltips()
+          if @pluginManager.controller(target.getModel())?.hasTooltips?()
             @pluginManager.controller(target.getModel()).hideTooltip()
           else
             abortKeyBinding?()
