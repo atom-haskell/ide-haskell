@@ -156,10 +156,11 @@ Changelog is available [here][CHANGELOG].
 Copyright © 2015 Alexander Chaika, Nikolay Yakimov
 
 Contributors:
-* Daniel Beskin
 * John Quigley
-* Luka Horvat
 * Ondřej Janošík
+* Luka Horvat
+* Daniel Beskin
+* Daniel Gröber
 
 See the [LICENSE.md][LICENSE] for details.
 
