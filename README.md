@@ -141,10 +141,11 @@ More information is available in [lib/upi.coffee][upi] source file
 - [x] Get type at point
 - [x] Autocompletion
 - [x] Code beautify
-- [x] Cabal project management
-- [ ] Jump to definition
+- [x] Cabal project management (with ide-haskell-cabal)
+- [x] Jump to definition (since haskell-ghc-mod 1.3.0)
+- [x] Interactive REPL (alpha, with ide-haskell-repl)
+- [ ] Stack project management
 - [ ] Who calls and vice versa
-- [ ] Interactive REPL
 - [ ] Documentation support
 
 ## Changelog
