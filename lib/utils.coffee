@@ -4,7 +4,7 @@ module.exports = Utils =
   MainMenuLabel: 'Haskell IDE'
 
   getEventType: (detail) ->
-    if detail?.contextCommand?
+    if detail?.contextCommand? or detail?[0]?.contextCommand?
       'context'
     else
       'keyboard'
