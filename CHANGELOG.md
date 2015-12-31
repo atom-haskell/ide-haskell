@@ -1,3 +1,7 @@
+## 1.3.8
+* Fix getEventType for Atom 1.3.x
+* update contributors
+
 ## 1.3.7
 * Might be no controller on close-tooplip
 
