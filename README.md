@@ -13,7 +13,7 @@ IDE-Haskell works only with Haskell projects. When you open a Haskell source fil
 #### Errors, warnings and linter
 
 After saving the current file the check and linter processes will be executed.
-After processes are finished the results can be seen in output panel. You can
+After processes are finished, the results can be seen in output panel. You can
 see different kind of results by switching `Errors`, `Warnings` and `Lints` tab
 buttons. If you click on message's file name in output panel, Atom will open
 this file and put cursor near problem that triggered output message.
@@ -96,7 +96,7 @@ Package is fully configurable via **Edit → Preferences → Packages → ide-ha
 You will likely need to specify full paths to `stylish-haskell`, if it is not in
 your `PATH`, at the very least.
 
-You might also want look into configuring haskell-ghc-mod ([haskell-ghc-mod README](https://github.com/atom-haskell/haskell-ghc-mod#haskell-ghc-mod-atom-package)) and ide-haskell-cabal ([ide-haskell-cabal README](https://github.com/atom-haskell/ide-haskell-cabal#ide-haskell-cabal-package))
+You might also want to look into configuring haskell-ghc-mod ([haskell-ghc-mod README](https://github.com/atom-haskell/haskell-ghc-mod#haskell-ghc-mod-atom-package)) and ide-haskell-cabal ([ide-haskell-cabal README](https://github.com/atom-haskell/ide-haskell-cabal#ide-haskell-cabal-package))
 
 ***NOTE***: Since version 1.0.0, some configuration options have been moved to
 backends, in particular, haskell-ghc-mod. Migration should be automatic, but
