@@ -1,3 +1,8 @@
+## 1.3.9
+* Add ide-haskell class to atom-workspace
+* Grammar
+* Update TODO
+
 ## 1.3.8
 * Fix getEventType for Atom 1.3.x
 * update contributors
