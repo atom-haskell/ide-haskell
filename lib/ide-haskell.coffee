@@ -128,6 +128,8 @@ module.exports = IdeHaskell =
   activate: (state) ->
     @cleanConfig()
 
+    atom.views.getView(atom.workspace).classList.add 'ide-haskell'
+
     @upiProvided = false
 
     if atom.config.get 'ide-haskell.startupMessageIdeBackend'
