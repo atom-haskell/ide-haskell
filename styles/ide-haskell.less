@@ -340,16 +340,35 @@ atom-text-editor::shadow {
 }
 
 ide-haskell-tooltip {
+  &::before {
+    background:
+      linear-gradient(-45deg, @overlay-border-color 50%, transparent 0) bottom left,
+      linear-gradient(45deg, @overlay-border-color 50%, transparent 0) top right;
+    position: absolute;
+    top: -0.5ch;
+    left: 0;
+    width: 1ch;
+    height: 0.5ch;
+    background-size: 50% 100%;
+    background-repeat: no-repeat;
+    margin: 0;
+    padding: 0;
+    content: "";
+  }
   div {
-    white-space: pre-wrap;
     text-align: left;
-    color: @text-color-info;
+    // color: @text-color-info;
+    font-size: 85%;
+    display: block;
+    white-space: pre-wrap;
+    background: none !important;
+    word-break: break-all;
   }
   display: block;
   background: @overlay-background-color;
   border: solid 2px @overlay-border-color;
   padding: 5px;
-  border-radius: 3px;
+  border-radius: 0 0.5em;
 }
 
 // A hack to catch mouse events only on .scroll-view
