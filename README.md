@@ -100,9 +100,13 @@ Binary dependencies:
   [`hlint`](https://github.com/ndmitchell/hlint) - Required by `haskell-ghc-mod`
   if you choose to install that plugin
 
-The most reliable way to build all of these executable binaries is to use
-`stack install`.  Run the following commands from a command line terminal after
-you finish installing the minimal Haskell toolchain:
+The most reliable way to build these executable binaries is to use
+`stack install`.  Note that `ide-haskell` currently only supports `cabal` and
+does not yet support `stack`-based Haskell projects; for now we are only using
+`stack` to build the executables that `ide-haskell` depends on.
+
+Run the following commands from a command line terminal after you finish
+installing the minimal Haskell toolchain:
 
 ```bash
 $ stack install stylish-haskell
