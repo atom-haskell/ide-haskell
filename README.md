@@ -4,6 +4,10 @@ Welcome to IDE-Haskell plugin for amazing [Atom](http://atom.io) editor! This
 plugin is intended to help you with development in
 [Haskell](http://haskell.org).
 
+**NOTE:** You must install all this plugin's dependencies in addition to
+installing this plugin.  Jump to the [Requirements section](#requirements) below
+and follow all setup instructions.
+
 ## Implemented features
 
 #### Haskell project autodetection
@@ -68,15 +72,79 @@ clean and test your project from ide-haskell.
 
 ## Requirements
 
-Atom packages:
-* [haskell-ghc-mod](https://atom.io/packages/haskell-ghc-mod)
-* [ide-haskell-cabal](https://atom.io/packages/ide-haskell-cabal)
-* [language-haskell](https://atom.io/packages/language-haskell)
-* [autocomplete-haskell](https://atom.io/packages/autocomplete-haskell) (optional, recommended)
+The `ide-haskell` plugin assumes that you have a minimal Haskell toolchain
+installed on your system.  You can install this toolchain by following the
+instructions here:
 
-Binaries:
-* [stylish-haskell](https://github.com/jaspervdj/stylish-haskell)
+* [Minimal Haskell installers](https://www.haskell.org/downloads#minimal)
 
+Atom plugin dependencies:
+
+Only the `language-haskell` plugin is strictly required, but you will probably
+also want to install one of these other plugins as well:
+
+* [`language-haskell`](https://atom.io/packages/language-haskell) - **ABSOLUTELY
+  REQUIRED!**
+* [`ide-haskell-cabal`](https://atom.io/packages/ide-haskell-cabal) - Use this
+  plugin to build and launch Haskell projects
+* [`haskell-ghc-mod`](https://atom.io/packages/haskell-ghc-mod) - Use this plugin
+  to type-check your code on save and add type highlights on mouseover
+* [`autocomplete-haskell`](https://atom.io/packages/autocomplete-haskell) - Use
+  this plugin to autocomplete code.  This plugin depends on `haskell-ghc-mod`
+
+Binary dependencies:
+
+* [`stylish-haskell`](https://github.com/jaspervdj/stylish-haskell) - Required by
+  `ide-haskell` plugin
+* [`ghc-mod` / `ghc-modi`](https://github.com/kazu-yamamoto/ghc-mod) and
+  [`hlint`](https://github.com/ndmitchell/hlint) - Required by `haskell-ghc-mod`
+  if you choose to install that plugin
+
+The most reliable way to build these executable binaries is to use
+`stack install`.  Note that `ide-haskell` currently only supports `cabal` and
+does not yet support `stack`-based Haskell projects; for now we are only using
+`stack` to build the executables that `ide-haskell` depends on.
+
+Run the following commands from a command line terminal after you finish
+installing the minimal Haskell toolchain:
+
+```bash
+$ stack install stylish-haskell
+...
+Copied executables to {STACK_INSTALL_PATH}:
+- stylish-haskell
+$ stack install ghc-mod
+...
+Copied executables to {STACK_INSTALL_PATH}:
+- ghc-mod
+- ghc-modi
+$ stack install hlint
+...
+Copied executables to {STACK_INSTALL_PATH}:
+- hlint
+```
+
+... where `STACK_INSTALL_PATH` depends on your operating system.  For example,
+on OS X or Linux this path will usually be `~/.local/bin/`.
+
+First, make sure that `STACK_INSTALL_PATH` is on your executable search path
+(i.e. `$PATH` for OS X and Linux).  However, this alone might not be enough for
+Atom to find your installed executables since Atom in
+[some cases](https://github.com/atom-community/linter/issues/150) Atom does not
+correctly pick up the search path upon launch.
+
+If Atom fails to find a required executable (such as `stylish-haskell`) you will
+get an error that reads something like this:
+
+> Ide-haskell could not spawn stylish-haskell
+>
+> Error: spawn stylish-haskell ENOENT
+
+If this happens, you will need to modify this package's settings to point to the
+absolute path to where you installed `stylish-haskell` executable.  For example,
+if your `STACK_INSTALL_PATH` were `/home/johndoe/.local/bin/` then the
+absolute path to the executable would be
+`/home/johndoe/.local/bin/stylish-haskell`.
 
 ## Known conflicts
 
