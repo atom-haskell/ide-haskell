@@ -1,3 +1,7 @@
+## 1.4.2
+* Vertical spacing for multi-message tooltips
+* Support array TooltipMessage
+
 ## 1.4.1
 * Fix some bugs in MessageObject
 
