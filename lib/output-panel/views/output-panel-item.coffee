@@ -1,4 +1,5 @@
 SubAtom = require 'sub-atom'
+MessageObject = require '../../message-object.coffee'
 
 class OutputPanelItemView extends HTMLElement
   setModel: (@model) ->
@@ -7,7 +8,7 @@ class OutputPanelItemView extends HTMLElement
       @appendChild @position = document.createElement 'ide-haskell-item-position'
       @position.innerText = "#{@model.uri}: #{@model.position.row + 1}, #{@model.position.column + 1}"
     @appendChild @description = document.createElement 'ide-haskell-item-description'
-    @description.innerText = @model.message
+    MessageObject.fromObject(@model.message).paste(@description)
     @
 
   attachedCallback: ->

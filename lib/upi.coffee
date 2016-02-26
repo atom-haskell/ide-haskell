@@ -46,7 +46,7 @@ class UPIInstance
   messages: Array of Object
     uri: String, File URI message relates to
     position: Point, or Point-like Object, position to which message relates
-    message: String, message
+    message: String or {<text | html>, highlighter?}, message
     severity: String, one of 'error', 'warning', 'lint', 'build',
               or user-defined, see `setMessageTypes`
   types: Array of String, containing possible message `severity`. If undefined,
@@ -123,7 +123,7 @@ class UPIInstance
   eventType: one of 'context', 'keyboard' and 'mouse'
   detail: for automatic selection between 'context' and 'keyboard'.
           Ignored if 'eventType' is set.
-  tooltip: String, tooltip text
+  tooltip: String or {<text | html>, highlighter?}, tooltip text
   ###
   showTooltip: ({editor, pos, eventType, detail, tooltip}) ->
     controller = @pluginManager.controller(editor)
