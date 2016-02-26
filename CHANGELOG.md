@@ -1,3 +1,6 @@
+## 1.4.1
+* Fix some bugs in MessageObject
+
 ## 1.4.0
 * Add more detail to setup instructions (pull request #140 from @Gabriel439)
 * Pretty tooltips
