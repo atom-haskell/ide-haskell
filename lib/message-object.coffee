@@ -20,11 +20,16 @@ class MessageObject
 
   toHtml: ->
     if @highlighter? and @text?
-      g = atom.grammars.grammarForScopeName highlighter
-      ls = g.tokenizeLines text
+      g = atom.grammars.grammarForScopeName @highlighter
+      if not g?
+        @highlighter = null
+        return @toHtml()
+      ls = g.tokenizeLines @text
       tls = for l in ls
         tl = for t in l
-          "<span class='#{t.scopes.join(' ').replace(/\./g, ' ')}'>#{t.value}</span>"
+          ins = for s in t.scopes
+            "<span class='#{s.replace(/\./g, ' ')}'>"
+          "#{ins.join('')}#{t.value}#{"</span>".repeat(ins.length)}"
         tl.join('')
       return tls.join('\n')
     else if @html?
