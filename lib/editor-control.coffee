@@ -194,8 +194,9 @@ class EditorControl
       @hideTooltip subtype: 'check-result'
       return false
 
-    text = (markers.map (marker) ->
-      marker.getProperties().desc).join('\n\n')
+    text =
+      markers.map (marker) ->
+        marker.getProperties().desc
 
     if gutter
       @showTooltip pos, new Range(pos, pos), text, {eventType, subtype: 'check-result'}

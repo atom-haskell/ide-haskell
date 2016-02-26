@@ -6,11 +6,15 @@ class TooltipMessage
 
 class TooltipView extends HTMLElement
   setMessage: (message) ->
-    MessageObject.fromObject(message).paste(@inner)
+    @innerHtml = ''
+    if message instanceof Array
+      for m in message
+        @appendChild inner = document.createElement 'div'
+        MessageObject.fromObject(m).paste(inner)
+    else
+      @appendChild inner = document.createElement 'div'
+      MessageObject.fromObject(message).paste(inner)
     @
-
-  createdCallback: ->
-    @appendChild @inner = document.createElement 'div'
 
   attachedCallback: ->
     @parentElement.classList.add 'ide-haskell'
