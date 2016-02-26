@@ -1,3 +1,7 @@
+## 1.4.0
+* Add more detail to setup instructions (pull request #140 from @Gabriel439)
+* Pretty tooltips
+
 ## 1.3.9
 * Add ide-haskell class to atom-workspace
 * Grammar
