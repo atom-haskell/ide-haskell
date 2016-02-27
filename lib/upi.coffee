@@ -113,7 +113,12 @@ class UPIInstance
         editor: editor
         pos: pos
         eventType: eventType
-        tooltip: (crange) -> callback editor, crange, eventType
+        tooltip: (crange) ->
+          res = callback editor, crange, eventType
+          if res?
+            Promise.resolve res
+          else
+            Promise.reject ignore: true
     disp
 
   ###
