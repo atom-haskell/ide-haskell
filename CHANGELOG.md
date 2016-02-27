@@ -19,7 +19,7 @@
 * update contributors
 
 ## 1.3.7
-* Might be no controller on close-tooplip
+* Might be no controller on close-tooltip
 
 ## 1.3.6
 * Fix tooltip fail reporting
