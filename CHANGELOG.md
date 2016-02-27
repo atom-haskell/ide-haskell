@@ -1,3 +1,6 @@
+## 1.5.1
+* onShouldShowTooltip callback can return undef/val
+
 ## 1.5.0
 * Update CHANGELOG
 * Show tooltip on selection range
