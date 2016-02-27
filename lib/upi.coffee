@@ -105,6 +105,13 @@ class UPIInstance
     crange: Range, cursor range that generated event.
     type: One of 'mouse', 'selection' -- type of event that triggered this
 
+    Returns {range, text} or Promise.
+      range: Range, tooltip highlighting range
+      text: tooltip text. String or {text, highlighter} or {html}
+        text: tooltip text
+        highlighter: grammar scope that will be used to highlight tooltip text
+        html: html to be displayed in tooltip
+
   returns Disposable
   ###
   onShouldShowTooltip: (callback) ->
@@ -129,7 +136,15 @@ class UPIInstance
   eventType: one of 'context', 'keyboard' and 'mouse'
   detail: for automatic selection between 'context' and 'keyboard'.
           Ignored if 'eventType' is set.
-  tooltip: String or {<text | html>, highlighter?}, tooltip text
+  tooltip: function(crange)
+    crange: Range, currently selected range in editor (possibly empty)
+
+    Returns {range, text} or Promise
+      range: Range, tooltip highlighting range
+      text: tooltip text. String or {text, highlighter} or {html}
+        text: tooltip text
+        highlighter: grammar scope that will be used to highlight tooltip text
+        html: html to be displayed in tooltip
   ###
   showTooltip: ({editor, pos, eventType, detail, tooltip}) ->
     controller = @pluginManager.controller(editor)
