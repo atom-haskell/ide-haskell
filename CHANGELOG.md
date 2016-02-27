@@ -1,3 +1,7 @@
+## 1.5.0
+* Show tooltip on selection range
+* Do away with ::shadow selector
+
 ## 1.4.2
 * Vertical spacing for multi-message tooltips
 * Support array TooltipMessage
