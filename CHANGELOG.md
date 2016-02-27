@@ -1,6 +1,8 @@
 ## 1.5.0
+* Update CHANGELOG
 * Show tooltip on selection range
 * Do away with ::shadow selector
+* Typo (pull request #144 from @ggreif)
 
 ## 1.4.2
 * Vertical spacing for multi-message tooltips
