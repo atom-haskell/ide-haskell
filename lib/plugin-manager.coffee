@@ -69,8 +69,8 @@ class PluginManager
       @controllers.set editor, controller = new EditorControl(editor)
       controller.disposables.add editor.onDidDestroy =>
         @removeController editor
-      controller.disposables.add controller.onShouldShowTooltip ({editor, pos}) =>
-        @emitter.emit 'should-show-tooltip', {editor, pos, eventType: 'mouse'}
+      controller.disposables.add controller.onShouldShowTooltip ({editor, pos, eventType}) =>
+        @emitter.emit 'should-show-tooltip', {editor, pos, eventType}
       controller.disposables.add controller.onWillSaveBuffer (buffer) =>
         @emitter.emit 'will-save-buffer', buffer
       controller.disposables.add controller.onDidSaveBuffer (buffer) =>

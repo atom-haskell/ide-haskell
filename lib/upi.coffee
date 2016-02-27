@@ -100,9 +100,10 @@ class UPIInstance
   Editor event subscription. Fires when mouse cursor stopped over a symbol in
   editor.
 
-  callback: callback(editor, crange)
+  callback: callback(editor, crange, type)
     editor: TextEditor, editor that generated event
     crange: Range, cursor range that generated event.
+    type: One of 'mouse', 'selection' -- type of event that triggered this
 
   returns Disposable
   ###
@@ -112,7 +113,7 @@ class UPIInstance
         editor: editor
         pos: pos
         eventType: eventType
-        tooltip: (crange) -> callback editor, crange
+        tooltip: (crange) -> callback editor, crange, eventType
     disp
 
   ###
@@ -127,7 +128,7 @@ class UPIInstance
   ###
   showTooltip: ({editor, pos, eventType, detail, tooltip}) ->
     controller = @pluginManager.controller(editor)
-    @withEventRange {controller, pos, detail, eventType}, ({crange, pos}) =>
+    @withEventRange {controller, pos, detail, eventType}, ({crange, pos, eventType}) =>
       tooltip(crange).then ({range, text}) ->
         controller.showTooltip pos, range, text, {eventType, subtype: 'external'}
       .catch (status = {status: 'warning'}) =>
