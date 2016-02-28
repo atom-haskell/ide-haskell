@@ -83,9 +83,11 @@ class EditorControl
   updateResults: (res, types) =>
     if types?
       for t in types
-        m.destroy() for m in @editor.findMarkers {type: 'check-result', severity: t}
+        for m in @editor.findMarkers {type: 'check-result', severity: t, editor: @editor.id}
+          m.destroy()
     else
-      m.destroy() for m in @editor.findMarkers {type: 'check-result'}
+      for m in @editor.findMarkers {type: 'check-result', editor: @editor.id}
+        m.destroy()
     @markerFromCheckResult(r) for r in res
 
   markerFromCheckResult: ({uri, severity, message, position}) ->
@@ -97,6 +99,7 @@ class EditorControl
       type: 'check-result'
       severity: severity
       desc: message
+      editor: @editor.id
 
     @decorateMarker(marker)
 
@@ -182,13 +185,16 @@ class EditorControl
 
   findCheckResultMarkers: (pos, gutter, eventType) ->
     if gutter
-      @editor.findMarkers {type: 'check-result', startBufferRow: pos.row}
+      @editor.findMarkers {type: 'check-result', startBufferRow: pos.row, editor: @editor.id}
     else
       switch eventType
         when 'keyboard'
-          @editor.findMarkers {type: 'check-result', containsRange: Range.fromPointWithDelta pos, 0, 1}
+          @editor.findMarkers
+            type: 'check-result'
+            editor: @editor.id
+            containsRange: Range.fromPointWithDelta pos, 0, 1
         when 'mouse'
-          @editor.findMarkers {type: 'check-result', containsPoint: pos}
+          @editor.findMarkers {type: 'check-result', editor: @editor.id, containsPoint: pos}
         else
           []
 
