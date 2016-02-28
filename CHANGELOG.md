@@ -1,3 +1,7 @@
+## 1.5.2
+* Bind check result markers to editor id
+* Update UPI docs
+
 ## 1.5.1
 * onShouldShowTooltip callback can return undef/val
 
