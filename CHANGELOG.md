@@ -1,3 +1,6 @@
+## 1.5.3
+* Clean panel font styles
+
 ## 1.5.2
 * Bind check result markers to editor id
 * Update UPI docs
