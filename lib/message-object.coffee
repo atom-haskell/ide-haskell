@@ -27,9 +27,15 @@ class MessageObject
       ls = g.tokenizeLines @text
       tls = for l in ls
         tl = for t in l
-          ins = for s in t.scopes
-            "<span class='#{s.replace(/\./g, ' ')}'>"
-          "#{ins.join('')}#{t.value}#{"</span>".repeat(ins.length)}"
+          span = start = document.createElement 'span'
+          clss = []
+          for s in t.scopes
+            span.appendChild span = document.createElement 'span'
+            cls = s.split('.').filter (i) -> clss.indexOf(i) < 0
+            clss.push cls...
+            span.classList.add cls...
+          span.innerText = t.value
+          start.innerHTML
         tl.join('')
       return tls.join('\n')
     else if @html?
