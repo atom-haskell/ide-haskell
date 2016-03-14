@@ -1,3 +1,6 @@
+## 1.5.4
+* Fix html entities in messages
+
 ## 1.5.3
 * Clean panel font styles
 
