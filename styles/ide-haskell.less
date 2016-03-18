@@ -274,13 +274,14 @@ ide-haskell-panel {
 
 ide-haskell-tooltip {
   &::before {
-    background:
-      linear-gradient(-45deg, @overlay-border-color 50%, transparent 0) bottom left,
-      linear-gradient(45deg, @overlay-border-color 50%, transparent 0) top right;
+  	border-width: 0 0.5ch 0.5ch;
+  	border-style: solid;
+  	border-color: @overlay-border-color transparent;
+    display: block;
+    width:0;
     position: absolute;
     top: -0.5ch;
     left: 0;
-    width: 1ch;
     height: 0.5ch;
     background-size: 50% 100%;
     background-repeat: no-repeat;
