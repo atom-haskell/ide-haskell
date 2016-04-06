@@ -28,11 +28,9 @@ class MessageObject
       tls = for l in ls
         tl = for t in l
           span = start = document.createElement 'span'
-          clss = []
           for s in t.scopes
             span.appendChild span = document.createElement 'span'
-            cls = s.split('.').filter (i) -> clss.indexOf(i) < 0
-            clss.push cls...
+            cls = s.split('.')
             span.classList.add cls...
           span.innerText = t.value
           start.innerHTML
