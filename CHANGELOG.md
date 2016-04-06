@@ -1,4 +1,4 @@
-## 1.5.5
+## 1.6.0
 * Fix MessageObject toHtml tokenization
 * Move build target select list style to ide-haskell-cabal
 * Move ide-haskell-target style to ide-haskell-cabal
