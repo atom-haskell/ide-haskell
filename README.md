@@ -100,6 +100,8 @@ Binary dependencies:
   [`hlint`](https://github.com/ndmitchell/hlint) - Required by `haskell-ghc-mod`
   if you choose to install that plugin
 
+### Installing binary dependencies with stack
+
 The most reliable way to build these executable binaries is to use
 `stack install`.  Note that `ide-haskell` currently only supports `cabal` and
 does not yet support `stack`-based Haskell projects; for now we are only using
@@ -145,6 +147,58 @@ absolute path to where you installed `stylish-haskell` executable.  For example,
 if your `STACK_INSTALL_PATH` were `/home/johndoe/.local/bin/` then the
 absolute path to the executable would be
 `/home/johndoe/.local/bin/stylish-haskell`.
+
+### Installing binary dependencies with cabal
+
+***NOTE:*** You do not need to do this if you already installed with stack.
+
+Alternatively, you can use cabal-install if you don't want to use stack for some reason.
+
+It is advisable to first create a cabal sandbox for the installation to avoid global package database pollution and conflicts. This will also make updating easy.
+
+To create a sandbox, create a directory, f.ex.
+
+```bash
+mkdir $HOME/ghc-mod-sandbox
+```
+
+***NOTE:*** Windows command line shell uses different syntax for environment variables, and there is usually no `HOME` defined anyway. I sincerely hope you can figure this out.
+
+Then, `cd` into int:
+
+```bash
+cd $HOME/ghc-mod-sandbox
+```
+
+And run the following command
+
+```bash
+cabal sandbox init --sandbox=.
+```
+
+The last `--sandbox=.` part is to simplify paths.
+
+Now you can install ghc-mod and stylish-haskell. *In the same directory* run
+
+```bash
+cabal install ghc-mod stylish-haskell
+```
+*Note:* hlint will be pulled in as ghc-mod dependency.
+
+Now you have ghc-mod and stylish-haskell installed. Binary files are in `$HOME/ghc-mod-sandbox/bin`. You can add this path to PATH, or put full path to **executables** in relevant ide-haskell and haskell-ghc-mod settings.
+
+**Don't forget to replace `$HOME` with actual path to home directory** for the latter option. On Linux, you can run
+
+```bash
+echo $HOME/ghc-mod-sandbox/bin/*
+```
+
+in the terminal to get actual paths to all executables, if not sure what those should look like. ***NOTE:*** Bear in mind this trick probably won't work on Windows.
+
+For example, assuming your `HOME` is `/home/user`:
+
+* In ide-haskell settings, set 'Stylish Haskell Path' to `/home/user/ghc-mod-sandbox/bin/stylish-haskell`
+* In haskell-ghc-mod settings, set 'Ghc Mod Path' to `/home/user/ghc-mod-sandbox/bin/ghc-mod`
 
 ## Known conflicts
 
