@@ -1,3 +1,8 @@
+## 1.6.1
+* Shut up deprecation cop
+* [README] Installing with cabal
+* Fix changelog
+
 ## 1.6.0
 * Fix MessageObject toHtml tokenization
 * Move build target select list style to ide-haskell-cabal
