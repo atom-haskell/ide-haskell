@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "temp": "^0.8.1",
-    "sub-atom": "^1.0.0"
+    "sub-atom": "^1.0.0",
+    "atom-haskell-utils": "^0.7.3"
   }
 }

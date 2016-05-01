@@ -1,3 +1,4 @@
+{getRootDir} = require 'atom-haskell-utils'
 utilStylishHaskell = require './util-stylish-haskell'
 utilCabalFormat = require './util-cabal-format'
 
@@ -9,12 +10,7 @@ module.exports = Prettify =
       when 'haskell' then utilStylishHaskell
       when 'cabal' then utilCabalFormat
       else throw new Error "Unknown format #{format}"
-    try
-      workDir = dirname(editor.getPath())
-      if not statSync(workDir).isDirectory()
-        workDir = '.'
-    catch
-      workDir = '.'
+    workDir = getRootDir(editor.getBuffer()).getPath()
     util.prettify editor.getText(), workDir,
       onComplete: (text) ->
         editor.setText(text)
