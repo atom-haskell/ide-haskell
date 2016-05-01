@@ -1,3 +1,6 @@
+## 1.6.2
+* Use general algo to get root dir for prettify
+
 ## 1.6.1
 * Shut up deprecation cop
 * [README] Installing with cabal
