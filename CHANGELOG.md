@@ -1,3 +1,6 @@
+## 1.6.3
+* Handle non-zero exit code in prettify
+
 ## 1.6.2
 * Use general algo to get root dir for prettify
 
