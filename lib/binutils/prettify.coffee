@@ -20,3 +20,5 @@ module.exports = Prettify =
           cursors.forEach (cursor) ->
             editor.addCursorAtBufferPosition cursor,
               autoscroll: false
+      onFailure: ({message, detail}) ->
+        atom.notifications.addError message, {detail}

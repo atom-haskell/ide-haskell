@@ -25,22 +25,30 @@ prettify = (text, workingDirectory, {onComplete, onFailure}) ->
       args: ['format', path]
       options:
         cwd: workingDirectory
-      exit: ->
-        FS.readFile path, encoding: 'utf-8', (error, text) ->
-          if error?
-            atom.notifications.addError "Ide-haskell could not read #{path}",
-              detail: "#{error}"
-            console.error error
-            onFailure?()
-          else
-            onComplete?(text)
+      exit: (code) ->
+        if code is 0
+          FS.readFile path, encoding: 'utf-8', (error, text) ->
+            if error?
+              console.error error
+              onFailure? {
+                message: "Ide-haskell could not read #{path}"
+                detail: "#{error}"
+              }
+            else
+              onComplete?(text)
+        else
+          onFailure? {
+            message: "Failed to prettify"
+            detail: "cabal format ended with non-zero exit code #{code}"
+          }
 
     proc.onWillThrowError ({error, handle}) ->
-      atom.notifications.addError "Ide-haskell could not spawn #{shpath}",
-        detail: "#{error}"
       console.error error
       close()
-      onFailure?()
+      onFailure? {
+        message: "Ide-haskell could not spawn #{shpath}",
+        detail: "#{error}"
+      }
       handle()
 
 module.exports = {

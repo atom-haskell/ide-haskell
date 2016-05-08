@@ -16,13 +16,18 @@ prettify = (text, workingDirectory, {onComplete, onFailure}) ->
       cwd: workingDirectory
     stdout: (line) ->
       lines.push(line)
-    exit: -> onComplete?(lines.join(''))
+    exit: (code) ->
+      if code is 0
+        onComplete?(lines.join(''))
+      else
+        onFailure? {
+          message: "Failed to prettify"
+          detail: "Stylish-haskell exited with non-zero exit status #{code}"
+        }
 
   proc.onWillThrowError ({error, handle}) ->
-    atom.notifications.addError "Ide-haskell could not spawn #{shpath}",
-      detail: "#{error}"
     console.error error
-    onFailure?()
+    onFailure? {message: "Ide-haskell could not spawn #{shpath}", detail: "#{error}"}
     handle()
 
   proc.process.stdin.write(text)
