@@ -1,3 +1,6 @@
+## 1.6.5
+* Use typeof instead instanceof where possible
+
 ## 1.6.4
 * AHS bump
 * AHS bump
