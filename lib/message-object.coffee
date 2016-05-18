@@ -6,7 +6,7 @@ class MessageObject
     if typeof(message) is 'string'
       return new MessageObject
         text: message
-    else if message instanceof Object
+    else if typeof(message) is 'object'
       @validate(message)
       return new MessageObject(message)
 
