@@ -68,7 +68,7 @@ definitions. Simply select `Prettify` from Haskel IDE menu to apply
 #### Build and test project
 
 If you have `ide-haskell-cabal` or similar package installed, you can build,
-clean and test your project from ide-haskell.
+clean and test your project from ide-haskell (stack and cabal supported)
 
 ## Requirements
 
@@ -103,9 +103,7 @@ Binary dependencies:
 ### Installing binary dependencies with stack
 
 The most reliable way to build these executable binaries is to use
-`stack install`.  Note that `ide-haskell` currently only supports `cabal` and
-does not yet support `stack`-based Haskell projects; for now we are only using
-`stack` to build the executables that `ide-haskell` depends on.
+`stack install`.
 
 Run the following commands from a command line terminal after you finish
 installing the minimal Haskell toolchain:
@@ -264,9 +262,9 @@ More information is available in [lib/upi.coffee][upi] source file
 - [x] Autocompletion
 - [x] Code beautify
 - [x] Cabal project management (with ide-haskell-cabal)
-- [x] Jump to definition (since haskell-ghc-mod 1.3.0)
+- [x] Jump to definition (since haskell-ghc-mod 1.3.0, or with ide-haskell-hasktags)
 - [x] Interactive REPL (alpha, with ide-haskell-repl)
-- [ ] Stack project management
+- [x] Stack project management (with ide-haskell-cabal)
 - [ ] Who calls and vice versa
 - [ ] Documentation support
 
@@ -282,7 +280,9 @@ Contributors:
 * John Quigley
 * Ondřej Janošík
 * Luka Horvat
+* Gabriel Gonzalez
 * Daniel Beskin
+* Gabor Greif
 * Daniel Gröber
 
 See the [LICENSE.md][LICENSE] for details.
