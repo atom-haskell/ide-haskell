@@ -95,7 +95,8 @@ class EditorControl
 
     # create a new marker
     range = new Range position, {row: position.row, column: position.column + 1}
-    marker = @editor.markBufferRange range,
+    marker = @editor.markBufferRange range
+    marker.setProperties
       type: 'check-result'
       severity: severity
       desc: message
@@ -151,10 +152,11 @@ class EditorControl
     @tooltipHighlightRange = range
     markerPos = range.start
     detail.type = 'tooltip'
-    tooltipMarker = @editor.markBufferPosition markerPos, detail
-    highlightMarker = @editor.markBufferRange range, detail
-    @editor.decorateMarker tooltipMarker,
+    highlightMarker = @editor.markBufferRange range
+    highlightMarker.setProperties detail
+    @editor.decorateMarker highlightMarker,
       type: 'overlay'
+      position: 'tail'
       item: new TooltipMessage text
     @editor.decorateMarker highlightMarker,
       type: 'highlight'
