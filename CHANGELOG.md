@@ -1,3 +1,7 @@
+## 1.6.6
+* Quick-patch tootlips to work on atom-1.9.0-beta2
+* Readme update
+
 ## 1.6.5
 * Use typeof instead instanceof where possible
 
