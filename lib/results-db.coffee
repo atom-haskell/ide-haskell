@@ -21,7 +21,7 @@ class ResultsDB
     if severityArr?
       @results =
         @results.filter(({severity}) -> not (severity in severityArr))
-        .concat(res.map (i) -> new ResultItem(i))
+        .concat(res.map (i) => new ResultItem(@, i))
     else
       @results = res
 
@@ -32,7 +32,7 @@ class ResultsDB
     @emitter.emit 'did-update', {res: @, types: severityArr}
 
   appendResults: (res, severityArr) ->
-    @results = @results.concat res.map (r) -> new ResultItem(r)
+    @results = @results.concat res.map (r) => new ResultItem(@, r)
 
     unless severityArr?
       severityArr = []
@@ -42,6 +42,7 @@ class ResultsDB
 
   removeResult: (resItem) ->
     @results = @results.filter (res) -> res isnt resItem
+    resItem.parent = null
 
   resultsWithURI: ->
     @results.filter ({uri}) -> uri?

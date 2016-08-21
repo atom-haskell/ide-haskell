@@ -73,8 +73,6 @@ class PluginManager
         @emitter.emit 'did-save-buffer', buffer
       controller.disposables.add controller.onDidStopChanging (editor) =>
         @emitter.emit 'did-stop-changing', editor.getBuffer()
-      controller.disposables.add controller.onDidInvalidateResult (resItem) =>
-        @checkResults.removeResult resItem
       controller.updateResults @checkResults.filter uri: editor.getPath()
 
   removeController: (editor) ->

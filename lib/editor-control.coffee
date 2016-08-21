@@ -103,9 +103,9 @@ class EditorControl
       severity: severity
       desc: message
       editor: @editor.id
-    marker.disposables.add marker.onDidChange ({isValid}) =>
+    marker.disposables.add marker.onDidChange ({isValid}) ->
       unless isValid
-        @emitter.emit 'did-invalidate-result', resItem
+        resItem.destroy()
         marker.destroy()
 
     @decorateMarker(marker)
@@ -128,9 +128,6 @@ class EditorControl
 
   onDidStopChanging: (callback) ->
     @emitter.on 'did-stop-changing', callback
-
-  onDidInvalidateResult: (callback) ->
-    @emitter.on 'did-invalidate-result', callback
 
   shouldShowTooltip: (pos, eventType = 'mouse') ->
     return if @showCheckResult pos, false, eventType

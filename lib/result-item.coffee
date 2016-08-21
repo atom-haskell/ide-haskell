@@ -1,3 +1,7 @@
 module.exports =
 class ResultItem
-  constructor: ({@uri, @message, @severity, @position}) ->
+  constructor: (@parent, {@uri, @message, @severity, @position}) ->
+
+  destroy: ->
+    if @parent?
+      @parent.removeResult @
