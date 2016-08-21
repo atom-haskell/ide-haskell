@@ -1,9 +1,8 @@
-{Emitter} = require 'atom'
-SubAtom = require 'sub-atom'
-
 module.exports=
 class OutputPanelButtons extends HTMLElement
   createdCallback: ->
+    {Emitter} = require 'atom'
+    SubAtom = require 'sub-atom'
     @disposables = new SubAtom
     @disposables.add @emitter = new Emitter
     @buttons = {}

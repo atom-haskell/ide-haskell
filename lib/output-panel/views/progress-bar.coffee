@@ -10,8 +10,6 @@ class ProgressBar extends HTMLElement
       @classList.add 'visible'
 
 
-ProgressBarElement =
+module.exports = ProgressBarElement =
   document.registerElement 'ide-haskell-progress-bar',
     prototype: ProgressBar.prototype
-
-module.exports = ProgressBarElement

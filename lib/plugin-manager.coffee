@@ -1,15 +1,10 @@
-OutputPanel = require './output-panel/output-panel'
-{EditorControl} = require './editor-control'
-{TooltipMessage} = require './views/tooltip-view'
-ResultsDB = require './results-db'
-{CompositeDisposable, Emitter} = require 'atom'
-{dirname} = require 'path'
-{statSync} = require 'fs'
-
+module.exports =
 class PluginManager
   constructor: (state) ->
+    ResultsDB = require './results-db'
     @checkResults = new ResultsDB
 
+    {CompositeDisposable, Emitter} = require 'atom'
     @disposables = new CompositeDisposable
     @controllers = new WeakMap
     @disposables.add @emitter = new Emitter
@@ -57,6 +52,7 @@ class PluginManager
 
   # Create and delete output view panel.
   createOutputViewPanel: (state) ->
+    OutputPanel = require './output-panel/output-panel'
     @outputView = new OutputPanel(state.outputView, @checkResults)
 
   deleteOutputViewPanel: ->
@@ -65,6 +61,7 @@ class PluginManager
 
   addController: (editor) ->
     unless @controllers.get(editor)?
+      EditorControl = require './editor-control'
       @controllers.set editor, controller = new EditorControl(editor)
       controller.disposables.add editor.onDidDestroy =>
         @removeController editor
@@ -106,8 +103,3 @@ class PluginManager
 
   prevError: ->
     @outputView?.showPrevError()
-
-
-module.exports = {
-  PluginManager
-}

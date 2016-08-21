@@ -1,5 +1,3 @@
-path = require 'path'
-
 module.exports = Utils =
   MainMenuLabel: 'Haskell IDE'
 

@@ -1,5 +1,6 @@
 MessageObject = require '../message-object.coffee'
 
+module.exports =
 class TooltipMessage
   constructor: (text) ->
     @element = (new TooltipElement).setMessage text
@@ -22,7 +23,3 @@ class TooltipView extends HTMLElement
 TooltipElement =
   document.registerElement 'ide-haskell-tooltip',
     prototype: TooltipView.prototype
-
-module.exports = {
-  TooltipMessage
-}

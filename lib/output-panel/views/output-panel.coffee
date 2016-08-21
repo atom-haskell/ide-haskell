@@ -1,9 +1,3 @@
-OutputPanelButtonsElement = require './output-panel-buttons'
-OutputPanelItemsElement = require './output-panel-items'
-ProgressBar = require './progress-bar'
-SubAtom = require 'sub-atom'
-{Disposable} = require 'atom'
-
 module.exports=
 class OutputPanelView extends HTMLElement
   setModel: (@model) ->
@@ -21,6 +15,7 @@ class OutputPanelView extends HTMLElement
     @
 
   createdCallback: ->
+    SubAtom = require 'sub-atom'
     @disposables = new SubAtom
     @appendChild @resizeHandle = document.createElement 'resize-handle'
     @initResizeHandle()
@@ -29,12 +24,15 @@ class OutputPanelView extends HTMLElement
       id: 'status'
       attrs:
         'data-status': 'ready'
+    OutputPanelButtonsElement = require './output-panel-buttons'
     @disposables.add @addPanelControl new OutputPanelButtonsElement,
       id: 'buttons'
+    ProgressBar = require './progress-bar'
     @disposables.add @addPanelControl new ProgressBar,
       id: 'progressBar'
     @progressBar.setProgress 0
 
+    OutputPanelItemsElement = require './output-panel-items'
     @appendChild @items = new OutputPanelItemsElement
     @disposables.add @buttons.onButtonClicked =>
       @updateItems()
@@ -44,12 +42,14 @@ class OutputPanelView extends HTMLElement
       @updateItems() if @buttons.getFileFilter()
 
   addPanelControl: (element, {events, classes, style, attrs, before, id}) ->
+    {Disposable} = require 'atom'
     if id? and @[id]
       return new Disposable ->
     element = document.createElement element if typeof element is 'string'
     if id?
       element.id = id
       @[id] = element
+    SubAtom = require 'sub-atom'
     disp = new SubAtom
     disp.add new Disposable ->
       if id?

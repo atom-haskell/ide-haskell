@@ -1,14 +1,11 @@
-{BufferedProcess} = require 'atom'
-path = require 'path'
-
-
-# run stylish-haskell backend
+module.exports =
 prettify = (text, workingDirectory, {onComplete, onFailure}) ->
 
   lines = []
 
   shpath = atom.config.get('ide-haskell.stylishHaskellPath')
 
+  {BufferedProcess} = require 'atom'
   proc = new BufferedProcess
     command: shpath
     args: []
@@ -32,7 +29,3 @@ prettify = (text, workingDirectory, {onComplete, onFailure}) ->
 
   proc.process.stdin.write(text)
   proc.process.stdin.end()
-
-module.exports = {
-  prettify
-}

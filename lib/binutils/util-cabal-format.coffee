@@ -1,9 +1,7 @@
-{BufferedProcess} = require 'atom'
-path = require 'path'
-Temp = require 'temp'
 FS = require 'fs'
 
 withTempFile = (contents, callback) ->
+  Temp = require 'temp'
   Temp.open
     prefix:'haskell-ghc-mod',
     suffix:'.hs',
@@ -16,10 +14,12 @@ withTempFile = (contents, callback) ->
         FS.close info.fd, -> FS.unlink info.path
 
 # run cabal format
+module.exports =
 prettify = (text, workingDirectory, {onComplete, onFailure}) ->
   shpath = atom.config.get('ide-haskell.cabalPath')
 
   withTempFile text, (path, close) ->
+    {BufferedProcess} = require 'atom'
     proc = new BufferedProcess
       command: shpath
       args: ['format', path]
@@ -50,7 +50,3 @@ prettify = (text, workingDirectory, {onComplete, onFailure}) ->
         detail: "#{error}"
       }
       handle()
-
-module.exports = {
-  prettify
-}

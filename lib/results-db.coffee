@@ -1,12 +1,13 @@
-{CompositeDisposable, Emitter} = require 'atom'
-ResultItem = require './result-item'
+ResultItem = null
 
 module.exports =
 class ResultsDB
   constructor: ->
     @results = []
+    {CompositeDisposable, Emitter} = require 'atom'
     @disposables = new CompositeDisposable
     @disposables.add @emitter = new Emitter
+    ResultItem = require './result-item'
 
   destroy: ->
     @disposables?.dispose?()
@@ -20,7 +21,7 @@ class ResultsDB
     if severityArr?
       @results =
         @results.filter(({severity}) -> not (severity in severityArr))
-        .concat(res.map (i) -> new ResultItem i)
+        .concat(res.map (i) -> new ResultItem(i))
     else
       @results = res
 
@@ -31,7 +32,7 @@ class ResultsDB
     @emitter.emit 'did-update', {res: @, types: severityArr}
 
   appendResults: (res, severityArr) ->
-    @results = @results.concat res.map (r) -> new ResultItem r
+    @results = @results.concat res.map (r) -> new ResultItem(r)
 
     unless severityArr?
       severityArr = []

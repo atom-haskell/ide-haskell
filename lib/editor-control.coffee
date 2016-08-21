@@ -1,12 +1,11 @@
-SubAtom = require 'sub-atom'
+Range = null
 
-{bufferPositionFromMouseEvent} = require './utils'
-{TooltipMessage} = require './views/tooltip-view'
-{Range, Disposable, Emitter} = require 'atom'
-
+module.exports =
 class EditorControl
   constructor: (@editor) ->
+    SubAtom = require 'sub-atom'
     @disposables = new SubAtom
+    {Range, Emitter} = require 'atom'
     @disposables.add @emitter = new Emitter
 
     editorElement = atom.views.getView(@editor)
@@ -15,6 +14,8 @@ class EditorControl
     @gutter ?= @editor.addGutter
       name: "ide-haskell-check-results"
       priority: 10
+
+    {bufferPositionFromMouseEvent} = require './utils'
 
     gutterElement = atom.views.getView(@gutter)
     @disposables.add gutterElement, 'mouseenter', ".decoration", (e) =>
@@ -162,6 +163,7 @@ class EditorControl
     detail.type = 'tooltip'
     highlightMarker = @editor.markBufferRange range
     highlightMarker.setProperties detail
+    TooltipMessage = require './views/tooltip-view'
     @editor.decorateMarker highlightMarker,
       type: 'overlay'
       position: 'tail'
@@ -231,7 +233,3 @@ class EditorControl
   hasTooltips: (template = {}) ->
     template.type = 'tooltip'
     !!@editor.findMarkers(template).length
-
-module.exports = {
-  EditorControl
-}

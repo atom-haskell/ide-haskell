@@ -1,5 +1,3 @@
-OutputPanelItemElement = require './output-panel-item'
-
 class OutputPanelItemsView extends HTMLElement
   setModel: (@model) ->
 
@@ -12,6 +10,7 @@ class OutputPanelItemsView extends HTMLElement
     scrollTop = @scrollTop
     @clear()
     @items = @model.filter @activeFilter
+    OutputPanelItemElement = require './output-panel-item'
     @itemViews = for i in @items
       @appendChild (new OutputPanelItemElement).setModel i
     @scrollTop = scrollTop
