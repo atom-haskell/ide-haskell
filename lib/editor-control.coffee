@@ -90,17 +90,22 @@ class EditorControl
         m.destroy()
     @markerFromCheckResult(r) for r in res
 
-  markerFromCheckResult: ({uri, severity, message, position}) ->
+  markerFromCheckResult: (resItem) ->
+    {uri, severity, message, position} = resItem
     return unless uri? and uri is @editor.getURI()
 
     # create a new marker
     range = new Range position, {row: position.row, column: position.column + 1}
-    marker = @editor.markBufferRange range
+    marker = @editor.markBufferRange range, invalidate: 'touch'
     marker.setProperties
       type: 'check-result'
       severity: severity
       desc: message
       editor: @editor.id
+    marker.disposables.add marker.onDidChange ({isValid}) =>
+      unless isValid
+        @emitter.emit 'did-invalidate-result', resItem
+        marker.destroy()
 
     @decorateMarker(marker)
 
@@ -122,6 +127,9 @@ class EditorControl
 
   onDidStopChanging: (callback) ->
     @emitter.on 'did-stop-changing', callback
+
+  onDidInvalidateResult: (callback) ->
+    @emitter.on 'did-invalidate-result', callback
 
   shouldShowTooltip: (pos, eventType = 'mouse') ->
     return if @showCheckResult pos, false, eventType

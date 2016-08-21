@@ -39,6 +39,9 @@ class ResultsDB
 
     @emitter.emit 'did-update', {res: @, types: severityArr}
 
+  removeResult: (resItem) ->
+    @results = @results.filter (res) -> res isnt resItem
+
   resultsWithURI: ->
     @results.filter ({uri}) -> uri?
 
