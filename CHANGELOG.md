@@ -1,3 +1,9 @@
+## 1.7.0
+* UPI 0.1.0: keep per-project plugin configuration
+* Cleanup result-item destruction
+* Requires cleanup
+* Remove unneeded require
+
 ## 1.6.7
 * Destroy check-result markers on invalidation
 
