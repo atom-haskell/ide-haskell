@@ -139,6 +139,9 @@ class PluginManager
     return disp
 
   getConfigParam: (pluginName, name) ->
+    unless atom.packages.isPackageActive(pluginName)
+      throw new Error("Ide-haskell cannot get parameter #{pluginName}:#{name}
+                       of inactive package #{pluginName}")
     if @configParams[pluginName]?[name]?
       return @configParams[pluginName][name]
     else if @changeParamFs[pluginName]?[name]?
@@ -149,6 +152,9 @@ class PluginManager
                        before it is defined")
 
   setConfigParam: (pluginName, name, value) ->
+    unless atom.packages.isPackageActive(pluginName)
+      throw new Error("Ide-haskell cannot set parameter #{pluginName}:#{name}
+                       of inactive package #{pluginName}")
     if value?
       @configParams[pluginName] ?= {}
       @configParams[pluginName][name] = value
