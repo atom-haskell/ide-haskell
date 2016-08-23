@@ -28,6 +28,7 @@
   "dependencies": {
     "temp": "^0.8.1",
     "sub-atom": "^1.0.0",
+    "atom-space-pen-views": "^2.0.3",
     "atom-haskell-utils": "^0.7.8"
   }
 }
