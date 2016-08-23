@@ -177,6 +177,11 @@ ide-haskell-panel {
     }
   }
 
+  ide-haskell-param {
+    font-size: 1.2em;
+    margin: 0 0.5em;
+  }
+
   ide-haskell-progress-bar {
     display: block;
     flex-grow: 1;
@@ -291,6 +296,14 @@ ide-haskell-tooltip {
   border: solid 2px @overlay-border-color;
   padding: 5px;
   border-radius: 0 0.5em;
+}
+
+.select-list.ide-haskell {
+  .select-list-heading {
+    color: @text-color-highlight;
+    font-size: 150%;
+    text-align: center;
+  }
 }
 
 // A hack to catch mouse events only on .scroll-view

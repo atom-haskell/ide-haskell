@@ -9,12 +9,13 @@ class UPI
   Call this function in consumer to get actual interface
 
   disposables: CompositeDisposable, one you will return in consumer
+  name: Plugin package name
   ###
-  registerPlugin: (disposables) ->
-    new UPIInstance(@pluginManager, disposables)
+  registerPlugin: (disposables, name) ->
+    new UPIInstance(@pluginManager, disposables, name)
 
 class UPIInstance
-  constructor: (@pluginManager, disposables) ->
+  constructor: (@pluginManager, disposables, @pluginName) ->
     disposables.add @disposables = new CompositeDisposable
 
   ###
@@ -205,6 +206,55 @@ class UPIInstance
   ###
   addPanelControl: (element, opts) ->
     @pluginManager.outputView.addPanelControl element, opts
+
+  ###
+  addConfigParam
+    param_name:
+      onChanged: callback void(value)
+      items: Array or callback Array(void)
+      itemTemplate: callback, String(item), html template
+      itemFilterKey: String, item filter key
+      description: String [optional]
+      displayName: String [optional, capitalized param_name default]
+      displayTemplate: callback, String(item), string template
+      default: item, default value
+
+  Returns
+    disp: Disposable
+    change: object of change functions, keys being param_name
+  ###
+  addConfigParam: (spec) ->
+    @pluginManager.addConfigParam @pluginName, spec
+
+  ###
+  getConfigParam(paramName) or getConfigParam(pluginName, paramName)
+
+  returns either a parameter value, or a Promise that resolves to parameter
+  value.
+
+  Throws if parameter is not defined and hasn't been set.
+  ###
+  getConfigParam: (pluginName, name) ->
+    unless name?
+      name = pluginName
+      pluginName = @pluginName
+    @pluginManager.getConfigParam(pluginName, name)
+
+  ###
+  setConfigParam(paramName, value) or setConfigParam(pluginName, paramName, value)
+
+  value is optional. If omitted, a selection dialog will be presented to user.
+
+  returns a Promise that resolves to parameter value.
+
+  Throws if parameter is not defined and no value supplied.
+  ###
+  setConfigParam: (pluginName, name, value) ->
+    unless value?
+      value = name
+      name = pluginName
+      pluginName = @pluginName
+    @pluginManager.setConfigParam(pluginName, name, value)
 
   ###
   Utility function to extract event range/type for a given event

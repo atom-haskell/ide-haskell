@@ -14,6 +14,9 @@ class PluginManager
     @createOutputViewPanel(state)
     @subscribeEditorController()
 
+    @changeParamFs = {}
+    @configParams = state.configParams ? {}
+
   deactivate: ->
     @checkResults.destroy()
     @disposables.dispose()
@@ -24,6 +27,7 @@ class PluginManager
 
   serialize: ->
     outputView: @outputView?.serialize()
+    configParams: @configParams
 
   onShouldShowTooltip: (callback) ->
     @emitter.on 'should-show-tooltip', callback
@@ -101,3 +105,57 @@ class PluginManager
 
   prevError: ->
     @outputView?.showPrevError()
+
+  addConfigParam: (pluginName, specs) ->
+    {CompositeDisposable} = require 'atom'
+    disp = new CompositeDisposable
+    @changeParamFs[pluginName] ?= {}
+    @configParams[pluginName] ?= {}
+    for name, spec of specs
+      do (name, spec) =>
+        @configParams[pluginName][name] ?= spec.default
+        elem = document.createElement "ide-haskell-param"
+        elem.classList.add "ide-haskell-#{pluginName}-#{name}"
+        spec.displayName ?= name.charAt(0).toUpperCase() + name.slice(1)
+        show = =>
+          elem.innerText = "#{spec.displayName}: " + spec.displayTemplate(@configParams[pluginName][name])
+          spec.onChanged?(@configParams[pluginName][name])
+        show()
+        @changeParamFs[pluginName][name] = change = (resolve) =>
+          ParamSelectView = require './output-panel/views/param-select-view'
+          new ParamSelectView
+            items: if typeof spec.items is 'function' then spec.items() else spec.items
+            heading: spec.description
+            itemTemplate: spec.itemTemplate
+            itemFilterName: spec.itemFilterName
+            onConfirmed: (value) =>
+              @configParams[pluginName][name] = value
+              show()
+              resolve(value)
+        disp.add @outputView.addPanelControl elem,
+          events:
+            click: -> change()
+          before: '#progressBar'
+    return disp
+
+  getConfigParam: (pluginName, name) ->
+    if @configParams[pluginName]?[name]?
+      return @configParams[pluginName][name]
+    else if @changeParamFs[pluginName]?[name]?
+      new Promise (resolve) =>
+        @changeParamFs[pluginName][name](resolve)
+    else
+      throw new Error("Ide-haskell cannot get parameter #{pluginName}:#{name}
+                       before it is defined")
+
+  setConfigParam: (pluginName, name, value) ->
+    if value?
+      @configParams[pluginName] ?= {}
+      @configParams[pluginName][name] = value
+      Promise.resolve(value)
+    else if @changeParamFs[pluginName]?[name]?
+      new Promise (resolve) =>
+        @changeParamFs[pluginName][name](resolve)
+    else
+      throw new Error("Ide-haskell cannot set parameter #{pluginName}:#{name}
+                       before it is defined")
