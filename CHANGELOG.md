@@ -1,3 +1,7 @@
+## 1.7.2
+* Throw error if package isn't active
+* Add aspv to deps
+
 ## 1.7.1
 * Possibly undefined argument
 
