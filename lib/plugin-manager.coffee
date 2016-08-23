@@ -131,7 +131,7 @@ class PluginManager
             onConfirmed: (value) =>
               @configParams[pluginName][name] = value
               show()
-              resolve(value)
+              resolve?(value)
         disp.add @outputView.addPanelControl elem,
           events:
             click: -> change()
