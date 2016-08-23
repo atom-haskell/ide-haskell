@@ -1,3 +1,6 @@
+## 1.7.1
+* Possibly undefined argument
+
 ## 1.7.0
 * UPI 0.1.0: keep per-project plugin configuration
 * Cleanup result-item destruction
