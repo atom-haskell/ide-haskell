@@ -1,3 +1,8 @@
+mkError = (name, message) ->
+  e = new Error(message)
+  e.name = name
+  return e
+
 module.exports =
 class PluginManager
   constructor: (state) ->
@@ -121,7 +126,7 @@ class PluginManager
           elem.innerText = "#{spec.displayName}: " + spec.displayTemplate(@configParams[pluginName][name])
           spec.onChanged?(@configParams[pluginName][name])
         show()
-        @changeParamFs[pluginName][name] = change = (resolve) =>
+        @changeParamFs[pluginName][name] = change = (resolve, reject) =>
           ParamSelectView = require './output-panel/views/param-select-view'
           new ParamSelectView
             items: if typeof spec.items is 'function' then spec.items() else spec.items
@@ -132,6 +137,8 @@ class PluginManager
               @configParams[pluginName][name] = value
               show()
               resolve?(value)
+            onCancelled: ->
+              reject?()
         disp.add @outputView.addPanelControl elem,
           events:
             click: -> change()
@@ -140,28 +147,36 @@ class PluginManager
 
   getConfigParam: (pluginName, name) ->
     unless atom.packages.isPackageActive(pluginName)
-      throw new Error("Ide-haskell cannot get parameter #{pluginName}:#{name}
-                       of inactive package #{pluginName}")
+      return Promise.reject(
+        mkError('PackageInactiveError',
+          "Ide-haskell cannot get parameter #{pluginName}:#{name}
+           of inactive package #{pluginName}"))
     if @configParams[pluginName]?[name]?
-      return @configParams[pluginName][name]
+      return Promise.resolve(@configParams[pluginName][name])
     else if @changeParamFs[pluginName]?[name]?
-      new Promise (resolve) =>
-        @changeParamFs[pluginName][name](resolve)
+      new Promise (resolve, reject) =>
+        @changeParamFs[pluginName][name](resolve, reject)
     else
-      throw new Error("Ide-haskell cannot get parameter #{pluginName}:#{name}
-                       before it is defined")
+      return Promise.reject(
+        mkError('ParamUndefinedError',
+          "Ide-haskell cannot get parameter #{pluginName}:#{name}
+           before it is defined"))
 
   setConfigParam: (pluginName, name, value) ->
     unless atom.packages.isPackageActive(pluginName)
-      throw new Error("Ide-haskell cannot set parameter #{pluginName}:#{name}
-                       of inactive package #{pluginName}")
+      return Promise.reject(
+        mkError('PackageInactiveError',
+          "Ide-haskell cannot set parameter #{pluginName}:#{name}
+           of inactive package #{pluginName}"))
     if value?
       @configParams[pluginName] ?= {}
       @configParams[pluginName][name] = value
       Promise.resolve(value)
     else if @changeParamFs[pluginName]?[name]?
-      new Promise (resolve) =>
-        @changeParamFs[pluginName][name](resolve)
+      new Promise (resolve, reject) =>
+        @changeParamFs[pluginName][name](resolve, reject)
     else
-      throw new Error("Ide-haskell cannot set parameter #{pluginName}:#{name}
-                       before it is defined")
+      return Promise.reject(
+        mkError('ParamUndefinedError',
+          "Ide-haskell cannot set parameter #{pluginName}:#{name}
+           before it is defined"))

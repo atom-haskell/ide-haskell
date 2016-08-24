@@ -229,10 +229,11 @@ class UPIInstance
   ###
   getConfigParam(paramName) or getConfigParam(pluginName, paramName)
 
-  returns either a parameter value, or a Promise that resolves to parameter
+  returns a Promise that resolves to parameter
   value.
 
-  Throws if parameter is not defined and hasn't been set.
+  Promise can be rejected with either error, or 'undefined'. Latter
+  in case user cancels param selection dialog.
   ###
   getConfigParam: (pluginName, name) ->
     unless name?
@@ -247,7 +248,8 @@ class UPIInstance
 
   returns a Promise that resolves to parameter value.
 
-  Throws if parameter is not defined and no value supplied.
+  Promise can be rejected with either error, or 'undefined'. Latter
+  in case user cancels param selection dialog.
   ###
   setConfigParam: (pluginName, name, value) ->
     unless value?

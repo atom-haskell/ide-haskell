@@ -21,7 +21,7 @@
       "description": "Universal pluggable interface",
       "versions": {
         "0.0.1": "provideUpi",
-        "0.1.0": "provideUpi"
+        "0.2.0": "provideUpi"
       }
     }
   },
