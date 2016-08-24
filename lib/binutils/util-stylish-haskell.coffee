@@ -8,7 +8,7 @@ prettify = (text, workingDirectory, {onComplete, onFailure}) ->
   {BufferedProcess} = require 'atom'
   proc = new BufferedProcess
     command: shpath
-    args: []
+    args: atom.config.get('ide-haskell.stylishHaskellArguments')
     options:
       cwd: workingDirectory
     stdout: (line) ->
@@ -19,7 +19,7 @@ prettify = (text, workingDirectory, {onComplete, onFailure}) ->
       else
         onFailure? {
           message: "Failed to prettify"
-          detail: "Stylish-haskell exited with non-zero exit status #{code}"
+          detail: "Prettifier exited with non-zero exit status #{code}"
         }
 
   proc.onWillThrowError ({error, handle}) ->

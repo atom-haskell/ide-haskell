@@ -29,7 +29,13 @@ module.exports = IdeHaskell =
     stylishHaskellPath:
       type: "string"
       default: 'stylish-haskell'
-      description: "Path to `stylish-haskell` utility"
+      description: "Path to `stylish-haskell` utility or other prettifier"
+    stylishHaskellArguments:
+      type: 'array'
+      default: []
+      description: 'Additional arguments to pass to prettifier; comma-separated'
+      items:
+        type: 'string'
     cabalPath:
       type: "string"
       default: 'cabal'
