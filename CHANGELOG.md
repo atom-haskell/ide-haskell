@@ -1,3 +1,6 @@
+## 1.8.1
+* Add custom prettifier options
+
 ## 1.8.0
 * UPI 0.2: get/setConfigParam only promises
 
