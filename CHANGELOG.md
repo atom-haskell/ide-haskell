@@ -1,3 +1,6 @@
+## 1.8.0
+* UPI 0.2: get/setConfigParam only promises
+
 ## 1.7.2
 * Throw error if package isn't active
 * Add aspv to deps
