@@ -20,22 +20,15 @@ class MessageObject
 
   toHtml: ->
     if @highlighter? and @text?
-      g = atom.grammars.grammarForScopeName @highlighter
-      if not g?
+      html = require('./highlight')
+        fileContents: @text
+        scopeName: @highlighter
+        registry: atom.grammars
+      unless html?
         @highlighter = null
-        return @toHtml()
-      ls = g.tokenizeLines @text
-      tls = for l in ls
-        tl = for t in l
-          span = start = document.createElement 'span'
-          for s in t.scopes
-            span.appendChild span = document.createElement 'span'
-            cls = s.split('.')
-            span.classList.add cls...
-          span.innerText = t.value
-          start.innerHTML
-        tl.join('')
-      return tls.join('\n')
+        @toHtml()
+      else
+        html
     else if @html?
       return @html
     else
