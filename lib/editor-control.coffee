@@ -136,8 +136,25 @@ class EditorControl
        pos.row >= @editor.getLineCount() or
        pos.isEqual @editor.bufferRangeForBufferRow(pos.row).end
       @hideTooltip {eventType}
-    else
+    else if @rangeHasChanged(pos, eventType)
       @emitter.emit 'should-show-tooltip', {@editor, pos, eventType}
+
+  rangeHasChanged: (pos, eventType) ->
+    newrange = @getEventRange(pos, eventType).crange
+    isFirstIteration = not (@lastMouseBufferPtTest? and @lastMouseBufferRangeTest?)
+    rangesAreEmpty = => @lastMouseBufferRangeTest.isEmpty() and newrange.isEmpty()
+    isSameRow = => @lastMouseBufferPtTest.row is pos.row
+    isSameToken = =>
+      return false unless rangesAreEmpty() and isSameRow()
+      tl = @editor.tokenizedBuffer.tokenizedLineForRow(@lastMouseBufferPtTest.row)
+      oldtokid = tl.tokenIndexAtBufferColumn(@lastMouseBufferPtTest.column)
+      newtokid = tl.tokenIndexAtBufferColumn(pos.column)
+      oldtokid is newtokid
+    result =
+      isFirstIteration or not ( @lastMouseBufferRangeTest.isEqual(newrange) or isSameToken() )
+    @lastMouseBufferPtTest = pos
+    @lastMouseBufferRangeTest = newrange
+    return result
 
   showTooltip: (pos, range, text, detail) ->
     return unless @editor?
