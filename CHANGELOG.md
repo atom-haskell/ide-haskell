@@ -1,3 +1,8 @@
+## 1.8.2
+* Prepare 1.8.2 release
+* Don't emit should-show-tooltip if range under cursor is unchanged
+* Use Atom's highlights code for tooltips, etc
+
 ## 1.8.1
 * Add custom prettifier options
 
