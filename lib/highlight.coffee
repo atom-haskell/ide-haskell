@@ -58,6 +58,7 @@ highlightSync = ({registry, fileContents, scopeName} = {}) ->
     # html += '<div class="line">'
     for {value, scopes} in tokens
       value = ' ' unless value
+      scopes = scopes.map (s) -> "syntax--#{s.replace(/\./g, '.syntax--')}"
       html = updateScopeStack(scopeStack, scopes, html)
       html += "<span>#{escapeString(value)}</span>"
     html = popScope(scopeStack, html) while scopeStack.length > 0
