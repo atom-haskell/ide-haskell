@@ -157,22 +157,22 @@ module.exports = IdeHaskell =
 
     @disposables.add \
       atom.commands.add 'atom-text-editor[data-grammar~="haskell"]',
-        'ide-haskell:prettify-file': ({target}) ->
-          prettifyFile target.getModel()
-        'ide-haskell:close-tooltip': ({target, abortKeyBinding}) =>
-          if @pluginManager.controller(target.getModel())?.hasTooltips?()
-            @pluginManager.controller(target.getModel()).hideTooltip()
+        'ide-haskell:prettify-file': ({currentTarget}) ->
+          prettifyFile currentTarget.getModel()
+        'ide-haskell:close-tooltip': ({currentTarget, abortKeyBinding}) =>
+          if @pluginManager.controller(currentTarget.getModel())?.hasTooltips?()
+            @pluginManager.controller(currentTarget.getModel()).hideTooltip()
           else
             abortKeyBinding?()
-        'ide-haskell:next-error': ({target}) =>
+        'ide-haskell:next-error': =>
           @pluginManager.nextError()
-        'ide-haskell:prev-error': ({target}) =>
+        'ide-haskell:prev-error': =>
           @pluginManager.prevError()
 
     @disposables.add \
       atom.commands.add 'atom-text-editor[data-grammar~="cabal"]',
-        'ide-haskell:prettify-file': ({target}) ->
-          prettifyFile target.getModel(), 'cabal'
+        'ide-haskell:prettify-file': ({currentTarget}) ->
+          prettifyFile currentTarget.getModel(), 'cabal'
 
     atom.keymaps.add 'ide-haskell',
       'atom-text-editor[data-grammar~="haskell"]':
