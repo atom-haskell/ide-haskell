@@ -38,6 +38,7 @@ updateScopeStack = (scopeStack, desiredScopes, html) ->
 
 module.exports =
 highlightSync = ({registry, fileContents, scopeName} = {}) ->
+  registry ?= atom.grammars
 
   grammar = registry.grammarForScopeName(scopeName)
   return unless grammar?
@@ -63,5 +64,6 @@ highlightSync = ({registry, fileContents, scopeName} = {}) ->
       html += "<span>#{escapeString(value)}</span>"
     html = popScope(scopeStack, html) while scopeStack.length > 0
     html += '\n'
+    # html += '</div>'
   # html += '</div>'
   html
