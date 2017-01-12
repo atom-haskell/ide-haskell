@@ -1,3 +1,11 @@
+## 1.8.3
+* s/target/currentTarget
+* Bring highlighter in-line with other projects
+* Atom 1.13 update
+* Update CHANGELOG
+* Fix LICENSE date
+* Update LICENSE
+
 ## 1.8.2
 * Prepare 1.8.2 release
 * Don't emit should-show-tooltip if range under cursor is unchanged
