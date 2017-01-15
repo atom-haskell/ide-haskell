@@ -39,12 +39,17 @@ class OutputPanelButtons extends HTMLElement
   buttonNames: ->
     Object.keys @buttons
 
-  clickButton: (btn) ->
+  clickButton: (btn, force = false) ->
     if @buttons[btn]?
+      isActive = @buttons[btn].element.classList.contains 'active'
       for v in @getElementsByClassName 'active'
         v.classList.remove 'active'
-      @buttons[btn].element.classList.add 'active'
+      @buttons[btn].element.classList.add 'active' if not isActive or force
       @emitter.emit 'button-clicked', btn
+
+  disableAll: ->
+    for v in @getElementsByClassName 'active'
+      v.classList.remove 'active'
 
   setCount: (btn, count) ->
     if @buttons[btn]?
@@ -55,7 +60,7 @@ class OutputPanelButtons extends HTMLElement
     @disposables.dispose()
 
   getActive: ->
-    @getElementsByClassName('active')[0]?.getAttribute?('data-caption')
+    @getElementsByClassName('active')[0]?.getAttribute?('data-caption') ? null
 
 OutputPanelButtonsElement =
   document.registerElement 'ide-haskell-panel-buttons',

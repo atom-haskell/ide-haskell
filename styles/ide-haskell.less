@@ -45,6 +45,16 @@ ide-haskell-panel {
     position: absolute;
   }
 
+  &.hidden-output {
+    height: auto !important;
+    width: auto !important;
+    min-height: inherit !important;
+    min-width: inherit !important;
+    ide-haskell-panel-items {
+      display: none;
+    }
+  }
+
   &[data-pos=top], &[data-pos=bottom] {
     min-height: 120px;
     max-height: 50vh;

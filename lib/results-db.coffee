@@ -51,3 +51,6 @@ class ResultsDB
     @results.filter (item) ->
       b = (item[k] is v for k, v of template)
       b.every (v) -> v
+
+  isEmpty: ->
+    @results.length is 0

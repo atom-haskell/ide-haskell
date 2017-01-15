@@ -2,14 +2,20 @@ module.exports=
 class OutputPanelView extends HTMLElement
   setModel: (@model) ->
     @disposables.add @model.results.onDidUpdate ({types}) =>
-      if atom.config.get('ide-haskell.switchTabOnCheck')
-        @activateFirstNonEmptyTab types
+      if atom.config.get('ide-haskell.autoHideOutput') and \
+          types.map((type) => @model.results.filter(severity: type).length).every((l) -> l is 0)
+        @buttons.disableAll()
+      else
+        if atom.config.get('ide-haskell.switchTabOnCheck')
+          @activateFirstNonEmptyTab types
       @updateItems()
     @items.setModel @model.results
 
     @style.height = @model.state.height if @model.state?.height?
     @style.width = @model.state.width if @model.state?.width?
-    @activateTab(@model.state.activeTab ? @buttons.buttonNames()[0])
+    @activateTab(@model.state.activeTab) if @model.state?.activeTab?
+    if @model.state?.activeTab is undefined
+      @activateTab(@buttons.buttonNames()[0])
     @checkboxUriFilter.setFileFilter @model.state.fileFilter
 
     @
@@ -131,13 +137,17 @@ class OutputPanelView extends HTMLElement
       document.documentElement.addEventListener 'mouseup', stopDrag
   updateItems: ->
     activeTab = @getActiveTab()
-    filter = severity: activeTab
-    if @checkboxUriFilter.getFileFilter()
-      uri = atom.workspace.getActiveTextEditor()?.getPath?()
-      filter.uri = uri if uri? and @buttons.options(activeTab).uriFilter
-    scroll = @buttons.options(activeTab).autoScroll and @items.atEnd()
-    @items.filter filter
-    @items.scrollToEnd() if scroll
+    if activeTab?
+      @classList.remove 'hidden-output'
+      filter = severity: activeTab
+      if @checkboxUriFilter.getFileFilter()
+        uri = atom.workspace.getActiveTextEditor()?.getPath?()
+        filter.uri = uri if uri? and @buttons.options(activeTab).uriFilter
+      scroll = @buttons.options(activeTab).autoScroll and @items.atEnd()
+      @items.filter filter
+      @items.scrollToEnd() if scroll
+    else
+      @classList.add 'hidden-output'
 
     for btn in @buttons.buttonNames()
       f = severity: btn
@@ -145,7 +155,7 @@ class OutputPanelView extends HTMLElement
       @buttons.setCount btn, @model.results.filter(f).length
 
   activateTab: (tab) ->
-    @buttons.clickButton tab
+    @buttons.clickButton tab, true
 
   activateFirstNonEmptyTab: (types) ->
     for name in @buttons.buttonNames() when (if types? then name in types else true)
@@ -172,8 +182,6 @@ class OutputPanelView extends HTMLElement
   createTab: (name, opts) ->
     unless name in @buttons.buttonNames()
       @buttons.createButton name, opts
-    unless @getActiveTab()?
-      @activateTab @buttons.buttonNames()[0]
 
   setProgress: (progress) ->
     switch atom.config.get('ide-haskell.panelPosition')
