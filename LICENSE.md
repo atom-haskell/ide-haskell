@@ -18,3 +18,11 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+IcoMoon font located in resources/icomoon.woff is created by
+@Keyamoon (https://github.com/Keyamoon) and is licensed by GPLv3 or CC BY 4.0.
+
+See
+
+* http://creativecommons.org/licenses/by/4.0/
+* http://www.gnu.org/licenses/gpl.html

@@ -52,6 +52,12 @@ module.exports = IdeHaskell =
       Output panel position
       '''
       enum: ['bottom', 'left', 'top', 'right']
+    hideParameterValues:
+      type: 'boolean'
+      default: false
+      description: '''
+      Hide additional plugin parameter values until hovered
+      '''
 
   cleanConfig: ->
     [ 'onSaveCheck'

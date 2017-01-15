@@ -6,20 +6,17 @@ class OutputPanelButtons extends HTMLElement
     @disposables = new SubAtom
     @disposables.add @emitter = new Emitter
     @buttons = {}
-    @appendChild @buttonsContainer = document.createElement 'ide-haskell-buttons-container'
     ['error', 'warning', 'lint'].forEach (btn) =>
       @createButton btn
     @createButton 'build',
       uriFilter: false
       autoScroll: true
-    @appendChild @cbCurrentFile = document.createElement 'ide-haskell-checkbox'
-    @disposables.add @cbCurrentFile, 'click', => @toggleFileFilter()
 
   createButton: (btn, opts) ->
     @buttons[btn] =
       element: null
       options: opts ? {}
-    @buttonsContainer.appendChild @buttons[btn].element = document.createElement 'ide-haskell-button'
+    @appendChild @buttons[btn].element = document.createElement 'ide-haskell-button'
     @buttons[btn].element.setAttribute 'data-caption', btn
     @buttons[btn].element.setAttribute 'data-count', 0
     @disposables.add @buttons[btn].element, 'click', => @clickButton btn
@@ -48,20 +45,6 @@ class OutputPanelButtons extends HTMLElement
         v.classList.remove 'active'
       @buttons[btn].element.classList.add 'active'
       @emitter.emit 'button-clicked', btn
-
-  setFileFilter: (state) ->
-    if state
-      @cbCurrentFile.classList.add 'enabled'
-      @emitter.emit 'checkbox-switched', true
-    else
-      @cbCurrentFile.classList.remove 'enabled'
-      @emitter.emit 'checkbox-switched', false
-
-  getFileFilter: ->
-    @cbCurrentFile.classList.contains 'enabled'
-
-  toggleFileFilter: ->
-    @setFileFilter not @getFileFilter()
 
   setCount: (btn, count) ->
     if @buttons[btn]?

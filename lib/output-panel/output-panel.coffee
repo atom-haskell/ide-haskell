@@ -41,10 +41,13 @@ class OutputPanel
     height: @element.style.height
     width: @element.style.width
     activeTab: @element.getActiveTab()
-    fileFilter: @element.buttons.getFileFilter()
+    fileFilter: @element.checkboxUriFilter.getFileFilter()
 
   addPanelControl: (element, opts) ->
     @element.addPanelControl element, opts
+
+  setHideParameterValues: (value) ->
+    @element.setHideParameterValues(value)
 
   backendStatus: ({status, progress}) ->
     @element.statusChanged {status, oldStatus: @status ? 'ready'}

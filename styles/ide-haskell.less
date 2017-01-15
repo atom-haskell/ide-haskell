@@ -6,6 +6,13 @@
 @import "ui-variables";
 @import "icon";
 
+@font-face {
+  font-family: 'icomoon';
+  src: url('atom://ide-haskell/resources/icomoon.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
 @-webkit-keyframes ide-haskell-move {
   0% {
     background-position: 0 0;
@@ -15,9 +22,24 @@
   }
 }
 
+.clickable() {
+  flex-shrink: 0;
+  flex-grow: 0;
+  display: inline-block;
+  line-height: 1.8em;
+  color: @text-color-subtle;
+  border: 1px solid @button-border-color;
+  background: fade(@button-background-color,33%);
+  cursor: pointer;
+  vertical-align: middle;
+
+  &:active {
+    background: transparent;
+  }
+}
+
 ide-haskell-panel {
   display: flex;
-  flex-direction: column;
 
   resize-handle {
     position: absolute;
@@ -27,6 +49,27 @@ ide-haskell-panel {
     min-height: 120px;
     max-height: 50vh;
     width: auto !important;
+    flex-direction: column;
+    ide-haskell-panel-heading {
+      flex-direction: row;
+      ide-haskell-panel-buttons {
+        display: flex;
+        flex-direction: row;
+        ide-haskell-button {
+          margin-right: -1px; // hide left border
+          padding: 0 .6em;
+          &:first-of-type {
+            border-top-left-radius: @component-border-radius;
+            border-bottom-left-radius: @component-border-radius;
+          }
+          &:last-of-type {
+            margin-right: .6em;
+            border-top-right-radius: @component-border-radius;
+            border-bottom-right-radius: @component-border-radius;
+          }
+        }
+      }
+    }
     resize-handle {
       cursor: row-resize;
       height: 10px;
@@ -38,6 +81,27 @@ ide-haskell-panel {
     min-width: 120px;
     max-width: 50vw;
     height: auto !important;
+    flex-direction: row;
+    ide-haskell-panel-heading {
+      flex-direction: column;
+      ide-haskell-panel-buttons {
+        display: flex;
+        flex-direction: column;
+        ide-haskell-button {
+          margin-top: -1px; // hide left border
+          padding: 0 .6em;
+          &:first-of-type {
+            border-top-left-radius: @component-border-radius;
+            border-top-right-radius: @component-border-radius;
+          }
+          &:last-of-type {
+            margin-bottom: .6em;
+            border-bottom-left-radius: @component-border-radius;
+            border-bottom-right-radius: @component-border-radius;
+          }
+        }
+      }
+    }
     resize-handle {
       cursor: col-resize;
       width: 10px;
@@ -64,49 +128,31 @@ ide-haskell-panel {
     flex-direction: row;
     flex-shrink: 0;
     flex-wrap: wrap;
+    align-items: center;
 
     ide-haskell-status-icon {
-      padding-top: 3px;
+      padding: 0.5ex 0;
       margin: 0px 0.5em;
+      font-size: 1.2em;
 
       &:before {
         .icon;
-        display: block;
-        text-align: center;
-        font-size: 1.3em;
-        content: @check;
-        width: 15pt;
+        content: "\a0" @check "\a0";
       }
 
       &[data-status=progress]:before {
-        content: @hourglass;
+        content: "\a0" @hourglass "\a0";
       }
       &[data-status=ready]:before {
-        content: @check;
+        content: "\a0" @check "\a0";
       }
       &[data-status=error]:before {
         color: @text-color-error;
-        content: @alert;
+        content: "\a0" @alert "\a0";
       }
       &[data-status=warning]:before {
-        content: @stop;
+        content: "\a0" @stop "\a0";
         color: @text-color-warning;
-      }
-    }
-
-    .clickable() {
-      flex-shrink: 0;
-      flex-grow: 0;
-      display: inline-block;
-      line-height: 1.8em;
-      color: @text-color-subtle;
-      border: 1px solid @button-border-color;
-      background: fade(@button-background-color,33%);
-      cursor: pointer;
-      vertical-align: middle;
-
-      &:active {
-        background: transparent;
       }
     }
 
@@ -117,7 +163,7 @@ ide-haskell-panel {
       &.cancel {
         width: 2em;
         border-radius: @component-border-radius;
-        margin-left: 5px;
+        margin: .5ex;
         &:before {
           .icon;
           display: block;
@@ -129,70 +175,119 @@ ide-haskell-panel {
     }
 
     ide-haskell-panel-buttons {
-      ide-haskell-buttons-container {
-        ide-haskell-button {
-          text-transform: capitalize;
-          margin-right: -1px; // hide left border
-          padding: 0 .6em;
-          &:first-of-type {
-            border-top-left-radius: @component-border-radius;
-            border-bottom-left-radius: @component-border-radius;
-          }
-          &:last-of-type {
-            margin-right: .6em;
-            border-top-right-radius: @component-border-radius;
-            border-bottom-right-radius: @component-border-radius;
-          }
+      ide-haskell-button {
+        text-transform: capitalize;
 
-          &.active {
-            color: @text-color-highlight;
-            background: @button-background-color;
-          }
-
-          &:before {
-            content: attr(data-caption);
-          }
-
-          &:not([data-count="0"]):before {
-            content: attr(data-caption) ' (' attr(data-count) ')';
-          }
+        &.active {
+          color: @text-color-highlight;
+          background: @button-background-color;
         }
-      }
-      ide-haskell-checkbox {
-        .clickable;
+
         &:before {
-          .icon;
-          display: block;
-          text-align: center;
-          font-size: 1.7em;
-          content: @file-directory;
+          content: attr(data-caption);
         }
-        &.enabled:before {
-          content: @file-text;
+
+        &:not([data-count="0"]):before {
+          content: attr(data-caption) ' (' attr(data-count) ')';
         }
-        border-radius: @component-border-radius;
-        width: 2em;
-        height: 1.8em;
       }
+    }
+    ide-haskell-checkbox#checkboxUriFilter {
+      .clickable;
+      margin: 0.125em;
+      font-size: 1.2em;
+      &:before {
+        font-family: "icomoon";
+        content: "\a0\e930\a0";
+      }
+      &:after {
+        content: "Show all project messages";
+        display: none;
+        position: absolute;
+        background: @overlay-background-color;
+        border: solid 1px @overlay-border-color;
+        padding: 0.3em;
+        pointer-events: none;
+      }
+      &.enabled:after {
+        content: "Show current file messages";
+      }
+      &:hover:after {
+        display: block;
+      }
+      &.enabled:before {
+        content: "\a0\e926\a0";
+      }
+      border-radius: @component-border-radius;
     }
   }
 
   ide-haskell-param {
+    .clickable;
+    border-radius: @component-border-radius;
     font-size: 1.2em;
-    margin: 0 0.5em;
+    margin: 0.125em;
+    &:before {
+      content: attr(data-display-name) ":";
+      margin: 0 1ex;
+    }
+    ide-haskell-param-value {
+      margin-right: 1ex;
+    }
+    &:hover:after {
+      display: block;
+      position: absolute;
+      background: @overlay-background-color;
+      border: solid 1px @overlay-border-color;
+      padding: 0.3em;
+      pointer-events: none;
+      content:  attr(data-display-name);
+    }
+    &.hidden-value {
+      &:before {
+        content: attr(data-display-name);
+      }
+      ide-haskell-param-value {
+        display: none;
+        position: absolute;
+        background: @overlay-background-color;
+        border: solid 1px @overlay-border-color;
+        padding: 0.3em;
+        pointer-events: none;
+      }
+      &:hover {
+        ide-haskell-param-value {
+          &:before {
+            content: attr(data-display-name) ": ";
+          }
+          display: block;
+          margin-right: 0;
+        }
+      }
+    }
+  }
+
+  &[data-pos=left], &[data-pos=right] {
+    ide-haskell-progress-bar {
+      min-height: 50px;
+      max-height: 300px;
+      width: 1.25em;
+    }
+  }
+  &[data-pos=top], &[data-pos=bottom] {
+    ide-haskell-progress-bar {
+      min-width: 50px;
+      max-width: 300px;
+      height: 1.25em;
+    }
   }
 
   ide-haskell-progress-bar {
     display: block;
     flex-grow: 1;
-    min-width: 50px;
-    max-width: 300px;
-    height: 1.25em;
-    margin-top: 0.25em;
     border: 1px solid;
     border-radius: 3px;
     position: relative;
-    margin-left: 1em;
     visibility: hidden;
     &.visible {
       visibility: visible;
@@ -201,6 +296,9 @@ ide-haskell-panel {
         background-color: @background-color-info;
         position: absolute;
         height: 100%;
+        width: 100%;
+        left: 0;
+        bottom: 0;
         background-image: -webkit-linear-gradient(
           right,
           darken(@background-color-info, 10%) 37%,

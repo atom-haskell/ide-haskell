@@ -10,7 +10,7 @@ class OutputPanelView extends HTMLElement
     @style.height = @model.state.height if @model.state?.height?
     @style.width = @model.state.width if @model.state?.width?
     @activateTab(@model.state.activeTab ? @buttons.buttonNames()[0])
-    @buttons.setFileFilter @model.state.fileFilter
+    @checkboxUriFilter.setFileFilter @model.state.fileFilter
 
     @
 
@@ -27,6 +27,9 @@ class OutputPanelView extends HTMLElement
     OutputPanelButtonsElement = require './output-panel-buttons'
     @disposables.add @addPanelControl new OutputPanelButtonsElement,
       id: 'buttons'
+    OutputPanelCheckboxElement = require './output-panel-checkbox'
+    @disposables.add @addPanelControl new OutputPanelCheckboxElement,
+      id: 'checkboxUriFilter'
     ProgressBar = require './progress-bar'
     @disposables.add @addPanelControl new ProgressBar,
       id: 'progressBar'
@@ -36,10 +39,10 @@ class OutputPanelView extends HTMLElement
     @appendChild @items = new OutputPanelItemsElement
     @disposables.add @buttons.onButtonClicked =>
       @updateItems()
-    @disposables.add @buttons.onCheckboxSwitched =>
+    @disposables.add @checkboxUriFilter.onCheckboxSwitched =>
       @updateItems()
     @disposables.add atom.workspace.onDidChangeActivePaneItem =>
-      @updateItems() if @buttons.getFileFilter()
+      @updateItems() if @checkboxUriFilter.getFileFilter()
 
   addPanelControl: (element, {events, classes, style, attrs, before, id}) ->
     {Disposable} = require 'atom'
@@ -78,6 +81,13 @@ class OutputPanelView extends HTMLElement
     @disposables.add disp
 
     disp
+
+  setHideParameterValues: (value) ->
+    Array.prototype.slice.call(@heading.querySelectorAll('ide-haskell-param')).forEach (el) ->
+      if value
+        el.classList.add('hidden-value')
+      else
+        el.classList.remove('hidden-value')
 
   ###
   Note: can't use detachedCallback here, since when panel
@@ -122,7 +132,7 @@ class OutputPanelView extends HTMLElement
   updateItems: ->
     activeTab = @getActiveTab()
     filter = severity: activeTab
-    if @buttons.getFileFilter()
+    if @checkboxUriFilter.getFileFilter()
       uri = atom.workspace.getActiveTextEditor()?.getPath?()
       filter.uri = uri if uri? and @buttons.options(activeTab).uriFilter
     scroll = @buttons.options(activeTab).autoScroll and @items.atEnd()
@@ -166,7 +176,11 @@ class OutputPanelView extends HTMLElement
       @activateTab @buttons.buttonNames()[0]
 
   setProgress: (progress) ->
-    @progressBar.setProgress progress
+    switch atom.config.get('ide-haskell.panelPosition')
+      when 'top', 'bottom'
+        @progressBar.setProgress progress, 'horizontal'
+      else
+        @progressBar.setProgress progress, 'vertical'
 
 OutputPanelElement =
   document.registerElement 'ide-haskell-panel',

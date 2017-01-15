@@ -22,6 +22,9 @@ class PluginManager
     @changeParamFs = {}
     @configParams = state.configParams ? {}
 
+    @disposables.add atom.config.observe 'ide-haskell.hideParameterValues', (value) =>
+      @outputView.setHideParameterValues(value)
+
   deactivate: ->
     @checkResults.destroy()
     @disposables.dispose()
@@ -120,10 +123,15 @@ class PluginManager
       do (name, spec) =>
         @configParams[pluginName][name] ?= spec.default
         elem = document.createElement "ide-haskell-param"
-        elem.classList.add "ide-haskell-#{pluginName}-#{name}"
+        elem.classList.add "ide-haskell--#{pluginName}", "ide-haskell-param--#{name}"
+        if atom.config.get('ide-haskell.hideParameterValues')
+          elem.classList.add 'hidden-value'
+        elem.appendChild elemVal = document.createElement "ide-haskell-param-value"
         spec.displayName ?= name.charAt(0).toUpperCase() + name.slice(1)
         show = =>
-          elem.innerText = "#{spec.displayName}: " + spec.displayTemplate(@configParams[pluginName][name])
+          elem.setAttribute('data-display-name', spec.displayName)
+          elemVal.setAttribute('data-display-name', spec.displayName)
+          elemVal.innerText = spec.displayTemplate(@configParams[pluginName][name])
           spec.onChanged?(@configParams[pluginName][name])
         show()
         @changeParamFs[pluginName][name] = change = (resolve, reject) =>

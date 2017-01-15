@@ -2,8 +2,13 @@ class ProgressBar extends HTMLElement
   createdCallback: ->
     @appendChild @span = document.createElement 'span'
 
-  setProgress: (progress) ->
-    @span.style.setProperty 'width', "#{progress * 100}%"
+  setProgress: (progress, direction = 'horizontal') ->
+    if direction is 'horizontal'
+      @span.style.setProperty 'width', "#{progress * 100}%"
+      @span.style.removeProperty 'height'
+    else
+      @span.style.setProperty 'height', "#{progress * 100}%"
+      @span.style.removeProperty 'width'
     if progress <= 0
       @classList.remove 'visible'
     else
