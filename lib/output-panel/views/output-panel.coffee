@@ -13,9 +13,6 @@ class OutputPanelView extends HTMLElement
 
     @style.height = @model.state.height if @model.state?.height?
     @style.width = @model.state.width if @model.state?.width?
-    @activateTab(@model.state.activeTab) if @model.state?.activeTab?
-    if @model.state?.activeTab is undefined
-      @activateTab(@buttons.buttonNames()[0])
     @checkboxUriFilter.setFileFilter @model.state.fileFilter
 
     @
@@ -182,6 +179,9 @@ class OutputPanelView extends HTMLElement
   createTab: (name, opts) ->
     unless name in @buttons.buttonNames()
       @buttons.createButton name, opts
+      @activateTab(@model.state.activeTab) if @model.state?.activeTab?
+      if @model.state?.activeTab is undefined
+        @activateTab(@buttons.buttonNames()[0])
 
   setProgress: (progress) ->
     switch atom.config.get('ide-haskell.panelPosition')
