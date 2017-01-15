@@ -246,6 +246,54 @@ You can edit Atom keybindings by opening 'Edit → Open Your Keymap'. Here is a 
   '': 'ide-haskell:toggle-output'
 ```
 
+### Changing output panel look
+
+Changing output panel look can be achieved with Atom stylesheets. You can open your stylesheet with Edit → Stylesheet...
+
+Syntax is [Less](http://lesscss.org/). You can use the following selectors:
+
+* `ide-haskell-panel` -- whole panel
+* `ide-haskell-panel-heading` -- panel heading (control elements)
+* `ide-hashell-panel-items` -- output area
+* `ide-haskell-item-position` -- file/line/column of individual message
+* `ide-haskell-item-description` -- message itself
+
+Please note, that to change font face in `ide-haskell-item-description`, you need to target it specifically, or use `!important` specifier.
+
+For example, to change font size in whole panel:
+
+```less
+ide-haskell-panel {
+  font-size: 18pt;
+}
+```
+
+Or only in output area:
+
+```less
+ide-haskell-panel-items {
+  font-size: 18pt;
+}
+```
+
+To change font face in panel heading:
+
+```less
+ide-haskell-panel-heading {
+  font-family: "Comic Sans MS";
+}
+```
+
+To change font face in messages themselves:
+
+```less
+ide-haskell-item-description {
+  font-family: "Fira Mono";
+}
+```
+
+You are free to write any CSS, of course. Bear in mind, however, that any selectors not listed above are subject to sudden change.
+
 ## API
 
 Ide-haskell provides service-hub API with `ide-haskell-upi` service.
