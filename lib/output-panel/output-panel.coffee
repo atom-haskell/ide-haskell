@@ -28,6 +28,12 @@ class OutputPanel
     else
       @panel.show()
 
+  hide: ->
+    @panel.hide()
+
+  show: ->
+    @panel.show()
+
   destroy: ->
     @disposables.dispose()
     @panel.destroy()

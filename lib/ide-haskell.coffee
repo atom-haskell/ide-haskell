@@ -53,6 +53,11 @@ module.exports = IdeHaskell =
       '''
       enum: ['bottom', 'left', 'top', 'right']
 
+    panelAutoHide:
+      type: "boolean"
+      default: false
+      description: "Hide panel when there are no messages to show"
+
   cleanConfig: ->
     [ 'onSaveCheck'
     , 'onSaveLint'
