@@ -1,3 +1,9 @@
+## 1.9.0
+* Panel tooltips
+* Fix state-saved tab activation
+* Auto hide output option (thanks @supermario, #185)
+* Vertical panel heading when docked left/right, style cleanup
+
 ## 1.8.3
 * s/target/currentTarget
 * Bring highlighter in-line with other projects
