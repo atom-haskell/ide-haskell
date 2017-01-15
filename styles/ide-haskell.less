@@ -38,6 +38,18 @@
   }
 }
 
+.panel-tooltip() {
+  position: absolute;
+  background: @overlay-background-color;
+  border: solid 1px @overlay-border-color;
+  border-radius: @component-border-radius;
+  padding: 0.3em;
+  pointer-events: none;
+  display: block;
+  white-space: nowrap;
+  z-index: 100;
+}
+
 ide-haskell-panel {
   display: flex;
 
@@ -120,17 +132,26 @@ ide-haskell-panel {
     }
   }
 
-  &[data-pos=top] resize-handle {
-    bottom: 0;
+  &[data-pos=top]{
+    resize-handle { bottom: 0; }
   }
-  &[data-pos=bottom] resize-handle {
-    top: 0;
+  &[data-pos=bottom] {
+    resize-handle { top: 0; }
+    ide-haskell-checkbox:after { bottom: 100%; }
+    ide-haskell-param:after { bottom: 100%; }
+    ide-haskell-param.hidden-value ide-haskell-param-value { bottom: 100%; }
   }
-  &[data-pos=left] resize-handle {
-    right: 0;
+  &[data-pos=left] {
+    resize-handle { right: 0; }
+    ide-haskell-checkbox:after { left: 100%; top: 0; }
+    ide-haskell-param:after { left: 100%; top: 0; }
+    ide-haskell-param.hidden-value ide-haskell-param-value { left: 100%; top: 0; }
   }
-  &[data-pos=right] resize-handle {
-    left: 0;
+  &[data-pos=right] {
+    resize-handle { left: 0; }
+    ide-haskell-checkbox:after { right: 100%; top: 0; }
+    ide-haskell-param:after { right: 100%; top: 0; }
+    ide-haskell-param.hidden-value ide-haskell-param-value { right: 100%; top: 0; }
   }
 
   ide-haskell-panel-heading {
@@ -204,29 +225,23 @@ ide-haskell-panel {
     }
     ide-haskell-checkbox#checkboxUriFilter {
       .clickable;
+      position: relative;
       margin: 0.125em;
       font-size: 1.2em;
       &:before {
         font-family: "icomoon";
         content: "\a0\e930\a0";
       }
-      &:after {
-        content: "Show all project messages";
-        display: none;
-        position: absolute;
-        background: @overlay-background-color;
-        border: solid 1px @overlay-border-color;
-        padding: 0.3em;
-        pointer-events: none;
-      }
-      &.enabled:after {
-        content: "Show current file messages";
-      }
-      &:hover:after {
-        display: block;
-      }
       &.enabled:before {
         content: "\a0\e926\a0";
+      }
+      &:hover:after {
+        .panel-tooltip;
+        content: "Show all project messages";
+      }
+      &.enabled:hover:after {
+        .panel-tooltip;
+        content: "Show current file messages";
       }
       border-radius: @component-border-radius;
     }
@@ -234,6 +249,7 @@ ide-haskell-panel {
 
   ide-haskell-param {
     .clickable;
+    position: relative;
     border-radius: @component-border-radius;
     font-size: 1.2em;
     margin: 0.125em;
@@ -244,13 +260,8 @@ ide-haskell-panel {
     ide-haskell-param-value {
       margin-right: 1ex;
     }
-    &:hover:after {
-      display: block;
-      position: absolute;
-      background: @overlay-background-color;
-      border: solid 1px @overlay-border-color;
-      padding: 0.3em;
-      pointer-events: none;
+    &:not(.hidden-value):hover:after {
+      .panel-tooltip;
       content:  attr(data-display-name);
     }
     &.hidden-value {
@@ -259,18 +270,13 @@ ide-haskell-panel {
       }
       ide-haskell-param-value {
         display: none;
-        position: absolute;
-        background: @overlay-background-color;
-        border: solid 1px @overlay-border-color;
-        padding: 0.3em;
-        pointer-events: none;
       }
       &:hover {
         ide-haskell-param-value {
           &:before {
             content: attr(data-display-name) ": ";
           }
-          display: block;
+          .panel-tooltip;
           margin-right: 0;
         }
       }
