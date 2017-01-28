@@ -57,6 +57,25 @@ class EditorControl
       clearTimeout @exprTypeTimeout if @exprTypeTimeout?
 
     @disposables.add @editor.onDidChangeSelectionRange ({newBufferRange}) =>
+      slcl = editorElement.pixelRectForScreenRange(@editor.screenRangeForBufferRange(newBufferRange))
+      eecl = editorElement.querySelector('.scroll-view').getBoundingClientRect()
+      ttcl = document.querySelector('ide-haskell-tooltip')?.getBoundingClientRect?()
+      if ttcl?
+        ttcld = document.querySelector('ide-haskell-tooltip div').getBoundingClientRect()
+        ttbox =
+          left: ttcl.left - eecl.left
+          top: ttcld.top - eecl.top
+          width: ttcl.width
+          height: ttcld.height
+        xmax = Math.round(Math.max(ttbox.left, slcl.left))
+        xmin = Math.round(Math.min(ttbox.left + ttbox.width, slcl.left + slcl.width))
+        ymax = Math.round(Math.max(ttbox.top, slcl.top))
+        ymin = Math.round(Math.min(ttbox.top + ttbox.height, slcl.top + slcl.height))
+        if ymax <= ymin and xmax <= xmin
+          document.querySelector('ide-haskell-tooltip').style.setProperty('opacity', '0.3')
+        else
+          document.querySelector('ide-haskell-tooltip').style.removeProperty('opacity')
+
       clearTimeout @selTimeout if @selTimeout?
       if newBufferRange.isEmpty()
         @hideTooltip eventType: 'selection'
@@ -64,10 +83,10 @@ class EditorControl
           when 'Show Tooltip'
             clearTimeout @exprTypeTimeout if @exprTypeTimeout?
             unless @showCheckResult newBufferRange.start, false, 'keyboard'
-              @hideTooltip()
+              @hideTooltip(persistOnCursorMove: false)
           when 'Hide Tooltip'
             clearTimeout @exprTypeTimeout if @exprTypeTimeout?
-            @hideTooltip()
+            @hideTooltip(persistOnCursorMove: false)
       else
         @selTimeout = setTimeout (=> @shouldShowTooltip newBufferRange.start, 'selection'),
           atom.config.get('ide-haskell.expressionTypeInterval')
@@ -160,6 +179,7 @@ class EditorControl
     return unless @editor?
 
     throw new Error('eventType not set') unless detail.eventType
+    detail.persistOnCursorMove ?= false
 
     if range.isEqual(@tooltipHighlightRange)
       return
