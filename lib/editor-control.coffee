@@ -103,10 +103,14 @@ class EditorControl
       severity: severity
       desc: message
       editor: @editor.id
-    marker.disposables.add marker.onDidChange ({isValid}) ->
+    {CompositeDisposable} = require 'atom'
+    disp = new CompositeDisposable
+    disp.add marker.onDidChange ({isValid}) ->
       unless isValid
         resItem.destroy()
         marker.destroy()
+    disp.add marker.onDidDestroy ->
+      disp.dispose()
 
     @decorateMarker(marker)
 
