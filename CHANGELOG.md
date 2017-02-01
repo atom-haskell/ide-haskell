@@ -1,3 +1,6 @@
+## 1.9.2
+* Don't depend on marker internals
+
 ## 1.9.1
 * Make vertical padding smaller on ide-haskell-item-description
 * Add README info on changing panel style
