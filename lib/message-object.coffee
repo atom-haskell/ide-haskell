@@ -20,10 +20,10 @@ class MessageObject
 
   toHtml: ->
     if @highlighter? and @text?
-      html = require('./highlight')
+      html = require('atom-highlight')
         fileContents: @text
         scopeName: @highlighter
-        registry: atom.grammars
+        nbsp: false
       unless html?
         @highlighter = null
         @toHtml()
