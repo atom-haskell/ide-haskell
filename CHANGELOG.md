@@ -1,3 +1,6 @@
+## 1.9.3
+* Use atom-highlight package for highlighting
+
 ## 1.9.2
 * Don't depend on marker internals
 
