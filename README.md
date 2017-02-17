@@ -1,4 +1,4 @@
-# IDE-Haskell [![Join the chat at https://gitter.im/atom-haskell/ide-haskell](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/atom-haskell/ide-haskell?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+# IDE-Haskell
 
 Welcome to IDE-Haskell plugin for amazing [Atom](http://atom.io) editor! This
 plugin is intended to help you with development in
