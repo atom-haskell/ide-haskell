@@ -20,8 +20,9 @@ class EditorControl
     gutterElement = atom.views.getView(@gutter)
     @disposables.add gutterElement, 'mouseenter', ".decoration", (e) =>
       bufferPt = bufferPositionFromMouseEvent @editor, e
-      @lastMouseBufferPt = bufferPt
-      @showCheckResult bufferPt, true
+      if bufferPt?
+        @lastMouseBufferPt = bufferPt
+        @showCheckResult bufferPt, true
     @disposables.add gutterElement, 'mouseleave', ".decoration", (e) =>
       @hideTooltip()
 
@@ -46,6 +47,8 @@ class EditorControl
     # show expression type if mouse stopped somewhere
     @disposables.add editorElement.rootElement, 'mousemove', '.scroll-view', (e) =>
       bufferPt = bufferPositionFromMouseEvent @editor, e
+
+      return unless bufferPt?
 
       return if @lastMouseBufferPt?.isEqual(bufferPt)
       @lastMouseBufferPt = bufferPt

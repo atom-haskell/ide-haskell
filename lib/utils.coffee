@@ -9,5 +9,6 @@ module.exports = Utils =
 
   # screen position from mouse event
   bufferPositionFromMouseEvent: (editor, event) ->
-    editor.bufferPositionForScreenPosition (
-      atom.views.getView(editor).component.screenPositionForMouseEvent event)
+    sp = atom.views.getView(editor).component.screenPositionForMouseEvent event
+    return null if isNaN(sp.row) or isNaN(sp.column)
+    editor.bufferPositionForScreenPosition sp
