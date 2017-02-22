@@ -1,3 +1,8 @@
+## 1.9.4
+* Fix #192
+* Add IRC chat info
+* Removed gitter badge
+
 ## 1.9.3
 * Use atom-highlight package for highlighting
 
