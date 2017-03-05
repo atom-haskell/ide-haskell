@@ -2,7 +2,7 @@
 
 module.exports=
 class ParamSelectView extends SelectListView
-  initialize: ({@onConfirmed, @onCancelled, items, heading, @itemTemplate, @itemFilterName}) ->
+  initialize: ({@onConfirmed, @onCancelled, items, heading, @itemTemplate, @itemFilterKey}) ->
     super
     @panel = atom.workspace.addModalPanel
       item: this

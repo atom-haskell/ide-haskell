@@ -140,7 +140,7 @@ class PluginManager
             items: if typeof spec.items is 'function' then spec.items() else spec.items
             heading: spec.description
             itemTemplate: spec.itemTemplate
-            itemFilterName: spec.itemFilterName
+            itemFilterKey: spec.itemFilterKey
             onConfirmed: (value) =>
               @configParams[pluginName][name] = value
               show()
