@@ -1,3 +1,6 @@
+## 1.9.5
+* Fix ParamSelectView filter key error
+
 ## 1.9.4
 * Fix #192
 * Add IRC chat info
