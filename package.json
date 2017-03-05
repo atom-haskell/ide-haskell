@@ -25,6 +25,13 @@
       }
     }
   },
+  "consumedServices": {
+    "linter-indie": {
+      "versions": {
+        "1.0.0": "consumeLinter"
+      }
+    }
+  },
   "dependencies": {
     "atom-haskell-utils": "^0.7.8",
     "atom-highlight": "^0.3.0",

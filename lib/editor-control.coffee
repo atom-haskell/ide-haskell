@@ -10,21 +10,22 @@ class EditorControl
 
     editorElement = atom.views.getView(@editor)
 
-    @gutter = @editor.gutterWithName "ide-haskell-check-results"
-    @gutter ?= @editor.addGutter
-      name: "ide-haskell-check-results"
-      priority: 10
-
     {bufferPositionFromMouseEvent} = require './utils'
 
-    gutterElement = atom.views.getView(@gutter)
-    @disposables.add gutterElement, 'mouseenter', ".decoration", (e) =>
-      bufferPt = bufferPositionFromMouseEvent @editor, e
-      if bufferPt?
-        @lastMouseBufferPt = bufferPt
-        @showCheckResult bufferPt, true
-    @disposables.add gutterElement, 'mouseleave', ".decoration", (e) =>
-      @hideTooltip()
+    if atom.config.get('ide-haskell.messageDisplayFrontend') is 'builtin'
+      @gutter = @editor.gutterWithName "ide-haskell-check-results"
+      @gutter ?= @editor.addGutter
+        name: "ide-haskell-check-results"
+        priority: 10
+
+      gutterElement = atom.views.getView(@gutter)
+      @disposables.add gutterElement, 'mouseenter', ".decoration", (e) =>
+        bufferPt = bufferPositionFromMouseEvent @editor, e
+        if bufferPt?
+          @lastMouseBufferPt = bufferPt
+          @showCheckResult bufferPt, true
+      @disposables.add gutterElement, 'mouseleave', ".decoration", (e) =>
+        @hideTooltip()
 
     # buffer events for automatic check
     buffer = @editor.getBuffer()
