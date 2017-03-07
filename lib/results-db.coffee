@@ -23,7 +23,7 @@ class ResultsDB
         @results.filter(({severity}) -> not (severity in severityArr))
         .concat(res.map (i) => new ResultItem(@, i))
     else
-      @results = res
+      @results = res.map (i) => new ResultItem(@, i)
 
     unless severityArr?
       severityArr = []
