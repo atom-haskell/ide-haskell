@@ -1,3 +1,7 @@
+## 1.9.6
+* Use Atom tooltips for panel elements
+* Fix #197
+
 ## 1.9.5
 * Fix ParamSelectView filter key error
 
