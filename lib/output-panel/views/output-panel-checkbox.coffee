@@ -5,6 +5,12 @@ class OutputPanelCheckbox extends HTMLElement
     @disposables = new SubAtom
     @disposables.add @emitter = new Emitter
     @disposables.add this, 'click', => @toggleFileFilter()
+    @disposables.add atom.tooltips.add @,
+      title: =>
+        if @getFileFilter()
+          "Show current file messages"
+        else
+          "Show all project messages"
 
   onCheckboxSwitched: (callback) ->
     @emitter.on 'checkbox-switched', callback

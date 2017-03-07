@@ -38,18 +38,6 @@
   }
 }
 
-.panel-tooltip() {
-  position: absolute;
-  background: @overlay-background-color;
-  border: solid 1px @overlay-border-color;
-  border-radius: @component-border-radius;
-  padding: 0.3em;
-  pointer-events: none;
-  display: block;
-  white-space: nowrap;
-  z-index: 100;
-}
-
 ide-haskell-panel {
   display: flex;
 
@@ -235,14 +223,6 @@ ide-haskell-panel {
       &.enabled:before {
         content: "\a0\e926\a0";
       }
-      &:hover:after {
-        .panel-tooltip;
-        content: "Show all project messages";
-      }
-      &.enabled:hover:after {
-        .panel-tooltip;
-        content: "Show current file messages";
-      }
       border-radius: @component-border-radius;
     }
   }
@@ -260,25 +240,12 @@ ide-haskell-panel {
     ide-haskell-param-value {
       margin-right: 1ex;
     }
-    &:not(.hidden-value):hover:after {
-      .panel-tooltip;
-      content:  attr(data-display-name);
-    }
     &.hidden-value {
       &:before {
         content: attr(data-display-name);
       }
       ide-haskell-param-value {
         display: none;
-      }
-      &:hover {
-        ide-haskell-param-value {
-          &:before {
-            content: attr(data-display-name) ": ";
-          }
-          .panel-tooltip;
-          margin-right: 0;
-        }
       }
     }
   }

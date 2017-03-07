@@ -129,11 +129,15 @@ class PluginManager
         elem.appendChild elemVal = document.createElement "ide-haskell-param-value"
         spec.displayName ?= name.charAt(0).toUpperCase() + name.slice(1)
         show = =>
-          elem.setAttribute('data-display-name', spec.displayName)
-          elemVal.setAttribute('data-display-name', spec.displayName)
           elemVal.innerText = spec.displayTemplate(@configParams[pluginName][name])
           spec.onChanged?(@configParams[pluginName][name])
         show()
+        disp.add atom.tooltips.add elem,
+          title: ->
+            if elem.classList.contains 'hidden-value'
+              "#{spec.displayName}: #{elemVal.innerText}"
+            else
+              spec.displayName
         @changeParamFs[pluginName][name] = change = (resolve, reject) =>
           ParamSelectView = require './output-panel/views/param-select-view'
           new ParamSelectView
