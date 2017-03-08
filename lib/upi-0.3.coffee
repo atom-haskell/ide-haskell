@@ -7,28 +7,6 @@ TODO:
 * Destruction handling
 ###
 
-###
-Utility function to extract event range/type for a given event
-
-editor: TextEditor, editor that generated event
-detail: event detail, ignored if eventType is set
-eventType: String, event type, one of 'keyboard', 'context', 'mouse'
-pos: Point, or Point-like Object, event position, can be undefined
-controller: leave undefined, this is internal field
-
-callback: callback({pos, crange}, eventType)
-  pos: Point, event position
-  crange: Range, event range
-  eventType: String, event type, one of 'keyboard', 'context', 'mouse'
-###
-withEventRange = ({editor, detail, eventType, pos, controller}, callback) ->
-  pos = Point.fromObject pos if pos?
-  eventType ?= getEventType detail
-  controller ?= pluginManager.controller(editor)
-  return unless controller?
-
-  callback (controller.getEventRange pos, eventType)
-
 module.exports =
 class UPI
   constructor: (@pluginManager) ->
@@ -42,8 +20,8 @@ class UPI
       controller = @pluginManager.controller(editor)
       for {handler} in subs
         tooltipPromise =
-          tooltipPromise.catch (rst) ->
-            withEventRange {controller, pos, eventType}, ({crange, pos, eventType}) ->
+          tooltipPromise.catch (rst) =>
+            @withEventRange {controller, pos, eventType}, ({crange, pos, eventType}) ->
               Promise.resolve(handler editor, crange, eventType)
               .then (tt) ->
                 if tt? and tt
@@ -72,7 +50,7 @@ class UPI
       throw new Error("name has to be specified for UPI")
     if @instances.has(name)
       throw new Error("Plugin #{name} already registered with UPI")
-    instance = new UPIInstance(@pluginManager, name)
+    instance = new UPIInstance(@pluginManager, name, @)
     @instances.set(name, instance)
 
     if menu?
@@ -108,9 +86,32 @@ class UPI
   dispose: ->
     @disposables.dispose()
 
+  ###
+  Utility function to extract event range/type for a given event
+
+  editor: TextEditor, editor that generated event
+  detail: event detail, ignored if eventType is set
+  eventType: String, event type, one of 'keyboard', 'context', 'mouse'
+  pos: Point, or Point-like Object, event position, can be undefined
+  controller: leave undefined, this is internal field
+
+  callback: callback({pos, crange}, eventType)
+    pos: Point, event position
+    crange: Range, event range
+    eventType: String, event type, one of 'keyboard', 'context', 'mouse'
+  ###
+  withEventRange: ({editor, detail, eventType, pos, controller}, callback) =>
+    # Note: fat arrow is required since we're re-exporting this later
+    pos = Point.fromObject pos if pos?
+    eventType ?= getEventType detail
+    controller ?= @pluginManager.controller(editor)
+    return unless controller?
+
+    callback (controller.getEventRange pos, eventType)
+
 
 class UPIInstance
-  constructor: (pluginManager, pluginName, disposables) ->
+  constructor: (pluginManager, pluginName, {withEventRange}) ->
     @disposables = new CompositeDisposable
     @tooltipEvents = new Set
 
