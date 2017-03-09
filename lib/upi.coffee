@@ -40,7 +40,7 @@ class UPIInstance
               if 0 or undefined, progress bar is not shown
   ###
   setStatus: (status) ->
-    @pluginManager.outputView.backendStatus status
+    @pluginManager.outputView.backendStatus @pluginName, status
 
   ###
   Add messages to ide-haskell output

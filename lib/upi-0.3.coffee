@@ -14,28 +14,43 @@ class UPI
     @disposables = new CompositeDisposable
     @disposables.add @pluginManager.onShouldShowTooltip ({editor, pos, eventType}) =>
       subs =
-        [].concat((Array.from(@instances.values()).map (inst) -> Array.from(inst.tooltipEvents.values()))...)
-        .sort (a, b) -> a.priority - b.priority
-      tooltipPromise = Promise.reject()
+        [].concat(
+          (
+            Array.from(@instances.entries())
+            .map (v) ->
+              [pluginName, inst] = v
+              Array.from(inst.tooltipEvents.values()).map (vs) ->
+                vs.pluginName = pluginName
+                return vs
+          )...
+        )
+        .sort (a, b) -> b.priority - a.priority
+      tooltipPromise = Promise.reject(status: ignore: true)
       controller = @pluginManager.controller(editor)
-      for {handler} in subs
+      for {pluginName, handler} in subs
         tooltipPromise =
           tooltipPromise.catch (rst) =>
             @withEventRange {controller, pos, eventType}, ({crange, pos, eventType}) ->
               Promise.resolve(handler editor, crange, eventType)
+              .catch (status) ->
+                throw {pluginName, status}
               .then (tt) ->
                 if tt? and tt
                   {range, text} = tt
                   controller.showTooltip pos, range, text, {eventType, subtype: 'external'}
                 else
                   throw rst
-      tooltipPromise.catch (status = {status: 'warning'}) =>
-        if status instanceof Error
+      tooltipPromise.catch (status) =>
+        unless status?
+          throw new Error('No status')
+        if status.status.message?
           console.warn status
-          status = status: 'warning'
-        unless status.ignore
+          status.status =
+            status: 'warning'
+            detail: status.status.message
+        unless status.status.ignore
           controller.hideTooltip {eventType}
-          @pluginManager.outputView.backendStatus status
+          @pluginManager.outputView.backendStatus status.pluginName, status.status
 
   ###
   Call this function in consumer to get actual interface
@@ -139,7 +154,7 @@ class UPIInstance
                   if 0 or undefined, progress bar is not shown
       ###
       status: (status) ->
-        pluginManager.outputView.backendStatus status
+        pluginManager.outputView.backendStatus pluginName, status
 
       ###
       Add messages to ide-haskell output

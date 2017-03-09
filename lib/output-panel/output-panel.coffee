@@ -20,8 +20,6 @@ class OutputPanel
 
     @disposables.add @results.onDidUpdate => @currentResult = null
 
-    @backendStatus status: 'ready'
-
   toggle: ->
     if @panel.isVisible()
       @panel.hide()
@@ -49,9 +47,9 @@ class OutputPanel
   setHideParameterValues: (value) ->
     @element.setHideParameterValues(value)
 
-  backendStatus: ({status, progress}) ->
-    @element.statusChanged {status, oldStatus: @status ? 'ready'}
-    @status = status
+  backendStatus: (pluginName, statusObject) ->
+    {status, progress, detail} = statusObject
+    @element.statusChanged pluginName, {status, detail}
     unless status is 'progress'
       progress ?= 0
     @element.setProgress progress if progress?
