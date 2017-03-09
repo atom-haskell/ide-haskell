@@ -75,6 +75,11 @@ module.exports = IdeHaskell =
       '''
       order: 11
 
+    panelAutoHide:
+      type: "boolean"
+      default: false
+      description: "Hide panel when there are no messages to show"
+
   cleanConfig: ->
     [ 'onSaveCheck'
     , 'onSaveLint'

@@ -14,7 +14,9 @@ class PluginManager
     @controllers = new WeakMap
     @disposables.add @emitter = new Emitter
 
-    @disposables.add @onResultsUpdated ({types}) => @updateEditorsWithResults(types)
+    @disposables.add @onResultsUpdated ({types}) =>
+      @panelAutoHide() if atom.config.get('ide-haskell.panelAutoHide')
+      @updateEditorsWithResults(types)
 
     @createOutputViewPanel(state)
     @subscribeEditorController()
@@ -58,6 +60,12 @@ class PluginManager
 
   onResultsUpdated: (callback) =>
     @checkResults.onDidUpdate callback
+
+  panelAutoHide: ->
+    if @checkResults.results.length > 0
+      @outputView?.show()
+    else
+      @outputView?.hide()
 
   controller: (editor) ->
     @controllers?.get? editor
