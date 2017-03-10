@@ -42,19 +42,30 @@ class OutputPanelView extends HTMLElement
           """)
         .join('')
 
-    OutputPanelButtonsElement = require './output-panel-buttons'
-    @disposables.add @addPanelControl new OutputPanelButtonsElement,
-      id: 'buttons'
-    OutputPanelCheckboxElement = require './output-panel-checkbox'
-    @disposables.add @addPanelControl new OutputPanelCheckboxElement,
-      id: 'checkboxUriFilter'
-    ProgressBar = require './progress-bar'
-    @disposables.add @addPanelControl new ProgressBar,
-      id: 'progressBar'
+    {OutputPanelButtons} = require './output-panel-buttons'
+    @buttons = new OutputPanelButtons
+    @buttons.element.id = 'buttons'
+    @heading.appendChild(@buttons.element)
+    {OutputPanelCheckbox} = require './output-panel-checkbox'
+    @checkboxUriFilter = new OutputPanelCheckbox
+    @checkboxUriFilter.element.id = 'checkboxUriFilter'
+    @heading.appendChild(@checkboxUriFilter.element)
+    # @disposables.add @addPanelControl new OutputPanelCheckboxElement,
+    #   id: 'checkboxUriFilter'
+    {ProgressBar} = require './progress-bar'
+    @progressBar = new ProgressBar
+    @progressBar.element.id = 'progressBar'
+    @heading.appendChild(@progressBar.element)
+    # @disposables.add @addPanelControl new ProgressBar,
+    #   id: 'progressBar'
     @progressBar.setProgress 0
 
-    OutputPanelItemsElement = require './output-panel-items'
-    @appendChild @items = new OutputPanelItemsElement
+    # OutputPanelItemsElement = require './output-panel-items'
+    # @appendChild @items = new OutputPanelItemsElement
+    {OutputPanelItems} = require './output-panel-items'
+    @items = new OutputPanelItems#(model: @model.results)
+    @items.element.id = 'items'
+    @appendChild(@items.element)
     @disposables.add @buttons.onButtonClicked =>
       @updateItems()
     @disposables.add @checkboxUriFilter.onCheckboxSwitched =>
