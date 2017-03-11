@@ -384,7 +384,7 @@ class UPIInstance
   destroy: ->
     @disposables.dispose()
     @tooltipEvents.clear()
-    Object.getOwnPropertyNames().forEach (p) =>
+    Object.getOwnPropertyNames(this).forEach (p) =>
       @[p] = null
     @destroyed = true
 
