@@ -1,11 +1,14 @@
 {CompositeDisposable, Point, Disposable} = require 'atom'
 {MainMenuLabel, getEventType} = require './utils'
 
-###
-TODO:
-* Separate statuses for plugins
-* Destruction handling
-###
+class UPIError extends Error
+  constructor: (message) ->
+    super(arguments...)
+    Object.defineProperty this, "name",
+      value: this.constructor.name
+    Object.defineProperty this, "message",
+      value: message
+    Error.captureStackTrace(this, this.constructor)
 
 module.exports =
 class UPI
@@ -42,7 +45,7 @@ class UPI
                   throw rst
       tooltipPromise.catch (status) =>
         unless status?
-          throw new Error('No status')
+          throw new UPIError('No status')
         if status.status.message?
           console.warn status
           status.status =
@@ -62,9 +65,9 @@ class UPI
   consume: (options = {}) ->
     {name, menu, messageTypes, events, controls, params, consumer, tooltipEvent} = options
     unless name?
-      throw new Error("name has to be specified for UPI")
+      throw new UPIError("name has to be specified for UPI")
     if @instances.has(name)
-      throw new Error("Plugin #{name} already registered with UPI")
+      throw new UPIError("Plugin #{name} already registered with UPI")
     instance = new UPIInstance(@pluginManager, name, @)
     @instances.set(name, instance)
 
@@ -93,10 +96,11 @@ class UPI
 
     consumer(instance)
 
-    instance.disposables.add new Disposable =>
+    disp = new Disposable =>
       @instances.delete(name)
-    @disposables.add instance.disposables
-    return instance.disposables
+      instance.destroy()
+    @disposables.add disp
+    return disp
 
   dispose: ->
     @disposables.dispose()
@@ -129,6 +133,7 @@ class UPIInstance
   constructor: (pluginManager, pluginName, {withEventRange}) ->
     @disposables = new CompositeDisposable
     @tooltipEvents = new Set
+    @destroyed = false
 
     @menu =
       ###
@@ -237,7 +242,7 @@ class UPIInstance
           Promise.resolve(tooltip(crange)).then ({range, text, persistOnCursorMove}) ->
             controller.showTooltip pos, range, text, {eventType, subtype: 'external', persistOnCursorMove}
           .catch (status = {status: 'warning'}) =>
-            if status instanceof Error
+            if status.message?
               console.warn status
               status = status: 'warning'
             unless status.ignore
@@ -375,3 +380,15 @@ class UPIInstance
         pluginManager.setConfigParam(plugin, name, value)
 
     @utils = {withEventRange}
+
+  destroy: ->
+    @disposables.dispose()
+    @tooltipEvents.clear()
+    Object.getOwnPropertyNames().forEach (p) =>
+      @[p] = null
+    @destroyed = true
+
+  check: ->
+    if(@destroyed)
+      throw new UPIError('This UPI interface was destroyed')
+    return this
