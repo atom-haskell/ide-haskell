@@ -294,6 +294,10 @@ ide-haskell-item-description {
 
 You are free to write any CSS, of course. Bear in mind, however, that any selectors not listed above are subject to sudden change.
 
+### Using [atom-linter](https://atom.io/packages/linter) for output
+
+You can use linter package for displaying some messages. Install linter package, and then change `messageDisplayFrontend` in ide-haskell settings to `linter`. Restart Atom.
+
 ## API
 
 Ide-haskell provides service-hub API with `ide-haskell-upi` service.
