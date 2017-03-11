@@ -205,7 +205,7 @@ class EditorControl
     detail.type = 'tooltip'
     highlightMarker = @editor.markBufferRange range
     highlightMarker.setProperties detail
-    TooltipMessage = require './views/tooltip-view'
+    {TooltipMessage} = require './views/tooltip-view'
     @editor.decorateMarker highlightMarker,
       type: 'overlay'
       position: 'tail'
