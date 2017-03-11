@@ -20,8 +20,8 @@ class PluginManager
     @createOutputViewPanel(state)
     @subscribeEditorController()
 
-    @changeParamFs = {}
-    @configParams = state.configParams ? {}
+    @configParamsState = state.configParams ? {}
+    @configParams = {}
 
     @disposables.add atom.config.observe 'ide-haskell.hideParameterValues', (value) =>
       @outputView.setHideParameterValues(value)
@@ -35,8 +35,14 @@ class PluginManager
     @deleteOutputViewPanel()
 
   serialize: ->
+    cp = {}
+    for pluginName, vars of @configParams
+      cp[pluginName] = {}
+      for name, obj of vars
+        cp[pluginName][name] = obj.value
     outputView: @outputView?.serialize()
-    configParams: @configParams
+    configParams: cp
+
 
   onShouldShowTooltip: (callback) ->
     @emitter.on 'should-show-tooltip', callback
@@ -65,7 +71,7 @@ class PluginManager
 
   # Create and delete output view panel.
   createOutputViewPanel: (state) ->
-    OutputPanel = require './output-panel/output-panel'
+    {OutputPanel} = require './output-panel/output-panel'
     @outputView = new OutputPanel(state.outputView, @checkResults)
 
   deleteOutputViewPanel: ->
@@ -134,44 +140,18 @@ class PluginManager
   addConfigParam: (pluginName, specs) ->
     {CompositeDisposable} = require 'atom'
     disp = new CompositeDisposable
-    @changeParamFs[pluginName] ?= {}
     @configParams[pluginName] ?= {}
+    {ParamControl} = require './views/paramControl'
     for name, spec of specs
       do (name, spec) =>
-        @configParams[pluginName][name] ?= spec.default
-        elem = document.createElement "ide-haskell-param"
-        elem.classList.add "ide-haskell--#{pluginName}", "ide-haskell-param--#{name}"
-        if atom.config.get('ide-haskell.hideParameterValues')
-          elem.classList.add 'hidden-value'
-        elem.appendChild elemVal = document.createElement "ide-haskell-param-value"
-        spec.displayName ?= name.charAt(0).toUpperCase() + name.slice(1)
-        show = =>
-          elemVal.innerText = spec.displayTemplate(@configParams[pluginName][name])
-          spec.onChanged?(@configParams[pluginName][name])
-        show()
-        disp.add atom.tooltips.add elem,
-          title: ->
-            if elem.classList.contains 'hidden-value'
-              "#{spec.displayName}: #{elemVal.innerText}"
-            else
-              spec.displayName
-        @changeParamFs[pluginName][name] = change = (resolve, reject) =>
-          ParamSelectView = require './output-panel/views/param-select-view'
-          new ParamSelectView
-            items: if typeof spec.items is 'function' then spec.items() else spec.items
-            heading: spec.description
-            itemTemplate: spec.itemTemplate
-            itemFilterKey: spec.itemFilterKey
-            onConfirmed: (value) =>
-              @configParams[pluginName][name] = value
-              show()
-              resolve?(value)
-            onCancelled: ->
-              reject?()
-        disp.add @outputView.addPanelControl elem,
-          events:
-            click: -> change()
-          before: '#progressBar'
+        @outputView.addPanelControl ParamControl, {
+          pluginName, name, spec,
+          ref: "#{pluginName}.#{name}",
+          value: @configParamsState[pluginName]?[name]
+        }
+        .then (res) =>
+          @configParams[pluginName][name] = res
+          disp.add res.disposables
     return disp
 
   getConfigParam: (pluginName, name) ->
@@ -180,11 +160,11 @@ class PluginManager
         mkError('PackageInactiveError',
           "Ide-haskell cannot get parameter #{pluginName}:#{name}
            of inactive package #{pluginName}"))
-    if @configParams[pluginName]?[name]?
-      return Promise.resolve(@configParams[pluginName][name])
-    else if @changeParamFs[pluginName]?[name]?
+    if @configParams[pluginName]?[name]?.value?
+      return Promise.resolve(@configParams[pluginName][name].value)
+    else if @configParams[pluginName]?[name]?.setValue?
       new Promise (resolve, reject) =>
-        @changeParamFs[pluginName][name](resolve, reject)
+        @configParams[pluginName][name].setValue(null, resolve, reject)
     else
       return Promise.reject(
         mkError('ParamUndefinedError',
@@ -197,13 +177,12 @@ class PluginManager
         mkError('PackageInactiveError',
           "Ide-haskell cannot set parameter #{pluginName}:#{name}
            of inactive package #{pluginName}"))
-    if value?
-      @configParams[pluginName] ?= {}
-      @configParams[pluginName][name] = value
+    if value? and @configParams[pluginName]?[name]?
+      @configParams[pluginName][name].value = value
       Promise.resolve(value)
-    else if @changeParamFs[pluginName]?[name]?
+    else if @configParams[pluginName]?[name]?
       new Promise (resolve, reject) =>
-        @changeParamFs[pluginName][name](resolve, reject)
+        @configParams[pluginName][name].setValue(null, resolve, reject)
     else
       return Promise.reject(
         mkError('ParamUndefinedError',
