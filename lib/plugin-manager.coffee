@@ -71,7 +71,7 @@ class PluginManager
 
   # Create and delete output view panel.
   createOutputViewPanel: (state) ->
-    {OutputPanel} = require './output-panel/output-panel'
+    {OutputPanel} = require './output-panel'
     @outputView = new OutputPanel(state.outputView, @checkResults)
 
   deleteOutputViewPanel: ->
@@ -98,7 +98,7 @@ class PluginManager
     return unless atom.config.get('ide-haskell.messageDisplayFrontend') is 'linter'
     @disposables.add @onResultsUpdated ({types}) =>
       linter.deleteMessages()
-      MessageObject = require './message-object'
+      {MessageObject} = require './utils'
       {Range} = require 'atom'
       linter.setMessages(
         for result in @checkResults.resultsWithURI()
