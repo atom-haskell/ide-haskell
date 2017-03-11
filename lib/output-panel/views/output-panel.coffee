@@ -15,6 +15,8 @@ class OutputPanelView extends HTMLElement
     @style.width = @model.state.width if @model.state?.width?
     @checkboxUriFilter.setFileFilter @model.state.fileFilter
 
+    @statusMap = new Map
+
     @
 
   createdCallback: ->
@@ -27,6 +29,19 @@ class OutputPanelView extends HTMLElement
       id: 'status'
       attrs:
         'data-status': 'ready'
+
+    @disposables.add atom.tooltips.add @status,
+      'class': 'ide-haskell-status-tooltip'
+      title: =>
+        (for [plugin, {status, detail}] in Array.from(@statusMap.entries())
+          """
+          <ide-haskell-status-item>
+            <ide-haskell-status-icon data-status=\"#{status}\">#{plugin}</ide-haskell-status-icon>
+            <ide-haskell-status-detail>#{detail ? ""}</ide-haskell-status-detail>
+          </ide-haskell-status-item>
+          """)
+        .join('')
+
     OutputPanelButtonsElement = require './output-panel-buttons'
     @disposables.add @addPanelControl new OutputPanelButtonsElement,
       id: 'buttons'
@@ -101,6 +116,8 @@ class OutputPanelView extends HTMLElement
     @remove()
     @items.destroy()
     @disposables.dispose()
+    @statusMap.clear()
+    @statusMap = null
 
   setPanelPosition: (@pos) ->
     @setAttribute 'data-pos', @pos
@@ -160,14 +177,15 @@ class OutputPanelView extends HTMLElement
         @activateTab name
         break
 
-  statusChanged: ({status, oldStatus}) ->
+  statusChanged: (pluginName, status) ->
     prio =
-      progress: 0
+      progress: 5
       error: 20
       warning: 10
       ready: 0
-    if prio[status] >= prio[oldStatus] or status is 'progress'
-      @status.setAttribute 'data-status', status
+    @statusMap.set(pluginName, status)
+    [consensus] = Array.from(@statusMap.values()).sort (a, b) -> prio[b.status] - prio[a.status]
+    @status.setAttribute 'data-status', consensus.status
 
   showItem: (item) ->
     @activateTab item.severity

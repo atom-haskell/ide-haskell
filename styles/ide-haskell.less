@@ -38,6 +38,30 @@
   }
 }
 
+.status-icon() {
+  &:before {
+    .icon;
+    font-size: 1.2em;
+    margin: 0 0.5em;
+    content: @check;
+  }
+
+  &[data-status=progress]:before {
+    content: @hourglass;
+  }
+  &[data-status=ready]:before {
+    content: @check;
+  }
+  &[data-status=error]:before {
+    color: @text-color-error;
+    content: @alert;
+  }
+  &[data-status=warning]:before {
+    content: @stop;
+    color: @text-color-warning;
+  }
+}
+
 ide-haskell-panel {
   display: flex;
 
@@ -152,27 +176,7 @@ ide-haskell-panel {
     ide-haskell-status-icon {
       padding: 0.5ex 0;
       margin: 0px 0.5em;
-      font-size: 1.2em;
-
-      &:before {
-        .icon;
-        content: "\a0" @check "\a0";
-      }
-
-      &[data-status=progress]:before {
-        content: "\a0" @hourglass "\a0";
-      }
-      &[data-status=ready]:before {
-        content: "\a0" @check "\a0";
-      }
-      &[data-status=error]:before {
-        color: @text-color-error;
-        content: "\a0" @alert "\a0";
-      }
-      &[data-status=warning]:before {
-        content: "\a0" @stop "\a0";
-        color: @text-color-warning;
-      }
+      .status-icon();
     }
 
     ide-haskell-button {
@@ -218,10 +222,11 @@ ide-haskell-panel {
       font-size: 1.2em;
       &:before {
         font-family: "icomoon";
-        content: "\a0\e930\a0";
+        content: "\e930";
+        margin: 0 0.5em;
       }
       &.enabled:before {
-        content: "\a0\e926\a0";
+        content: "\e926";
       }
       border-radius: @component-border-radius;
     }
@@ -384,6 +389,27 @@ ide-haskell-tooltip {
     color: @text-color-highlight;
     font-size: 150%;
     text-align: center;
+  }
+}
+
+.ide-haskell-status-tooltip .tooltip-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  ide-haskell-status-icon {
+    .status-icon();
+    &:before {
+      margin-left: 0;
+    }
+  }
+  ide-haskell-status-detail {
+    display: block;
+    margin-left: 1.7em;
+  }
+  ide-haskell-status-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 
