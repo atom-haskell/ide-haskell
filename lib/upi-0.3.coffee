@@ -46,6 +46,9 @@ class UPI
       tooltipPromise.catch (status) =>
         unless status?
           throw new UPIError('No status')
+        unless status.status?
+          atom.notifications.addFatalError(status.toString(), detail: status, stack: status.stack, dismissable: true)
+          return
         if status.status.message?
           console.warn status
           status.status =
