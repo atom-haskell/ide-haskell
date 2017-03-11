@@ -146,12 +146,17 @@ class PluginManager
       do (name, spec) =>
         @outputView.addPanelControl ParamControl, {
           pluginName, name, spec,
-          ref: "#{pluginName}.#{name}",
           value: @configParamsState[pluginName]?[name]
         }
         .then (res) =>
           @configParams[pluginName][name] = res
           disp.add res.disposables
+    ###
+    TODO: Fix this horribleness.
+    There is a chance that disp will be disposed before promises above
+    resolve. That will be an error.
+    Also, leaking scope like crazy. Maybe there's a way to keep incapsulation.
+    ###
     return disp
 
   getConfigParam: (pluginName, name) ->
