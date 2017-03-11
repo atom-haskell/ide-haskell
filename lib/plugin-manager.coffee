@@ -14,7 +14,8 @@ class PluginManager
     @controllers = new WeakMap
     @disposables.add @emitter = new Emitter
 
-    @disposables.add @onResultsUpdated ({types}) => @updateEditorsWithResults(types)
+    if atom.config.get('ide-haskell.messageDisplayFrontend') is 'builtin'
+      @disposables.add @onResultsUpdated ({types}) => @updateEditorsWithResults(types)
 
     @createOutputViewPanel(state)
     @subscribeEditorController()
@@ -87,6 +88,20 @@ class PluginManager
         @emitter.emit 'did-stop-changing', editor.getBuffer()
       controller.updateResults @checkResults.filter uri: editor.getPath()
 
+  setLinter: (linter) ->
+    return unless atom.config.get('ide-haskell.messageDisplayFrontend') is 'linter'
+    @disposables.add @onResultsUpdated ({types}) =>
+      linter.deleteMessages()
+      MessageObject = require './message-object'
+      {Range} = require 'atom'
+      linter.setMessages(
+        for result in @checkResults.resultsWithURI()
+          type: if result.severity is 'lint' then 'info' else result.severity
+          html: MessageObject.fromObject(result.message).toHtml()
+          filePath: result.uri
+          range: new Range(result.position, result.position.translate([0, 1]))
+      )
+
   removeController: (editor) ->
     @controllers.get(editor)?.deactivate()
     @controllers.delete(editor)
@@ -109,9 +124,11 @@ class PluginManager
       @removeController editor
 
   nextError: ->
+    return unless atom.config.get('ide-haskell.messageDisplayFrontend') is 'builtin'
     @outputView?.showNextError()
 
   prevError: ->
+    return unless atom.config.get('ide-haskell.messageDisplayFrontend') is 'builtin'
     @outputView?.showPrevError()
 
   addConfigParam: (pluginName, specs) ->

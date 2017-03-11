@@ -13,6 +13,8 @@ class OutputPanelButtons extends HTMLElement
       autoScroll: true
 
   createButton: (btn, opts) ->
+    unless atom.config.get('ide-haskell.messageDisplayFrontend') is 'builtin'
+      return if (opts?.uriFilter ? true)
     @buttons[btn] =
       element: null
       options: opts ? {}

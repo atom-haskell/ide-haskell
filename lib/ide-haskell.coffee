@@ -29,6 +29,16 @@ module.exports = IdeHaskell =
       enum: ['Show Tooltip', 'Hide Tooltip', 'Nothing']
       default: 'Nothing'
       order: 40
+    messageDisplayFrontend:
+      type: 'string'
+      default: 'builtin'
+      description: '''
+      Frontend to use for displaying errors/warnigns/lints. Builtin
+      (i.e. output panel) and atom-linter supported.
+      Requires Atom restart.
+      '''
+      enum: ['builtin', 'linter']
+      order: 45
     stylishHaskellPath:
       type: "string"
       default: 'stylish-haskell'
@@ -240,3 +250,10 @@ module.exports = IdeHaskell =
   provideUpi3: ->
     @upiProvided = true
     @upi3
+
+  consumeLinter: (indieRegistry) ->
+    linter = indieRegistry.register
+      name: 'IDE-Haskell'
+    @disposables.add linter
+    @pluginManager.setLinter linter
+    linter
