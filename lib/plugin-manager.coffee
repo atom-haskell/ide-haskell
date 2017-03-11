@@ -12,7 +12,9 @@ class PluginManager
     if atom.config.get('ide-haskell.messageDisplayFrontend') is 'builtin'
       @disposables.add @onResultsUpdated ({types}) => @updateEditorsWithResults(types)
 
-    @createOutputViewPanel(state)
+    {OutputPanel} = require './output-panel'
+    @outputView = new OutputPanel(state.outputView, @checkResults)
+
     @subscribeEditorController()
 
     {ConfigParamManager} = require './config-params'
@@ -26,11 +28,15 @@ class PluginManager
 
   deactivate: ->
     @checkResults.destroy()
+    @checkResults = null
     @disposables.dispose()
     @backend?.shutdownBackend?()
 
     @deleteEditorControllers()
-    @deleteOutputViewPanel()
+    @outputView.destroy()
+    @outputView = null
+    @configParamManager.destroy()
+    @configParamManager = null
 
   serialize: ->
     outputView: @outputView?.serialize()
@@ -61,15 +67,6 @@ class PluginManager
 
   controller: (editor) ->
     @controllers?.get? editor
-
-  # Create and delete output view panel.
-  createOutputViewPanel: (state) ->
-    {OutputPanel} = require './output-panel'
-    @outputView = new OutputPanel(state.outputView, @checkResults)
-
-  deleteOutputViewPanel: ->
-    @outputView.destroy()
-    @outputView = null
 
   addController: (editor) ->
     unless @controllers.get(editor)?
