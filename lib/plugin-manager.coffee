@@ -1,8 +1,3 @@
-mkError = (name, message) ->
-  e = new Error(message)
-  e.name = name
-  return e
-
 module.exports =
 class PluginManager
   constructor: (state) ->
@@ -20,6 +15,9 @@ class PluginManager
     @createOutputViewPanel(state)
     @subscribeEditorController()
 
+    {ConfigParamManager} = require './config-params'
+    @configParamManager = new ConfigParamManager(@outputView, state.configParams)
+
     @configParamsState = state.configParams ? {}
     @configParams = {}
 
@@ -35,13 +33,8 @@ class PluginManager
     @deleteOutputViewPanel()
 
   serialize: ->
-    cp = {}
-    for pluginName, vars of @configParams
-      cp[pluginName] = {}
-      for name, obj of vars
-        cp[pluginName][name] = obj.value
     outputView: @outputView?.serialize()
-    configParams: cp
+    configParams: @configParamManager?.serialize()
 
 
   onShouldShowTooltip: (callback) ->
@@ -138,58 +131,10 @@ class PluginManager
     @outputView?.showPrevError()
 
   addConfigParam: (pluginName, specs) ->
-    {CompositeDisposable} = require 'atom'
-    disp = new CompositeDisposable
-    @configParams[pluginName] ?= {}
-    {ParamControl} = require './views/paramControl'
-    for name, spec of specs
-      do (name, spec) =>
-        @outputView.addPanelControl ParamControl, {
-          pluginName, name, spec,
-          value: @configParamsState[pluginName]?[name]
-        }
-        .then (res) =>
-          @configParams[pluginName][name] = res
-          disp.add res.disposables
-    ###
-    TODO: Fix this horribleness.
-    There is a chance that disp will be disposed before promises above
-    resolve. That will be an error.
-    Also, leaking scope like crazy. Maybe there's a way to keep incapsulation.
-    ###
-    return disp
+    @configParamManager.add(pluginName, specs)
 
   getConfigParam: (pluginName, name) ->
-    unless atom.packages.isPackageActive(pluginName)
-      return Promise.reject(
-        mkError('PackageInactiveError',
-          "Ide-haskell cannot get parameter #{pluginName}:#{name}
-           of inactive package #{pluginName}"))
-    if @configParams[pluginName]?[name]?.value?
-      return Promise.resolve(@configParams[pluginName][name].value)
-    else if @configParams[pluginName]?[name]?.setValue?
-      new Promise (resolve, reject) =>
-        @configParams[pluginName][name].setValue(null, resolve, reject)
-    else
-      return Promise.reject(
-        mkError('ParamUndefinedError',
-          "Ide-haskell cannot get parameter #{pluginName}:#{name}
-           before it is defined"))
+    @configParamManager.get(pluginName, name)
 
   setConfigParam: (pluginName, name, value) ->
-    unless atom.packages.isPackageActive(pluginName)
-      return Promise.reject(
-        mkError('PackageInactiveError',
-          "Ide-haskell cannot set parameter #{pluginName}:#{name}
-           of inactive package #{pluginName}"))
-    if value? and @configParams[pluginName]?[name]?
-      @configParams[pluginName][name].value = value
-      Promise.resolve(value)
-    else if @configParams[pluginName]?[name]?
-      new Promise (resolve, reject) =>
-        @configParams[pluginName][name].setValue(null, resolve, reject)
-    else
-      return Promise.reject(
-        mkError('ParamUndefinedError',
-          "Ide-haskell cannot set parameter #{pluginName}:#{name}
-           before it is defined"))
+    @configParamManager.set(pluginName, name, value)
