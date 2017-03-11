@@ -142,6 +142,7 @@ class UPIInstance
 
     Returns {range, text} or Promise
       range: Range, tooltip highlighting range
+      persistOnCursorMove: Boolean, optional, default false, persist on cursor move regardless of settings
       text: tooltip text. String or {text, highlighter} or {html}
         text: tooltip text
         highlighter: grammar scope that will be used to highlight tooltip text
@@ -150,8 +151,8 @@ class UPIInstance
   showTooltip: ({editor, pos, eventType, detail, tooltip}) ->
     controller = @pluginManager.controller(editor)
     @withEventRange {controller, pos, detail, eventType}, ({crange, pos, eventType}) =>
-      tooltip(crange).then ({range, text}) ->
-        controller.showTooltip pos, range, text, {eventType, subtype: 'external'}
+      Promise.resolve(tooltip(crange)).then ({range, text, persistOnCursorMove}) ->
+        controller.showTooltip pos, range, text, {eventType, subtype: 'external', persistOnCursorMove}
       .catch (status = {status: 'warning'}) =>
         if status instanceof Error
           console.warn status
