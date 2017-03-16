@@ -30,7 +30,7 @@ class UPI
         .sort (a, b) -> b.priority - a.priority
       tooltipPromise = Promise.reject(status: ignore: true)
       controller = @pluginManager.controller(editor)
-      for {pluginName, handler} in subs
+      subs.forEach ({pluginName, handler}) =>
         tooltipPromise =
           tooltipPromise.catch (rst) =>
             @withEventRange {controller, pos, eventType}, ({crange, pos, eventType}) ->
