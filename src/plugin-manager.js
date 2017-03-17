@@ -7,7 +7,7 @@ import {ConfigParamManager} from './config-params'
 import {EditorControl} from './editor-control'
 import {LinterSupport} from './linter-support'
 
-export default class PluginManager {
+export class PluginManager {
   constructor (state) {
     this.checkResults = new ResultsDB()
 

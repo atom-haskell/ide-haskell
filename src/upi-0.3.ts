@@ -2,9 +2,10 @@
 
 import {CompositeDisposable, Point, Disposable, TextBuffer, TextEditor} from 'atom'
 import {MainMenuLabel, getEventType} from './utils'
+import {PluginManager} from './plugin-manager'
 
 export class UPIError extends Error {
-  constructor(message) {
+  constructor(message: string) {
     super(message)
     Object.defineProperty(this, "name",
       {value: this.constructor.name})
@@ -17,7 +18,7 @@ export class UPIError extends Error {
 export class UPI {
   instances: Map<string, UPIInstance>
   disposables: CompositeDisposable
-  constructor(private pluginManager) {
+  constructor(private pluginManager: PluginManager) {
     this.instances = new Map
     this.disposables = new CompositeDisposable
     this.disposables.add(this.pluginManager.onShouldShowTooltip(this.shouldShowTooltip.bind(this)))
@@ -118,13 +119,13 @@ export class UPI {
     this.disposables.dispose()
   }
 
-  withEventRange ({editor, detail, eventType, pos, controller}: TEventRangeParamsInternal, callback: TEventRangeCallback) {
+  withEventRange<T>({editor, detail, eventType, pos, controller}: TEventRangeParamsInternal, callback: TEventRangeCallback<T>) {
     if (pos) pos = Point.fromObject(pos)
     if (!eventType) eventType = getEventType(detail)
     if (!controller) controller = this.pluginManager.controller(editor)
     if (!controller) return
 
-    callback (controller.getEventRange(pos, eventType), eventType)
+    return callback(controller.getEventRange(pos, eventType), eventType)
   }
 
   getEventRange({editor, detail, eventType, pos, controller}: TEventRangeParamsInternal) : {pos: Point, crange: Range} | undefined {
@@ -156,7 +157,7 @@ class UPIInstance {
   public tooltipEvents: Set<TTooltipHandlerSpec>
   private disposables: CompositeDisposable
   private destroyed: boolean
-  constructor(pluginManager, pluginName, main: UPI) {
+  constructor(pluginManager: PluginManager, pluginName: string, main: UPI) {
     this.disposables = new CompositeDisposable
     this.tooltipEvents = new Set
     this.destroyed = false
@@ -176,7 +177,7 @@ class UPIInstance {
     }
     this.messages = {
       status (status) {
-        pluginManager.outputView.backendStatus(pluginName, status)
+        pluginManager.outputView.backendStatus(pluginName, status as any) //TODO Fix this
       },
       add (messages, types) {
         messages = messages.map((m) => {
@@ -223,7 +224,7 @@ class UPIInstance {
           })
         })
       },
-      onShouldShowTooltip (...args) {
+      onShouldShowTooltip (...args: any[]) {
         if (args.length < 2) {
           args.unshift(100)
         }
@@ -259,17 +260,19 @@ class UPIInstance {
       add (spec) {
         return pluginManager.addConfigParam(pluginName, spec)
       },
-      get (...args) {
+      get (...args: any[]) {
         if(args.length < 2) {
           args.unshift(pluginName)
         }
-        return pluginManager.getConfigParam(...args)
+        const [plugin, name] = args
+        return pluginManager.getConfigParam(plugin, name)
       },
-      set (...args) {
+      set (...args: any[]) {
         if(args.length < 3) {
           args.unshift(pluginName)
         }
-        return pluginManager.setConfigParam(...args)
+        const [plugin, name, value] = args
+        return pluginManager.setConfigParam(plugin, name, value)
       }
     }
   }
@@ -311,7 +314,7 @@ declare interface IUPIProgressStatus {
   progress?: number
 }
 
-declare type IUPIStatus = IUPINormalStatus | IUPIProgressStatus
+declare type IUPIStatus = (IUPINormalStatus | IUPIProgressStatus) & {detail: string}
 
 declare interface IUPIMessageText {
   text: string
@@ -543,7 +546,7 @@ declare interface IUPIParams {
     disp: Disposable
     change: object of change functions, keys being param_name
   */
-  add (spec: {[param_name: string]: IParamSpec<any>})
+  add (spec: {[param_name: string]: IParamSpec<any>}): Disposable
 
   /**
   getConfigParam(paramName) or getConfigParam(pluginName, paramName)
@@ -555,7 +558,7 @@ declare interface IUPIParams {
   in case user cancels param selection dialog.
   */
   get<T> (plugin: string, name: string): Promise<T>
-  get<T> (name): Promise<T>
+  get<T> (name: string): Promise<T>
 
   /**
   setConfigParam(paramName, value) or setConfigParam(pluginName, paramName, value)
@@ -578,7 +581,7 @@ declare interface IEventRangeParams {
   pos: TPosition
   controller: undefined
 }
-declare type TEventRangeCallback = (pars: {pos: Point, crange: Range}, eventType: TEventRangeType) => void
+declare type TEventRangeCallback<T> = (pars: {pos: Point, crange: Range}, eventType: TEventRangeType) => T
 declare interface IUPIUtils {
   /**
   Utility function to extract event range/type for a given event
@@ -594,6 +597,6 @@ declare interface IUPIUtils {
     crange: Range, event range
     eventType: String, event type, one of 'keyboard', 'context', 'mouse'
   */
-  withEventRange(params: IEventRangeParams, callback: TEventRangeCallback)
+  withEventRange<T>(params: IEventRangeParams, callback: TEventRangeCallback<T>): T | undefined
 }
 declare type TTooltipHandlerSpec = {priority: number, handler: TTooltipHandler}

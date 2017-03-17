@@ -2734,7 +2734,7 @@ declare module AtomTypes {
          * @param {Object} An {Object} whose top-level keys point at sub-objects mapping keystroke patterns to commands.
          * @param {number} A {Number} used to sort keybindings which have the same specificity. Defaults to `0`.
          */
-        add(source: string, bindings: Object, priority: number): void;
+        add(source: string, bindings: Object, priority?: number): void;
         /**
          * Get all current key bindings.
          * @returns {any[]} Returns an {Array} of {KeyBinding}s.
