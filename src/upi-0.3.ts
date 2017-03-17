@@ -1,3 +1,5 @@
+'use babel'
+
 import {CompositeDisposable, Point, Disposable, TextBuffer, TextEditor} from 'atom'
 import {MainMenuLabel, getEventType} from './utils'
 
@@ -39,6 +41,7 @@ export class UPI {
         if (tt) {
           const {range, text} = tt
           controller.showTooltip(newPos, range, text, {eventType, subtype: 'external'})
+          break
         } else {
           continue
         }
@@ -121,7 +124,7 @@ export class UPI {
     if (!controller) controller = this.pluginManager.controller(editor)
     if (!controller) return
 
-    callback (controller.getEventRange(pos), eventType)
+    callback (controller.getEventRange(pos, eventType), eventType)
   }
 
   getEventRange({editor, detail, eventType, pos, controller}: TEventRangeParamsInternal) : {pos: Point, crange: Range} | undefined {
@@ -130,7 +133,7 @@ export class UPI {
     if (!controller) controller = this.pluginManager.controller(editor)
     if (!controller) return
 
-    return controller.getEventRange(pos)
+    return controller.getEventRange(pos, eventType)
   }
 }
 
@@ -153,10 +156,13 @@ class UPIInstance {
   public tooltipEvents: Set<TTooltipHandlerSpec>
   private disposables: CompositeDisposable
   private destroyed: boolean
-  constructor(pluginManager, pluginName, {withEventRange}) {
+  constructor(pluginManager, pluginName, main: UPI) {
     this.disposables = new CompositeDisposable
     this.tooltipEvents = new Set
     this.destroyed = false
+    let instance = this
+
+    this.utils = {withEventRange: main.withEventRange.bind(main)}
 
     this.menu = {
       set({label, menu}) {
@@ -164,7 +170,7 @@ class UPIInstance {
           label: MainMenuLabel,
           submenu: [ {label: label, submenu: menu} ]
         }])
-        this.disposables.add(menuDisp)
+        instance.disposables.add(menuDisp)
         return menuDisp
       }
     }
@@ -202,7 +208,7 @@ class UPIInstance {
     this.tooltips = {
       show ({editor, pos, eventType, detail, tooltip}) {
         const controller = pluginManager.controller(editor)
-        withEventRange({controller, pos, detail, eventType}, ({crange, pos, eventType}) => {
+        main.withEventRange({controller, pos, detail, eventType}, ({crange, pos}, eventType) => {
           Promise.resolve(tooltip(crange)).then(({range, text, persistOnCursorMove}) =>
             controller.showTooltip(pos, range, text, {eventType, subtype: 'external', persistOnCursorMove}))
           .catch((status = {status: 'warning'}) => {
@@ -212,7 +218,7 @@ class UPIInstance {
             }
             if (!status.ignore) {
               controller.hideTooltip({eventType})
-              this.messages.status(status)
+              instance.messages.status(status)
             }
           })
         })
@@ -223,24 +229,24 @@ class UPIInstance {
         }
         const [priority, handler] = args
         const obj = {priority, handler}
-        this.tooltipEvents.add(obj)
-        return new Disposable(() => this.tooltipEvents.delete(obj))
+        instance.tooltipEvents.add(obj)
+        return new Disposable(() => instance.tooltipEvents.delete(obj))
       }
     }
     this.events = {
       onWillSaveBuffer (callback) {
         const disp = pluginManager.onWillSaveBuffer(callback)
-        this.disposables.add(disp)
+        instance.disposables.add(disp)
         return disp
       },
       onDidSaveBuffer(callback) {
         const disp = pluginManager.onDidSaveBuffer(callback)
-        this.disposables.add(disp)
+        instance.disposables.add(disp)
         return disp
       },
       onDidStopChanging(callback) {
         const disp = pluginManager.onDidStopChanging(callback)
-        this.disposables.add(disp)
+        instance.disposables.add(disp)
         return disp
       }
     }
@@ -266,8 +272,6 @@ class UPIInstance {
         return pluginManager.setConfigParam(...args)
       }
     }
-
-    this.utils = {withEventRange}
   }
 
   destroy () {

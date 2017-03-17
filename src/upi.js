@@ -1,3 +1,5 @@
+'use babel'
+
 import { CompositeDisposable, Point } from 'atom'
 import { MainMenuLabel, getEventType } from './utils'
 

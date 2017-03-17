@@ -4,7 +4,7 @@ import {CompositeDisposable, Emitter} from 'atom'
 import ResultsDB from './results-db'
 import {OutputPanel} from './output-panel'
 import {ConfigParamManager} from './config-params'
-import EditorControl from './editor-control'
+import {EditorControl} from './editor-control'
 import {LinterSupport} from './linter-support'
 
 export default class PluginManager {
