@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "target": "es6",
-        "module": "commonjs",
+        "module": "es2015",
         "moduleResolution": "node",
         "isolatedModules": false,
         "jsx": "react",
@@ -16,8 +16,8 @@
         "preserveConstEnums": true,
         "suppressImplicitAnyIndexErrors": true,
         "outDir": "lib",
-        "inlineSources": true,
-        "inlineSourceMap": true,
+        "inlineSources": false,
+        "inlineSourceMap": false,
         "strictNullChecks": true,
         "allowJs": true
     },

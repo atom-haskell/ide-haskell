@@ -74,7 +74,7 @@ module.exports = {
         {label: 'Toggle Panel', command: 'ide-haskell:toggle-output'}
       ]}]))
 
-    let UPI = require('./upi-0.3')
+    let {UPI} = require('./upi-0.3')
     this.upi3 = new UPI(this.pluginManager)
   },
 
@@ -101,7 +101,7 @@ module.exports = {
 
   provideUpi: function () {
     this.upiProvided = true
-    const UPI = require('./upi')
+    const {UPI} = require('./upi')
     return new UPI(this.pluginManager)
   },
 
