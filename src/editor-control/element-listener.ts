@@ -8,8 +8,8 @@ export function listen (
       callback(evt)
     }
   }
-  element.addEventListener(event, bound, true)
+  element.addEventListener(event, bound)
   return new Disposable(() => {
-    element.removeEventListener(event, bound, true)
+    element.removeEventListener(event, bound)
   })
 }

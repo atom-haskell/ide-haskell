@@ -55,7 +55,7 @@ export class EditorControl {
 
       const gutterElement = atom.views.getView(this.gutter)
       this.disposables.add(listen(
-        gutterElement, 'mouseenter', '.decoration',
+        gutterElement, 'mouseover', '.decoration',
         (e) => {
           const bufferPt = bufferPositionFromMouseEvent(this.editor, e as MouseEvent)
           if (bufferPt) {
@@ -65,7 +65,7 @@ export class EditorControl {
         }
       ))
       this.disposables.add(listen(
-        gutterElement, 'mouseleave', '.decoration', (e) => this.hideTooltip()
+        gutterElement, 'mouseout', '.decoration', (e) => this.hideTooltip()
       ))
     }
 
