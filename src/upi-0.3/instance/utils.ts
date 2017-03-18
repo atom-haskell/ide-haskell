@@ -1,6 +1,5 @@
-import {CompositeDisposable, Point, Disposable, TextBuffer, TextEditor} from 'atom'
-import {PluginManager} from '../../plugin-manager'
-import {TPosition, TUPIText, TEventRangeType} from './general'
+import {Point, TextEditor} from 'atom'
+import {TPosition, TEventRangeType} from './general'
 
 interface IEventRangeParams {
   editor: TextEditor
@@ -25,5 +24,5 @@ export interface IMainInterface {
     crange: Range, event range
     eventType: String, event type, one of 'keyboard', 'context', 'mouse'
   */
-  withEventRange<T>(params: IEventRangeParams, callback: TEventRangeCallback<T>): T | undefined
+  withEventRange<T> (params: IEventRangeParams, callback: TEventRangeCallback<T>): T | undefined
 }

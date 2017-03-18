@@ -1,4 +1,4 @@
-import {CompositeDisposable, Point, Disposable, TextBuffer, TextEditor} from 'atom'
+import {Disposable, TextEditor} from 'atom'
 import {PluginManager} from '../../plugin-manager'
 import {UPI} from '../'
 import {UPIInstance} from './'
@@ -17,7 +17,8 @@ interface ITooltipData {
   text: TUPIText
   persistOnCursorMove?: boolean
 }
-export type TTooltipHandler = (editor: TextEditor, crange: Range, type: TEventRangeType) => ITooltipData | Promise<ITooltipData>
+export type TTooltipHandler =
+  (editor: TextEditor, crange: Range, type: TEventRangeType) => ITooltipData | Promise<ITooltipData>
 
 export interface IMainInterface {
   /**
@@ -70,16 +71,16 @@ export function create (pluginManager: PluginManager, main: UPI, instance: UPIIn
     // TODO: merge this to UPI
     show ({editor, pos, eventType, detail, tooltip}) {
       const controller = pluginManager.controller(editor)
-      main.withEventRange({controller, pos, detail, eventType}, ({crange, pos}, eventType) => {
+      main.withEventRange({controller, pos, detail, eventType}, ({crange, pos: evpos}, newEventType) => {
         Promise.resolve(tooltip(crange)).then(({range, text, persistOnCursorMove}) =>
-          controller.showTooltip(pos, range, text, {eventType, subtype: 'external', persistOnCursorMove}))
+          controller.showTooltip(evpos, range, text, {newEventType, subtype: 'external', persistOnCursorMove}))
         .catch((status = {status: 'warning'}) => {
           if (status.message) {
             console.warn(status)
             status = {status: 'warning'}
           }
           if (!status.ignore) {
-            controller.hideTooltip({eventType})
+            controller.hideTooltip({newEventType})
             instance.messages.status(status)
           }
         })

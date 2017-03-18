@@ -1,5 +1,5 @@
-import {CompositeDisposable, Point, Disposable, TextBuffer, TextEditor} from 'atom'
-import {MainMenuLabel, getEventType} from '../../utils'
+import {CompositeDisposable, Disposable} from 'atom'
+import {MainMenuLabel} from '../../utils'
 
 export interface IMainInterface {
   /**
@@ -10,17 +10,17 @@ export interface IMainInterface {
 
   @returns Disposable.
   */
-  set(options: IMenuDefinition) : Disposable
+  set (options: IMenuDefinition): Disposable
 }
 
 export interface IMenuDefinition {label: string, menu: any[]}
 
 export function create (disposables: CompositeDisposable): IMainInterface {
   return {
-    set({label, menu}) {
+    set ({label, menu}) {
       const menuDisp = atom.menu.add([{
         label: MainMenuLabel,
-        submenu: [ {label: label, submenu: menu} ]
+        submenu: [ {label, submenu: menu} ]
       }])
       disposables.add(menuDisp)
       return menuDisp
