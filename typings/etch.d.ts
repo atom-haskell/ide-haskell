@@ -9,7 +9,7 @@ declare namespace JSX {
 declare module "etch" {
   export function destroy(component: any, removeNode?: boolean): any;
   export function destroySync(component: any, removeNode: any): void;
-  export function dom(tag: any, props: any, children: any): any;
+  export function dom(tag: any, props?: any, children?: any): any;
   export function getScheduler(): any;
   export function initialize(component: any): void;
   export function render(virtualNode: any, options: any): any;

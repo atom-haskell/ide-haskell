@@ -2,15 +2,15 @@ import {Disposable, TextEditor} from 'atom'
 import {PluginManager} from '../../plugin-manager'
 import {UPI} from '../'
 import {UPIInstance} from './'
-import {TEventRangeType} from './general'
+import {TEventRangeType} from '../../editor-control'
 import {TPosition} from '../../results-db'
 import {TMessage} from '../../utils'
 
 interface IShowTooltipParams {
   editor: TextEditor
   pos: TPosition
-  eventType: TEventRangeType
-  detail: any
+  eventType?: TEventRangeType
+  detail?: any
   tooltip: TTooltipFunction
 }
 type TTooltipFunction = (crange: Range) => ITooltipData | Promise<ITooltipData>
@@ -74,7 +74,7 @@ export function create (pluginManager: PluginManager, main: UPI, instance: UPIIn
     show ({editor, pos, eventType, detail, tooltip}) {
       const controller = pluginManager.controller(editor)
       if (!controller) { return }
-      main.withEventRange({controller, pos, detail, eventType}, ({crange, pos: evpos}, newEventType) => {
+      main.withEventRange({controller, pos, detail, eventType}, ({crange, pos: evpos, eventType: newEventType}) => {
         Promise.resolve(tooltip(crange)).then(({range, text, persistOnCursorMove}) =>
           controller.showTooltip(evpos, range, text, {newEventType, subtype: 'external', persistOnCursorMove}))
         .catch((status = {status: 'warning'}) => {

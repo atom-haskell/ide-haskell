@@ -1,5 +1,3 @@
-'use babel'
-
 import {CompositeDisposable} from 'atom'
 import {ParamControl} from './param-control'
 import {ConfigParamStore, IParamSpec, IState as IStoreState} from './param-store'

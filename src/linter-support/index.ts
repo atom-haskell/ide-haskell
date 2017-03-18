@@ -1,5 +1,3 @@
-'use babel'
-
 import {CompositeDisposable, Range} from 'atom'
 import {ResultsDB} from '../results-db'
 

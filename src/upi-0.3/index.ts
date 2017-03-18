@@ -1,5 +1,3 @@
-'use babel'
-
 import {CompositeDisposable, Point, Disposable, TextEditor} from 'atom'
 import {getEventType} from '../utils'
 import {PluginManager} from '../plugin-manager'
@@ -8,11 +6,11 @@ import {UPIError} from './error'
 export {UPIError}
 
 import {TPosition} from '../results-db'
-import {TEventRangeType} from './instance/general'
+import {TEventRangeType} from '../editor-control'
 import {IMenuDefinition} from './instance/menu'
-import {ISetTypesParams} from './instance/messages'
+import {ISetTypesParams} from '../output-panel'
 import {TextBufferCallback} from './instance/events'
-import {IUPIControlDefinition} from './instance/controls'
+import {TUPIControlDefinition} from './instance/controls'
 import {IParamSpec} from '../config-params'
 import {TTooltipHandler} from './instance/tooltips'
 import {TEventRangeCallback} from './instance/utils'
@@ -28,7 +26,7 @@ export interface IRegistrationOptions {
     onDidSaveBuffer?: TextBufferCallback | TextBufferCallback[]
     onDidStopChanging?: TextBufferCallback | TextBufferCallback[]
   }
-  controls?: IUPIControlDefinition[]
+  controls?: TUPIControlDefinition[]
   params?: {[paramName: string]: IParamSpec<any>}
   tooltipEvent?: TTooltipHandler | {priority?: number, handler: TTooltipHandler}
 }
@@ -37,7 +35,7 @@ interface IEventRangeParamsInternal {
   editor?: TextEditor
   controller: any
   detail?: any
-  eventType: TEventRangeType
+  eventType?: TEventRangeType
   pos: TPosition
 }
 
@@ -134,7 +132,7 @@ export class UPI {
     if (!controller && editor) { controller = this.pluginManager.controller(editor) }
     if (!controller) { return }
 
-    return callback(controller.getEventRange(pos, eventType), eventType)
+    return callback(controller.getEventRange(pos, eventType))
   }
 
   public getEventRange (

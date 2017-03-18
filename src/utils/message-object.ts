@@ -1,5 +1,3 @@
-'use babel'
-
 interface IMessageText {
   text: string
   highlighter?: string

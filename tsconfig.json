@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "target": "es6",
-        "module": "es2015",
+        "module": "commonjs",
         "moduleResolution": "node",
         "isolatedModules": false,
         "jsx": "react",
@@ -9,17 +9,17 @@
         "emitDecoratorMetadata": true,
         "declaration": false,
         "noImplicitAny": true,
-        "noImplicitUseStrict": true,
+        "noImplicitUseStrict": false,
         "removeComments": true,
         "noLib": false,
         "jsxFactory": "etch.dom",
         "preserveConstEnums": true,
         "suppressImplicitAnyIndexErrors": true,
         "outDir": "lib",
-        "inlineSources": false,
-        "inlineSourceMap": false,
+        "inlineSources": true,
+        "inlineSourceMap": true,
         "strictNullChecks": true,
-        "allowJs": true,
+        "allowJs": false,
         "lib":["dom","es2017"]
     },
     "exclude": [

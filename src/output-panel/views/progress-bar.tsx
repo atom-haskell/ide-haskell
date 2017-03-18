@@ -1,15 +1,16 @@
-'use babel'
-/** @jsx etch.dom */
+import * as etch from 'etch'
 
-import etch from 'etch'
+type TDirection = 'horizontal' | 'vertical'
 
 export class ProgressBar {
-  constructor ({orientation = 'horizontal'} = {}, children) {
+  private direction: TDirection
+  private progress: number
+  constructor ({orientation = 'horizontal'}: {orientation?: TDirection} = {}) {
     this.direction = orientation
     etch.initialize(this)
   }
 
-  render () {
+  public render () {
     return (
       <ide-haskell-progress-bar className={isNaN(this.progress) ? '' : 'visible'}>
         <span style={`${this.direction === 'horizontal' ? 'width' : 'height'}: ${this.progress * 100}%`}>
@@ -18,17 +19,17 @@ export class ProgressBar {
     )
   }
 
-  update ({orientation = 'horizontal'} = {}) {
+  public update ({orientation = 'horizontal'}: {orientation?: TDirection} = {}) {
     this.direction = orientation
     return etch.update(this)
   }
 
-  setProgress (progress) {
+  public setProgress (progress: number) {
     this.progress = progress
     this.update()
   }
 
-  async destroy () {
+  public async destroy () {
     await etch.destroy(this)
   }
 }

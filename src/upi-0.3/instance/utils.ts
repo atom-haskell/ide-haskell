@@ -1,5 +1,5 @@
 import {Point, TextEditor} from 'atom'
-import {TEventRangeType} from './general'
+import {TEventRangeType} from '../../editor-control'
 import {TPosition} from '../../results-db'
 
 interface IEventRangeParams {
@@ -9,7 +9,7 @@ interface IEventRangeParams {
   pos: TPosition
   controller: undefined
 }
-export type TEventRangeCallback<T> = (pars: {pos: Point, crange: Range}, eventType: TEventRangeType) => T
+export type TEventRangeCallback<T> = (pars: {pos: Point, crange: Range, eventType: TEventRangeType}) => T
 export interface IMainInterface {
   /**
   Utility function to extract event range/type for a given event

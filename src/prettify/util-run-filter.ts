@@ -1,5 +1,3 @@
-'use babel'
-
 import * as CP from 'child_process'
 
 interface IRunFilterArgs {

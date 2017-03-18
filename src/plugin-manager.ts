@@ -1,5 +1,3 @@
-'use babel'
-
 import {CompositeDisposable, Emitter, TextEditor, Point, TextBuffer, Grammar} from 'atom'
 import {ResultsDB, TUpdateCallback} from './results-db'
 import {OutputPanel} from './output-panel'
