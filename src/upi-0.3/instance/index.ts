@@ -44,9 +44,6 @@ export class UPIInstance {
   public destroy () {
     this.disposables.dispose()
     this.tooltipEvents.clear()
-    Object.getOwnPropertyNames(this).forEach((p) => {
-      this[p] = null
-    })
     this.destroyed = true
   }
 

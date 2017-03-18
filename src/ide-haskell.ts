@@ -6,10 +6,10 @@ import * as UPI from './upi'
 import * as UPI3 from './upi-0.3'
 
 let upiProvided = false
-let disposables: CompositeDisposable | null
-let pluginManager: PluginManager | null
-let menu: CompositeDisposable | null
-let upi3: UPI3.UPI | null
+let disposables: CompositeDisposable | undefined
+let pluginManager: PluginManager | undefined
+let menu: CompositeDisposable | undefined
+let upi3: UPI3.UPI | undefined
 
 export {config} from './config'
 
@@ -96,19 +96,15 @@ export function activate (state: IState) {
 
 export function deactivate () {
   pluginManager && pluginManager.deactivate()
-  pluginManager = null
   upi3 && upi3.dispose()
-  upi3 = null
 
   // TODO: no definition
   atom.keymaps.removeBindingsFromSource('ide-haskell')
 
   // clear commands
   disposables && disposables.dispose()
-  disposables = null
 
   menu && menu.dispose()
-  menu = null
   atom.menu.update()
 }
 
