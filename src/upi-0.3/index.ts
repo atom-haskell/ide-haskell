@@ -130,7 +130,7 @@ export class UPI {
   ) {
     if (pos) { pos = Point.fromObject(pos) }
     if (!eventType) { eventType = getEventType(detail) }
-    if (!controller) { controller = this.pluginManager.controller(editor) }
+    if (!controller && editor) { controller = this.pluginManager.controller(editor) }
     if (!controller) { return }
 
     return callback(controller.getEventRange(pos, eventType), eventType)
@@ -141,7 +141,7 @@ export class UPI {
   ): {pos: Point, crange: Range} | undefined {
     if (pos) { pos = Point.fromObject(pos) }
     if (!eventType) { eventType = getEventType(detail) }
-    if (!controller) { controller = this.pluginManager.controller(editor) }
+    if (!controller && editor) { controller = this.pluginManager.controller(editor) }
     if (!controller) { return }
 
     return controller.getEventRange(pos, eventType)
@@ -158,6 +158,7 @@ export class UPI {
     }
     subs.sort((a, b) => b.priority - a.priority)
     const controller = this.pluginManager.controller(editor)
+    if(!controller) return
     for (const {pluginName, handler} of subs) {
       try {
         const eventRange = this.getEventRange({controller, pos, eventType})

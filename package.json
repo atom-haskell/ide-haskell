@@ -44,6 +44,7 @@
   },
   "devDependencies": {
     "@types/node": "^7.0.8",
+    "@types/temp": "^0.8.29",
     "eslint": "^3.17.1",
     "eslint-config-standard": "^7.0.1",
     "eslint-plugin-promise": "^3.5.0",
