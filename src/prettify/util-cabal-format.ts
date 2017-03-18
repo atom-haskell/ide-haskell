@@ -1,11 +1,11 @@
 'use babel'
 
-import FS from 'fs'
-import Temp from 'temp'
+import * as FS from 'fs'
+import * as Temp from 'temp'
 import runFilter from './util-run-filter'
 
-function makeTempFile (contents) {
-  return new Promise((resolve, reject) => {
+function makeTempFile (contents: string) {
+  return new Promise<Temp.OpenFile>((resolve, reject) => {
     Temp.open({prefix: 'ide-haskell', suffix: '.cabal'},
       (err, info) => {
         if (err) {
@@ -18,7 +18,7 @@ function makeTempFile (contents) {
   })
 }
 
-function read (path) {
+function read (path: string) {
   return new Promise((resolve, reject) => {
     FS.readFile(path, {encoding: 'utf-8'}, (error, text) => {
       if (error) {
@@ -29,7 +29,7 @@ function read (path) {
   })
 }
 
-export default async function (text, workingDirectory) {
+export default async function (text: string, workingDirectory: string) {
   let {path, fd} = await makeTempFile(text)
   try {
     await runFilter({
