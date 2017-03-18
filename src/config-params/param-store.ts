@@ -1,5 +1,3 @@
-'use babel'
-
 import {selectListView} from './param-select-view'
 import {Emitter, CompositeDisposable, Disposable} from 'atom'
 

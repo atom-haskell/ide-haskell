@@ -1,5 +1,3 @@
-'use babel'
-
 import * as FS from 'fs'
 import * as Temp from 'temp'
 import {runFilter} from './util-run-filter'

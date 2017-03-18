@@ -1,8 +1,8 @@
-'use babel'
-
 import {
   Range, Emitter
 } from 'atom'
+
+export type TEventRangeType = 'keyboard' | 'context' | 'mouse' | 'selection'
 
 export class EditorControl {
   constructor (editor) {

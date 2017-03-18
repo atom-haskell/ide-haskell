@@ -1,5 +1,3 @@
-'use babel'
-
 import * as etch from 'etch'
 import {MessageObject, TMessage} from '../utils'
 

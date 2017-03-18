@@ -1,5 +1,3 @@
-'use babel'
-
 import SelectListView from 'atom-select-list'
 import {Panel} from 'atom'
 

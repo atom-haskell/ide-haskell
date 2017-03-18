@@ -1,9 +1,7 @@
-'use babel'
-
 import {TPosition, TSeverity, IResultItem, ResultItem} from './result-item'
 import {CompositeDisposable, Emitter} from 'atom'
 
-export {TPosition, TSeverity, IResultItem}
+export {TPosition, TSeverity, IResultItem, ResultItem}
 
 export type TUpdateCallbackArg = {res: ResultsDB, types: TSeverity[]}
 export type TUpdateCallback = (arg: TUpdateCallbackArg) => void
@@ -26,10 +24,11 @@ export class ResultsDB {
     return this.emitter.on('did-update', callback)
   }
 
-  public setResults (res: IResultItem[], severityArr: TSeverity[]) {
+  public setResults (res: IResultItem[], severityArr?: TSeverity[]) {
     if (severityArr) {
+      const sa = severityArr
       this._results =
-        this._results.filter(({severity}) => !(severityArr.includes(severity)))
+        this._results.filter(({severity}) => !(sa.includes(severity)))
         .concat(res.map((i) => new ResultItem(this, i)))
     } else {
       this._results = res.map((i) => new ResultItem(this, i))
@@ -42,7 +41,7 @@ export class ResultsDB {
     this.emitter.emit('did-update', {res: this, types: severityArr})
   }
 
-  public appendResults (res: IResultItem[], severityArr: TSeverity[]) {
+  public appendResults (res: IResultItem[], severityArr?: TSeverity[]) {
     this._results = this._results.concat(res.map((r) => new ResultItem(this, r)))
 
     if (!severityArr) {
