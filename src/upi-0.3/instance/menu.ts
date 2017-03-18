@@ -1,5 +1,5 @@
 import {CompositeDisposable, Disposable} from 'atom'
-import {MainMenuLabel} from '../../utils'
+import {MAIN_MENU_LABEL} from '../../utils'
 
 export interface IMainInterface {
   /**
@@ -19,7 +19,7 @@ export function create (disposables: CompositeDisposable): IMainInterface {
   return {
     set ({label, menu}) {
       const menuDisp = atom.menu.add([{
-        label: MainMenuLabel,
+        label: MAIN_MENU_LABEL,
         submenu: [ {label, submenu: menu} ]
       }])
       disposables.add(menuDisp)

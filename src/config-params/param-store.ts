@@ -38,19 +38,19 @@ export class ConfigParamStore {
     this.plugins = new Map()
   }
 
-  serialize () {
+  public serialize () {
     return this.saved
   }
 
-  destroy () {
+  public destroy () {
     this.disposables.dispose()
   }
 
-  onDidUpdate (callback: TUpdatedCallback) {
+  public onDidUpdate (callback: TUpdatedCallback) {
     return this.emitter.on('did-update', callback)
   }
 
-  addParamSpec<T> (pluginName: string, paramName: string, spec: IParamSpec<T>) {
+  public addParamSpec<T> (pluginName: string, paramName: string, spec: IParamSpec<T>) {
     let pluginConfig = this.plugins.get(pluginName)
     if (!pluginConfig) {
       pluginConfig = new Map()
@@ -60,11 +60,10 @@ export class ConfigParamStore {
       throw new Error(`Parameter ${pluginName}.${paramName} already defined!`)
     }
     let value = this.saved[`${pluginName}.${paramName}`]
-    if (value === undefined) value = spec.default
+    if (value === undefined) { value = spec.default }
     pluginConfig.set(paramName, {spec, value})
     this.emitter.emit('did-update', {pluginName, paramName, value})
     return new Disposable(() => {
-      let pluginConfig = this.plugins.get(pluginName)
       if (pluginConfig) {
         pluginConfig.delete(paramName)
         if (pluginConfig.size === 0) {
@@ -74,9 +73,9 @@ export class ConfigParamStore {
     })
   }
 
-  async setValue<T> (pluginName: string, paramName: string, value?: T) {
+  public async setValue<T> (pluginName: string, paramName: string, value?: T) {
     const paramConfig = this.getParamConfig(pluginName, paramName, 'set')
-    if (value === undefined) value = await this.showSelect(paramConfig.spec)
+    if (value === undefined) { value = await this.showSelect(paramConfig.spec) }
     if (value !== undefined) {
       paramConfig.value = value
       this.saved[`${pluginName}.${paramName}`] = value
@@ -85,23 +84,23 @@ export class ConfigParamStore {
     return value
   }
 
-  async getValue (pluginName: string, paramName: string) {
+  public async getValue (pluginName: string, paramName: string) {
     const paramConfig = this.getParamConfig(pluginName, paramName, 'get')
-    if (paramConfig.value === undefined) await this.setValue(pluginName, paramName)
+    if (paramConfig.value === undefined) { await this.setValue(pluginName, paramName) }
     return paramConfig.value
   }
 
-  getValueRaw (pluginName: string, paramName: string) {
+  public getValueRaw (pluginName: string, paramName: string) {
     const paramConfig = this.getParamConfig(pluginName, paramName, 'get raw')
     return paramConfig.value
   }
 
-  private getParamConfig(pluginName: string, paramName: string, reason: string) {
-    let pluginConfig = this.plugins.get(pluginName)
+  private getParamConfig (pluginName: string, paramName: string, reason: string) {
+    const pluginConfig = this.plugins.get(pluginName)
     if (!pluginConfig) {
       throw new Error(`${pluginName} is not defined while trying to ${reason} ${pluginName}.${paramName}`)
     }
-    let paramConfig = pluginConfig.get(paramName)
+    const paramConfig = pluginConfig.get(paramName)
     if (!paramConfig) {
       throw new Error(`${paramName} is not defined while trying to ${reason} ${pluginName}.${paramName}`)
     }
