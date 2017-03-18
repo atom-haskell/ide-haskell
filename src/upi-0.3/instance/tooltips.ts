@@ -87,7 +87,7 @@ export function create (pluginManager: PluginManager, main: UPI, instance: UPIIn
             status = {status: 'warning'}
           }
           if (!status.ignore) {
-            controller.hideTooltip({newEventType})
+            controller.hideTooltip({eventType: newEventType})
             instance.messages.status(status)
           }
         })
