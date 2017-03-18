@@ -53,7 +53,7 @@ export class ResultsDB {
 
   public removeResult (resItem: ResultItem) {
     this._results = this._results.filter((res) => res !== resItem)
-    resItem.parent = null
+    resItem.parent = undefined
   }
 
   public results () {

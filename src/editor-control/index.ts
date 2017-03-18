@@ -10,7 +10,7 @@ interface ITextEditor extends TextEditor {
   id?: number
 }
 
-import {ResultItem, TUpdateCallback, TSeverity} from '../results-db'
+import {ResultItem, TSeverity} from '../results-db'
 import {TooltipMessage} from './tooltip-view'
 import {TMessage} from '../utils'
 import {listen} from './element-listener'
@@ -22,75 +22,59 @@ export class EditorControl {
   public disposables: CompositeDisposable // TODO should be private...
   private emitter: Emitter
   private gutter: Gutter
-  private lastMouseBufferPt: Point | null
-  private exprTypeTimeout: number | null
-  private selTimeout: number | null
-  private lastMouseBufferPtTest: Point | null
-  private lastMouseBufferRangeTest: Range | null
-  private tooltipHighlightRange: Range | null
+  private lastMouseBufferPt?: Point
+  private exprTypeTimeout?: number
+  private selTimeout?: number
+  private lastMouseBufferPtTest?: Point
+  private lastMouseBufferRangeTest?: Range
+  private tooltipHighlightRange?: Range
   constructor (private editor: ITextEditor) {
     this.updateResults = this.updateResults.bind(this)
     this.disposables = new CompositeDisposable()
     this.disposables.add(this.emitter = new Emitter())
 
-    let editorElement = atom.views.getView(this.editor)
+    const editorElement = atom.views.getView(this.editor)
 
     if (atom.config.get('ide-haskell.messageDisplayFrontend') === 'builtin') {
       this.gutter = this.editor.gutterWithName('ide-haskell-check-results')
-      if (this.gutter == null) {
+      if (!this.gutter) {
         this.gutter = this.editor.addGutter({
           name: 'ide-haskell-check-results',
           priority: 10
         })
       }
 
-      let gutterElement = atom.views.getView(this.gutter)
+      const gutterElement = atom.views.getView(this.gutter)
       this.disposables.add(listen(
         gutterElement.querySelector('.decoration'), 'mouseenter',
         (e) => {
           const bufferPt = bufferPositionFromMouseEvent(this.editor, e as MouseEvent)
-          if (bufferPt != null) {
+          if (bufferPt) {
             this.lastMouseBufferPt = bufferPt
             return this.showCheckResult(bufferPt, true)
           }
         }
       ))
       this.disposables.add(listen(
-        gutterElement.querySelector('.decoration'), 'mouseleave',
-        e => {
-          return this.hideTooltip()
-        }
+        gutterElement.querySelector('.decoration'), 'mouseleave', (e) => this.hideTooltip()
       ))
     }
 
     // buffer events for automatic check
-    let buffer = this.editor.getBuffer()
+    const buffer = this.editor.getBuffer()
     this.disposables.add(buffer.onWillSave(() => {
       this.emitter.emit('will-save-buffer', buffer)
       if (atom.config.get('ide-haskell.onSavePrettify')) {
-        return atom.commands.dispatch(editorElement,
-          'ide-haskell:prettify-file')
+        return atom.commands.dispatch(editorElement, 'ide-haskell:prettify-file')
       }
     }))
 
-    this.disposables.add(buffer.onDidSave(() => {
-      return this.emitter.emit('did-save-buffer', buffer)
-    }))
+    this.disposables.add(buffer.onDidSave(() => this.emitter.emit('did-save-buffer', buffer)))
 
-    this.disposables.add(this.editor.onDidStopChanging(() => {
-      return this.emitter.emit('did-stop-changing', this.editor)
-    }))
+    this.disposables.add(this.editor.onDidStopChanging(() => this.emitter.emit('did-stop-changing', this.editor)))
 
-    this.disposables.add(editorElement.onDidChangeScrollLeft(() => {
-      return this.hideTooltip({
-        eventType: 'mouse'
-      })
-    }))
-    this.disposables.add(editorElement.onDidChangeScrollTop(() => {
-      return this.hideTooltip({
-        eventType: 'mouse'
-      })
-    }))
+    this.disposables.add(editorElement.onDidChangeScrollLeft(() => this.hideTooltip({eventType: 'mouse'})))
+    this.disposables.add(editorElement.onDidChangeScrollTop(() => this.hideTooltip({eventType: 'mouse'})))
 
     // show expression type if mouse stopped somewhere
     this.disposables.add(listen(
@@ -98,7 +82,7 @@ export class EditorControl {
       (e) => {
         const bufferPt = bufferPositionFromMouseEvent(this.editor, e as MouseEvent)
 
-        if (bufferPt == null) {
+        if (!bufferPt) {
           return
         }
 
@@ -107,17 +91,19 @@ export class EditorControl {
         }
         this.lastMouseBufferPt = bufferPt
 
-        if (this.exprTypeTimeout != null) {
+        if (this.exprTypeTimeout) {
           clearTimeout(this.exprTypeTimeout)
         }
-        this.exprTypeTimeout = setTimeout(() => bufferPt && this.shouldShowTooltip(bufferPt),
-          atom.config.get('ide-haskell.expressionTypeInterval'))
+        this.exprTypeTimeout = setTimeout(
+          () => bufferPt && this.shouldShowTooltip(bufferPt),
+          atom.config.get('ide-haskell.expressionTypeInterval')
+        )
       }
     ))
     this.disposables.add(listen(
       editorElement.querySelector('.scroll-view'), 'mouseout',
       (e) => {
-        if (this.exprTypeTimeout != null) {
+        if (this.exprTypeTimeout) {
           return clearTimeout(this.exprTypeTimeout)
         }
       }
@@ -154,7 +140,7 @@ export class EditorControl {
         }
       }
 
-      if (this.selTimeout != null) {
+      if (this.selTimeout) {
         clearTimeout(this.selTimeout)
       }
       if (newBufferRange.isEmpty()) {
@@ -163,49 +149,49 @@ export class EditorControl {
         })
         switch (atom.config.get('ide-haskell.onCursorMove')) {
           case 'Show Tooltip':
-            if (this.exprTypeTimeout != null) {
+            if (this.exprTypeTimeout) {
               clearTimeout(this.exprTypeTimeout)
             }
-            if (!this.showCheckResult(newBufferRange.start, false,
-                'keyboard')) {
+            if (!this.showCheckResult(newBufferRange.start, false, 'keyboard')) {
               return this.hideTooltip({
                 persistOnCursorMove: false
               })
             }
             break
           case 'Hide Tooltip':
-            if (this.exprTypeTimeout != null) {
+            if (this.exprTypeTimeout) {
               clearTimeout(this.exprTypeTimeout)
             }
             return this.hideTooltip({
               persistOnCursorMove: false
             })
+          default: // impossible, but tslint complains
         }
       } else {
-        this.selTimeout = setTimeout(() => this.shouldShowTooltip(
-            newBufferRange.start, 'selection'),
-          atom.config.get('ide-haskell.expressionTypeInterval'))
+        this.selTimeout = setTimeout(
+          () => this.shouldShowTooltip(newBufferRange.start, 'selection'),
+          atom.config.get('ide-haskell.expressionTypeInterval')
+        )
       }
     }))
   }
 
-  deactivate () {
-    if (this.exprTypeTimeout != null) {
+  public deactivate () {
+    if (this.exprTypeTimeout) {
       clearTimeout(this.exprTypeTimeout)
     }
-    if (this.selTimeout != null) {
+    if (this.selTimeout) {
       clearTimeout(this.selTimeout)
     }
     this.hideTooltip()
     this.disposables.dispose()
-    this.lastMouseBufferPt = null
+    this.lastMouseBufferPt = undefined
   }
 
-  updateResults (res: ResultItem[], types?: TSeverity[]) {
-    let m
-    if (types != null) {
-      for (let t of Array.from(types)) {
-        for (m of Array.from(this.editor.findMarkers({
+  public updateResults (res: ResultItem[], types?: TSeverity[]) {
+    if (types) {
+      for (const t of Array.from(types)) {
+        for (const m of Array.from(this.editor.findMarkers({
           type: 'check-result',
           severity: t,
           editor: this.editor.id
@@ -214,7 +200,7 @@ export class EditorControl {
         }
       }
     } else {
-      for (m of Array.from(this.editor.findMarkers({
+      for (const m of Array.from(this.editor.findMarkers({
         type: 'check-result',
         editor: this.editor.id
       }))) {
@@ -225,10 +211,8 @@ export class EditorControl {
   }
 
   markerFromCheckResult (resItem: ResultItem) {
-    let {
-      uri, severity, message, position
-    } = resItem
-    if ((uri == null) || (uri !== this.editor.getPath())) {
+    const {uri, severity, message, position} = resItem
+    if ((!uri) || (uri !== this.editor.getPath())) {
       return
     }
     if (!position) {
@@ -236,11 +220,11 @@ export class EditorControl {
     }
 
     // create a new marker
-    let range = new Range(position, Point.fromObject({
+    const range = new Range(position, Point.fromObject({
       row: position.row,
       column: position.column + 1
     }))
-    let marker = this.editor.markBufferRange(range, {
+    const marker = this.editor.markBufferRange(range, {
       invalidate: 'touch'
     })
     marker.setProperties({
@@ -249,10 +233,7 @@ export class EditorControl {
       desc: message,
       editor: this.editor.id
     })
-    let {
-      CompositeDisposable
-    } = require('atom')
-    let disp = new CompositeDisposable()
+    const disp = new CompositeDisposable()
     disp.add(marker.onDidChange(({isValid}: DisplayMarker) => {
       if (!isValid) {
         resItem.destroy()
@@ -265,10 +246,10 @@ export class EditorControl {
   }
 
   decorateMarker (m: DisplayMarker) {
-    if (this.gutter == null) {
+    if (!this.gutter) {
       return
     }
-    let cls = `ide-haskell-${(m.getProperties() as any).severity}`
+    const cls = `ide-haskell-${(m.getProperties() as any).severity}`
     this.gutter.decorateMarker(m, {
       type: 'line-number',
       class: cls
@@ -300,7 +281,7 @@ export class EditorControl {
   }
 
   shouldShowTooltip (pos: Point, eventType?: TEventRangeType) {
-    if (eventType == null) {
+    if (!eventType) {
       eventType = 'mouse'
     }
     if (this.showCheckResult(pos, false, eventType)) {
@@ -321,19 +302,19 @@ export class EditorControl {
   }
 
   rangeHasChanged (pos: Point, eventType: TEventRangeType) {
-    let newrange = this.getEventRange(pos, eventType).crange
-    let isFirstIteration = !(this.lastMouseBufferRangeTest && this.lastMouseBufferPtTest)
-    let isSameToken = () => {
+    const newrange = this.getEventRange(pos, eventType).crange
+    const isFirstIteration = !(this.lastMouseBufferRangeTest && this.lastMouseBufferPtTest)
+    const isSameToken = () => {
       if (!(this.lastMouseBufferRangeTest && this.lastMouseBufferPtTest)) { return false }
-      let rangesAreEmpty = this.lastMouseBufferRangeTest.isEmpty() && newrange.isEmpty()
-      let isSameRow = this.lastMouseBufferPtTest.row === pos.row
+      const rangesAreEmpty = this.lastMouseBufferRangeTest.isEmpty() && newrange.isEmpty()
+      const isSameRow = this.lastMouseBufferPtTest.row === pos.row
       if (!rangesAreEmpty || !isSameRow) {
         return false
       }
-      let tl = (this.editor as any).tokenizedBuffer.tokenizedLineForRow(this.lastMouseBufferPtTest.row)
-      let oldtokid = tl.tokenIndexAtBufferColumn(this.lastMouseBufferPtTest
+      const tl = (this.editor as any).tokenizedBuffer.tokenizedLineForRow(this.lastMouseBufferPtTest.row)
+      const oldtokid = tl.tokenIndexAtBufferColumn(this.lastMouseBufferPtTest
         .column)
-      let newtokid = tl.tokenIndexAtBufferColumn(pos.column)
+      const newtokid = tl.tokenIndexAtBufferColumn(pos.column)
       return oldtokid === newtokid
     }
     const result = isFirstIteration || !(this.lastMouseBufferRangeTest!.isEqual(newrange) || isSameToken())
@@ -342,16 +323,16 @@ export class EditorControl {
     return result
   }
 
-  showTooltip (pos: Point, range: Range, text: TMessage | TMessage[], detail: {eventType: TEventRangeType, persistOnCursorMove?: boolean, subtype: string}) {
-    if (this.editor == null) {
+  showTooltip (
+    pos: Point, range: Range, text: TMessage | TMessage[],
+    detail: {eventType: TEventRangeType, persistOnCursorMove?: boolean, subtype: string}
+  ) {
+    if (!this.editor) {
       return
     }
 
     if (!detail.eventType) {
       throw new Error('eventType not set')
-    }
-    if (detail.persistOnCursorMove == null) {
-      detail.persistOnCursorMove = false
     }
 
     if (this.tooltipHighlightRange && range.isEqual(this.tooltipHighlightRange)) {
@@ -365,14 +346,14 @@ export class EditorControl {
       }
     }
     if (detail.eventType === 'selection') {
-      let lastSel = this.editor.getLastSelection()
+      const lastSel = this.editor.getLastSelection()
       if (!range.containsRange(lastSel.getBufferRange()) || !!lastSel.isEmpty()) {
         return
       }
     }
     this.tooltipHighlightRange = range
     const props = {...detail, type: 'tooltip'}
-    let highlightMarker = this.editor.markBufferRange(range)
+    const highlightMarker = this.editor.markBufferRange(range)
     highlightMarker.setProperties(props)
     this.editor.decorateMarker(highlightMarker, {
       type: 'overlay',
@@ -389,23 +370,23 @@ export class EditorControl {
     if (!template) {
       template = {}
     }
-    this.tooltipHighlightRange = null
+    this.tooltipHighlightRange = undefined
     template.type = 'tooltip'
     this.editor.findMarkers(template).forEach((m) => m.destroy())
   }
 
-  getEventRange (pos: Point | null, eventType: TEventRangeType) {
+  getEventRange (pos: Point | undefined, eventType: TEventRangeType) {
     let crange: Range
     switch (eventType) {
       case 'mouse':
       case 'context':
-        if (pos == null) {
+        if (!pos) {
           pos = this.lastMouseBufferPt
         }
-        let [selRange] = Array.from(this.editor.getSelections()
-          .map(sel => sel.getBufferRange()).filter(sel => sel.containsPoint(
+        const [selRange] = Array.from(this.editor.getSelections()
+          .map((sel) => sel.getBufferRange()).filter((sel) => sel.containsPoint(
             pos)))
-        crange = selRange != null ? selRange : new Range(pos!, pos!)
+        crange = selRange || new Range(pos!, pos!)
         break
       case 'keyboard':
       case 'selection':
@@ -452,21 +433,21 @@ export class EditorControl {
 
   // show check result when mouse over gutter icon
   showCheckResult (pos: Point, gutter: boolean, eventType?: TEventRangeType) {
-    if (eventType == null) {
+    if (!eventType) {
       eventType = 'mouse'
     }
-    let markers = this.findCheckResultMarkers(pos, gutter, eventType)
-    let [marker] = Array.from(markers)
+    const markers = this.findCheckResultMarkers(pos, gutter, eventType)
+    const [marker] = Array.from(markers)
 
-    if (marker == null) {
+    if (!marker) {
       this.hideTooltip({
         subtype: 'check-result'
       })
       return false
     }
 
-    let text =
-      markers.map(marker => marker.getProperties().desc)
+    const text =
+      markers.map((m) => m.getProperties().desc)
 
     if (gutter) {
       this.showTooltip(pos, new Range(pos, pos), text, {
@@ -482,10 +463,9 @@ export class EditorControl {
   }
 
   hasTooltips (template?: Object) {
-    if (template == null) {
+    if (!template) {
       template = {}
     }
-    template['type'] = 'tooltip'
-    return !!this.editor.findMarkers(template).length
+    return !!this.editor.findMarkers({type: 'tooltip', ...template}).length
   }
 }

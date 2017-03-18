@@ -23,6 +23,9 @@
       "align": [true, "parameters", "statements", "arguments"],
       "arrow-return-shorthand": [true, "multiline"],
       "no-unnecessary-qualifier": true,
-      "no-non-null-assertion": true
+      "no-non-null-assertion": true,
+      "no-switch-case-fall-through": true,
+      "no-null-keyword": true,
+      "no-var-requires": true
     }
 }

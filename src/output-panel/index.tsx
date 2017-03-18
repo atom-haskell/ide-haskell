@@ -305,7 +305,7 @@ export class OutputPanel {
     const rs = this.results.filter(({uri}) => !!uri)
     if (rs.length === 0) { return }
 
-    if (this.currentResult !== null && this.currentResult !== undefined) {
+    if (this.currentResult !== undefined) {
       this.currentResult++
     } else {
       this.currentResult = 0
@@ -319,7 +319,7 @@ export class OutputPanel {
     const rs = this.results.filter(({uri}) => !!uri)
     if (rs.length === 0) { return }
 
-    if (this.currentResult !== null && this.currentResult !== undefined) {
+    if (this.currentResult !== undefined) {
       this.currentResult--
     } else {
       this.currentResult = rs.length - 1
