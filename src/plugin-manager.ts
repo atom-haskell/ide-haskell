@@ -2,7 +2,7 @@ import {CompositeDisposable, Emitter, TextEditor, Point, TextBuffer, Grammar} fr
 import {ResultsDB, TUpdateCallback} from './results-db'
 import {OutputPanel} from './output-panel'
 import {ConfigParamManager, IState as IParamState} from './config-params'
-import {EditorControl} from './editor-control'
+import {EditorControl, TTextBufferCallback} from './editor-control'
 import {LinterSupport} from './linter-support'
 
 type Linter = any // TODO: Steal this from atom-typescript
@@ -10,7 +10,6 @@ type Linter = any // TODO: Steal this from atom-typescript
 export type TEventType = 'keyboard' | 'context' | 'mouse' | 'selection'
 type TShowTooltipCallbackParams = {editor: TextEditor, pos: Point, eventType: TEventType}
 type TShowTooltipCallback = (pars: TShowTooltipCallbackParams) => void
-export type TTextBufferCallback = (buffer: TextBuffer) => void
 
 type IOutputViewState = any
 export interface IState {

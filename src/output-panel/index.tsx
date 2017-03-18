@@ -75,16 +75,16 @@ export class OutputPanel {
       }
       switch (this.pos) {
         case 'top':
-          atom.workspace.addTopPanel(options)
+          this.panel = atom.workspace.addTopPanel(options)
           break
         case 'bottom':
-          atom.workspace.addBottomPanel(options)
+          this.panel = atom.workspace.addBottomPanel(options)
           break
         case 'left':
-          atom.workspace.addLeftPanel(options)
+          this.panel = atom.workspace.addLeftPanel(options)
           break
         case 'right':
-          atom.workspace.addRightPanel(options)
+          this.panel = atom.workspace.addRightPanel(options)
           break
         default: // impossible, but tslint won't shut up
       }

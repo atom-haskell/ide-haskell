@@ -1,4 +1,4 @@
-import {Point, TextEditor} from 'atom'
+import {Point, TextEditor, Range} from 'atom'
 import {TEventRangeType} from '../../editor-control'
 import {TPosition} from '../../results-db'
 
