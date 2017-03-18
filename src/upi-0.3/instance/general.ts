@@ -1,4 +1,4 @@
-import {CompositeDisposable, Point, Disposable, TextBuffer, TextEditor} from 'atom'
+import {Point} from 'atom'
 
 export interface IUPIMessageText {
   text: string

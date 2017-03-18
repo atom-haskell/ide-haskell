@@ -1,4 +1,4 @@
-import {CompositeDisposable, Point, Disposable, TextBuffer, TextEditor} from 'atom'
+import {Disposable} from 'atom'
 import {PluginManager} from '../../plugin-manager'
 
 export interface IControlOpts {
@@ -32,7 +32,7 @@ export interface IMainInterface {
   add (def: IUPIControlDefinition): Disposable
 }
 
-export function create(pluginManager: PluginManager): IMainInterface {
+export function create (pluginManager: PluginManager): IMainInterface {
   return {
     add ({element, opts}) {
       return pluginManager.outputView.addPanelControl(element, opts)
