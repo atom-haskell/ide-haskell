@@ -24,23 +24,25 @@ export class MessageObject {
     return new MessageObject(message)
   }
 
+  private htmlCache?: string
   constructor (private msg: TMessage) {
     // noop
   }
 
   public toHtml (): string {
+    if (this.htmlCache !== undefined) { return this.htmlCache }
     if (isTextMessage(this.msg) && this.msg.highlighter) {
       const html = require('atom-highlight')({
         fileContents: this.msg.text,
         scopeName: this.msg.highlighter,
         nbsp: false
       })
-      if (html) { return html }
+      if (html) { return this.htmlCache = html }
 
       this.msg.highlighter = undefined
       return this.toHtml()
     } else if (isHTMLMessage(this.msg)) {
-      return this.msg.html
+      return this.htmlCache = this.msg.html
     } else {
       let text: string
       if (isTextMessage(this.msg)) {
@@ -50,7 +52,7 @@ export class MessageObject {
       }
       const div = document.createElement('div')
       div.innerText = text
-      return div.innerHTML
+      return this.htmlCache = div.innerHTML
     }
   }
 
