@@ -1,5 +1,3 @@
-'use babel'
-
 import {TextEditor} from 'atom'
 
 export {MessageObject, TMessage} from './message-object'

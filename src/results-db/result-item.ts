@@ -1,5 +1,3 @@
-'use babel'
-
 import {Point} from 'atom'
 import {ResultsDB} from './'
 import {TMessage, MessageObject} from '../utils'

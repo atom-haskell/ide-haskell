@@ -1,5 +1,3 @@
-'use babel'
-
 import {CompositeDisposable, Disposable} from 'atom'
 import * as etch from 'etch'
 

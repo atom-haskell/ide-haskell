@@ -1,6 +1,7 @@
 import {Point} from 'atom'
 import {PluginManager} from '../../plugin-manager'
 import {IResultItem, TSeverity} from '../../results-db'
+import {IStatus, ISetTypesParams} from '../../output-panel'
 
 export interface IMainInterface {
   /**
@@ -10,7 +11,7 @@ export interface IMainInterface {
     progress: float between 0 and 1, only relevant when status is 'progress'
               if 0 or undefined, progress bar is not shown
   */
-  status (status: IUPIStatus): void
+  status (status: IStatus): void
 
   /**
   Add messages to ide-haskell output
@@ -56,24 +57,6 @@ export interface IMainInterface {
   */
   setTypes (types: ISetTypesParams): void // TODO: should add disposable
 }
-
-interface IUPINormalStatus {
-  status: 'ready' | 'error' | 'warning'
-}
-
-interface IUPIProgressStatus {
-  status: 'progress'
-  progress?: number
-}
-
-export type IUPIStatus = (IUPINormalStatus | IUPIProgressStatus) & {detail: string}
-
-export interface ISeverityTabDefinition {
-  uriFilter?: boolean
-  autoScroll?: boolean
-}
-
-export interface ISetTypesParams {[severity: string]: ISeverityTabDefinition}
 
 export function create (pluginName: string, pluginManager: PluginManager): IMainInterface {
   return {

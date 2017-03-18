@@ -1,5 +1,3 @@
-'use babel'
-
 import {runFilter} from './util-run-filter'
 
 export async function format (text: string, workingDirectory: string) {

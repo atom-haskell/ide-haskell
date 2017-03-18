@@ -1,17 +1,19 @@
 import {Disposable} from 'atom'
 import {PluginManager} from '../../plugin-manager'
+import {IControlOpts} from '../../output-panel'
 
-export interface IControlOpts {
-  id: string
-  events: {[key: string]: Function}
-  classes: string[]
-  style: {[key: string]: string}
-  attrs: {[key: string]: string}
-}
-export interface IUPIControlDefinition {
-  element: string | HTMLElement
+interface IUPIControlSimpleDefinition {
+  element: string
   opts: IControlOpts
 }
+
+interface IUPIControlCustomDefinition {
+  element: Function
+  opts: any
+}
+
+export type TUPIControlDefinition = IUPIControlCustomDefinition | IUPIControlSimpleDefinition
+
 export interface IMainInterface {
   /**
   Add a new control to ouptut panel heading.
@@ -29,7 +31,7 @@ export interface IMainInterface {
 
   Returns Disposable.
   */
-  add (def: IUPIControlDefinition): Disposable
+  add (def: TUPIControlDefinition): Disposable
 }
 
 export function create (pluginManager: PluginManager): IMainInterface {

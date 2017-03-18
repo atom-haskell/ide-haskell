@@ -3676,12 +3676,12 @@ declare module AtomTypes {
         /**
          * A zero-indexed {Number} representing the row of the {Point}.
          */
-        row: Number;
+        row: number;
     /*} representing the row of the {Point;*/
         /**
          * A zero-indexed {Number} representing the column of the {Point}.
          */
-        column: Number;
+        column: number;
     /*} representing the column of the {Point;*/
 
       /**

@@ -1,5 +1,3 @@
-'use babel'
-
 import {TextEditor} from 'atom'
 import {getRootDir} from 'atom-haskell-utils'
 import {format as cabalFormat} from './util-cabal-format'

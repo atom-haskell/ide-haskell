@@ -1,12 +1,34 @@
-'use babel'
+import { CompositeDisposable, Point, TextEditor, TextBuffer } from 'atom'
+import { MAIN_MENU_LABEL, getEventType } from './utils'
+import { PluginManager } from './plugin-manager'
+import {IStatus, ISetTypesParams, ISeverityTabDefinition, IControlOpts} from './output-panel'
+import {IResultItem, TSeverity} from './results-db'
+import {TMessage} from './utils'
+import {TEventRangeType} from './editor-control'
+import {TPosition} from './results-db'
+import {IParamSpec} from './config-params'
+import {EditorControl} from './editor-control'
 
-import { CompositeDisposable, Point } from 'atom'
-import { MainMenuLabel, getEventType } from './utils'
+interface ITooltipData {
+  range: Range
+  text: TMessage
+  persistOnCursorMove?: boolean
+}
+export type TTooltipHandler =
+  (editor: TextEditor, crange: Range, type: TEventRangeType) => ITooltipData | Promise<ITooltipData>
+
+interface IShowTooltipParams {
+  editor: TextEditor
+  pos: TPosition
+  eventType?: TEventRangeType
+  detail?: any
+  tooltip: TTooltipFunction
+}
+type TTooltipFunction = (crange: Range) => ITooltipData | Promise<ITooltipData>
+export type TextBufferCallback = (buffer: TextBuffer) => void
 
 export class UPI {
-  constructor (pluginManager) {
-    this.pluginManager = pluginManager
-  }
+  constructor (private pluginManager: PluginManager) { }
 
   /*
   Call this function in consumer to get actual interface
@@ -14,15 +36,18 @@ export class UPI {
   disposables: CompositeDisposable, one you will return in consumer
   name: Plugin package name
   */
-  registerPlugin (disposables, name) {
+  registerPlugin (disposables: CompositeDisposable, name: string) {
     return new UPIInstance(this.pluginManager, disposables, name)
   }
 }
 
 class UPIInstance {
-  constructor (pluginManager, disposables, pluginName) {
-    this.pluginManager = pluginManager
-    this.pluginName = pluginName
+  private disposables: CompositeDisposable
+  constructor (
+    private pluginManager: PluginManager,
+    disposables: CompositeDisposable,
+    private pluginName: string
+  ) {
     disposables.add(this.disposables = new CompositeDisposable())
   }
 
@@ -33,10 +58,10 @@ class UPIInstance {
 
   Returns Disposable.
   */
-  setMenu (name, menu) {
+  setMenu (name: string, menu: any[]) {
     let menuDisp
     this.disposables.add(menuDisp = atom.menu.add([{
-      label: MainMenuLabel,
+      label: MAIN_MENU_LABEL,
       submenu: [ {label: name, submenu: menu} ]
     }
     ]))
@@ -50,7 +75,7 @@ class UPIInstance {
     progress: float between 0 and 1, only relevant when status is 'progress'
               if 0 or undefined, progress bar is not shown
   */
-  setStatus (status) {
+  setStatus (status: IStatus) {
     return this.pluginManager.outputView.backendStatus(this.pluginName, status)
   }
 
@@ -65,11 +90,7 @@ class UPIInstance {
   types: Array of String, containing possible message `severity`. If undefined,
          will be taken from `messages`
   */
-  addMessages (messages, types) {
-    messages = messages.map(function (m) {
-      if (m.position != null) { m.position = Point.fromObject(m.position) }
-      return m
-    })
+  addMessages (messages: IResultItem[], types?: TSeverity[]) {
     return this.pluginManager.checkResults.appendResults(messages, types)
   }
 
@@ -85,7 +106,7 @@ class UPIInstance {
   types: Array of String, containing possible message `severity`. If undefined,
          will be taken from `messages`
   */
-  setMessages (messages, types) {
+  setMessages (messages: IResultItem[], types: TSeverity[]) {
     messages = messages.map(function (m) {
       if (m.position != null) { m.position = Point.fromObject(m.position) }
       return m
@@ -97,7 +118,7 @@ class UPIInstance {
   Clear all existing messages with `severity` in `types`
   This is shorthand from `setMessages([],types)`
   */
-  clearMessages (types) {
+  clearMessages (types: TSeverity[]) {
     return this.pluginManager.checkResults.setResults([], types)
   }
 
@@ -110,7 +131,7 @@ class UPIInstance {
 
   This allows to define custom output panel tabs.
   */
-  setMessageTypes (types) {
+  setMessageTypes (types: { [severity: string]: ISeverityTabDefinition}) {
     return (() => {
       let result = []
       for (let type in types) {
@@ -139,7 +160,7 @@ class UPIInstance {
 
   returns Disposable
   */
-  onShouldShowTooltip (callback) {
+  onShouldShowTooltip (callback: TTooltipHandler) {
     let disp
     this.disposables.add(disp = this.pluginManager.onShouldShowTooltip(({editor, pos, eventType}) => {
       return this.showTooltip({
@@ -180,10 +201,14 @@ class UPIInstance {
         highlighter: grammar scope that will be used to highlight tooltip text
         html: html to be displayed in tooltip
   */
-  showTooltip ({editor, pos, eventType, detail, tooltip}) {
+  showTooltip ({editor, pos, eventType, detail, tooltip}: IShowTooltipParams) {
     let controller = this.pluginManager.controller(editor)
     return this.withEventRange({controller, pos, detail, eventType}, ({crange, pos, eventType}) => {
-      return Promise.resolve(tooltip(crange)).then(({range, text, persistOnCursorMove}) => controller.showTooltip(pos, range, text, {eventType, subtype: 'external', persistOnCursorMove}))
+      return Promise.resolve(tooltip(crange)).then(
+        ({range, text, persistOnCursorMove}) => controller && controller.showTooltip(
+          pos, range, text, {eventType, subtype: 'external', persistOnCursorMove}
+        )
+      )
       .catch(status => {
         if (status == null) { status = {status: 'warning'} }
         if (status instanceof Error) {
@@ -191,7 +216,7 @@ class UPIInstance {
           status = {status: 'warning'}
         }
         if (!status.ignore) {
-          controller.hideTooltip({eventType})
+          controller && controller.hideTooltip({eventType})
           return this.setStatus(status)
         }
       }
@@ -208,7 +233,7 @@ class UPIInstance {
 
   Returns Disposable
   */
-  onWillSaveBuffer (callback) {
+  onWillSaveBuffer (callback: TextBufferCallback) {
     let disp
     this.disposables.add(disp = this.pluginManager.onWillSaveBuffer(callback))
     return disp
@@ -222,13 +247,13 @@ class UPIInstance {
 
   Returns Disposable
   */
-  onDidSaveBuffer (callback) {
+  onDidSaveBuffer (callback: TextBufferCallback) {
     let disp
     this.disposables.add(disp = this.pluginManager.onDidSaveBuffer(callback))
     return disp
   }
 
-  onDidStopChanging (callback) {
+  onDidStopChanging (callback: TextBufferCallback) {
     let disp
     this.disposables.add(disp = this.pluginManager.onDidStopChanging(callback))
     return disp
@@ -250,8 +275,13 @@ class UPIInstance {
 
   Returns Disposable.
   */
-  addPanelControl (element, opts) {
-    return this.pluginManager.outputView.addPanelControl(element, opts)
+  addPanelControl (element: string | HTMLElement, opts: IControlOpts) {
+    if (typeof element == 'string') {
+      return this.pluginManager.outputView.addPanelControl(element, opts)
+    } else {
+      let newOpts: IControlOpts & {element: HTMLElement} = {...opts, element}
+      return this.pluginManager.outputView.addPanelControl(DummyElement, opts)
+    }
   }
 
   /*
@@ -270,8 +300,8 @@ class UPIInstance {
     disp: Disposable
     change: object of change functions, keys being param_name
   */
-  addConfigParam (spec) {
-    return this.pluginManager.addConfigParam(this.pluginName, spec)
+  addConfigParam (spec: { [paramName: string]: IParamSpec<any> }) {
+    return this.pluginManager.configParamManager.add(this.pluginName, spec)
   }
 
   /*
@@ -283,12 +313,12 @@ class UPIInstance {
   Promise can be rejected with either error, or 'undefined'. Latter
   in case user cancels param selection dialog.
   */
-  getConfigParam (pluginName, name) {
+  getConfigParam (pluginName: string, name: string) {
     if (name == null) {
       name = pluginName;
       ({ pluginName } = this)
     }
-    return this.pluginManager.getConfigParam(pluginName, name)
+    return this.pluginManager.configParamManager.get(pluginName, name)
   }
 
   /*
@@ -301,13 +331,13 @@ class UPIInstance {
   Promise can be rejected with either error, or 'undefined'. Latter
   in case user cancels param selection dialog.
   */
-  setConfigParam (pluginName, name, value) {
+  setConfigParam (pluginName: string, name: string, value: any) {
     if (value == null) {
       value = name
       name = pluginName;
       ({ pluginName } = this)
     }
-    return this.pluginManager.setConfigParam(pluginName, name, value)
+    return this.pluginManager.configParamManager.set(pluginName, name, value)
   }
 
   /*
@@ -319,17 +349,66 @@ class UPIInstance {
   pos: Point, or Point-like Object, event position, can be undefined
   controller: leave undefined, this is internal field
 
-  callback: callback({pos, crange}, eventType)
+  callback: callback({pos, crange, eventType})
     pos: Point, event position
     crange: Range, event range
     eventType: String, event type, one of 'keyboard', 'context', 'mouse'
   */
-  withEventRange ({editor, detail, eventType, pos, controller}, callback) {
+  withEventRange ({editor, detail, eventType, pos, controller}: IEventRangeParams, callback: TEventRangeCallback<any>) {
     if (pos != null) { pos = Point.fromObject(pos) }
     if (eventType == null) { eventType = getEventType(detail) }
-    if (controller == null) { controller = this.pluginManager.controller(editor) }
+    if (controller == null && editor) { controller = this.pluginManager.controller(editor) }
     if (controller == null) { return }
 
-    return callback((controller.getEventRange(pos, eventType)))
+    return callback(controller.getEventRange(pos, eventType))
+  }
+}
+
+interface IEventRangeParams {
+  editor?: TextEditor
+  detail?: any
+  eventType?: TEventRangeType
+  pos: TPosition
+  controller?: EditorControl
+}
+export type TEventRangeCallback<T> = (pars: {pos: Point, crange: Range, eventType: TEventRangeType}) => T
+
+class DummyElement {
+  private element: HTMLElement
+  constructor (private opts: IControlOpts & {element: HTMLElement}) {
+    this.element = opts.element.cloneNode(true) as HTMLElement
+    this.init()
+  }
+
+  public update (opts: IControlOpts & {element: HTMLElement}) {
+    this.opts = opts
+    this.element.remove()
+    this.element = opts.element.cloneNode(true) as HTMLElement
+    this.init()
+  }
+
+  private init() {
+    const {id, events, classes, style, attrs} = this.opts
+    if (id) { this.element.id = id }
+    if (events) {
+      for (const ev of Object.keys(events)) {
+        this.element.addEventListener(ev, events[ev])
+      }
+    }
+    if (classes) {
+      for (const cls of classes) {
+        this.element.classList.add(cls)
+      }
+    }
+    if (style) {
+      for (const st of Object.keys(style)) {
+        this.element.style[st] = style[st]
+      }
+    }
+    if (attrs) {
+      for (const at of Object.keys(attrs)) {
+        this.element.setAttribute(at, attrs[at])
+      }
+    }
   }
 }

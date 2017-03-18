@@ -1,5 +1,3 @@
-'use babel'
-
 import {CompositeDisposable} from 'atom'
 import {PluginManager, IState} from './plugin-manager'
 import {prettifyFile} from './prettify'
