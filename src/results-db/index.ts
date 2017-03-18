@@ -1,6 +1,6 @@
 'use babel'
 
-import {TPosition, TSeverity, IResultItem, ResultItem, IResultItemTemplate} from './result-item'
+import {TPosition, TSeverity, IResultItem, ResultItem} from './result-item'
 import {CompositeDisposable, Emitter} from 'atom'
 
 export {TPosition, TSeverity, IResultItem}
@@ -18,15 +18,15 @@ export class ResultsDB {
     this.disposables.add(this.emitter = new Emitter())
   }
 
-  destroy () {
+  public destroy () {
     this.disposables.dispose()
   }
 
-  onDidUpdate (callback: TUpdateCallback) {
+  public onDidUpdate (callback: TUpdateCallback) {
     return this.emitter.on('did-update', callback)
   }
 
-  setResults (res: IResultItem[], severityArr: TSeverity[]) {
+  public setResults (res: IResultItem[], severityArr: TSeverity[]) {
     if (severityArr) {
       this._results =
         this._results.filter(({severity}) => !(severityArr.includes(severity)))
@@ -42,7 +42,7 @@ export class ResultsDB {
     this.emitter.emit('did-update', {res: this, types: severityArr})
   }
 
-  appendResults (res: IResultItem[], severityArr: TSeverity[]) {
+  public appendResults (res: IResultItem[], severityArr: TSeverity[]) {
     this._results = this._results.concat(res.map((r) => new ResultItem(this, r)))
 
     if (!severityArr) {
@@ -52,36 +52,28 @@ export class ResultsDB {
     this.emitter.emit('did-update', {res: this, types: severityArr})
   }
 
-  calcSeverityArr (res: IResultItem[]) {
-    let severityArr: TSeverity[] = []
-    for (let {severity} of res) {
-      if (!severityArr.includes(severity)) { severityArr.push(severity) }
-    }
-    return severityArr
-  }
-
-  removeResult (resItem: ResultItem) {
+  public removeResult (resItem: ResultItem) {
     this._results = this._results.filter((res) => res !== resItem)
     resItem.parent = null
   }
 
-  results () {
+  public results () {
     return this._results
   }
 
-  resultsWithURI ()  {
-    return this._results.filter(({uri}) => uri)
+  public filter (f: (item: ResultItem) => boolean) {
+    return this._results.filter(f)
   }
 
-  filter (template: IResultItemTemplate) {
-    return this._results.filter((item) => {
-      let b = true
-      for (let k of Object.keys(template)) { b = b && (item[k] === template[k]) }
-      return b
-    })
-  }
-
-  isEmpty () {
+  public isEmpty () {
     return this._results.length === 0
+  }
+
+  private calcSeverityArr (res: IResultItem[]) {
+    const severityArr: TSeverity[] = []
+    for (const {severity} of res) {
+      if (!severityArr.includes(severity)) { severityArr.push(severity) }
+    }
+    return severityArr
   }
 }

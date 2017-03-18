@@ -1,7 +1,6 @@
 import {Point} from 'atom'
 import {PluginManager} from '../../plugin-manager'
-import {TPosition, IResultItem, TSeverity} from '../../results-db'
-import {TMessage} from '../../utils'
+import {IResultItem, TSeverity} from '../../results-db'
 
 export interface IMainInterface {
   /**

@@ -1,8 +1,8 @@
 'use babel'
 
-import runFilter from './util-run-filter'
+import {runFilter} from './util-run-filter'
 
-export default function (text: string, workingDirectory: string) {
+export async function format (text: string, workingDirectory: string) {
   return runFilter({
     command: atom.config.get('ide-haskell.stylishHaskellPath'),
     args: atom.config.get('ide-haskell.stylishHaskellArguments'),

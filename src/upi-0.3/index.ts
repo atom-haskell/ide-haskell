@@ -159,7 +159,7 @@ export class UPI {
     }
     subs.sort((a, b) => b.priority - a.priority)
     const controller = this.pluginManager.controller(editor)
-    if(!controller) return
+    if (!controller) { return }
     for (const {pluginName, handler} of subs) {
       try {
         const eventRange = this.getEventRange({controller, pos, eventType})

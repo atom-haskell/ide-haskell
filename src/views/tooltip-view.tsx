@@ -15,7 +15,7 @@ export class TooltipMessage {
     etch.initialize(this)
   }
 
-  render () {
+  public render () {
     return (
       <ide-haskell-tooltip>
         {this.message}
@@ -23,11 +23,11 @@ export class TooltipMessage {
     )
   }
 
-  update () {
+  public update () {
     return etch.update(this)
   }
 
-  writeAfterUpdate () {
+  public writeAfterUpdate () {
     this.element.parentElement && this.element.parentElement.classList.add('ide-haskell')
   }
 }

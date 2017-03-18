@@ -31,10 +31,11 @@ export class ParamControl<T> {
     this.disposables = new CompositeDisposable()
 
     this.disposables.add(
-        atom.config.observe('ide-haskell.hideParameterValues',
+        atom.config.observe(
+          'ide-haskell.hideParameterValues',
           (val: boolean) => {
             this.hiddenValue = val
-            if (this.element) this.update()
+            if (this.element) { this.update() }
           })
     )
 
@@ -45,44 +46,15 @@ export class ParamControl<T> {
     etch.initialize(this)
 
     this.disposables.add(
-      atom.tooltips.add(this.element,
-        {
-          title: () => {
-            if (this.hiddenValue) {
-              return `${this.spec.displayName}: ${this.spec.displayTemplate(this.value)}`
-            } else {
-              return this.spec.displayName
-            }
-          }
-        }
-      )
+      atom.tooltips.add(this.element, { title: this.tooltipTitle.bind(this) })
     )
   }
 
-  initStore () {
-    if (this.storeDisposable) this.disposables.remove(this.storeDisposable)
-    this.storeDisposable =
-      this.store.onDidUpdate(({pluginName, paramName, value}) => {
-        if (this.pluginName === pluginName && this.name === paramName) {
-          this.value = value
-          this.update()
-        }
-      })
-    this.disposables.add(this.storeDisposable)
-    this.value = this.store.getValueRaw(this.pluginName, this.name)
-  }
-
-  initSpec () {
-    if (!this.spec.displayName) {
-      this.spec.displayName = this.name.charAt(0).toUpperCase() + this.name.slice(1)
-    }
-  }
-
-  render () {
-    let classList = [`ide-haskell--${this.pluginName}`, `ide-haskell-param--${this.name}`]
+  public render () {
+    const classList = [`ide-haskell--${this.pluginName}`, `ide-haskell-param--${this.name}`]
     if (this.hiddenValue) { classList.push('hidden-value') }
     return (
-      <ide-haskell-param class={classList.join(' ')} on={{click: this.setValue}}>
+      <ide-haskell-param class={classList.join(' ')} on={{click: this.setValue.bind(this)}}>
         <ide-haskell-param-value>
           {this.spec.displayTemplate(this.value)}
         </ide-haskell-param-value>
@@ -90,11 +62,11 @@ export class ParamControl<T> {
     )
   }
 
-  update (props?: IProps<T>) {
+  public update (props?: IProps<T>) {
     if (props) {
       const {pluginName, name, spec, store} = props
-      if (pluginName) this.pluginName = pluginName
-      if (name) this.name = name
+      if (pluginName) { this.pluginName = pluginName }
+      if (name) { this.name = name }
       if (spec && this.spec !== spec) {
         this.spec = spec
         this.initSpec()
@@ -107,13 +79,40 @@ export class ParamControl<T> {
     return etch.update(this)
   }
 
-  async setValue (e: T) {
+  public async setValue (e: T) {
     await this.store.setValue(this.pluginName, this.name)
     this.update()
   }
 
-  async destroy () {
+  public async destroy () {
     await etch.destroy(this)
     this.disposables.dispose()
+  }
+
+  private initStore () {
+    if (this.storeDisposable) { this.disposables.remove(this.storeDisposable) }
+    this.storeDisposable =
+      this.store.onDidUpdate(({pluginName, paramName, value}) => {
+        if (this.pluginName === pluginName && this.name === paramName) {
+          this.value = value
+          this.update()
+        }
+      })
+    this.disposables.add(this.storeDisposable)
+    this.value = this.store.getValueRaw(this.pluginName, this.name)
+  }
+
+  private initSpec () {
+    if (!this.spec.displayName) {
+      this.spec.displayName = this.name.charAt(0).toUpperCase() + this.name.slice(1)
+    }
+  }
+
+  private tooltipTitle () {
+    if (this.hiddenValue) {
+      return `${this.spec.displayName}: ${this.spec.displayTemplate(this.value)}`
+    } else {
+      return this.spec.displayName
+    }
   }
 }

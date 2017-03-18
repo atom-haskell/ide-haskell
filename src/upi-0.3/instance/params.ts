@@ -50,21 +50,21 @@ export interface IMainInterface {
 export function create (pluginName: string, pluginManager: PluginManager): IMainInterface {
   return {
     add (spec) {
-      return pluginManager.addConfigParam(pluginName, spec)
+      return pluginManager.configParamManager.add(pluginName, spec)
     },
     async get (...args: any[]) {
       if (args.length < 2) {
         args.unshift(pluginName)
       }
       const [plugin, name] = args
-      return pluginManager.getConfigParam(plugin, name)
+      return pluginManager.configParamManager.get(plugin, name)
     },
     async set (...args: any[]) {
       if (args.length < 3) {
         args.unshift(pluginName)
       }
       const [plugin, name, value] = args
-      return pluginManager.setConfigParam(plugin, name, value)
+      return pluginManager.configParamManager.set(plugin, name, value)
     }
   }
 }

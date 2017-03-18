@@ -16,18 +16,18 @@ export class ConfigParamManager {
     this.store = new ConfigParamStore(state)
   }
 
-  destroy () {
+  public destroy () {
     this.store.destroy()
   }
 
-  serialize () {
+  public serialize () {
     return this.store.serialize()
   }
 
-  add (pluginName: string, specs: { [paramName: string]: IParamSpec<any> }) {
-    let disp = new CompositeDisposable()
-    for (let name of Object.keys(specs)) {
-      let spec = specs[name]
+  public add (pluginName: string, specs: { [paramName: string]: IParamSpec<any> }) {
+    const disp = new CompositeDisposable()
+    for (const name of Object.keys(specs)) {
+      const spec = specs[name]
       disp.add(this.store.addParamSpec(pluginName, name, spec))
       disp.add(
         this.outputPanel.addPanelControl(ParamControl, {
@@ -41,11 +41,11 @@ export class ConfigParamManager {
     return disp
   }
 
-  async get (pluginName: string, name: string) {
+  public async get (pluginName: string, name: string) {
     return this.store.getValue(pluginName, name)
   }
 
-  async set (pluginName:string, name: string, value: any) {
+  public async set (pluginName: string, name: string, value: any) {
     return this.store.setValue(pluginName, name, value)
   }
 }
