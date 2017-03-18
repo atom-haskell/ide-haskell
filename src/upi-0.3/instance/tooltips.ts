@@ -2,7 +2,8 @@ import {Disposable, TextEditor} from 'atom'
 import {PluginManager} from '../../plugin-manager'
 import {UPI} from '../'
 import {UPIInstance} from './'
-import {TPosition, TEventRangeType} from './general'
+import {TEventRangeType} from './general'
+import {TPosition} from '../../results-db'
 import {TMessage} from '../../utils'
 
 interface IShowTooltipParams {
