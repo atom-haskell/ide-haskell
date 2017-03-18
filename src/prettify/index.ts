@@ -1,6 +1,8 @@
 'use babel'
 
-export async function prettifyFile (editor, format = 'haskell') {
+import {TextEditor} from 'atom'
+
+export async function prettifyFile (editor: TextEditor, format = 'haskell') {
   let [firstCursor, ...cursors] = editor.getCursors().map((cursor) => cursor.getBufferPosition())
   let modMap = {
     haskell: './util-stylish-haskell',
