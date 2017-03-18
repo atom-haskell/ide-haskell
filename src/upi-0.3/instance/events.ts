@@ -1,4 +1,4 @@
-import {CompositeDisposable, Point, Disposable, TextBuffer, TextEditor} from 'atom'
+import {CompositeDisposable, Disposable, TextBuffer} from 'atom'
 import {PluginManager} from '../../plugin-manager'
 export type TextBufferCallback = (buffer: TextBuffer) => void
 
@@ -21,7 +21,7 @@ export interface IMainInterface {
 
   @returns {Disposable}
   */
-  onDidSaveBuffer(callback: TextBufferCallback): Disposable
+  onDidSaveBuffer (callback: TextBufferCallback): Disposable
 
   /**
   Convenience function. Will fire after Haskell buffer has stopped changing for
@@ -32,7 +32,7 @@ export interface IMainInterface {
 
   @returns {Disposable}
   */
-  onDidStopChanging(callback: TextBufferCallback): Disposable
+  onDidStopChanging (callback: TextBufferCallback): Disposable
 }
 
 export function create (pluginManager: PluginManager, disposables: CompositeDisposable): IMainInterface {
@@ -42,12 +42,12 @@ export function create (pluginManager: PluginManager, disposables: CompositeDisp
       disposables.add(disp)
       return disp
     },
-    onDidSaveBuffer(callback) {
+    onDidSaveBuffer (callback) {
       const disp = pluginManager.onDidSaveBuffer(callback)
       disposables.add(disp)
       return disp
     },
-    onDidStopChanging(callback) {
+    onDidStopChanging (callback) {
       const disp = pluginManager.onDidStopChanging(callback)
       disposables.add(disp)
       return disp

@@ -2807,6 +2807,7 @@ declare module AtomTypes {
          * @returns {number} Returns a {Number}
          */
         getPartialMatchTimeout(): number;
+        removeBindingsFromSource(source: string): void;
     }
 
     /**

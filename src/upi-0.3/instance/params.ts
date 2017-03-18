@@ -1,10 +1,9 @@
-import {CompositeDisposable, Point, Disposable, TextBuffer, TextEditor} from 'atom'
+import {Disposable} from 'atom'
 import {PluginManager} from '../../plugin-manager'
-import {TPosition, TUPIText, TEventRangeType} from './general'
 
 export interface IParamSpec<T> {
   onChanged: (value: T) => void
-  items: Array<T> | (() => Array<T>)
+  items: T[] | (() => T[])
   itemTemplate: (item: T) => String
   itemFilterKey: string
   description?: string
@@ -29,7 +28,7 @@ export interface IMainInterface {
     disp: Disposable
     change: object of change functions, keys being param_name
   */
-  add (spec: {[param_name: string]: IParamSpec<any>}): Disposable
+  add (spec: {[paramName: string]: IParamSpec<any>}): Disposable
 
   /**
   getConfigParam(paramName) or getConfigParam(pluginName, paramName)
@@ -57,20 +56,20 @@ export interface IMainInterface {
   set<T> (name: string, value?: T): Promise<T>
 }
 
-export function create(pluginName: string, pluginManager: PluginManager): IMainInterface {
+export function create (pluginName: string, pluginManager: PluginManager): IMainInterface {
   return {
     add (spec) {
       return pluginManager.addConfigParam(pluginName, spec)
     },
-    get (...args: any[]) {
-      if(args.length < 2) {
+    async get (...args: any[]) {
+      if (args.length < 2) {
         args.unshift(pluginName)
       }
       const [plugin, name] = args
       return pluginManager.getConfigParam(plugin, name)
     },
-    set (...args: any[]) {
-      if(args.length < 3) {
+    async set (...args: any[]) {
+      if (args.length < 3) {
         args.unshift(pluginName)
       }
       const [plugin, name, value] = args

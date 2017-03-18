@@ -1,4 +1,4 @@
-import {CompositeDisposable, Point, Disposable, TextBuffer, TextEditor} from 'atom'
+import {Point} from 'atom'
 import {PluginManager} from '../../plugin-manager'
 import {TPosition, TUPIText} from './general'
 
@@ -37,7 +37,7 @@ export interface IMainInterface {
   types: Array of String, containing possible message `severity`. If undefined,
          will be taken from `messages`
   */
-  set(messages: IUPIMessage[], types: TSeverity[]): void
+  set (messages: IUPIMessage[], types: TSeverity[]): void
 
   /**
   Clear all existing messages with `severity` in `types`
@@ -54,9 +54,8 @@ export interface IMainInterface {
 
   This allows to define custom output panel tabs.
   */
-  setTypes (types: ISetTypesParams): void //TODO: should add disposable
+  setTypes (types: ISetTypesParams): void // TODO: should add disposable
 }
-
 
 interface IUPINormalStatus {
   status: 'ready' | 'error' | 'warning'
@@ -85,23 +84,25 @@ export interface ISeverityTabDefinition {
 
 export interface ISetTypesParams {[severity: string]: ISeverityTabDefinition}
 
-export function create (pluginName:string, pluginManager: PluginManager): IMainInterface {
+export function create (pluginName: string, pluginManager: PluginManager): IMainInterface {
   return {
     status (status) {
-      pluginManager.outputView.backendStatus(pluginName, status as any) //TODO Fix this
+      pluginManager.outputView.backendStatus(pluginName, status as any) // TODO Fix this
     },
     add (messages, types) {
       messages = messages.map((m) => {
-        if (m.position)
+        if (m.position) {
           m.position = Point.fromObject(m.position)
+        }
         return m
       })
       pluginManager.checkResults.appendResults(messages, types)
     },
-    set(messages, types) {
+    set (messages, types) {
       messages = messages.map((m) => {
-        if (m.position)
+        if (m.position) {
           m.position = Point.fromObject(m.position)
+        }
         return m
       })
       pluginManager.checkResults.setResults(messages, types)
@@ -110,7 +111,7 @@ export function create (pluginName:string, pluginManager: PluginManager): IMainI
       pluginManager.checkResults.setResults([], types)
     },
     setTypes (types) {
-      for (const type in types) {
+      for (const type of Object.keys(types)) {
         const opts = types[type]
         pluginManager.outputView.createTab(type, opts)
       }

@@ -15,15 +15,15 @@ let upi3: UPI3.UPI | null
 
 export const config = require('./config')
 
-function cleanConfig () {}
+function cleanConfig () { /*noop*/ }
 
 declare interface IDEHaskellState {
   // TODO
 }
 
 declare interface IEventDesc {
-  currentTarget: HTMLElement & { getModel(): AtomTypes.TextEditor }
-  abortKeyBinding?(): void
+  currentTarget: HTMLElement & { getModel (): AtomTypes.TextEditor }
+  abortKeyBinding? (): void
 }
 
 export function activate (state: IDEHaskellState) {
@@ -36,14 +36,17 @@ export function activate (state: IDEHaskellState) {
   upiProvided = false
 
   if (atom.config.get('ide-haskell.startupMessageIdeBackend')) {
-    setTimeout(() => {
-      if (!upiProvided) {
-        atom.notifications.addWarning(`
-          Ide-Haskell needs backends that provide most of functionality.
-          Please refer to README for details
-          `, {dismissable: true})
-      }
-    }, 5000)
+    setTimeout(
+      () => {
+        if (!upiProvided) {
+          atom.notifications.addWarning(
+            `Ide-Haskell needs backends that provide most of functionality.
+            Please refer to README for details`,
+            {dismissable: true})
+        }
+      },
+      5000
+    )
   }
 
   disposables = new CompositeDisposable()
@@ -58,11 +61,12 @@ export function activate (state: IDEHaskellState) {
 
   disposables.add(
     atom.commands.add('atom-text-editor[data-grammar~="haskell"]', {
-      'ide-haskell:prettify-file': ({currentTarget}: IEventDesc) =>
-        prettifyFile(currentTarget.getModel()),
+      'ide-haskell:prettify-file': ({currentTarget}: IEventDesc) => {
+        prettifyFile(currentTarget.getModel())
+      },
       'ide-haskell:close-tooltip': ({currentTarget, abortKeyBinding}: IEventDesc) => {
-        let controller = pluginManager && pluginManager.controller(currentTarget.getModel())
-        if (!controller) return
+        const controller = pluginManager && pluginManager.controller(currentTarget.getModel())
+        if (!controller) { return }
         if (controller.hasTooltips && controller.hasTooltips()) {
           controller.hideTooltip()
         } else if (abortKeyBinding) {
@@ -75,13 +79,14 @@ export function activate (state: IDEHaskellState) {
 
   disposables.add(
     atom.commands.add('atom-text-editor[data-grammar~="cabal"]', {
-      'ide-haskell:prettify-file': ({currentTarget}: IEventDesc) =>
-        prettifyFile(currentTarget.getModel(), 'cabal')
+      'ide-haskell:prettify-file': ({currentTarget}: IEventDesc) => {
+        prettifyFile(currentTarget.getModel() , 'cabal')
+      }
     }))
 
   atom.keymaps.add('ide-haskell', {
     'atom-text-editor[data-grammar~="haskell"]':
-      {'escape': 'ide-haskell:close-tooltip'}
+      {escape: 'ide-haskell:close-tooltip'}
   })
 
   menu = new CompositeDisposable()
@@ -99,10 +104,10 @@ export function deactivate () {
   pluginManager && pluginManager.deactivate()
   pluginManager = null
   upi3 && upi3.dispose()
-  upi3 = null;
+  upi3 = null
 
   // TODO: no definition
-  (atom.keymaps as any).removeBindingsFromSource('ide-haskell')
+  atom.keymaps.removeBindingsFromSource('ide-haskell')
 
   // clear commands
   disposables && disposables.dispose()
@@ -114,7 +119,9 @@ export function deactivate () {
 }
 
 export function serialize () {
-  if (pluginManager) return pluginManager.serialize()
+  if (pluginManager) {
+     return pluginManager.serialize()
+  }
 }
 
 export function provideUpi () {
@@ -127,14 +134,14 @@ export function provideUpi3 () {
   return upi3
 }
 
-interface LinterRegistry {
+interface ILinterRegistry {
   // TODO: steal this from atom-typescript
   register: Function
 }
 
-export function consumeLinter (indieRegistry: LinterRegistry) {
-  if(!(disposables && pluginManager)) return
-  let linter = indieRegistry.register({name: 'IDE-Haskell'})
+export function consumeLinter (indieRegistry: ILinterRegistry) {
+  if (!(disposables && pluginManager)) { return }
+  const linter = indieRegistry.register({name: 'IDE-Haskell'})
   disposables.add(linter)
   pluginManager.setLinter(linter)
   return linter

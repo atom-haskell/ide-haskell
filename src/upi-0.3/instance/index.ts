@@ -1,11 +1,9 @@
-import {CompositeDisposable, Point, Disposable, TextBuffer, TextEditor} from 'atom'
-import {MainMenuLabel, getEventType} from '../../utils'
+import {CompositeDisposable} from 'atom'
 import {PluginManager} from '../../plugin-manager'
 import {UPIError} from '../error'
 import {UPI} from '../'
 export {UPIError}
 
-import {TPosition, TUPIText, TEventRangeType} from './general'
 import * as Menu from './menu'
 import * as Messages from './messages'
 import * as Events from './events'
@@ -27,11 +25,10 @@ export class UPIInstance {
   public tooltipEvents: Set<TTooltipHandlerSpec>
   private disposables: CompositeDisposable
   private destroyed: boolean
-  constructor(pluginManager: PluginManager, pluginName: string, main: UPI) {
-    this.disposables = new CompositeDisposable
-    this.tooltipEvents = new Set
+  constructor (pluginManager: PluginManager, pluginName: string, main: UPI) {
+    this.disposables = new CompositeDisposable()
+    this.tooltipEvents = new Set()
     this.destroyed = false
-    let instance = this
 
     this.utils = {withEventRange: main.withEventRange.bind(main)}
 
@@ -44,7 +41,7 @@ export class UPIInstance {
     this.params = Params.create(pluginName, pluginManager)
   }
 
-  destroy () {
+  public destroy () {
     this.disposables.dispose()
     this.tooltipEvents.clear()
     Object.getOwnPropertyNames(this).forEach((p) => {
@@ -53,9 +50,10 @@ export class UPIInstance {
     this.destroyed = true
   }
 
-  check () {
-    if(this.destroyed)
+  public check () {
+    if (this.destroyed) {
       throw new UPIError('This UPI interface was destroyed')
+    }
     return this
   }
 }
