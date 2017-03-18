@@ -24,7 +24,7 @@ export class PluginManager {
   public emitter: Emitter
   public outputView: OutputPanel
   public configParamManager: ConfigParamManager
-  public linterSupport: LinterSupport | null
+  public linterSupport?: LinterSupport
   constructor (state: IState) {
     this.checkResults = new ResultsDB()
 
@@ -45,7 +45,7 @@ export class PluginManager {
 
     this.configParamManager = new ConfigParamManager(this.outputView, state.configParams)
 
-    this.linterSupport = null
+    this.linterSupport = undefined
   }
 
   public deactivate () {
@@ -57,7 +57,7 @@ export class PluginManager {
     this.configParamManager.destroy()
     if (this.linterSupport) {
       this.linterSupport.destroy()
-      this.linterSupport = null
+      this.linterSupport = undefined
     }
   }
 

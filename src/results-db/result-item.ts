@@ -17,7 +17,9 @@ export class ResultItem {
   public position?: Point
   public message: MessageObject
   public severity: TSeverity
-  constructor (public parent: ResultsDB | null, {uri, message, severity, position}: IResultItem) {
+  public parent?: ResultsDB
+  constructor (parent: ResultsDB, {uri, message, severity, position}: IResultItem) {
+    this.parent = parent
     this.uri = uri
     this.message = MessageObject.fromObject(message)
     this.severity = severity

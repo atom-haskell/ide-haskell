@@ -32,7 +32,7 @@ export class OutputPanelItem {
         </ide-haskell-item-position>
       )
     } else {
-      return null
+      return ''
     }
   }
 
