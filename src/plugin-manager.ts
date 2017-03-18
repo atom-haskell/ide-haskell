@@ -159,8 +159,8 @@ export class PluginManager {
       this.controllers.set(editor, controller)
       controller.disposables.add(
         editor.onDidDestroy(() => this.removeController(editor))
-      , controller.onShouldShowTooltip(({editor: ed, pos, eventType}: TShowTooltipCallbackParams) =>
-          this.emitter.emit('should-show-tooltip', {ed, pos, eventType}))
+      , controller.onShouldShowTooltip((params: TShowTooltipCallbackParams) =>
+          this.emitter.emit('should-show-tooltip', params))
       , controller.onWillSaveBuffer((buffer: TextBuffer) => this.emitter.emit('will-save-buffer', buffer))
       , controller.onDidSaveBuffer((buffer: TextBuffer) => this.emitter.emit('did-save-buffer', buffer))
       , controller.onDidStopChanging((ed: TextEditor) => this.emitter.emit('did-stop-changing', ed.getBuffer()))
