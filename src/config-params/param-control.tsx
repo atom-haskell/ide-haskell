@@ -1,11 +1,28 @@
 'use babel'
-/** @jsx etch.dom */
 
-import {CompositeDisposable} from 'atom'
-import etch from 'etch'
+import {CompositeDisposable, Disposable} from 'atom'
+import * as etch from 'etch'
 
-export class ParamControl {
-  constructor ({pluginName, name, spec, store}, children) {
+import {IParamSpec, ConfigParamStore} from './param-store'
+
+interface IProps<T> {
+  pluginName: string
+  name: string
+  spec: IParamSpec<T>
+  store: ConfigParamStore
+}
+
+export class ParamControl<T> {
+  private pluginName: string
+  private name: string
+  private spec: IParamSpec<any>
+  private store: ConfigParamStore
+  private disposables: CompositeDisposable
+  private hiddenValue: boolean
+  private element: HTMLElement | undefined
+  private value: T
+  private storeDisposable: Disposable
+  constructor ({pluginName, name, spec, store}: IProps<T>) {
     this.pluginName = pluginName
     this.spec = spec
     this.name = name
@@ -15,7 +32,7 @@ export class ParamControl {
 
     this.disposables.add(
         atom.config.observe('ide-haskell.hideParameterValues',
-          (val) => {
+          (val: boolean) => {
             this.hiddenValue = val
             if (this.element) this.update()
           })
@@ -73,21 +90,24 @@ export class ParamControl {
     )
   }
 
-  update ({pluginName, name, spec, store} = {}) {
-    if (pluginName) this.pluginName = pluginName
-    if (name) this.name = name
-    if (spec && this.spec !== spec) {
-      this.spec = spec
-      this.initSpec()
-    }
-    if (store && this.store !== store) {
-      this.store = store
-      this.initStore()
+  update (props?: IProps<T>) {
+    if (props) {
+      const {pluginName, name, spec, store} = props
+      if (pluginName) this.pluginName = pluginName
+      if (name) this.name = name
+      if (spec && this.spec !== spec) {
+        this.spec = spec
+        this.initSpec()
+      }
+      if (store && this.store !== store) {
+        this.store = store
+        this.initStore()
+      }
     }
     return etch.update(this)
   }
 
-  async setValue (e) {
+  async setValue (e: T) {
     await this.store.setValue(this.pluginName, this.name)
     this.update()
   }
@@ -95,11 +115,5 @@ export class ParamControl {
   async destroy () {
     await etch.destroy(this)
     this.disposables.dispose()
-    this.pluginName = null
-    this.spec = null
-    this.name = null
-    this.store = null
-    this.value = null
-    this.storeDisposable = null
   }
 }

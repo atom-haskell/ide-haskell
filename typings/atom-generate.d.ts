@@ -2468,6 +2468,7 @@ declare module AtomTypes {
           tokenizing the next line in the file.
          */
         tokenizeLine(line: string, ruleStack: any[], firstLine: boolean): Object;
+        scopeName: string
     }
 
     /**
@@ -3723,7 +3724,7 @@ declare module AtomTypes {
          * @param {Point} A {Point} whose row and column will be added to this point's row and column to build the returned point.
          * @returns {Point} Returns a {Point}.
          */
-        translate(other: Point): Point;
+        translate(other: Point | [number, number] | {row: number, column: number}): Point;
         /**
          * Build and return a new {Point} by traversing the rows and columns
          * specified by the given point.
@@ -5252,7 +5253,7 @@ declare module AtomTypes {
          * @param {Function} {Function}
          * @returns {Disposable} Returns a {Disposable} on which `.dispose()` can be called to unsubscribe.
          */
-        onDidChangeGrammar(callback: Function): Disposable;
+        onDidChangeGrammar(callback: (grammar: Grammar) => void): Disposable;
         /**
          * Calls your `callback` when the result of {::isModified} changes.
          * @param {Function} {Function}
@@ -6461,7 +6462,7 @@ declare module AtomTypes {
         /**
          * Get the current {Grammar} of this editor.
          */
-        getGrammar(): void;
+        getGrammar(): Grammar;
         /**
          * Set the current {Grammar} of this editor.
          *
@@ -6844,7 +6845,7 @@ declare module AtomTypes {
          * @param {Function} {Function} to be called with current and future text editors.
          * @returns {Disposable} Returns a {Disposable} on which `.dispose()` can be called to unsubscribe.
          */
-        observeTextEditors(callback: Function): Disposable;
+        observeTextEditors(callback: (editor: TextEditor) => void): Disposable;
         /**
          * Invoke the given callback with all current and future panes items
          * in the workspace.
@@ -7020,7 +7021,7 @@ declare module AtomTypes {
          * Get all text editors in the workspace.
          * @returns {any[]} Returns an {Array} of {TextEditor}s.
          */
-        getTextEditors(): any[];
+        getTextEditors(): TextEditor[];
         /**
          * Get the active item if it is an {TextEditor}.
          * @returns {TextEditor} Returns an {TextEditor} or `` if the current active item is not an

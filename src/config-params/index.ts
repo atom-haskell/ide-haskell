@@ -2,25 +2,29 @@
 
 import {CompositeDisposable} from 'atom'
 import {ParamControl} from './param-control'
-import {ConfigParamStore} from './param-store'
+import {ConfigParamStore, IParamSpec, IState as IStoreState} from './param-store'
+export {IParamSpec}
+
+import {OutputPanel} from '../output-panel'
+
+type IState = IStoreState
+export {IState}
 
 export class ConfigParamManager {
-  constructor (outputPanel, state) {
-    this.outputPanel = outputPanel
+  private store: ConfigParamStore
+  constructor (private outputPanel: OutputPanel, state: IState) {
     this.store = new ConfigParamStore(state)
   }
 
   destroy () {
     this.store.destroy()
-    this.store = null
-    this.outputPanel = null
   }
 
   serialize () {
     return this.store.serialize()
   }
 
-  add (pluginName, specs) {
+  add (pluginName: string, specs: { [paramName: string]: IParamSpec<any> }) {
     let disp = new CompositeDisposable()
     for (let name of Object.keys(specs)) {
       let spec = specs[name]
@@ -37,11 +41,11 @@ export class ConfigParamManager {
     return disp
   }
 
-  async get (pluginName, name) {
+  async get (pluginName: string, name: string) {
     return this.store.getValue(pluginName, name)
   }
 
-  async set (pluginName, name, value) {
+  async set (pluginName:string, name: string, value: any) {
     return this.store.setValue(pluginName, name, value)
   }
 }

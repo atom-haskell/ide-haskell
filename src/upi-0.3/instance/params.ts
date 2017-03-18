@@ -1,16 +1,7 @@
 import {Disposable} from 'atom'
 import {PluginManager} from '../../plugin-manager'
+import {IParamSpec} from '../../config-params'
 
-export interface IParamSpec<T> {
-  onChanged: (value: T) => void
-  items: T[] | (() => T[])
-  itemTemplate: (item: T) => String
-  itemFilterKey: string
-  description?: string
-  displayName?: string
-  displayTemplate: (item: T) => String
-  default: T
-}
 export interface IMainInterface {
   /**
   addConfigParam
