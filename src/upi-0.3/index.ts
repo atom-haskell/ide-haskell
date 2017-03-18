@@ -17,7 +17,7 @@ import {TTooltipHandler} from './instance/tooltips'
 import {TEventRangeCallback} from './instance/utils'
 import {TTooltipHandlerSpec} from './instance'
 
-export interface RegistrationOptions {
+export interface IRegistrationOptions {
   name: string
   consumer?: (instance: UPIInstance) => Disposable | void
   menu?: IMenuDefinition
@@ -94,7 +94,7 @@ export class UPI {
   @param consumer: callback :: UPIInstance -> ()
   @returns {Disposable}
   */
-  public consume(options: RegistrationOptions): Disposable {
+  public consume(options: IRegistrationOptions): Disposable {
     const {name, menu, messageTypes, events, controls, params, consumer, tooltipEvent} = options
     if (!name)
       throw new UPIError("name has to be specified for UPI")
