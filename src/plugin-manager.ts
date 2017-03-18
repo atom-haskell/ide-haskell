@@ -3,7 +3,7 @@
 import {CompositeDisposable, Emitter, TextEditor, Point, TextBuffer, Grammar} from 'atom'
 import {ResultsDB, TUpdateCallback} from './results-db'
 import {OutputPanel} from './output-panel'
-import {ConfigParamManager, IParamSpec, IState as IParamState} from './config-params'
+import {ConfigParamManager, IState as IParamState} from './config-params'
 import {EditorControl} from './editor-control'
 import {LinterSupport} from './linter-support'
 
@@ -51,7 +51,7 @@ export class PluginManager {
     this.linterSupport = null
   }
 
-  deactivate () {
+  public deactivate () {
     this.checkResults.destroy()
     this.disposables.dispose()
 
@@ -64,84 +64,74 @@ export class PluginManager {
     }
   }
 
-  serialize () {
+  public serialize () {
     return {
       outputView: this.outputView.serialize(),
       configParams: this.configParamManager.serialize()
     }
   }
 
-  onShouldShowTooltip (callback: TShowTooltipCallback) {
+  public onShouldShowTooltip (callback: TShowTooltipCallback) {
     return this.emitter.on('should-show-tooltip', callback)
   }
 
-  onWillSaveBuffer (callback: TTextBufferCallback) {
+  public onWillSaveBuffer (callback: TTextBufferCallback) {
     return this.emitter.on('will-save-buffer', callback)
   }
 
-  onDidSaveBuffer (callback: TTextBufferCallback) {
+  public onDidSaveBuffer (callback: TTextBufferCallback) {
     return this.emitter.on('did-save-buffer', callback)
   }
 
-  onDidStopChanging (callback: TTextBufferCallback) {
+  public onDidStopChanging (callback: TTextBufferCallback) {
     return this.emitter.on('did-stop-changing', callback)
   }
 
-  togglePanel () {
+  public togglePanel () {
     this.outputView.toggle()
   }
 
-  updateEditorsWithResults (types: string[]) {
-    for (let ed of atom.workspace.getTextEditors()) {
-      let ctrl = this.controller(ed)
-      if (ctrl) ctrl.updateResults(this.checkResults.filter({uri: ed.getPath()}), types)
-    }
-  }
-
-  onResultsUpdated (callback: TUpdateCallback) {
+  public onResultsUpdated (callback: TUpdateCallback) {
     return this.checkResults.onDidUpdate(callback)
   }
 
-  controller (editor: TextEditor) {
+  public controller (editor: TextEditor) {
     return this.controllers.get(editor)
   }
 
-  addController (editor: TextEditor) {
-    if (!this.controllers.has(editor)) {
-      let controller = new EditorControl(editor)
-      this.controllers.set(editor, controller)
-      controller.disposables.add(
-        editor.onDidDestroy(() => this.removeController(editor))
-      , controller.onShouldShowTooltip(({editor, pos, eventType}: TShowTooltipCallbackParams) =>
-          this.emitter.emit('should-show-tooltip', {editor, pos, eventType}))
-      , controller.onWillSaveBuffer((buffer: TextBuffer) => this.emitter.emit('will-save-buffer', buffer))
-      , controller.onDidSaveBuffer((buffer: TextBuffer) => this.emitter.emit('did-save-buffer', buffer))
-      , controller.onDidStopChanging((editor: TextEditor) => this.emitter.emit('did-stop-changing', editor.getBuffer()))
-      )
-      controller.updateResults(this.checkResults.filter({uri: editor.getPath()}))
-    }
-  }
-
-  setLinter (linter: Linter) {
-    if (atom.config.get('ide-haskell.messageDisplayFrontend') !== 'linter') return
+  public setLinter (linter: Linter) {
+    if (atom.config.get('ide-haskell.messageDisplayFrontend') !== 'linter') { return }
     this.linterSupport = new LinterSupport(linter, this.checkResults)
   }
 
-  removeController (editor: TextEditor) {
-    let controller = this.controllers.get(editor)
+  public nextError () {
+    if (atom.config.get('ide-haskell.messageDisplayFrontend') !== 'builtin') { return }
+    this.outputView.showNextError()
+  }
+
+  public prevError () {
+    if (atom.config.get('ide-haskell.messageDisplayFrontend') !== 'builtin') { return }
+    this.outputView.showPrevError()
+  }
+
+  private removeController (editor: TextEditor) {
+    const controller = this.controllers.get(editor)
     if (controller) {
       controller.deactivate()
       this.controllers.delete(editor)
     }
   }
 
-  controllerOnGrammar (editor: TextEditor, grammar: Grammar) {
-    if (grammar.scopeName.match(/haskell$/)) this.addController(editor)
-    else this.removeController(editor)
+  private controllerOnGrammar (editor: TextEditor, grammar: Grammar) {
+    if (grammar.scopeName.match(/haskell$/)) {
+      this.addController(editor)
+    } else {
+      this.removeController(editor)
+    }
   }
 
   // Observe text editors to attach controller
-  subscribeEditorController () {
+  private subscribeEditorController () {
     this.disposables.add(
       atom.workspace.observeTextEditors((editor) => {
         this.disposables.add(
@@ -154,29 +144,31 @@ export class PluginManager {
     )
   }
 
-  deleteEditorControllers () {
-    for (let editor of atom.workspace.getTextEditors()) { this.removeController(editor) }
+  private deleteEditorControllers () {
+    for (const editor of atom.workspace.getTextEditors()) { this.removeController(editor) }
   }
 
-  nextError () {
-    if (atom.config.get('ide-haskell.messageDisplayFrontend') !== 'builtin') return
-    this.outputView.showNextError()
+  private updateEditorsWithResults (types: string[]) {
+    for (const ed of atom.workspace.getTextEditors()) {
+      const ctrl = this.controller(ed)
+      const filtered = this.checkResults.filter(({uri}) => uri === ed.getPath())
+      if (ctrl) { ctrl.updateResults(filtered, types) }
+    }
   }
 
-  prevError () {
-    if (atom.config.get('ide-haskell.messageDisplayFrontend') !== 'builtin') return
-    this.outputView.showPrevError()
-  }
-
-  addConfigParam (pluginName: string, specs: { [paramName: string]: IParamSpec<any> }) {
-    return this.configParamManager.add(pluginName, specs)
-  }
-
-  getConfigParam (pluginName: string, name: string) {
-    return this.configParamManager.get(pluginName, name)
-  }
-
-  setConfigParam (pluginName: string, name: string, value: any) {
-    return this.configParamManager.set(pluginName, name, value)
+  private addController (editor: TextEditor) {
+    if (!this.controllers.has(editor)) {
+      const controller = new EditorControl(editor)
+      this.controllers.set(editor, controller)
+      controller.disposables.add(
+        editor.onDidDestroy(() => this.removeController(editor))
+      , controller.onShouldShowTooltip(({editor: ed, pos, eventType}: TShowTooltipCallbackParams) =>
+          this.emitter.emit('should-show-tooltip', {ed, pos, eventType}))
+      , controller.onWillSaveBuffer((buffer: TextBuffer) => this.emitter.emit('will-save-buffer', buffer))
+      , controller.onDidSaveBuffer((buffer: TextBuffer) => this.emitter.emit('did-save-buffer', buffer))
+      , controller.onDidStopChanging((ed: TextEditor) => this.emitter.emit('did-stop-changing', ed.getBuffer()))
+      )
+      controller.updateResults(this.checkResults.filter(({uri}) => uri === editor.getPath()))
+    }
   }
 }

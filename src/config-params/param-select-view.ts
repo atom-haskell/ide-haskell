@@ -3,7 +3,7 @@
 import SelectListView from 'atom-select-list'
 import {Panel} from 'atom'
 
-interface SelectListParams<T> {
+interface ISelectListParams<T> {
   items: T[] | Promise<T[]>
   heading?: string
   itemTemplate?: (item: T) => string
@@ -12,10 +12,10 @@ interface SelectListParams<T> {
 }
 
 export async function selectListView<T> (
-  {items, heading, itemTemplate, itemFilterKey, itemElement}: SelectListParams<T>
+  {items, heading, itemTemplate, itemFilterKey, itemElement}: ISelectListParams<T>
 ): Promise<T|undefined> {
   const itemElementDefault = (item: T) => {
-    let li = document.createElement('li')
+    const li = document.createElement('li')
     if (itemTemplate) {
       li.innerHTML = itemTemplate(item)
     } else {
@@ -36,12 +36,12 @@ export async function selectListView<T> (
       return `${item}`
     }
   }
-  let myitems = await Promise.resolve(items)
+  const myitems = await Promise.resolve(items)
   let panel: Panel | undefined
   let res: T | undefined
   try {
     res = await new Promise<T|undefined>((resolve, reject) => {
-      let select = new SelectListView({
+      const select = new SelectListView({
         items: myitems,
         infoMessage: heading,
         itemsClassList: ['ide-haskell'],

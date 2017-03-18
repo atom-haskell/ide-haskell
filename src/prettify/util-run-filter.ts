@@ -1,6 +1,5 @@
 'use babel'
 
-import {BufferedProcess} from 'atom'
 import * as CP from 'child_process'
 
 interface IRunFilterArgs {
@@ -10,10 +9,8 @@ interface IRunFilterArgs {
     stdin?: string
 }
 
-export default function ({command, args, cwd, stdin}: IRunFilterArgs) {
+export async function runFilter ({command, args, cwd, stdin}: IRunFilterArgs) {
   return new Promise((resolve, reject) => {
-    let lines: string[] = []
-    let stderr: string[] = []
     try {
       const proc = CP.execFile(command, args, {cwd}, (error, stdout, stderr) => {
         if (stderr.length > 0) {

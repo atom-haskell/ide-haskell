@@ -73,7 +73,7 @@ export function create (pluginManager: PluginManager, main: UPI, instance: UPIIn
     // TODO: merge this to UPI
     show ({editor, pos, eventType, detail, tooltip}) {
       const controller = pluginManager.controller(editor)
-      if (!controller) return
+      if (!controller) { return }
       main.withEventRange({controller, pos, detail, eventType}, ({crange, pos: evpos}, newEventType) => {
         Promise.resolve(tooltip(crange)).then(({range, text, persistOnCursorMove}) =>
           controller.showTooltip(evpos, range, text, {newEventType, subtype: 'external', persistOnCursorMove}))

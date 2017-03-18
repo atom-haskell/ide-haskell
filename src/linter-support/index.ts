@@ -1,35 +1,34 @@
 'use babel'
 
 import {CompositeDisposable, Range} from 'atom'
-import {MessageObject} from '../utils'
 import {ResultsDB} from '../results-db'
 
-interface Linter {
-  deleteMessages(): void
-  setMessages(messages: any[]): void
-  dispose(): void
+interface ILinter {
+  deleteMessages (): void
+  setMessages (messages: any[]): void
+  dispose (): void
 }
 
 export class LinterSupport {
   private disposables: CompositeDisposable
-  constructor (private linter: Linter, private resultDb: ResultsDB) {
+  constructor (private linter: ILinter, private resultDb: ResultsDB) {
     this.disposables = new CompositeDisposable()
 
     this.disposables.add(resultDb.onDidUpdate(this.update.bind(this)))
   }
 
-  destroy () {
+  public destroy () {
     this.disposables.dispose()
     this.linter.dispose()
   }
 
-  update () {
+  public update () {
     this.linter.deleteMessages()
     this.linter.setMessages(Array.from(this.messages()))
   }
 
-  * messages () {
-    for (let result of this.resultDb.results()) {
+  private * messages () {
+    for (const result of this.resultDb.results()) {
       if (result.uri && result.position) {
         yield {
           type: result.severity === 'lint' ? 'info' : result.severity,

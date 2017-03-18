@@ -3,7 +3,7 @@
 import {CompositeDisposable} from 'atom'
 import {PluginManager, IState} from './plugin-manager'
 import {prettifyFile} from './prettify'
-import {MainMenuLabel} from './utils'
+import {MAIN_MENU_LABEL} from './utils'
 import * as UPI from './upi'
 import * as UPI3 from './upi-0.3'
 
@@ -13,7 +13,7 @@ let pluginManager: PluginManager | null
 let menu: CompositeDisposable | null
 let upi3: UPI3.UPI | null
 
-export const config = require('./config')
+export {config} from './config'
 
 function cleanConfig () { /*noop*/ }
 
@@ -87,7 +87,7 @@ export function activate (state: IState) {
 
   menu = new CompositeDisposable()
   menu.add(atom.menu.add([{
-    label: MainMenuLabel,
+    label: MAIN_MENU_LABEL,
     submenu: [
       {label: 'Prettify', command: 'ide-haskell:prettify-file'},
       {label: 'Toggle Panel', command: 'ide-haskell:toggle-output'}
