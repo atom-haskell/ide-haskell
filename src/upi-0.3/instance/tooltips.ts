@@ -1,4 +1,4 @@
-import {Disposable, TextEditor} from 'atom'
+import {Disposable, TextEditor, Range} from 'atom'
 import {PluginManager} from '../../plugin-manager'
 import {UPI} from '../'
 import {UPIInstance} from './'
@@ -76,7 +76,7 @@ export function create (pluginManager: PluginManager, main: UPI, instance: UPIIn
       if (!controller) { return }
       main.withEventRange({controller, pos, detail, eventType}, ({crange, pos: evpos, eventType: newEventType}) => {
         Promise.resolve(tooltip(crange)).then(({range, text, persistOnCursorMove}) =>
-          controller.showTooltip(evpos, range, text, {newEventType, subtype: 'external', persistOnCursorMove}))
+          controller.showTooltip(evpos, range, text, {eventType: newEventType, subtype: 'external', persistOnCursorMove}))
         .catch((status = {status: 'warning'}) => {
           if (status.message) {
             console.warn(status)

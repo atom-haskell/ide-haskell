@@ -120,7 +120,7 @@ export function serialize () {
 
 export function provideUpi () {
   upiProvided = true
-  return new UPI.UPI(pluginManager)
+  return new UPI.UPI(pluginManager!) // TODO: not entirely sure it's OK...
 }
 
 export function provideUpi3 () {

@@ -1,4 +1,4 @@
-import {CompositeDisposable, Point, Disposable, TextEditor} from 'atom'
+import {CompositeDisposable, Point, Disposable, TextEditor, Range} from 'atom'
 import {getEventType} from '../utils'
 import {PluginManager} from '../plugin-manager'
 import {UPIInstance} from './instance'

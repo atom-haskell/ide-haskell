@@ -1,4 +1,4 @@
-import { CompositeDisposable, Point, TextEditor, TextBuffer } from 'atom'
+import { CompositeDisposable, Point, TextEditor, TextBuffer, Range } from 'atom'
 import { MAIN_MENU_LABEL, getEventType } from './utils'
 import { PluginManager } from './plugin-manager'
 import {IStatus, ISetTypesParams, ISeverityTabDefinition, IControlOpts} from './output-panel'
@@ -355,12 +355,13 @@ class UPIInstance {
     eventType: String, event type, one of 'keyboard', 'context', 'mouse'
   */
   withEventRange ({editor, detail, eventType, pos, controller}: IEventRangeParams, callback: TEventRangeCallback<any>) {
-    if (pos != null) { pos = Point.fromObject(pos) }
+    let ppos: Point | null = null
+    if (pos != null) { ppos = Point.fromObject(pos) }
     if (eventType == null) { eventType = getEventType(detail) }
     if (controller == null && editor) { controller = this.pluginManager.controller(editor) }
     if (controller == null) { return }
 
-    return callback(controller.getEventRange(pos, eventType))
+    return callback(controller.getEventRange(ppos, eventType))
   }
 }
 
