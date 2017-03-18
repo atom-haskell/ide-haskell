@@ -4,6 +4,21 @@ import {CompositeDisposable, Point, Disposable, TextBuffer, TextEditor} from 'at
 import {MainMenuLabel, getEventType} from './utils'
 import {PluginManager} from './plugin-manager'
 
+interface RegistrationOptions {
+  name: string
+  consumer?: (instance: UPIInstance) => Disposable | void
+  menu?: IMenuDefinition
+  messageTypes?: ISetTypesParams
+  events?: {
+    onWillSaveBuffer?: TextBufferCallback | TextBufferCallback[]
+    onDidSaveBuffer?: TextBufferCallback | TextBufferCallback[]
+    onDidStopChanging?: TextBufferCallback | TextBufferCallback[]
+  }
+  controls?: IUPIControlDefinition[]
+  params?: {[param_name: string]: IParamSpec<any>}
+  tooltipEvent?: TTooltipHandler | {priority?: number, handler: TTooltipHandler}
+}
+
 export class UPIError extends Error {
   constructor(message: string) {
     super(message)
@@ -70,7 +85,7 @@ export class UPI {
   @param consumer: callback :: UPIInstance -> ()
   @returns {Disposable}
   */
-  public consume(options: any = {}) {
+  public consume(options: RegistrationOptions): Disposable {
     const {name, menu, messageTypes, events, controls, params, consumer, tooltipEvent} = options
     if (!name)
       throw new UPIError("name has to be specified for UPI")
@@ -78,39 +93,49 @@ export class UPI {
       throw new UPIError(`Plugin ${name} already registered with UPI`)
     const instance = new UPIInstance(this.pluginManager, name, this)
     this.instances.set(name, instance)
+    const disp = new CompositeDisposable
 
     if (menu)
-      instance.menu.set(menu)
+      disp.add(instance.menu.set(menu))
     if (messageTypes)
-      instance.messages.setTypes(messageTypes)
+      instance.messages.setTypes(messageTypes) // TODO: Make disposable
     if (events)
-      for (const k of Object.keys(events)) {
-        let v = events[k]
-        if(!Array.isArray(v)) v = [v]
-        for (const i of v)
-          instance.events[k](i)
+      for (const k in events) {
+        if(instance.events[k]) {
+          let v: TextBufferCallback | TextBufferCallback[] = events[k]
+          if(!Array.isArray(v)) v = [v]
+          for (const i of v)
+             disp.add(instance.events[k](i))
+        }
       }
     if (tooltipEvent) {
-      let {priority, handler} = tooltipEvent
-      if (!handler) {
+      let handler: TTooltipHandler, priority: number | undefined
+      if(typeof tooltipEvent === 'function') {
         handler = tooltipEvent
+        priority = 100
+      } else {
+        ({handler, priority} = tooltipEvent)
       }
       if (!priority) priority = 100
-      instance.tooltips.onShouldShowTooltip(priority, handler)
+      disp.add(instance.tooltips.onShouldShowTooltip(priority, handler))
     }
     if (controls)
       for (const i of controls)
-        instance.controls.add(i)
+        disp.add(instance.controls.add(i))
     if (params)
-      for (const i of params)
-        instance.params.add(i)
+      disp.add(instance.params.add(params))
 
-    consumer(instance)
+    if (consumer) {
+      let d = consumer(instance)
+      if (typeof d === 'object') {
+        disp.add(d)
+      }
+    }
 
-    const disp = new Disposable(() => {
+    disp.add(new Disposable(() => {
       this.instances.delete(name)
       instance.destroy()
-    })
+    }))
     this.disposables.add(disp)
     return disp
   }
@@ -293,7 +318,7 @@ class UPIInstance {
   }
 }
 
-declare interface IUPIMenu {
+interface IUPIMenu {
   /**
   Adds new sumbenu to 'Haskell IDE' menu item
 
@@ -302,46 +327,48 @@ declare interface IUPIMenu {
 
   @returns Disposable.
   */
-  set(options: {label: string, menu: any[]}) : Disposable
+  set(options: IMenuDefinition) : Disposable
 }
 
-declare interface IUPINormalStatus {
+interface IMenuDefinition {label: string, menu: any[]}
+
+interface IUPINormalStatus {
   status: 'ready' | 'error' | 'warning'
 }
 
-declare interface IUPIProgressStatus {
+interface IUPIProgressStatus {
   status: 'progress'
   progress?: number
 }
 
-declare type IUPIStatus = (IUPINormalStatus | IUPIProgressStatus) & {detail: string}
+type IUPIStatus = (IUPINormalStatus | IUPIProgressStatus) & {detail: string}
 
-declare interface IUPIMessageText {
+interface IUPIMessageText {
   text: string
   highlighter?: string
 }
 
-declare interface IUPIMessageHTML {
+interface IUPIMessageHTML {
   html: string
 }
 
-declare type TSeverity = 'error' | 'warning' | 'lint' | string
-declare type TPosition = Point | [number, number] | {row: number, column: number}
-declare type TUPIText = String | IUPIMessageText | IUPIMessageHTML
+type TSeverity = 'error' | 'warning' | 'lint' | string
+type TPosition = Point | [number, number] | {row: number, column: number}
+type TUPIText = String | IUPIMessageText | IUPIMessageHTML
 
-declare interface IUPIMessage {
+interface IUPIMessage {
   uri?: string
   position?: TPosition
   message: TUPIText
   severity: TSeverity
 }
 
-declare interface ISeverityTabDefinition {
+interface ISeverityTabDefinition {
   uriFilter?: boolean
   autoScroll?: boolean
 }
 
-declare interface IUPIMessages {
+interface IUPIMessages {
   /**
   Sets backend status
   @param status {Object}
@@ -393,12 +420,14 @@ declare interface IUPIMessages {
 
   This allows to define custom output panel tabs.
   */
-  setTypes (types: {[severity: string]: ISeverityTabDefinition}): void
+  setTypes (types: ISetTypesParams): void //TODO: should add disposable
 }
 
-declare type TextBufferCallback = (buffer: TextBuffer) => void
+interface ISetTypesParams {[severity: string]: ISeverityTabDefinition}
 
-declare interface IUPIEvents {
+type TextBufferCallback = (buffer: TextBuffer) => void
+
+interface IUPIEvents {
   /**
   Convenience function. Will fire before Haskell buffer is saved.
 
@@ -430,21 +459,21 @@ declare interface IUPIEvents {
   */
   onDidStopChanging(callback: TextBufferCallback): Disposable
 }
-declare interface IShowTooltipParams {
+interface IShowTooltipParams {
   editor: TextEditor
   pos: TPosition
   eventType: TEventRangeType
   detail: any
   tooltip: TTooltipFunction
 }
-declare type TTooltipFunction = (crange: Range) => ITooltipData | Promise<ITooltipData>
-declare interface ITooltipData {
+type TTooltipFunction = (crange: Range) => ITooltipData | Promise<ITooltipData>
+interface ITooltipData {
   range: Range
   text: TUPIText
   persistOnCursorMove?: boolean
 }
-declare type TTooltipHandler = (editor: TextEditor, crange: Range, type: TEventRangeType) => ITooltipData | Promise<ITooltipData>
-declare interface IUPITooltips {
+type TTooltipHandler = (editor: TextEditor, crange: Range, type: TEventRangeType) => ITooltipData | Promise<ITooltipData>
+interface IUPITooltips {
   /**
   Show tooltip in editor.
 
@@ -489,18 +518,18 @@ declare interface IUPITooltips {
   onShouldShowTooltip (priority: number, handler: TTooltipHandler): Disposable
   onShouldShowTooltip (handler: TTooltipHandler): Disposable
 }
-declare interface IControlOpts {
+interface IControlOpts {
   id: string
   events: {[key: string]: Function}
   classes: string[]
   style: {[key: string]: string}
   attrs: {[key: string]: string}
 }
-declare interface IUPIControlDefinition {
+interface IUPIControlDefinition {
   element: string | HTMLElement
   opts: IControlOpts
 }
-declare interface IUPIControls {
+interface IUPIControls {
   /**
   Add a new control to ouptut panel heading.
 
@@ -519,7 +548,7 @@ declare interface IUPIControls {
   */
   add (def: IUPIControlDefinition): Disposable
 }
-declare interface IParamSpec<T> {
+interface IParamSpec<T> {
   onChanged: (value: T) => void
   items: Array<T> | (() => Array<T>)
   itemTemplate: (item: T) => String
@@ -529,7 +558,7 @@ declare interface IParamSpec<T> {
   displayTemplate: (item: T) => String
   default: T
 }
-declare interface IUPIParams {
+interface IUPIParams {
   /**
   addConfigParam
     param_name:
@@ -573,16 +602,16 @@ declare interface IUPIParams {
   set<T> (plugin: string, name: string, value?: T): Promise<T>
   set<T> (name: string, value?: T): Promise<T>
 }
-declare type TEventRangeType = 'keyboard' | 'context' | 'mouse' | 'selection'
-declare interface IEventRangeParams {
+type TEventRangeType = 'keyboard' | 'context' | 'mouse' | 'selection'
+interface IEventRangeParams {
   editor: TextEditor
   detail?: any
   eventType: TEventRangeType
   pos: TPosition
   controller: undefined
 }
-declare type TEventRangeCallback<T> = (pars: {pos: Point, crange: Range}, eventType: TEventRangeType) => T
-declare interface IUPIUtils {
+type TEventRangeCallback<T> = (pars: {pos: Point, crange: Range}, eventType: TEventRangeType) => T
+interface IUPIUtils {
   /**
   Utility function to extract event range/type for a given event
 
@@ -599,4 +628,4 @@ declare interface IUPIUtils {
   */
   withEventRange<T>(params: IEventRangeParams, callback: TEventRangeCallback<T>): T | undefined
 }
-declare type TTooltipHandlerSpec = {priority: number, handler: TTooltipHandler}
+type TTooltipHandlerSpec = {priority: number, handler: TTooltipHandler}
