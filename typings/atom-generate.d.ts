@@ -5693,6 +5693,7 @@ declare module AtomTypes {
          * @returns {Range} Returns a {Range}.
          */
         bufferRangeForScreenRange(screenRange: Range): Range;
+        bufferRangeForBufferRow(row: number): Range;
         /**
          * Clip the given {Point} to a valid position in the buffer.
          *
@@ -5812,7 +5813,7 @@ declare module AtomTypes {
          * @param  A hash of key-value pairs to associate with the marker. There are also reserved property names that have marker-specific meaning.
          * @returns {DisplayMarker} Returns a {DisplayMarker}.
          */
-        markBufferRange(range: Range, properties: any): DisplayMarker;
+        markBufferRange(range: Range, properties?: any): DisplayMarker;
         /**
          * Create a marker on the default marker layer with the given range
          * in screen coordinates. This marker will maintain its logical location as the
@@ -6628,7 +6629,7 @@ declare module AtomTypes {
          * Get the gutter with the given name.
          * @returns {Gutter} Returns a {Gutter}, or `null` if no gutter exists for the given name.
          */
-        gutterWithName(): Gutter;
+        gutterWithName(name: string): Gutter;
         /**
          * Scroll the editor to reveal the most recently added cursor if it is
          * off-screen.
