@@ -1,7 +1,7 @@
 'use babel'
 
 import {CompositeDisposable} from 'atom'
-import {PluginManager} from './plugin-manager'
+import {PluginManager, IState} from './plugin-manager'
 import {prettifyFile} from './prettify'
 import {MainMenuLabel} from './utils'
 import * as UPI from './upi'
@@ -17,16 +17,12 @@ export const config = require('./config')
 
 function cleanConfig () { /*noop*/ }
 
-declare interface IDEHaskellState {
-  // TODO
-}
-
 declare interface IEventDesc {
   currentTarget: HTMLElement & { getModel (): AtomTypes.TextEditor }
   abortKeyBinding? (): void
 }
 
-export function activate (state: IDEHaskellState) {
+export function activate (state: IState) {
   cleanConfig()
 
   atom.views.getView(atom.workspace).classList.add('ide-haskell')

@@ -1,14 +1,35 @@
 'use babel'
 
-import {CompositeDisposable, Emitter} from 'atom'
+import {CompositeDisposable, Emitter, TextEditor, Point, TextBuffer, Grammar} from 'atom'
 import ResultsDB from './results-db'
 import {OutputPanel} from './output-panel'
 import {ConfigParamManager} from './config-params'
 import {EditorControl} from './editor-control'
 import {LinterSupport} from './linter-support'
 
+type Linter = any // TODO: Steal this from atom-typescript
+
+export type TEventType = 'keyboard' | 'context' | 'mouse' | 'selection'
+type TShowTooltipCallbackParams = {editor: TextEditor, pos: Point, eventType: TEventType}
+type TShowTooltipCallback = (pars: TShowTooltipCallbackParams) => void
+export type TTextBufferCallback = (buffer: TextBuffer) => void
+
+type IOutputViewState = any
+type IConfigParamsState = any
+export interface IState {
+  outputView: IOutputViewState
+  configParams: IConfigParamsState
+}
+
 export class PluginManager {
-  constructor (state) {
+  public checkResults: ResultsDB
+  public disposables: CompositeDisposable
+  public controllers: WeakMap<TextEditor, EditorControl>
+  public emitter: Emitter
+  public outputView: OutputPanel
+  public configParamManager: ConfigParamManager
+  public linterSupport: LinterSupport | null
+  constructor (state: IState) {
     this.checkResults = new ResultsDB()
 
     this.disposables = new CompositeDisposable()
@@ -33,14 +54,11 @@ export class PluginManager {
 
   deactivate () {
     this.checkResults.destroy()
-    this.checkResults = null
     this.disposables.dispose()
 
     this.deleteEditorControllers()
     this.outputView.destroy()
-    this.outputView = null
     this.configParamManager.destroy()
-    this.configParamManager = null
     if (this.linterSupport) {
       this.linterSupport.destroy()
       this.linterSupport = null
@@ -54,19 +72,19 @@ export class PluginManager {
     }
   }
 
-  onShouldShowTooltip (callback) {
+  onShouldShowTooltip (callback: TShowTooltipCallback) {
     return this.emitter.on('should-show-tooltip', callback)
   }
 
-  onWillSaveBuffer (callback) {
+  onWillSaveBuffer (callback: TTextBufferCallback) {
     return this.emitter.on('will-save-buffer', callback)
   }
 
-  onDidSaveBuffer (callback) {
+  onDidSaveBuffer (callback: TTextBufferCallback) {
     return this.emitter.on('did-save-buffer', callback)
   }
 
-  onDidStopChanging (callback) {
+  onDidStopChanging (callback: TTextBufferCallback) {
     return this.emitter.on('did-stop-changing', callback)
   }
 
@@ -74,7 +92,7 @@ export class PluginManager {
     this.outputView.toggle()
   }
 
-  updateEditorsWithResults (types) {
+  updateEditorsWithResults (types: string[]) {
     for (let ed of atom.workspace.getTextEditors()) {
       let ctrl = this.controller(ed)
       if (ctrl) ctrl.updateResults(this.checkResults.filter({uri: ed.getPath()}), types)
@@ -85,37 +103,37 @@ export class PluginManager {
     return this.checkResults.onDidUpdate(callback)
   }
 
-  controller (editor) {
+  controller (editor: TextEditor) {
     return this.controllers.get(editor)
   }
 
-  addController (editor) {
+  addController (editor: TextEditor) {
     if (!this.controllers.has(editor)) {
       let controller = new EditorControl(editor)
       this.controllers.set(editor, controller)
       controller.disposables.add(
         editor.onDidDestroy(() => this.removeController(editor))
-      , controller.onShouldShowTooltip(({editor, pos, eventType}) =>
+      , controller.onShouldShowTooltip(({editor, pos, eventType}: TShowTooltipCallbackParams) =>
           this.emitter.emit('should-show-tooltip', {editor, pos, eventType}))
-      , controller.onWillSaveBuffer((buffer) => this.emitter.emit('will-save-buffer', buffer))
-      , controller.onDidSaveBuffer((buffer) => this.emitter.emit('did-save-buffer', buffer))
-      , controller.onDidStopChanging((editor) => this.emitter.emit('did-stop-changing', editor.getBuffer()))
+      , controller.onWillSaveBuffer((buffer: TextBuffer) => this.emitter.emit('will-save-buffer', buffer))
+      , controller.onDidSaveBuffer((buffer: TextBuffer) => this.emitter.emit('did-save-buffer', buffer))
+      , controller.onDidStopChanging((editor: TextEditor) => this.emitter.emit('did-stop-changing', editor.getBuffer()))
       )
       controller.updateResults(this.checkResults.filter({uri: editor.getPath()}))
     }
   }
 
-  setLinter (linter) {
+  setLinter (linter: Linter) {
     if (atom.config.get('ide-haskell.messageDisplayFrontend') !== 'linter') return
     this.linterSupport = new LinterSupport(linter, this.checkResults)
   }
 
-  removeController (editor) {
+  removeController (editor: TextEditor) {
     if (this.controllers.has(editor)) this.controllers.get(editor).deactivate()
     this.controllers.delete(editor)
   }
 
-  controllerOnGrammar (editor, grammar) {
+  controllerOnGrammar (editor: TextEditor, grammar: Grammar) {
     if (grammar.scopeName.match(/haskell$/)) this.addController(editor)
     else this.removeController(editor)
   }
@@ -148,15 +166,15 @@ export class PluginManager {
     this.outputView.showPrevError()
   }
 
-  addConfigParam (pluginName, specs) {
+  addConfigParam (pluginName: string, specs) {
     return this.configParamManager.add(pluginName, specs)
   }
 
-  getConfigParam (pluginName, name) {
+  getConfigParam (pluginName: string, name: string) {
     return this.configParamManager.get(pluginName, name)
   }
 
-  setConfigParam (pluginName, name, value) {
+  setConfigParam (pluginName: string, name: string, value: any) {
     return this.configParamManager.set(pluginName, name, value)
   }
 }

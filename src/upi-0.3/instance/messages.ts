@@ -1,6 +1,7 @@
 import {Point} from 'atom'
 import {PluginManager} from '../../plugin-manager'
-import {TPosition, TUPIText} from './general'
+import {TPosition} from './general'
+import {TMessage} from '../../utils'
 
 export interface IMainInterface {
   /**
@@ -73,7 +74,7 @@ type TSeverity = 'error' | 'warning' | 'lint' | string
 export interface IUPIMessage {
   uri?: string
   position?: TPosition
-  message: TUPIText
+  message: TMessage
   severity: TSeverity
 }
 

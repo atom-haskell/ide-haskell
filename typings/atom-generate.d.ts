@@ -290,7 +290,7 @@ declare module AtomTypes {
          * @param {number} {Number}
          * @param {boolean} {Boolean} (optional) Whether the command will automatically start when this BufferedProcess is created. Defaults to true.  When set to false you must call the `start` method to start the process.
          */
-        constructor(options: {command: string, args: any[], options: Object, stdout(data: string): any, stderr(data: string): any, exit(code: number): any, autoStart: boolean});
+        constructor(options: {command: string, args: any[], options?: Object, stdout?(data: string): any, stderr?(data: string): any, exit?(code: number): any, autoStart?: boolean});
         /**
          * Will call your callback when an error will be raised by the process.
          * Usually this is due to the command not being available or not on the PATH.
@@ -302,7 +302,7 @@ declare module AtomTypes {
          * @param {Function} {Function} call this to indicate you have handled the error. The error will not be thrown if this function is called.
          * @returns {Disposable} Returns a {Disposable}
          */
-        onWillThrowError(callback: Function, errorObject: Object, error: Object, handle: Function): Disposable;
+        onWillThrowError(callback: (errorObject: {error: Object, handle: () => void}) => void): Disposable;
         /**
          * Terminate the process.
          */
@@ -5938,7 +5938,7 @@ declare module AtomTypes {
          * @param {Point} A {Point} or {Array} of `[row, column]`
          * @returns {Cursor} Returns a {Cursor}.
          */
-        addCursorAtBufferPosition(bufferPosition: Point): Cursor;
+        addCursorAtBufferPosition(bufferPosition: Point, options?: Object): Cursor;
         /**
          * Add a cursor at the position in screen coordinates.
          * @param {Point} A {Point} or {Array} of `[row, column]`
@@ -6049,7 +6049,7 @@ declare module AtomTypes {
         /**
          * Get an Array of all {Cursor}s.
          */
-        getCursors(): void;
+        getCursors(): Cursor[];
         /**
          * Get all {Cursors}s, ordered by their position in the buffer
          * instead of the order in which they were added.
