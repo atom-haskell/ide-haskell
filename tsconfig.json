@@ -19,13 +19,15 @@
         "inlineSources": false,
         "inlineSourceMap": false,
         "strictNullChecks": true,
-        "allowJs": true
+        "allowJs": true,
+        "lib":["dom","es2017"]
     },
     "exclude": [
         "node_modules"
     ],
     "include": [
         "src/**/*.ts",
+        "src/**/*.tsx",
         "src/**/*.js",
         "typings/*.d.ts"
     ]

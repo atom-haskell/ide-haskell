@@ -1,6 +1,6 @@
 import {Point} from 'atom'
 import {PluginManager} from '../../plugin-manager'
-import {TPosition} from './general'
+import {TPosition, IResultItem, TSeverity} from '../../results-db'
 import {TMessage} from '../../utils'
 
 export interface IMainInterface {
@@ -24,7 +24,7 @@ export interface IMainInterface {
   @param types: Array of String, containing possible message `severity`. If undefined,
          will be taken from `messages`
   */
-  add (messages: IUPIMessage[], types: TSeverity[]): void
+  add (messages: IResultItem[], types: TSeverity[]): void
 
   /**
   Set messages in ide-haskell output. Clears all existing messages with
@@ -38,7 +38,7 @@ export interface IMainInterface {
   types: Array of String, containing possible message `severity`. If undefined,
          will be taken from `messages`
   */
-  set (messages: IUPIMessage[], types: TSeverity[]): void
+  set (messages: IResultItem[], types: TSeverity[]): void
 
   /**
   Clear all existing messages with `severity` in `types`
@@ -68,15 +68,6 @@ interface IUPIProgressStatus {
 }
 
 export type IUPIStatus = (IUPINormalStatus | IUPIProgressStatus) & {detail: string}
-
-type TSeverity = 'error' | 'warning' | 'lint' | string
-
-export interface IUPIMessage {
-  uri?: string
-  position?: TPosition
-  message: TMessage
-  severity: TSeverity
-}
 
 export interface ISeverityTabDefinition {
   uriFilter?: boolean

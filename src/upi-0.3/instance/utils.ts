@@ -1,5 +1,6 @@
 import {Point, TextEditor} from 'atom'
-import {TPosition, TEventRangeType} from './general'
+import {TEventRangeType} from './general'
+import {TPosition} from '../../results-db'
 
 interface IEventRangeParams {
   editor: TextEditor

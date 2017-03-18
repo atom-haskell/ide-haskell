@@ -1,9 +1,9 @@
 'use babel'
 
 import {CompositeDisposable, Emitter, TextEditor, Point, TextBuffer, Grammar} from 'atom'
-import ResultsDB from './results-db'
+import {ResultsDB, TUpdateCallback} from './results-db'
 import {OutputPanel} from './output-panel'
-import {ConfigParamManager} from './config-params'
+import {ConfigParamManager, IParamSpec, IState as IParamState} from './config-params'
 import {EditorControl} from './editor-control'
 import {LinterSupport} from './linter-support'
 
@@ -15,10 +15,9 @@ type TShowTooltipCallback = (pars: TShowTooltipCallbackParams) => void
 export type TTextBufferCallback = (buffer: TextBuffer) => void
 
 type IOutputViewState = any
-type IConfigParamsState = any
 export interface IState {
   outputView: IOutputViewState
-  configParams: IConfigParamsState
+  configParams: IParamState
 }
 
 export class PluginManager {
@@ -99,7 +98,7 @@ export class PluginManager {
     }
   }
 
-  onResultsUpdated (callback) {
+  onResultsUpdated (callback: TUpdateCallback) {
     return this.checkResults.onDidUpdate(callback)
   }
 
@@ -129,8 +128,11 @@ export class PluginManager {
   }
 
   removeController (editor: TextEditor) {
-    if (this.controllers.has(editor)) this.controllers.get(editor).deactivate()
-    this.controllers.delete(editor)
+    let controller = this.controllers.get(editor)
+    if (controller) {
+      controller.deactivate()
+      this.controllers.delete(editor)
+    }
   }
 
   controllerOnGrammar (editor: TextEditor, grammar: Grammar) {
@@ -166,7 +168,7 @@ export class PluginManager {
     this.outputView.showPrevError()
   }
 
-  addConfigParam (pluginName: string, specs) {
+  addConfigParam (pluginName: string, specs: { [paramName: string]: IParamSpec<any> }) {
     return this.configParamManager.add(pluginName, specs)
   }
 
