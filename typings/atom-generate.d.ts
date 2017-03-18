@@ -1528,7 +1528,7 @@ declare module AtomTypes {
          * @returns {string} Returns the relative {String} path to the given path from this
         directory.
          */
-        relativize(any): string;
+        relativize(any: string): string;
         /**
          * Traverse to the parent directory.
          * @returns {Directory} Returns a {Directory}.
