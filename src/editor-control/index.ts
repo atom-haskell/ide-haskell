@@ -29,7 +29,6 @@ export class EditorControl {
   private lastMouseBufferRangeTest: Range | null
   private tooltipHighlightRange: Range | null
   constructor (private editor: ITextEditor) {
-    let bufferPt: Point | null
     this.updateResults = this.updateResults.bind(this)
     this.disposables = new CompositeDisposable()
     this.disposables.add(this.emitter = new Emitter())
@@ -49,7 +48,7 @@ export class EditorControl {
       this.disposables.add(listen(
         gutterElement.querySelector('.decoration'), 'mouseenter',
         (e) => {
-          bufferPt = bufferPositionFromMouseEvent(this.editor, e as MouseEvent)
+          const bufferPt = bufferPositionFromMouseEvent(this.editor, e as MouseEvent)
           if (bufferPt != null) {
             this.lastMouseBufferPt = bufferPt
             return this.showCheckResult(bufferPt, true)
@@ -95,16 +94,15 @@ export class EditorControl {
 
     // show expression type if mouse stopped somewhere
     this.disposables.add(listen(
-      editorElement.rootElement.querySelector('.scroll-view'), 'mousemove',
-      e => {
-        bufferPt = bufferPositionFromMouseEvent(this.editor, e as MouseEvent)
+      editorElement.querySelector('.scroll-view'), 'mousemove',
+      (e) => {
+        const bufferPt = bufferPositionFromMouseEvent(this.editor, e as MouseEvent)
 
         if (bufferPt == null) {
           return
         }
 
-        if (this.lastMouseBufferPt != null ? this.lastMouseBufferPt.isEqual(
-            bufferPt) : undefined) {
+        if (this.lastMouseBufferPt && this.lastMouseBufferPt.isEqual(bufferPt)) {
           return
         }
         this.lastMouseBufferPt = bufferPt
@@ -117,8 +115,8 @@ export class EditorControl {
       }
     ))
     this.disposables.add(listen(
-      editorElement.rootElement.querySelector('.scroll-view'), 'mouseout',
-      e => {
+      editorElement.querySelector('.scroll-view'), 'mouseout',
+      (e) => {
         if (this.exprTypeTimeout != null) {
           return clearTimeout(this.exprTypeTimeout)
         }
@@ -312,9 +310,7 @@ export class EditorControl {
     if ((pos.row < 0) ||
       (pos.row >= this.editor.getLineCount()) ||
       pos.isEqual(this.editor.bufferRangeForBufferRow(pos.row).end)) {
-      return this.hideTooltip({
-        eventType
-      })
+      return this.hideTooltip({eventType})
     } else if (this.rangeHasChanged(pos, eventType)) {
       return this.emitter.emit('should-show-tooltip', {
         editor: this.editor,
@@ -377,7 +373,7 @@ export class EditorControl {
     this.tooltipHighlightRange = range
     const props = {...detail, type: 'tooltip'}
     let highlightMarker = this.editor.markBufferRange(range)
-    highlightMarker.setProperties(detail)
+    highlightMarker.setProperties(props)
     this.editor.decorateMarker(highlightMarker, {
       type: 'overlay',
       position: 'tail',
@@ -390,12 +386,12 @@ export class EditorControl {
   }
 
   hideTooltip (template?: any) {
-    if (template == null) {
+    if (!template) {
       template = {}
     }
     this.tooltipHighlightRange = null
     template.type = 'tooltip'
-    return Array.from(this.editor.findMarkers(template)).map((m) => m.destroy())
+    this.editor.findMarkers(template).forEach((m) => m.destroy())
   }
 
   getEventRange (pos: Point | null, eventType: TEventRangeType) {
