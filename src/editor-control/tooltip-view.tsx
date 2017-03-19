@@ -1,14 +1,14 @@
 import * as etch from 'etch'
-import {MessageObject, TMessage} from '../utils'
+import {MessageObject} from '../utils'
 
 export class TooltipMessage {
   private message: JSX.Element[]
   private element: HTMLElement
-  constructor (message: TMessage | TMessage[]) {
+  constructor (message: MessageObject | MessageObject[]) {
     if (Array.isArray(message)) {
-      this.message = message.map((m) => <div innerHTML={MessageObject.fromObject(m).toHtml()}/>)
+      this.message = message.map((m) => <div innerHTML={m.toHtml()}/>)
     } else {
-      this.message = [<div innerHTML={MessageObject.fromObject(message).toHtml()}/>]
+      this.message = [<div innerHTML={message.toHtml()}/>]
     }
     etch.initialize(this)
   }

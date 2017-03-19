@@ -4,7 +4,7 @@ import {UPI} from '../'
 import {UPIInstance} from './'
 import {TEventRangeType} from '../../editor-control'
 import {TPosition} from '../../results-db'
-import {TMessage} from '../../utils'
+import {TMessage, MessageObject} from '../../utils'
 
 interface IShowTooltipParams {
   editor: TextEditor
@@ -76,9 +76,9 @@ export function create (pluginManager: PluginManager, main: UPI, instance: UPIIn
       if (!controller) { return }
       main.withEventRange({controller, pos, detail, eventType}, ({crange, pos: evpos, eventType: newEventType}) => {
         Promise.resolve(tooltip(crange)).then(({range, text, persistOnCursorMove}) =>
-          controller.showTooltip(
-            evpos, range, text,
-            {eventType: newEventType, subtype: 'external', persistOnCursorMove}
+          controller.tooltips.show(
+            range, MessageObject.fromObject(text),
+            {type: newEventType, subtype: 'external', persistOnCursorMove}
           )
         )
         .catch((status = {status: 'warning'}) => {
@@ -87,7 +87,7 @@ export function create (pluginManager: PluginManager, main: UPI, instance: UPIIn
             status = {status: 'warning'}
           }
           if (!status.ignore) {
-            controller.hideTooltip({eventType: newEventType})
+            controller.tooltips.hide({type: newEventType})
             instance.messages.status(status)
           }
         })
