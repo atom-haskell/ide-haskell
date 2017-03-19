@@ -33,21 +33,19 @@ export class PluginManager {
   public checkResults: ResultsDB
   public outputView: OutputPanel
   public configParamManager: ConfigParamManager
-  public linterSupport?: LinterSupport
   public tooltipRegistry: TooltipRegistry
+  private linterSupport?: LinterSupport
   private disposables: CompositeDisposable
   private emitter: Emitter
   private controllers: ECMap<EditorControl>
-  private checkResultsControllers: ECMap<CheckResultsProvider>
-  private controllerClasses: Set<{map: ECMap<IEditorController>, factory: IEditorControllerFactory}>
-  private editorDispMap: WeakMap<TextEditor, Disposable>
+  private controllerClasses: Set<{map?: ECMap<IEditorController>, factory: IEditorControllerFactory}>
+  private editorDispMap: WeakMap<TextEditor, CompositeDisposable>
   constructor (state: IState) {
     this.disposables = new CompositeDisposable()
     this.emitter = new Emitter()
     this.disposables.add(this.emitter)
 
     this.controllers = new WeakMap()
-    this.checkResultsControllers = new WeakMap()
     this.controllerClasses = new Set()
     this.editorDispMap = new WeakMap()
 
@@ -56,8 +54,8 @@ export class PluginManager {
     this.tooltipRegistry = new TooltipRegistry(this)
     this.configParamManager = new ConfigParamManager(this.outputView, state.configParams)
 
-    this.addEditorController(this.controllers, EditorControl)
-    this.addEditorController(this.checkResultsControllers, CheckResultsProvider)
+    this.addEditorController(EditorControl, this.controllers)
+    this.addEditorController(CheckResultsProvider)
 
     this.subscribeEditorController()
   }
@@ -136,16 +134,9 @@ export class PluginManager {
       this.disposables.remove(disp)
       this.editorDispMap.delete(editor)
     }
-    for (const {map} of this.controllerClasses) {
-      const controller = map.get(editor)
-      if (controller) {
-        controller.destroy()
-        map.delete(editor)
-      }
-    }
   }
 
-  private addEditorController (map: WeakMap<TextEditor, IEditorController>, factory: IEditorControllerFactory) {
+  private addEditorController (factory: IEditorControllerFactory, map?: ECMap<IEditorController>) {
     this.controllerClasses.add({map, factory})
   }
 
@@ -176,15 +167,20 @@ export class PluginManager {
   }
 
   private addController (editor: TextEditor) {
+    const disp = this.editorDispMap.get(editor) || new CompositeDisposable()
     if (!this.editorDispMap.has(editor)) {
-      const disp = editor.onDidDestroy(() => this.removeController(editor))
+      disp.add(editor.onDidDestroy(() => this.removeController(editor)))
       this.editorDispMap.set(editor, disp)
       this.disposables.add(disp)
     }
     for (const {map, factory} of this.controllerClasses) {
-      if (!map.has(editor)) {
+      if (!map || !map.has(editor)) {
         const controller = new factory(editor, this)
-        map.set(editor, controller)
+        if (map) { map.set(editor, controller) }
+        disp.add(new Disposable(() => {
+          if (map) { map.delete(editor) }
+          controller.destroy()
+        }))
       }
     }
   }
