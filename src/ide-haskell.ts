@@ -98,7 +98,6 @@ export function deactivate () {
   pluginManager && pluginManager.deactivate()
   upi3 && upi3.dispose()
 
-  // TODO: no definition
   atom.keymaps.removeBindingsFromSource('ide-haskell')
 
   // clear commands
