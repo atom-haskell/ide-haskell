@@ -37,7 +37,7 @@ export interface IMainInterface {
 export function create (pluginManager: PluginManager): IMainInterface {
   return {
     add ({element, opts}) {
-      return pluginManager.outputView.addPanelControl(element, opts)
+      return pluginManager.outputPanel.addPanelControl(element, opts)
     }
   }
 }

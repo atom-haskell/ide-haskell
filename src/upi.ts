@@ -68,7 +68,7 @@ class UPIInstance {
               if 0 or undefined, progress bar is not shown
   */
   setStatus (status: IStatus) {
-    return this.pluginManager.outputView.backendStatus(this.pluginName, status)
+    return this.pluginManager.outputPanel.backendStatus(this.pluginName, status)
   }
 
   /*
@@ -83,7 +83,7 @@ class UPIInstance {
          will be taken from `messages`
   */
   addMessages (messages: IResultItem[], types?: TSeverity[]) {
-    return this.pluginManager.checkResults.appendResults(messages, types)
+    return this.pluginManager.resultsDB.appendResults(messages, types)
   }
 
   /*
@@ -103,7 +103,7 @@ class UPIInstance {
       if (m.position) { m.position = Point.fromObject(m.position) }
       return m
     })
-    return this.pluginManager.checkResults.setResults(messages, types)
+    return this.pluginManager.resultsDB.setResults(messages, types)
   }
 
   /*
@@ -111,7 +111,7 @@ class UPIInstance {
   This is shorthand from `setMessages([],types)`
   */
   clearMessages (types: TSeverity[]) {
-    return this.pluginManager.checkResults.setResults([], types)
+    return this.pluginManager.resultsDB.setResults([], types)
   }
 
   /*
@@ -128,7 +128,7 @@ class UPIInstance {
       const result = []
       for (const type of Object.keys(types)) {
         const opts = types[type]
-        result.push(this.pluginManager.outputView.createTab(type, opts))
+        result.push(this.pluginManager.outputPanel.createTab(type, opts))
       }
       return result
     })()
@@ -240,10 +240,10 @@ class UPIInstance {
   */
   addPanelControl (element: string | HTMLElement, opts: IControlOpts) {
     if (typeof element === 'string') {
-      return this.pluginManager.outputView.addPanelControl(element, opts)
+      return this.pluginManager.outputPanel.addPanelControl(element, opts)
     } else {
       const newOpts: IControlOpts & {element: HTMLElement} = {...opts, element}
-      return this.pluginManager.outputView.addPanelControl(DummyElement, newOpts)
+      return this.pluginManager.outputPanel.addPanelControl(DummyElement, newOpts)
     }
   }
 

@@ -15,7 +15,7 @@ export class CheckResultsProvider implements IEditorController {
   private disposables: CompositeDisposable
   private markerProps: WeakMap<DisplayMarker, ResultItem>
   constructor (private editor: TextEditor, pluginManager: PluginManager) {
-    const results = pluginManager.checkResults
+    const results = pluginManager.resultsDB
     const tooltipRegistry = pluginManager.tooltipRegistry
     this.gutter = this.editor.gutterWithName('ide-haskell-check-results')
 
