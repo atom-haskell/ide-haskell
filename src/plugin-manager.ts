@@ -4,6 +4,7 @@ import {OutputPanel} from './output-panel'
 import {ConfigParamManager, IState as IParamState} from './config-params'
 import {EditorControl, TTextBufferCallback} from './editor-control'
 import {LinterSupport} from './linter-support'
+import {TooltipRegistry} from './tooltip-registry'
 
 type Linter = any // TODO: Steal this from atom-typescript
 
@@ -25,6 +26,7 @@ export class PluginManager {
   public outputView: OutputPanel
   public configParamManager: ConfigParamManager
   public linterSupport?: LinterSupport
+  public tooltipRegistry: TooltipRegistry
   constructor (state: IState) {
     this.checkResults = new ResultsDB()
 
@@ -32,6 +34,8 @@ export class PluginManager {
     this.controllers = new WeakMap()
     this.emitter = new Emitter()
     this.disposables.add(this.emitter)
+
+    this.tooltipRegistry = new TooltipRegistry(this)
 
     this.outputView = new OutputPanel(state.outputView, this.checkResults)
 
@@ -62,10 +66,6 @@ export class PluginManager {
     }
   }
 
-  public onShouldShowTooltip (callback: TShowTooltipCallback) {
-    return this.emitter.on('should-show-tooltip', callback)
-  }
-
   public onWillSaveBuffer (callback: TTextBufferCallback) {
     return this.emitter.on('will-save-buffer', callback)
   }
@@ -76,6 +76,18 @@ export class PluginManager {
 
   public onDidStopChanging (callback: TTextBufferCallback) {
     return this.emitter.on('did-stop-changing', callback)
+  }
+
+  public willSaveBuffer (buffer: TextBuffer) {
+    return this.emitter.emit('will-save-buffer', buffer)
+  }
+
+  public didSaveBuffer (buffer: TextBuffer) {
+    return this.emitter.emit('did-save-buffer', buffer)
+  }
+
+  public didStopChanging (buffer: TextBuffer) {
+    return this.emitter.emit('did-stop-changing', buffer)
   }
 
   public togglePanel () {
@@ -105,12 +117,8 @@ export class PluginManager {
     this.outputView.showPrevError()
   }
 
-  private removeController (editor: TextEditor) {
-    const controller = this.controllers.get(editor)
-    if (controller) {
-      controller.deactivate()
-      this.controllers.delete(editor)
-    }
+  public removeController (editor: TextEditor) {
+    this.controllers.delete(editor)
   }
 
   private controllerOnGrammar (editor: TextEditor, grammar: Grammar) {
@@ -141,16 +149,8 @@ export class PluginManager {
 
   private addController (editor: TextEditor) {
     if (!this.controllers.has(editor)) {
-      const controller = new EditorControl(editor, this.checkResults)
+      const controller = new EditorControl(editor, this)
       this.controllers.set(editor, controller)
-      controller.disposables.add(
-        editor.onDidDestroy(() => this.removeController(editor))
-      , controller.onShouldShowTooltip((params: TShowTooltipCallbackParams) =>
-          this.emitter.emit('should-show-tooltip', params))
-      , controller.onWillSaveBuffer((buffer: TextBuffer) => this.emitter.emit('will-save-buffer', buffer))
-      , controller.onDidSaveBuffer((buffer: TextBuffer) => this.emitter.emit('did-save-buffer', buffer))
-      , controller.onDidStopChanging((ed: TextEditor) => this.emitter.emit('did-stop-changing', ed.getBuffer()))
-      )
     }
   }
 }

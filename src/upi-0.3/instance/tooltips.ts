@@ -1,10 +1,11 @@
-import {Disposable, TextEditor, Range} from 'atom'
+import {Disposable, TextEditor, Point, CompositeDisposable} from 'atom'
 import {PluginManager} from '../../plugin-manager'
-import {UPI} from '../'
-import {UPIInstance} from './'
-import {TEventRangeType} from '../../editor-control'
+import {TEventRangeType} from '../../editor-control/tooltip-manager'
 import {TPosition} from '../../results-db'
-import {TMessage, MessageObject} from '../../utils'
+import {getEventType} from '../../utils'
+import {TTooltipFunction, TTooltipHandler} from '../../tooltip-registry'
+
+export {TTooltipHandler}
 
 interface IShowTooltipParams {
   editor: TextEditor
@@ -13,14 +14,6 @@ interface IShowTooltipParams {
   detail?: any
   tooltip: TTooltipFunction
 }
-type TTooltipFunction = (crange: Range) => ITooltipData | Promise<ITooltipData>
-interface ITooltipData {
-  range: Range
-  text: TMessage
-  persistOnCursorMove?: boolean
-}
-export type TTooltipHandler =
-  (editor: TextEditor, crange: Range, type: TEventRangeType) => ITooltipData | Promise<ITooltipData>
 
 export interface IMainInterface {
   /**
@@ -68,39 +61,25 @@ export interface IMainInterface {
   onShouldShowTooltip (handler: TTooltipHandler): Disposable
 }
 
-export function create (pluginManager: PluginManager, main: UPI, instance: UPIInstance): IMainInterface {
+export function create (
+  pluginName: string, pluginManager: PluginManager, disposables: CompositeDisposable
+): IMainInterface {
   return {
-    // TODO: merge this to UPI
     show ({editor, pos, eventType, detail, tooltip}) {
-      const controller = pluginManager.controller(editor)
-      if (!controller) { return }
-      main.withEventRange({controller, pos, detail, eventType}, ({crange, pos: evpos, eventType: newEventType}) => {
-        Promise.resolve(tooltip(crange)).then(({range, text, persistOnCursorMove}) =>
-          controller.tooltips.show(
-            range, MessageObject.fromObject(text),
-            {type: newEventType, subtype: 'external', persistOnCursorMove}
-          )
-        )
-        .catch((status = {status: 'warning'}) => {
-          if (status.message) {
-            console.warn(status)
-            status = {status: 'warning'}
-          }
-          if (!status.ignore) {
-            controller.tooltips.hide({type: newEventType})
-            instance.messages.status(status)
-          }
-        })
-      })
+      if (!eventType) {
+        eventType = getEventType(detail)
+      }
+      pluginManager.tooltipRegistry.showTooltip(
+        editor, eventType, Point.fromObject(pos), {pluginName, tooltip}
+      )
     },
     onShouldShowTooltip (...args: any[]) {
       if (args.length < 2) {
         args.unshift(100)
       }
       const [priority, handler] = args
-      const obj = {priority, handler}
-      instance.tooltipEvents.add(obj)
-      return new Disposable(() => instance.tooltipEvents.delete(obj))
+      const disp = pluginManager.tooltipRegistry.register(pluginName, {priority, handler})
+      return disp
     }
   }
 }

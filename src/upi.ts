@@ -1,31 +1,22 @@
-import { CompositeDisposable, Point, TextEditor, TextBuffer, Range } from 'atom'
+/* tslint:disable: max-classes-per-file member-access */
+import { CompositeDisposable, Point, TextEditor, Range } from 'atom'
 import { MAIN_MENU_LABEL, getEventType } from './utils'
-import { PluginManager } from './plugin-manager'
+import {PluginManager} from './plugin-manager'
 import {IStatus, ISeverityTabDefinition, IControlOpts} from './output-panel'
 import {IResultItem, TSeverity} from './results-db'
-import {TMessage, MessageObject} from './utils'
-import {TEventRangeType} from './editor-control'
+import {TEventRangeType} from './editor-control/tooltip-manager'
 import {TPosition} from './results-db'
 import {IParamSpec} from './config-params'
-import {EditorControl} from './editor-control'
-
-interface ITooltipData {
-  range: Range
-  text: TMessage
-  persistOnCursorMove?: boolean
-}
-export type TTooltipHandler =
-  (editor: TextEditor, crange: Range, type: TEventRangeType) => ITooltipData | Promise<ITooltipData>
+import {EditorControl, TTextBufferCallback} from './editor-control'
+import {TTooltipHandler, TTooltipFunction} from './tooltip-registry'
 
 interface IShowTooltipParams {
   editor: TextEditor
   pos: TPosition
   eventType?: TEventRangeType
-  detail?: any
+  detail?: Event
   tooltip: TTooltipFunction
 }
-type TTooltipFunction = (crange: Range) => ITooltipData | Promise<ITooltipData>
-export type TextBufferCallback = (buffer: TextBuffer) => void
 
 export class UPI {
   constructor (private pluginManager: PluginManager) { }
@@ -36,7 +27,7 @@ export class UPI {
   disposables: CompositeDisposable, one you will return in consumer
   name: Plugin package name
   */
-  registerPlugin (disposables: CompositeDisposable, name: string) {
+  public registerPlugin (disposables: CompositeDisposable, name: string) {
     return new UPIInstance(this.pluginManager, disposables, name)
   }
 }
@@ -48,7 +39,8 @@ class UPIInstance {
     disposables: CompositeDisposable,
     private pluginName: string
   ) {
-    disposables.add(this.disposables = new CompositeDisposable())
+    this.disposables = new CompositeDisposable()
+    disposables.add(this.disposables)
   }
 
   /*
@@ -107,8 +99,8 @@ class UPIInstance {
          will be taken from `messages`
   */
   setMessages (messages: IResultItem[], types: TSeverity[]) {
-    messages = messages.map(function (m) {
-      if (m.position != null) { m.position = Point.fromObject(m.position) }
+    messages = messages.map((m) => {
+      if (m.position) { m.position = Point.fromObject(m.position) }
       return m
     })
     return this.pluginManager.checkResults.setResults(messages, types)
@@ -133,9 +125,9 @@ class UPIInstance {
   */
   setMessageTypes (types: { [severity: string]: ISeverityTabDefinition}) {
     return (() => {
-      let result = []
-      for (let type in types) {
-        let opts = types[type]
+      const result = []
+      for (const type of Object.keys(types)) {
+        const opts = types[type]
         result.push(this.pluginManager.outputView.createTab(type, opts))
       }
       return result
@@ -161,24 +153,10 @@ class UPIInstance {
   returns Disposable
   */
   onShouldShowTooltip (callback: TTooltipHandler) {
-    let disp
-    this.disposables.add(disp = this.pluginManager.onShouldShowTooltip(({editor, pos, eventType}) => {
-      return this.showTooltip({
-        editor,
-        pos,
-        eventType,
-        tooltip (crange) {
-          let res = callback(editor, crange, eventType)
-          if (res != null) {
-            return Promise.resolve(res)
-          } else {
-            return Promise.reject({ignore: true})
-          }
-        }
-      })
-    }
+    const disp = this.pluginManager.tooltipRegistry.register(
+      this.pluginName, {priority: 100, handler: callback}
     )
-    )
+    this.disposables.add(disp)
     return disp
   }
 
@@ -202,26 +180,11 @@ class UPIInstance {
         html: html to be displayed in tooltip
   */
   showTooltip ({editor, pos, eventType, detail, tooltip}: IShowTooltipParams) {
-    let controller = this.pluginManager.controller(editor)
-    return this.withEventRange({controller, pos, detail, eventType}, ({crange, pos, eventType}) => {
-      return Promise.resolve(tooltip(crange)).then(
-        ({range, text, persistOnCursorMove}) => controller && controller.tooltips.show(
-          range, MessageObject.fromObject(text), {type: eventType, subtype: 'external', persistOnCursorMove}
-        )
-      )
-      .catch(status => {
-        if (status == null) { status = {status: 'warning'} }
-        if (status instanceof Error) {
-          console.warn(status)
-          status = {status: 'warning'}
-        }
-        if (!status.ignore) {
-          controller && controller.tooltips.hide({type: eventType})
-          return this.setStatus(status)
-        }
-      }
-      )
+    if (!eventType) {
+      eventType = getEventType(detail)
     }
+    this.pluginManager.tooltipRegistry.showTooltip(
+      editor, eventType, Point.fromObject(pos), {pluginName: this.pluginName, tooltip}
     )
   }
 
@@ -233,7 +196,7 @@ class UPIInstance {
 
   Returns Disposable
   */
-  onWillSaveBuffer (callback: TextBufferCallback) {
+  onWillSaveBuffer (callback: TTextBufferCallback) {
     let disp
     this.disposables.add(disp = this.pluginManager.onWillSaveBuffer(callback))
     return disp
@@ -247,13 +210,13 @@ class UPIInstance {
 
   Returns Disposable
   */
-  onDidSaveBuffer (callback: TextBufferCallback) {
+  onDidSaveBuffer (callback: TTextBufferCallback) {
     let disp
     this.disposables.add(disp = this.pluginManager.onDidSaveBuffer(callback))
     return disp
   }
 
-  onDidStopChanging (callback: TextBufferCallback) {
+  onDidStopChanging (callback: TTextBufferCallback) {
     let disp
     this.disposables.add(disp = this.pluginManager.onDidStopChanging(callback))
     return disp
@@ -276,11 +239,11 @@ class UPIInstance {
   Returns Disposable.
   */
   addPanelControl (element: string | HTMLElement, opts: IControlOpts) {
-    if (typeof element == 'string') {
+    if (typeof element === 'string') {
       return this.pluginManager.outputView.addPanelControl(element, opts)
     } else {
-      let newOpts: IControlOpts & {element: HTMLElement} = {...opts, element}
-      return this.pluginManager.outputView.addPanelControl(DummyElement, opts)
+      const newOpts: IControlOpts & {element: HTMLElement} = {...opts, element}
+      return this.pluginManager.outputView.addPanelControl(DummyElement, newOpts)
     }
   }
 
@@ -313,8 +276,8 @@ class UPIInstance {
   Promise can be rejected with either error, or 'undefined'. Latter
   in case user cancels param selection dialog.
   */
-  getConfigParam (pluginName: string, name: string) {
-    if (name == null) {
+  async getConfigParam (pluginName: string, name: string) {
+    if (!name) {
       name = pluginName;
       ({ pluginName } = this)
     }
@@ -331,8 +294,8 @@ class UPIInstance {
   Promise can be rejected with either error, or 'undefined'. Latter
   in case user cancels param selection dialog.
   */
-  setConfigParam (pluginName: string, name: string, value: any) {
-    if (value == null) {
+  async setConfigParam (pluginName: string, name: string, value: any) {
+    if (!value) {
       value = name
       name = pluginName;
       ({ pluginName } = this)
@@ -356,12 +319,13 @@ class UPIInstance {
   */
   withEventRange ({editor, detail, eventType, pos, controller}: IEventRangeParams, callback: TEventRangeCallback<any>) {
     let ppos: Point | undefined
-    if (pos != null) { ppos = Point.fromObject(pos) }
-    if (eventType == null) { eventType = getEventType(detail) }
-    if (controller == null && editor) { controller = this.pluginManager.controller(editor) }
-    if (controller == null) { return }
-
-    return callback(controller.getEventRange(ppos, eventType))
+    if (pos) { ppos = Point.fromObject(pos) }
+    if (!eventType) { eventType = getEventType(detail) }
+    if (!controller && editor) { controller = this.pluginManager.controller(editor) }
+    if (!controller) { return }
+    const res = controller.getEventRange(eventType)
+    if (!res) { return }
+    return callback(res)
   }
 }
 
@@ -388,7 +352,7 @@ class DummyElement {
     this.init()
   }
 
-  private init() {
+  private init () {
     const {id, events, classes, style, attrs} = this.opts
     if (id) { this.element.id = id }
     if (events) {

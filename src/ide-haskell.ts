@@ -116,6 +116,7 @@ export function serialize () {
 
 export function provideUpi () {
   upiProvided = true
+  // tslint:disable-next-line: no-non-null-assertion
   return new UPI.UPI(pluginManager!) // TODO: not entirely sure it's OK...
 }
 

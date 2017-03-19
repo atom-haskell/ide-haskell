@@ -14,16 +14,19 @@ function isTextMessage (msg: TMessage): msg is IMessageText {
 function isHTMLMessage (msg: TMessage): msg is IMessageHTML {
   return !!(msg && (msg as IMessageHTML).html)
 }
-
-export type TMessage = string | IMessageText | IMessageHTML
+export type TMessage = string | IMessageText | IMessageHTML | MessageObject
 
 export class MessageObject {
-  public static fromObject (message: TMessage) {
-    return new MessageObject(message)
+  public static fromObject (message: TMessage): MessageObject  {
+    if (message instanceof MessageObject) {
+      return message
+    } else {
+      return new MessageObject(message)
+    }
   }
 
   private htmlCache?: string
-  constructor (private msg: TMessage) {
+  constructor (private msg: string | IMessageText | IMessageHTML) {
     // noop
   }
 
