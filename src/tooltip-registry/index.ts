@@ -85,7 +85,7 @@ export class TooltipRegistry {
         }
         return {pluginName, tooltipData}
       } catch (e) {
-        this.pluginManager.outputView.backendStatus(pluginName, e)
+        this.pluginManager.outputPanel.backendStatus(pluginName, e)
         continue
       }
     }
