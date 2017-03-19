@@ -7,14 +7,16 @@ import {ResultItem} from '../results-db'
 import {MessageObject} from '../utils'
 import {ResultsDB} from '../results-db'
 import {TEventRangeType} from '../editor-control/tooltip-manager'
-import {TooltipRegistry} from '../tooltip-registry'
+import {PluginManager, IEditorController} from '../plugin-manager'
 
-export class MarkerManager {
+export class CheckResultsProvider implements IEditorController {
   public gutter: Gutter
   private markers: DisplayMarkerLayer
   private disposables: CompositeDisposable
   private markerProps: WeakMap<DisplayMarker, ResultItem>
-  constructor (private editor: TextEditor, private results: ResultsDB, private tooltipRegistry: TooltipRegistry) {
+  constructor (private editor: TextEditor, pluginManager: PluginManager) {
+    const results = pluginManager.checkResults
+    const tooltipRegistry = pluginManager.tooltipRegistry
     this.gutter = this.editor.gutterWithName('ide-haskell-check-results')
 
     this.disposables = new CompositeDisposable()
@@ -30,7 +32,7 @@ export class MarkerManager {
     }))
   }
 
-  public dispose () {
+  public destroy () {
     this.markers.destroy()
     this.disposables.dispose()
   }
@@ -53,11 +55,11 @@ export class MarkerManager {
     return result
   }
 
-  private updateResults () {
+  private updateResults ({res}: {res: ResultsDB}) {
     this.markers.clear()
     const path = this.editor.getPath()
-    for (const res of this.results.filter(({uri}) => uri === path)) {
-      this.markerFromCheckResult(res)
+    for (const r of res.filter(({uri}) => uri === path)) {
+      this.markerFromCheckResult(r)
     }
   }
 

@@ -29,7 +29,11 @@ export class TooltipRegistry {
   public register (pluginName: string, provider: TTooltipHandlerSpec): Disposable {
     const idx = this.providers.findIndex(({priority}) => priority < provider.priority)
     const record = {pluginName, ...provider}
-    this.providers.splice(idx, 0, record)
+    if (idx === -1) {
+      this.providers.push(record)
+    } else {
+      this.providers.splice(idx, 0, record)
+    }
     return new Disposable(() => {
       const ix = this.providers.indexOf(record)
       this.providers.splice(ix, 1)
