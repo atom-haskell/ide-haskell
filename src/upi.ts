@@ -14,7 +14,7 @@ interface IShowTooltipParams {
   editor: TextEditor
   pos: TPosition
   eventType?: TEventRangeType
-  detail?: Event
+  detail?: any
   tooltip: TTooltipFunction
 }
 

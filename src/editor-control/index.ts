@@ -12,6 +12,8 @@ import {TooltipRegistry} from '../tooltip-registry'
 import {PluginManager} from '../plugin-manager'
 
 export type TTextBufferCallback = (buffer: TextBuffer) => void
+export type TEventRangeResult = { crange: Range, pos: Point, eventType: TEventRangeType } | undefined
+export {TEventRangeType}
 
 export class EditorControl {
   public disposables: CompositeDisposable // TODO should be private...
@@ -76,7 +78,7 @@ export class EditorControl {
 
   public getEventRange (
     eventType: TEventRangeType
-  ): { crange: Range, pos: Point, eventType: TEventRangeType } | undefined {
+  ): TEventRangeResult {
     let crange: Range, pos: Point
     switch (eventType) {
       case 'mouse':
