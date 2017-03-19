@@ -54,7 +54,12 @@ export class TooltipRegistry {
       tooltipData = await Promise.resolve(tooltip(eventRange.crange))
     } else {
       const tooltip = await this.defaultTooltipFunction(editor, type, eventRange.crange)
-      if (!tooltip) { return }
+      if (!tooltip) {
+        // if nobody wants to show anything, might as well hide...
+        // TODO: this doesn't seem like a particularly bright idea?
+        controller.tooltips.hide(type)
+        return
+      }
       ({pluginName, tooltipData} = tooltip)
     }
     const newEventRange = controller.getEventRange(type)
@@ -71,7 +76,7 @@ export class TooltipRegistry {
     )
   }
 
-  private async defaultTooltipFunction (editor: TextEditor, type: TEventRangeType = 'mouse', crange: Range) {
+  private async defaultTooltipFunction (editor: TextEditor, type: TEventRangeType, crange: Range) {
     for (const {pluginName, handler} of this.providers) {
       try {
         const tooltipData = await Promise.resolve(handler(editor, crange, type))
