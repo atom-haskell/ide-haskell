@@ -9,6 +9,7 @@ import * as Events from './events'
 import * as Tooltips from './tooltips'
 import * as Controls from './controls'
 import * as Params from './params'
+import * as Utils from './utils'
 
 export type TTooltipHandlerSpec = {priority: number, handler: Tooltips.TTooltipHandler}
 
@@ -19,6 +20,7 @@ export class UPIInstance {
   public tooltips: Tooltips.IMainInterface
   public controls: Controls.IMainInterface
   public params: Params.IMainInterface
+  public utils: Utils.IMainInterface
   private disposables: CompositeDisposable
   private destroyed: boolean
   constructor (pluginManager: PluginManager, pluginName: string) {
@@ -32,6 +34,7 @@ export class UPIInstance {
     this.events = Events.create(pluginManager, this.disposables)
     this.controls = Controls.create(pluginManager)
     this.params = Params.create(pluginName, pluginManager)
+    this.utils = Utils.create(pluginManager)
   }
 
   public destroy () {
