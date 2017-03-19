@@ -61,7 +61,7 @@ export interface IMainInterface {
 export function create (pluginName: string, pluginManager: PluginManager): IMainInterface {
   return {
     status (status) {
-      pluginManager.outputView.backendStatus(pluginName, status as any) // TODO Fix this
+      pluginManager.outputView.backendStatus(pluginName, status)
     },
     add (messages, types) {
       messages = messages.map((m) => {
