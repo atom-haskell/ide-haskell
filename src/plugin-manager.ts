@@ -33,12 +33,6 @@ export class PluginManager {
     this.emitter = new Emitter()
     this.disposables.add(this.emitter)
 
-    if (atom.config.get('ide-haskell.messageDisplayFrontend') === 'builtin') {
-      this.disposables.add(
-        this.onResultsUpdated(({types}) => this.updateEditorsWithResults(types))
-      )
-    }
-
     this.outputView = new OutputPanel(state.outputView, this.checkResults)
 
     this.subscribeEditorController()
@@ -145,17 +139,9 @@ export class PluginManager {
     for (const editor of atom.workspace.getTextEditors()) { this.removeController(editor) }
   }
 
-  private updateEditorsWithResults (types: string[]) {
-    for (const ed of atom.workspace.getTextEditors()) {
-      const ctrl = this.controller(ed)
-      const filtered = this.checkResults.filter(({uri}) => uri === ed.getPath())
-      if (ctrl) { ctrl.updateResults(filtered, types) }
-    }
-  }
-
   private addController (editor: TextEditor) {
     if (!this.controllers.has(editor)) {
-      const controller = new EditorControl(editor)
+      const controller = new EditorControl(editor, this.checkResults)
       this.controllers.set(editor, controller)
       controller.disposables.add(
         editor.onDidDestroy(() => this.removeController(editor))
@@ -165,7 +151,6 @@ export class PluginManager {
       , controller.onDidSaveBuffer((buffer: TextBuffer) => this.emitter.emit('did-save-buffer', buffer))
       , controller.onDidStopChanging((ed: TextEditor) => this.emitter.emit('did-stop-changing', ed.getBuffer()))
       )
-      controller.updateResults(this.checkResults.filter(({uri}) => uri === editor.getPath()))
     }
   }
 }
