@@ -9,13 +9,13 @@ import {
 import {listen} from './element-listener'
 import {TooltipManager, TEventRangeType} from './tooltip-manager'
 import {TooltipRegistry} from '../tooltip-registry'
-import {PluginManager} from '../plugin-manager'
+import {PluginManager, IEditorController} from '../plugin-manager'
 
 export type TTextBufferCallback = (buffer: TextBuffer) => void
 export type TEventRangeResult = { crange: Range, pos: Point, eventType: TEventRangeType } | undefined
 export {TEventRangeType}
 
-export class EditorControl {
+export class EditorControl implements IEditorController {
   public disposables: CompositeDisposable // TODO should be private...
   public tooltips: TooltipManager
   private lastMouseBufferPt?: Point
@@ -25,11 +25,11 @@ export class EditorControl {
   private gutter: Gutter
   private gutterElement: any
   private tooltipRegistry: TooltipRegistry
-  constructor (private editor: TextEditor, private pluginManager: PluginManager) {
+  constructor (private editor: TextEditor, pluginManager: PluginManager) {
     this.disposables = new CompositeDisposable()
     this.tooltips = new TooltipManager(this.editor)
     this.disposables.add(this.tooltips)
-    this.tooltipRegistry = this.pluginManager.tooltipRegistry
+    this.tooltipRegistry = pluginManager.tooltipRegistry
     this.gutter = this.editor.addGutter({
       name: 'ide-haskell-check-results',
       priority: 10
@@ -46,10 +46,9 @@ export class EditorControl {
 
     this.disposables.add(
       // buffer events for automatic check
-      this.editor.onDidDestroy(() => this.destroy()),
-      buffer.onWillSave(() => this.pluginManager.willSaveBuffer(buffer)),
-      buffer.onDidSave(() => this.pluginManager.didSaveBuffer(buffer)),
-      this.editor.onDidStopChanging(() => this.pluginManager.didStopChanging(buffer)),
+      buffer.onWillSave(() => pluginManager.willSaveBuffer(buffer)),
+      buffer.onDidSave(() => pluginManager.didSaveBuffer(buffer)),
+      this.editor.onDidStopChanging(() => pluginManager.didStopChanging(buffer)),
       // tooltip tracking (mouse and selection)
       this.editorElement.onDidChangeScrollLeft(() => this.tooltips.hide('mouse')),
       this.editorElement.onDidChangeScrollTop(() => this.tooltips.hide('mouse')),
@@ -72,7 +71,6 @@ export class EditorControl {
       console.warn(e)
     }
     this.disposables.dispose()
-    this.pluginManager.removeController(this.editor)
     this.lastMouseBufferPt = undefined
   }
 

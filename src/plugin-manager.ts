@@ -1,10 +1,11 @@
 import {CompositeDisposable, Emitter, TextEditor, Point, TextBuffer, Grammar} from 'atom'
-import {ResultsDB, TUpdateCallback} from './results-db'
+import {ResultsDB} from './results-db'
 import {OutputPanel} from './output-panel'
 import {ConfigParamManager, IState as IParamState} from './config-params'
 import {EditorControl, TTextBufferCallback} from './editor-control'
 import {LinterSupport} from './linter-support'
 import {TooltipRegistry} from './tooltip-registry'
+import {CheckResultsProvider} from './check-results-provider'
 
 type Linter = any // TODO: Steal this from atom-typescript
 
@@ -18,32 +19,50 @@ export interface IState {
   configParams: IParamState
 }
 
+export interface IEditorController {
+  destroy (): void
+}
+
+export interface IEditorControllerFactory {
+  new (editor: TextEditor, manager: PluginManager): IEditorController
+}
+
+type ECMap<T extends IEditorController> = WeakMap<TextEditor, T>
+
 export class PluginManager {
   public checkResults: ResultsDB
-  public disposables: CompositeDisposable
-  public controllers: WeakMap<TextEditor, EditorControl>
-  public emitter: Emitter
   public outputView: OutputPanel
   public configParamManager: ConfigParamManager
   public linterSupport?: LinterSupport
   public tooltipRegistry: TooltipRegistry
+  private disposables: CompositeDisposable
+  private emitter: Emitter
+  private controllers: ECMap<EditorControl>
+  private checkResultsControllers: ECMap<CheckResultsProvider>
+  private controllerClasses: Set<{map: ECMap<IEditorController>, factory: IEditorControllerFactory}>
   constructor (state: IState) {
-    this.checkResults = new ResultsDB()
-
     this.disposables = new CompositeDisposable()
-    this.controllers = new WeakMap()
     this.emitter = new Emitter()
     this.disposables.add(this.emitter)
 
-    this.tooltipRegistry = new TooltipRegistry(this)
+    this.controllers = new WeakMap()
+    this.checkResultsControllers = new WeakMap()
+    this.controllerClasses = new Set()
 
+    this.checkResults = new ResultsDB()
     this.outputView = new OutputPanel(state.outputView, this.checkResults)
-
-    this.subscribeEditorController()
-
+    this.tooltipRegistry = new TooltipRegistry(this)
     this.configParamManager = new ConfigParamManager(this.outputView, state.configParams)
 
-    this.linterSupport = undefined
+    this.addEditorController(this.controllers, EditorControl)
+    this.addEditorController(this.checkResultsControllers, CheckResultsProvider)
+
+    this.subscribeEditorController()
+  }
+
+  public addEditorController (map: WeakMap<TextEditor, IEditorController>, factory: IEditorControllerFactory) {
+    this.controllerClasses.add({map, factory})
+    // TODO: subscribe?
   }
 
   public deactivate () {
@@ -94,10 +113,6 @@ export class PluginManager {
     this.outputView.toggle()
   }
 
-  public onResultsUpdated (callback: TUpdateCallback) {
-    return this.checkResults.onDidUpdate(callback)
-  }
-
   public controller (editor: TextEditor) {
     return this.controllers.get(editor)
   }
@@ -118,7 +133,13 @@ export class PluginManager {
   }
 
   public removeController (editor: TextEditor) {
-    this.controllers.delete(editor)
+    for (const {map} of this.controllerClasses) {
+      const controller = map.get(editor)
+      if (controller) {
+        controller.destroy()
+        map.delete(editor)
+      }
+    }
   }
 
   private controllerOnGrammar (editor: TextEditor, grammar: Grammar) {
@@ -148,9 +169,11 @@ export class PluginManager {
   }
 
   private addController (editor: TextEditor) {
-    if (!this.controllers.has(editor)) {
-      const controller = new EditorControl(editor, this)
-      this.controllers.set(editor, controller)
+    for (const {map, factory} of this.controllerClasses) {
+      if (!map.has(editor)) {
+        const controller = new factory(editor, this)
+        map.set(editor, controller)
+      }
     }
   }
 }
