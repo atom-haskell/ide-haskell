@@ -61,8 +61,8 @@ export function activate (state: IState) {
       'ide-haskell:close-tooltip': ({currentTarget, abortKeyBinding}: IEventDesc) => {
         const controller = pluginManager && pluginManager.controller(currentTarget.getModel())
         if (!controller) { return }
-        if (controller.hasTooltips && controller.hasTooltips()) {
-          controller.hideTooltip()
+        if (controller.tooltips.has()) {
+          controller.tooltips.hide()
         } else if (abortKeyBinding) {
           abortKeyBinding()
         }

@@ -1887,7 +1887,7 @@ declare module AtomTypes {
          * @param  A hash of key-value pairs to associate with the marker. There are also reserved property names that have marker-specific meaning.
          * @returns {DisplayMarker} Returns a {DisplayMarker}.
          */
-        markBufferRange(range: Range, options: any): DisplayMarker;
+        markBufferRange(range: Range, options?: any): DisplayMarker;
         /**
          * Create a marker on this layer with its head at the given buffer
          * position and no tail.
@@ -1921,7 +1921,7 @@ declare module AtomTypes {
          * @param {Object} An {Object} containing properties that each returned marker must satisfy. Markers can be associated with custom properties, which are compared with basic equality. In addition, several reserved properties can be used to filter markers based on their current range:
          * @returns {any[]} Returns an {Array} of {DisplayMarker}s
          */
-        findMarkers(properties: Object): any[];
+        findMarkers(properties: Object): DisplayMarker[];
     }
 
     /**
@@ -5875,7 +5875,7 @@ declare module AtomTypes {
          * @param {Object} An {Object} containing the following keys:
          * @returns {DisplayMarkerLayer} Returns a {DisplayMarkerLayer}.
          */
-        addMarkerLayer(options: Object): DisplayMarkerLayer;
+        addMarkerLayer(options?: {maintainHistory?: boolean, persistent?: boolean}): DisplayMarkerLayer;
         /**
          * Get a {DisplayMarkerLayer} by id.
          * @param  The id of the marker layer to retrieve.

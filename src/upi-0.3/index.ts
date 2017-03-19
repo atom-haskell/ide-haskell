@@ -1,5 +1,5 @@
 import {CompositeDisposable, Point, Disposable, TextEditor, Range} from 'atom'
-import {getEventType} from '../utils'
+import {getEventType, MessageObject} from '../utils'
 import {PluginManager} from '../plugin-manager'
 import {UPIInstance} from './instance'
 import {UPIError} from './error'
@@ -166,7 +166,7 @@ export class UPI {
         const tt = await Promise.resolve(handler(editor, crange, eventType))
         if (tt) {
           const {range, text} = tt
-          controller.showTooltip(newPos, range, text, {eventType, subtype: 'external'})
+          controller.tooltips.show(range, MessageObject.fromObject(text), {type: eventType, subtype: 'external'})
           break
         } else {
           continue
@@ -180,7 +180,7 @@ export class UPI {
           }
         }
         if (!e.ignore) {
-          controller.hideTooltip({eventType})
+          controller.tooltips.hide({type: eventType})
           this.pluginManager.outputView.backendStatus(pluginName, e)
         }
       }

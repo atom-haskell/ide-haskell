@@ -3,7 +3,7 @@ import { MAIN_MENU_LABEL, getEventType } from './utils'
 import { PluginManager } from './plugin-manager'
 import {IStatus, ISeverityTabDefinition, IControlOpts} from './output-panel'
 import {IResultItem, TSeverity} from './results-db'
-import {TMessage} from './utils'
+import {TMessage, MessageObject} from './utils'
 import {TEventRangeType} from './editor-control'
 import {TPosition} from './results-db'
 import {IParamSpec} from './config-params'
@@ -205,8 +205,8 @@ class UPIInstance {
     let controller = this.pluginManager.controller(editor)
     return this.withEventRange({controller, pos, detail, eventType}, ({crange, pos, eventType}) => {
       return Promise.resolve(tooltip(crange)).then(
-        ({range, text, persistOnCursorMove}) => controller && controller.showTooltip(
-          pos, range, text, {eventType, subtype: 'external', persistOnCursorMove}
+        ({range, text, persistOnCursorMove}) => controller && controller.tooltips.show(
+          range, MessageObject.fromObject(text), {type: eventType, subtype: 'external', persistOnCursorMove}
         )
       )
       .catch(status => {
@@ -216,7 +216,7 @@ class UPIInstance {
           status = {status: 'warning'}
         }
         if (!status.ignore) {
-          controller && controller.hideTooltip({eventType})
+          controller && controller.tooltips.hide({type: eventType})
           return this.setStatus(status)
         }
       }
