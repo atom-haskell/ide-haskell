@@ -1,28 +1,21 @@
 import {
-  Range, Emitter, TextEditor, Point, CompositeDisposable, Gutter, DisplayMarker, TextBuffer,
+  Range, TextEditor, Point, CompositeDisposable, Gutter, DisplayMarker,
   DisplayMarkerLayer
 } from 'atom'
 
-import {ResultItem, TSeverity} from '../results-db'
+import {ResultItem} from '../results-db'
 import {MessageObject} from '../utils'
-import {ResultsDB, TUpdateCallbackArg} from '../results-db'
-
-export type TEventRangeType = 'keyboard' | 'context' | 'mouse' | 'selection'
-export type TFindType = 'mouse' | 'keyboard' | 'gutter'
+import {ResultsDB} from '../results-db'
+import {TEventRangeType} from '../editor-control/tooltip-manager'
+import {TooltipRegistry} from '../tooltip-registry'
 
 export class MarkerManager {
   public gutter: Gutter
   private markers: DisplayMarkerLayer
   private disposables: CompositeDisposable
   private markerProps: WeakMap<DisplayMarker, ResultItem>
-  constructor (private editor: TextEditor, private results: ResultsDB) {
+  constructor (private editor: TextEditor, private results: ResultsDB, private tooltipRegistry: TooltipRegistry) {
     this.gutter = this.editor.gutterWithName('ide-haskell-check-results')
-    if (!this.gutter) {
-      this.gutter = this.editor.addGutter({
-        name: 'ide-haskell-check-results',
-        priority: 10
-      })
-    }
 
     this.disposables = new CompositeDisposable()
     this.markers = editor.addMarkerLayer({
@@ -30,8 +23,11 @@ export class MarkerManager {
       persistent: false
     })
     this.markerProps = new WeakMap()
-    this.updateResults = this.updateResults.bind(this)
-    this.disposables.add(results.onDidUpdate(this.updateResults))
+    this.disposables.add(results.onDidUpdate(this.updateResults.bind(this)))
+    this.disposables.add(tooltipRegistry.register('builtin:check-results', {
+      priority: 200,
+      handler: this.tooltipProvider.bind(this)
+    }))
   }
 
   public dispose () {
@@ -39,7 +35,14 @@ export class MarkerManager {
     this.disposables.dispose()
   }
 
-  public getMessageAt (pos: Point, type: TFindType) {
+  private tooltipProvider (editor: TextEditor, crange: Range, type: TEventRangeType) {
+    const msg = this.getMessageAt(crange.start, type)
+    if (msg.length > 0) {
+      return { range: crange, text: msg }
+    }
+  }
+
+  private getMessageAt (pos: Point, type: TEventRangeType) {
     const markers = this.find(pos, type)
     const result: MessageObject[] = []
     for (const marker of markers) {
@@ -50,7 +53,7 @@ export class MarkerManager {
     return result
   }
 
-  private updateResults ({types}: TUpdateCallbackArg) {
+  private updateResults () {
     this.markers.clear()
     const path = this.editor.getPath()
     for (const res of this.results.filter(({uri}) => uri === path)) {
@@ -86,14 +89,17 @@ export class MarkerManager {
     this.editor.decorateMarker(m, { type: 'line', ...cls })
   }
 
-  private find (pos: Point, type: TFindType) {
+  private find (pos: Point, type: TEventRangeType) {
     switch (type) {
       case 'gutter':
+      case 'selection': // TODO: this is not good
         return this.markers.findMarkers({ startBufferRow: pos.row })
       case 'keyboard':
         return this.markers.findMarkers({ startBufferPosition: pos })
       case 'mouse':
+      case 'context':
         return this.markers.findMarkers({ containsBufferPosition: pos })
+      default: throw new TypeError('Switch assertion failed')
     }
   }
 }

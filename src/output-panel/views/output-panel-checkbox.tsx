@@ -6,12 +6,14 @@ export class OutputPanelCheckbox {
   private state: boolean
   private disposables: CompositeDisposable
   private emitter: Emitter
+  // tslint:disable-next-line:no-uninitialized-class-properties
   private element: HTMLElement
   constructor ({id, enabled = false}: {id?: string, enabled?: boolean} = {}) {
     this.id = id
     this.state = enabled
     this.disposables = new CompositeDisposable()
-    this.disposables.add(this.emitter = new Emitter())
+    this.emitter = new Emitter()
+    this.disposables.add(this.emitter)
     etch.initialize(this)
     this.disposables.add(
       atom.tooltips.add(this.element, {title: this.tooltipTitle.bind(this)})

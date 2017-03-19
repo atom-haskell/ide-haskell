@@ -6,10 +6,12 @@ export class OutputPanelItems {
   private model: ResultsDB
   private items: ResultItem[]
   private activeFilter: (item: ResultItem) => boolean
+  // tslint:disable-next-line:no-uninitialized-class-properties
   private element: HTMLElement
   constructor ({model}: {model: ResultsDB}) {
     this.model = model
     this.items = []
+    this.activeFilter = () => true
     etch.initialize(this)
   }
 

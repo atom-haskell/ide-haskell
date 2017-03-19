@@ -1,84 +1,70 @@
 import {
-  Range, Emitter, TextEditor, Point, CompositeDisposable, Gutter, DisplayMarker, TextBuffer,
-  DisplayMarkerLayer
+  Range, TextEditor, DisplayMarker,
 } from 'atom'
 
-import {ResultItem, TSeverity} from '../results-db'
 import {TooltipMessage} from './tooltip-view'
-import {TMessage, MessageObject} from '../utils'
-
-export type TEventRangeType = 'keyboard' | 'context' | 'mouse' | 'selection'
+import {MessageObject} from '../utils'
+import {EventTable, TEventRangeType} from './event-table'
+export {TEventRangeType}
 export interface IMarkerProperties {
-  type: TEventRangeType
-  subtype: 'check-result' | 'external'
-  persistOnCursorMove?: boolean
-}
-export interface IMarkerTemplate {
-  type?: TEventRangeType
-  subtype?: 'check-result' | 'external'
-  persistOnCursorMove?: boolean
+  persistOnCursorMove: boolean
 }
 
 export class TooltipManager {
-  private tooltipHighlightRange?: Range
-  private lastMouseBufferPt?: Point
-  private markers: DisplayMarkerLayer
-  constructor(private editor: TextEditor) {
-    this.markers = this.editor.addMarkerLayer()
+  private markers: EventTable
+  constructor (private editor: TextEditor) {
+    this.markers = new EventTable(editor, [
+      [{type: 'keyboard'}, {type: 'context'}],
+      [{type: 'mouse'}, {type: 'selection'}, {type: 'gutter'}],
+    ])
   }
 
   public dispose () {
     this.markers.destroy()
-    this.lastMouseBufferPt = undefined
   }
 
-  show (
+  public show (
     range: Range, text: MessageObject | MessageObject[],
-    detail: IMarkerProperties
+    type: TEventRangeType, source: string, detail: IMarkerProperties
   ) {
-    if (this.tooltipHighlightRange && range.isEqual(this.tooltipHighlightRange)) {
-      return
-    }
-    this.hide()
-      // exit if mouse moved away
-    if (detail.type === 'mouse') {
-      if (this.lastMouseBufferPt && !range.containsPoint(this.lastMouseBufferPt)) {
-        return
-      }
-    }
-    if (detail.type === 'selection') {
-      const lastSel = this.editor.getLastSelection()
-      if (!range.containsRange(lastSel.getBufferRange()) || !!lastSel.isEmpty()) {
-        return
-      }
-    }
-    this.tooltipHighlightRange = range
-    const highlightMarker = this.markers.markBufferRange(range)
+    this.hide(type, source)
+    const highlightMarker = this.markers.get(type, source).markBufferRange(range)
     highlightMarker.setProperties(detail)
-    this.editor.decorateMarker(highlightMarker, {
-      type: 'overlay',
-      position: 'tail',
-      item: new TooltipMessage(text)
-    })
-    return this.editor.decorateMarker(highlightMarker, {
-      type: 'highlight',
-      class: 'ide-haskell-type'
-    })
+    this.decorate(highlightMarker, new TooltipMessage(text))
   }
 
-  hide (template?: IMarkerTemplate) {
-    if (!template) {
+  public hide (type?: TEventRangeType, source?: string, template?: IMarkerProperties) {
+    if (!type) {
       this.markers.clear()
       return
     }
-    this.tooltipHighlightRange = undefined
-    this.markers.findMarkers(template).forEach((m) => m.destroy())
+    if (!template) {
+      this.markers.get(type, source).clear()
+    } else {
+      this.markers.get(type, source).findMarkers(template).forEach((m) => m.destroy())
+    }
   }
 
-  has (template?: IMarkerTemplate) {
-    if (!template) {
+  public has (type?: TEventRangeType, source?: string, template?: IMarkerProperties) {
+    if (!type) {
       return this.markers.getMarkerCount() > 0
     }
-    return this.markers.findMarkers(template).length > 0
+    if (!template) {
+      return this.markers.get(type, source).getMarkerCount()
+    } else {
+      return this.markers.get(type, source).findMarkers(template).length > 0
+    }
+  }
+
+  private decorate (marker: DisplayMarker, tooltipView: TooltipMessage) {
+    this.editor.decorateMarker(marker, {
+      type: 'overlay',
+      position: 'tail',
+      item: tooltipView
+    })
+    this.editor.decorateMarker(marker, {
+      type: 'highlight',
+      class: 'ide-haskell-type'
+    })
   }
 }

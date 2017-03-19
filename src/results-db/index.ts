@@ -13,7 +13,8 @@ export class ResultsDB {
   constructor () {
     this._results = []
     this.disposables = new CompositeDisposable()
-    this.disposables.add(this.emitter = new Emitter())
+    this.emitter = new Emitter()
+    this.disposables.add(this.emitter)
   }
 
   public destroy () {

@@ -7,6 +7,7 @@ export class ProgressBar {
   private progress: number
   constructor ({orientation = 'horizontal'}: {orientation?: TDirection} = {}) {
     this.direction = orientation
+    this.progress = NaN
     etch.initialize(this)
   }
 
