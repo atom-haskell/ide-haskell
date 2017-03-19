@@ -30,8 +30,8 @@ export interface IEditorControllerFactory {
 type ECMap<T extends IEditorController> = WeakMap<TextEditor, T>
 
 export class PluginManager {
-  public checkResults: ResultsDB
-  public outputView: OutputPanel
+  public resultsDB: ResultsDB
+  public outputPanel: OutputPanel
   public configParamManager: ConfigParamManager
   public tooltipRegistry: TooltipRegistry
   private linterSupport?: LinterSupport
@@ -49,10 +49,10 @@ export class PluginManager {
     this.controllerClasses = new Set()
     this.editorDispMap = new WeakMap()
 
-    this.checkResults = new ResultsDB()
-    this.outputView = new OutputPanel(state.outputView, this.checkResults)
+    this.resultsDB = new ResultsDB()
+    this.outputPanel = new OutputPanel(state.outputView, this.resultsDB)
     this.tooltipRegistry = new TooltipRegistry(this)
-    this.configParamManager = new ConfigParamManager(this.outputView, state.configParams)
+    this.configParamManager = new ConfigParamManager(this.outputPanel, state.configParams)
 
     this.addEditorController(EditorControl, this.controllers)
     this.addEditorController(CheckResultsProvider)
@@ -61,11 +61,11 @@ export class PluginManager {
   }
 
   public deactivate () {
-    this.checkResults.destroy()
+    this.resultsDB.destroy()
     this.disposables.dispose()
 
     this.deleteEditorControllers()
-    this.outputView.destroy()
+    this.outputPanel.destroy()
     this.configParamManager.destroy()
     if (this.linterSupport) {
       this.linterSupport.destroy()
@@ -75,7 +75,7 @@ export class PluginManager {
 
   public serialize () {
     return {
-      outputView: this.outputView.serialize(),
+      outputView: this.outputPanel.serialize(),
       configParams: this.configParamManager.serialize()
     }
   }
@@ -105,7 +105,7 @@ export class PluginManager {
   }
 
   public togglePanel () {
-    this.outputView.toggle()
+    this.outputPanel.toggle()
   }
 
   public controller (editor: TextEditor) {
@@ -114,17 +114,17 @@ export class PluginManager {
 
   public setLinter (linter: Linter) {
     if (atom.config.get('ide-haskell.messageDisplayFrontend') !== 'linter') { return }
-    this.linterSupport = new LinterSupport(linter, this.checkResults)
+    this.linterSupport = new LinterSupport(linter, this.resultsDB)
   }
 
   public nextError () {
     if (atom.config.get('ide-haskell.messageDisplayFrontend') !== 'builtin') { return }
-    this.outputView.showNextError()
+    this.outputPanel.showNextError()
   }
 
   public prevError () {
     if (atom.config.get('ide-haskell.messageDisplayFrontend') !== 'builtin') { return }
-    this.outputView.showPrevError()
+    this.outputPanel.showPrevError()
   }
 
   public removeController (editor: TextEditor) {

@@ -61,7 +61,7 @@ export interface IMainInterface {
 export function create (pluginName: string, pluginManager: PluginManager): IMainInterface {
   return {
     status (status) {
-      pluginManager.outputView.backendStatus(pluginName, status)
+      pluginManager.outputPanel.backendStatus(pluginName, status)
     },
     add (messages, types) {
       messages = messages.map((m) => {
@@ -70,7 +70,7 @@ export function create (pluginName: string, pluginManager: PluginManager): IMain
         }
         return m
       })
-      pluginManager.checkResults.appendResults(messages, types)
+      pluginManager.resultsDB.appendResults(messages, types)
     },
     set (messages, types) {
       messages = messages.map((m) => {
@@ -79,15 +79,15 @@ export function create (pluginName: string, pluginManager: PluginManager): IMain
         }
         return m
       })
-      pluginManager.checkResults.setResults(messages, types)
+      pluginManager.resultsDB.setResults(messages, types)
     },
     clear (types) {
-      pluginManager.checkResults.setResults([], types)
+      pluginManager.resultsDB.setResults([], types)
     },
     setTypes (types) {
       for (const type of Object.keys(types)) {
         const opts = types[type]
-        pluginManager.outputView.createTab(type, opts)
+        pluginManager.outputPanel.createTab(type, opts)
       }
     },
   }
