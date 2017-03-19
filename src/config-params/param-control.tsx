@@ -16,10 +16,10 @@ export class ParamControl<T> {
   private spec: IParamSpec<any>
   private store: ConfigParamStore
   private disposables: CompositeDisposable
-  private hiddenValue: boolean
+  private hiddenValue?: boolean
   private element: HTMLElement | undefined
-  private value: T
-  private storeDisposable: Disposable
+  private value?: T
+  private storeDisposable?: Disposable
   constructor ({pluginName, name, spec, store}: IProps<T>) {
     this.pluginName = pluginName
     this.spec = spec

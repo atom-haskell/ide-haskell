@@ -41,6 +41,7 @@ export interface IControlOpts {
 }
 
 export class OutputPanel {
+  // tslint:disable-next-line:no-uninitialized-class-properties
   private refs: {
     items: OutputPanelItems
     buttons: OutputPanelButtons
@@ -52,7 +53,9 @@ export class OutputPanel {
   private elements: Set<JSX.Element>
   private statusMap: Map<string, IStatus>
   private disposables: CompositeDisposable
+  // tslint:disable-next-line:no-uninitialized-class-properties
   private pos: TPanelPosition
+  // tslint:disable-next-line:no-uninitialized-class-properties
   private panel: Panel
   private element?: HTMLElement
   private currentResult: number
@@ -64,6 +67,8 @@ export class OutputPanel {
     this.statusMap = new Map()
 
     this.disposables = new CompositeDisposable()
+
+    this.currentResult = 0
 
     etch.initialize(this)
 
@@ -86,7 +91,7 @@ export class OutputPanel {
         case 'right':
           this.panel = atom.workspace.addRightPanel(options)
           break
-        default: // impossible, but tslint won't shut up
+        default: throw new TypeError('Switch assertion failed')
       }
       if (this.element) {
         this.update()

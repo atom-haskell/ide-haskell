@@ -17,10 +17,12 @@ export class OutputPanelButtons {
   private disposables: CompositeDisposable
   private emitter: Emitter
   private buttons: Set<IBtnDesc>
+  // tslint:disable-next-line:no-uninitialized-class-properties
   private refs: { [btnName: string]: Button }
   constructor () {
     this.disposables = new CompositeDisposable()
-    this.disposables.add(this.emitter = new Emitter())
+    this.emitter = new Emitter()
+    this.disposables.add(this.emitter)
     this.buttons = new Set();
     ['error', 'warning', 'lint'].forEach((btn) => this.createButton(btn))
     this.createButton('build', {uriFilter: false, autoScroll: true})

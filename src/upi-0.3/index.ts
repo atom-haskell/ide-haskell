@@ -1,20 +1,17 @@
-import {CompositeDisposable, Point, Disposable, TextEditor, Range} from 'atom'
-import {getEventType, MessageObject} from '../utils'
+import {CompositeDisposable, Disposable, TextEditor} from 'atom'
 import {PluginManager} from '../plugin-manager'
 import {UPIInstance} from './instance'
 import {UPIError} from './error'
 export {UPIError}
 
 import {TPosition} from '../results-db'
-import {TEventRangeType} from '../editor-control'
+import {TEventRangeType} from '../editor-control/tooltip-manager'
 import {IMenuDefinition} from './instance/menu'
 import {ISetTypesParams} from '../output-panel'
 import {TextBufferCallback} from './instance/events'
 import {TUPIControlDefinition} from './instance/controls'
 import {IParamSpec} from '../config-params'
 import {TTooltipHandler} from './instance/tooltips'
-import {TEventRangeCallback} from './instance/utils'
-import {TTooltipHandlerSpec} from './instance'
 
 export interface IRegistrationOptions {
   name: string
@@ -45,7 +42,6 @@ export class UPI {
   constructor (private pluginManager: PluginManager) {
     this.instances = new Map()
     this.disposables = new CompositeDisposable()
-    this.disposables.add(this.pluginManager.onShouldShowTooltip(this.shouldShowTooltip.bind(this)))
   }
 
   /**
@@ -63,7 +59,7 @@ export class UPI {
     if (this.instances.has(name)) {
       throw new UPIError(`Plugin ${name} already registered with UPI`)
     }
-    const instance = new UPIInstance(this.pluginManager, name, this)
+    const instance = new UPIInstance(this.pluginManager, name)
     this.instances.set(name, instance)
     const disp = new CompositeDisposable()
 
@@ -121,69 +117,5 @@ export class UPI {
 
   public dispose () {
     this.disposables.dispose()
-  }
-
-  public withEventRange<T> (
-    {editor, detail, eventType, pos, controller}: IEventRangeParamsInternal,
-    callback: TEventRangeCallback<T>
-  ) {
-    if (pos) { pos = Point.fromObject(pos) }
-    if (!eventType) { eventType = getEventType(detail) }
-    if (!controller && editor) { controller = this.pluginManager.controller(editor) }
-    if (!controller) { return }
-
-    return callback(controller.getEventRange(pos, eventType))
-  }
-
-  public getEventRange (
-    {editor, detail, eventType, pos, controller}: IEventRangeParamsInternal
-  ): {pos: Point, crange: Range} | undefined {
-    if (pos) { pos = Point.fromObject(pos) }
-    if (!eventType) { eventType = getEventType(detail) }
-    if (!controller && editor) { controller = this.pluginManager.controller(editor) }
-    if (!controller) { return }
-
-    return controller.getEventRange(pos, eventType)
-  }
-
-  private async shouldShowTooltip (
-    {editor, pos, eventType}: {editor: TextEditor, pos: Point, eventType: TEventRangeType}
-  ) {
-    const subs: Array<TTooltipHandlerSpec & {pluginName: string}> = []
-    for (const [pluginName, inst] of this.instances.entries()) {
-      for (const vs of inst.tooltipEvents.values()) {
-        subs.push({pluginName, ...vs})
-      }
-    }
-    subs.sort((a, b) => b.priority - a.priority)
-    const controller = this.pluginManager.controller(editor)
-    if (!controller) { return }
-    for (const {pluginName, handler} of subs) {
-      try {
-        const eventRange = this.getEventRange({controller, pos, eventType})
-        if (!eventRange) { continue }
-        const {crange, pos: newPos} = eventRange
-        const tt = await Promise.resolve(handler(editor, crange, eventType))
-        if (tt) {
-          const {range, text} = tt
-          controller.tooltips.show(range, MessageObject.fromObject(text), {type: eventType, subtype: 'external'})
-          break
-        } else {
-          continue
-        }
-      } catch (e) {
-        if (e.message) {
-          console.warn(e)
-          e = {
-            status: 'warning',
-            detail: e.message
-          }
-        }
-        if (!e.ignore) {
-          controller.tooltips.hide({type: eventType})
-          this.pluginManager.outputView.backendStatus(pluginName, e)
-        }
-      }
-    }
   }
 }
