@@ -1,7 +1,6 @@
-import {Disposable, TextEditor, Point, CompositeDisposable} from 'atom'
+import {Disposable, TextEditor, CompositeDisposable} from 'atom'
 import {PluginManager} from '../../plugin-manager'
 import {TEventRangeType} from '../../editor-control/tooltip-manager'
-import {TPosition} from '../../results-db'
 import {getEventType} from '../../utils'
 import {TTooltipFunction, TTooltipHandler} from '../../tooltip-registry'
 
@@ -9,7 +8,6 @@ export {TTooltipHandler}
 
 interface IShowTooltipParams {
   editor: TextEditor
-  pos: TPosition
   eventType?: TEventRangeType
   detail?: any
   tooltip: TTooltipFunction
@@ -65,12 +63,12 @@ export function create (
   pluginName: string, pluginManager: PluginManager, disposables: CompositeDisposable
 ): IMainInterface {
   return {
-    show ({editor, pos, eventType, detail, tooltip}) {
+    show ({editor, eventType, detail, tooltip}) {
       if (!eventType) {
         eventType = getEventType(detail)
       }
       pluginManager.tooltipRegistry.showTooltip(
-        editor, eventType, Point.fromObject(pos), {pluginName, tooltip}
+        editor, eventType, {pluginName, tooltip}
       )
     },
     onShouldShowTooltip (...args: any[]) {
