@@ -1,4 +1,4 @@
-import {TextEditor, Disposable, Range, Point} from 'atom'
+import {TextEditor, Disposable, Range} from 'atom'
 import {TMessage, MessageObject} from '../utils'
 import {PluginManager} from '../plugin-manager'
 import {TEventRangeType} from '../editor-control/tooltip-manager'
@@ -37,8 +37,7 @@ export class TooltipRegistry {
   }
 
   public async showTooltip (
-    editor: TextEditor, type: TEventRangeType,
-    pos?: Point, spec?: TTooltipSpec
+    editor: TextEditor, type: TEventRangeType, spec?: TTooltipSpec
   ) {
     const controller = this.pluginManager.controller(editor)
     if (!controller) { return }

@@ -184,7 +184,7 @@ class UPIInstance {
       eventType = getEventType(detail)
     }
     this.pluginManager.tooltipRegistry.showTooltip(
-      editor, eventType, Point.fromObject(pos), {pluginName: this.pluginName, tooltip}
+      editor, eventType, {pluginName: this.pluginName, tooltip}
     )
   }
 
