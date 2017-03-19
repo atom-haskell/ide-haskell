@@ -3,7 +3,7 @@ import {PluginManager, IState} from './plugin-manager'
 import {prettifyFile} from './prettify'
 import {MAIN_MENU_LABEL} from './utils'
 import * as UPI from './upi'
-import * as UPI3 from './upi-0.3'
+import * as UPI3 from './upi-3'
 
 let upiProvided = false
 let disposables: CompositeDisposable | undefined

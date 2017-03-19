@@ -1,11 +1,9 @@
-import {CompositeDisposable, Disposable, TextEditor} from 'atom'
+import {CompositeDisposable, Disposable} from 'atom'
 import {PluginManager} from '../plugin-manager'
 import {UPIInstance} from './instance'
 import {UPIError} from './error'
-export {UPIError}
+export {UPIError, UPIInstance}
 
-import {TPosition} from '../results-db'
-import {TEventRangeType} from '../editor-control/tooltip-manager'
 import {IMenuDefinition} from './instance/menu'
 import {ISetTypesParams} from '../output-panel'
 import {TextBufferCallback} from './instance/events'
@@ -26,14 +24,6 @@ export interface IRegistrationOptions {
   controls?: TUPIControlDefinition[]
   params?: {[paramName: string]: IParamSpec<any>}
   tooltipEvent?: TTooltipHandler | {priority?: number, handler: TTooltipHandler}
-}
-
-interface IEventRangeParamsInternal {
-  editor?: TextEditor
-  controller: any
-  detail?: any
-  eventType?: TEventRangeType
-  pos: TPosition
 }
 
 export class UPI {
