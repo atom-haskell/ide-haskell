@@ -1,4 +1,4 @@
-import {CompositeDisposable, Emitter, TextEditor, Point, TextBuffer, Grammar} from 'atom'
+import {CompositeDisposable, Emitter, TextEditor, Point, TextBuffer, Grammar, Disposable} from 'atom'
 import {ResultsDB} from './results-db'
 import {OutputPanel} from './output-panel'
 import {ConfigParamManager, IState as IParamState} from './config-params'
@@ -40,6 +40,7 @@ export class PluginManager {
   private controllers: ECMap<EditorControl>
   private checkResultsControllers: ECMap<CheckResultsProvider>
   private controllerClasses: Set<{map: ECMap<IEditorController>, factory: IEditorControllerFactory}>
+  private editorDispMap: WeakMap<TextEditor, Disposable>
   constructor (state: IState) {
     this.disposables = new CompositeDisposable()
     this.emitter = new Emitter()
@@ -48,6 +49,7 @@ export class PluginManager {
     this.controllers = new WeakMap()
     this.checkResultsControllers = new WeakMap()
     this.controllerClasses = new Set()
+    this.editorDispMap = new WeakMap()
 
     this.checkResults = new ResultsDB()
     this.outputView = new OutputPanel(state.outputView, this.checkResults)
@@ -58,11 +60,6 @@ export class PluginManager {
     this.addEditorController(this.checkResultsControllers, CheckResultsProvider)
 
     this.subscribeEditorController()
-  }
-
-  public addEditorController (map: WeakMap<TextEditor, IEditorController>, factory: IEditorControllerFactory) {
-    this.controllerClasses.add({map, factory})
-    // TODO: subscribe?
   }
 
   public deactivate () {
@@ -133,6 +130,12 @@ export class PluginManager {
   }
 
   public removeController (editor: TextEditor) {
+    const disp = this.editorDispMap.get(editor)
+    if (disp) {
+      disp.dispose()
+      this.disposables.remove(disp)
+      this.editorDispMap.delete(editor)
+    }
     for (const {map} of this.controllerClasses) {
       const controller = map.get(editor)
       if (controller) {
@@ -140,6 +143,10 @@ export class PluginManager {
         map.delete(editor)
       }
     }
+  }
+
+  private addEditorController (map: WeakMap<TextEditor, IEditorController>, factory: IEditorControllerFactory) {
+    this.controllerClasses.add({map, factory})
   }
 
   private controllerOnGrammar (editor: TextEditor, grammar: Grammar) {
@@ -169,6 +176,11 @@ export class PluginManager {
   }
 
   private addController (editor: TextEditor) {
+    if (!this.editorDispMap.has(editor)) {
+      const disp = editor.onDidDestroy(() => this.removeController(editor))
+      this.editorDispMap.set(editor, disp)
+      this.disposables.add(disp)
+    }
     for (const {map, factory} of this.controllerClasses) {
       if (!map.has(editor)) {
         const controller = new factory(editor, this)
