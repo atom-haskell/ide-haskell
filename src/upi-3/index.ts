@@ -7,6 +7,8 @@ import {IParamSpec} from '../config-params'
 import {TTooltipHandler} from '../tooltip-registry'
 import {MAIN_MENU_LABEL} from '../utils'
 
+export * from './instance'
+
 export interface IAtomMenuCommand {
   label: string
   command: string
@@ -92,7 +94,12 @@ export function consume (pluginManager: PluginManager, options: IRegistrationOpt
     }
   }
   if (params) {
-    disp.add(pluginManager.configParamManager.add(name, params))
+    for (const paramName of Object.keys(params)) {
+      const spec = params[paramName]
+      disp.add(
+        pluginManager.configParamManager.add(this.pluginName, paramName, spec)
+      )
+    }
   }
 
   return disp

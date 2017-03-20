@@ -2,10 +2,12 @@ import {TextEditor, Disposable, Range} from 'atom'
 import {TMessage, MessageObject} from '../utils'
 import {PluginManager} from '../plugin-manager'
 import {TEventRangeType} from '../editor-control/tooltip-manager'
+import {TPosition} from '../results-db'
 
 export type TTooltipFunction = (crange: Range) => ITooltipData | Promise<ITooltipData>
+export type TRange = Range | [TPosition, TPosition]
 export interface ITooltipData {
-  range: Range
+  range: TRange
   text: TMessage | TMessage[]
   persistOnCursorMove?: boolean
 }
@@ -72,7 +74,7 @@ export class TooltipRegistry {
       msg = MessageObject.fromObject(tooltipData.text)
     }
     controller.tooltips.show(
-      tooltipData.range, msg, type, pluginName, {persistOnCursorMove}
+      Range.fromObject(tooltipData.range), msg, type, pluginName, {persistOnCursorMove}
     )
   }
 
