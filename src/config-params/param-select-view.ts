@@ -1,7 +1,7 @@
 import SelectListView from 'atom-select-list'
 import {Panel} from 'atom'
 
-interface ISelectListParams<T> {
+export interface ISelectListParams<T> {
   items: T[] | Promise<T[]>
   heading?: string
   itemTemplate?: (item: T) => string

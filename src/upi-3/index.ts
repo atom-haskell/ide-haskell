@@ -19,12 +19,12 @@ export interface IAtomSubmenu {
   submenu: TAtomMenu[]
 }
 
-interface IUPIControlSimpleDefinition {
+export interface IUPIControlSimpleDefinition {
   element: string
   opts: IControlOpts
 }
 
-interface IUPIControlCustomDefinition<T> {
+export interface IUPIControlCustomDefinition<T> {
   element: { new (arg: T): IElementObject<T> }
   opts: T
 }

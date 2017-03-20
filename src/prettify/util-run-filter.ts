@@ -1,6 +1,6 @@
 import * as CP from 'child_process'
 
-interface IRunFilterArgs {
+export interface IRunFilterArgs {
     command: string
     args: string[]
     cwd: string
