@@ -1,6 +1,7 @@
 import {CompositeDisposable, Range} from 'atom'
 import {ResultsDB} from '../results-db'
 import * as Linter from './linter'
+export * from './linter'
 
 export class LinterSupport {
   private disposables: CompositeDisposable
