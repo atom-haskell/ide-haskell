@@ -8,7 +8,7 @@ export interface ISeverityTabDefinition {
   autoScroll?: boolean
 }
 
-interface IBtnDesc extends IBtnProps {
+export interface IBtnDesc extends IBtnProps {
   uriFilter: boolean
   autoScroll: boolean
 }

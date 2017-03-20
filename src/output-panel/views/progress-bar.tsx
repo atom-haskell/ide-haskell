@@ -1,6 +1,6 @@
 import * as etch from 'etch'
 
-type TDirection = 'horizontal' | 'vertical'
+export type TDirection = 'horizontal' | 'vertical'
 
 export class ProgressBar {
   private direction: TDirection

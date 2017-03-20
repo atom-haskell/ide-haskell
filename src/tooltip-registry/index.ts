@@ -16,7 +16,7 @@ export type TTooltipHandler =
   => ITooltipData | undefined | Promise<ITooltipData | undefined>
 
 export type TTooltipHandlerSpec = {priority: number, handler: TTooltipHandler}
-type TTooltipSpec = {pluginName: string, tooltip: TTooltipFunction}
+export type TTooltipSpec = {pluginName: string, tooltip: TTooltipFunction}
 
 export class TooltipRegistry {
   private providers: Array<TTooltipHandlerSpec & {pluginName: string}>

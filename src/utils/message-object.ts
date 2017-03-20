@@ -1,9 +1,9 @@
-interface IMessageText {
+export interface IMessageText {
   text: string
   highlighter?: string
 }
 
-interface IMessageHTML {
+export interface IMessageHTML {
   html: string
 }
 

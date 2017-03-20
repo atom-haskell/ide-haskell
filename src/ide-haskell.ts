@@ -1,10 +1,18 @@
-import {CompositeDisposable} from 'atom'
+import {CompositeDisposable, Disposable} from 'atom'
 import {PluginManager, IState} from './plugin-manager'
 import {prettifyFile} from './prettify'
 import {MAIN_MENU_LABEL} from './utils'
 import {ILinterRegistry} from './linter-support'
 import * as UPI from './upi-2'
 import * as UPI3 from './upi-3'
+
+// for typings
+import {IShowTooltipParams} from './upi-3'
+import {IStatus, ISeverityTabDefinition, IControlOpts, IElementObject} from './output-panel'
+import {IResultItem, TSeverity} from './results-db'
+import {IParamSpec} from './config-params'
+import {TTooltipHandler, TTooltipFunction} from './tooltip-registry'
+// end
 
 let upiProvided = false
 let disposables: CompositeDisposable | undefined
@@ -137,7 +145,7 @@ export function consumeUpi3 (registration: UPI3.IRegistrationOptions) {
   return UPI3.consume(pluginManager!, registration) // TODO: not entirely sure it's OK...
 }
 
-export function consumeLinter (indieRegistry: ILinterRegistry) {
+export function consumeLinter (indieRegistry: ILinterRegistry): Disposable | undefined {
   if (!(disposables && pluginManager)) { return }
   const linter = indieRegistry.register({name: 'IDE-Haskell'})
   disposables.add(linter)

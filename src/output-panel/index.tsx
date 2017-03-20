@@ -16,17 +16,17 @@ export interface IElementObject<T> {
 
 export interface IState {
   visibility?: boolean
-  width?: number
-  height?: number
+  width?: string
+  height?: string
   fileFilter?: boolean
   activeTab?: string
 }
 
-interface INormalStatus {
+export interface INormalStatus {
   status: 'ready' | 'error' | 'warning'
 }
 
-interface IProgressStatus {
+export interface IProgressStatus {
   status: 'progress'
   progress?: number
 }
@@ -274,7 +274,7 @@ export class OutputPanel {
     }
   }
 
-  public serialize () {
+  public serialize (): IState {
     return {
       visibility: this.panel.isVisible(),
       height: this.element && this.element.style.height || this.state.height,
