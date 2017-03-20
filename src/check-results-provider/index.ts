@@ -55,7 +55,7 @@ export class CheckResultsProvider implements IEditorController {
     return result
   }
 
-  private updateResults ({res}: {res: ResultsDB}) {
+  private updateResults (res: ResultsDB) {
     this.markers.clear()
     const path = this.editor.getPath()
     for (const r of res.filter(({uri}) => uri === path)) {
@@ -70,14 +70,16 @@ export class CheckResultsProvider implements IEditorController {
     const range = new Range(position, Point.fromObject([position.row, position.column + 1]))
     const marker = this.markers.markBufferRange(range, { invalidate: 'touch' })
     this.markerProps.set(marker, resItem)
-    const disp = marker.onDidChange(({isValid}: DisplayMarker) => {
-      if (!isValid) {
+    const disp = new CompositeDisposable()
+    disp.add(
+      marker.onDidDestroy(() => {
         this.markerProps.delete(marker)
-        resItem.destroy()
-        marker.destroy()
         disp.dispose()
-      }
-    })
+      }),
+      marker.onDidChange(({isValid}: {isValid: boolean}) => {
+        resItem.setValid(isValid)
+      })
+    )
     this.decorateMarker(marker, resItem)
   }
 

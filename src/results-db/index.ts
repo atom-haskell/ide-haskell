@@ -1,20 +1,22 @@
 import {TPosition, TSeverity, IResultItem, ResultItem} from './result-item'
 import {CompositeDisposable, Emitter} from 'atom'
+import {Provider, TMessageProviderFunction} from './provider'
 
-export {TPosition, TSeverity, IResultItem, ResultItem}
+export {TPosition, TSeverity, IResultItem, TMessageProviderFunction, ResultItem}
 
-export type TUpdateCallbackArg = {res: ResultsDB, types: TSeverity[]}
-export type TUpdateCallback = (arg: TUpdateCallbackArg) => void
+export type TUpdateCallback = (arg: ResultsDB) => void
 
 export class ResultsDB {
-  private _results: ResultItem[]
+  private currentId: number
+  private messages: ResultItem[]
   private disposables: CompositeDisposable
   private emitter: Emitter
   constructor () {
-    this._results = []
+    this.currentId = 0
     this.disposables = new CompositeDisposable()
     this.emitter = new Emitter()
     this.disposables.add(this.emitter)
+    this.messages = []
   }
 
   public destroy () {
@@ -25,55 +27,27 @@ export class ResultsDB {
     return this.emitter.on('did-update', callback)
   }
 
-  public setResults (res: IResultItem[], severityArr?: TSeverity[]) {
-    if (severityArr) {
-      const sa = severityArr
-      this._results =
-        this._results.filter(({severity}) => !(sa.includes(severity)))
-        .concat(res.map((i) => new ResultItem(this, i)))
-    } else {
-      this._results = res.map((i) => new ResultItem(this, i))
-    }
-
-    if (!severityArr) {
-      severityArr = this.calcSeverityArr(res)
-    }
-
-    this.emitter.emit('did-update', {res: this, types: severityArr})
+  public didUpdate (providerId: number, msgs: ResultItem[]) {
+    this.messages = this.messages.filter((m) => m.providerId !== providerId)
+    this.messages.push(...msgs)
+    this.emitter.emit('did-update', this)
   }
 
-  public appendResults (res: IResultItem[], severityArr?: TSeverity[]) {
-    this._results = this._results.concat(res.map((r) => new ResultItem(this, r)))
-
-    if (!severityArr) {
-      severityArr = this.calcSeverityArr(res)
-    }
-
-    this.emitter.emit('did-update', {res: this, types: severityArr})
-  }
-
-  public removeResult (resItem: ResultItem) {
-    this._results = this._results.filter((res) => res !== resItem)
-    resItem.parent = undefined
+  public registerProvider (providerName: string) {
+    const p = new Provider(this, ++this.currentId, name)
+    this.disposables.add(p)
+    return p
   }
 
   public results () {
-    return this._results
+    return this.messages.filter((i) => i.isValid())
   }
 
   public filter (f: (item: ResultItem) => boolean) {
-    return this._results.filter(f)
+    return this.messages.filter(f)
   }
 
   public isEmpty () {
-    return this._results.length === 0
-  }
-
-  private calcSeverityArr (res: IResultItem[]) {
-    const severityArr: TSeverity[] = []
-    for (const {severity} of res) {
-      if (!severityArr.includes(severity)) { severityArr.push(severity) }
-    }
-    return severityArr
+    return this.messages.length === 0
   }
 }
