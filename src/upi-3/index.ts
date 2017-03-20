@@ -2,7 +2,7 @@ import {CompositeDisposable, Disposable} from 'atom'
 
 import {PluginManager} from '../plugin-manager'
 import {TTextBufferCallback} from '../editor-control'
-import {ISetTypesParams, IControlOpts} from '../output-panel'
+import {ISetTypesParams, IControlOpts, IElementObject} from '../output-panel'
 import {IParamSpec} from '../config-params'
 import {TTooltipHandler} from '../tooltip-registry'
 import {MAIN_MENU_LABEL} from '../utils'
@@ -24,12 +24,12 @@ interface IUPIControlSimpleDefinition {
   opts: IControlOpts
 }
 
-interface IUPIControlCustomDefinition {
-  element: Function
-  opts: any
+interface IUPIControlCustomDefinition<T> {
+  element: { new (arg: T): IElementObject<T> }
+  opts: T
 }
 
-export type TUPIControlDefinition = IUPIControlCustomDefinition | IUPIControlSimpleDefinition
+export type TUPIControlDefinition = IUPIControlCustomDefinition<Object> | IUPIControlSimpleDefinition
 
 export type TAtomMenu = IAtomMenuCommand | IAtomSubmenu
 
@@ -90,7 +90,11 @@ export function consume (pluginManager: PluginManager, options: IRegistrationOpt
   }
   if (controls) {
     for (const {element, opts} of controls) {
-      disp.add(pluginManager.outputPanel.addPanelControl(element, opts))
+      if (typeof element === 'string') {
+        disp.add(pluginManager.outputPanel.addPanelControl(element, opts))
+      } else {
+        disp.add(pluginManager.outputPanel.addPanelControl(element, opts))
+      }
     }
   }
   if (params) {

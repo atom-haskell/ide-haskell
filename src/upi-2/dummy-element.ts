@@ -1,13 +1,13 @@
 import {IControlOpts} from '../output-panel'
 
 export class DummyElement {
-  private element: HTMLElement
+  public element: HTMLElement
   constructor (private opts: IControlOpts & {element: HTMLElement}) {
     this.element = opts.element.cloneNode(true) as HTMLElement
     this.init()
   }
 
-  public update (opts: IControlOpts & {element: HTMLElement}) {
+  public async update (opts: IControlOpts & {element: HTMLElement}) {
     this.opts = opts
     this.element.remove()
     this.element = opts.element.cloneNode(true) as HTMLElement

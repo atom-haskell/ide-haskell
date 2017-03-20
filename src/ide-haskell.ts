@@ -113,7 +113,7 @@ export function provideUpi () {
   upiProvided = true
   // tslint:disable-next-line: no-non-null-assertion
   return {
-     register (disp: CompositeDisposable, pluginName: string) {
+     registerPlugin (disp: CompositeDisposable, pluginName: string) {
        // tslint:disable-next-line: no-non-null-assertion
        return UPI.instance(pluginManager!, disp, pluginName) // TODO: not entirely sure it's OK...
      }

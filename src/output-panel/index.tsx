@@ -9,6 +9,11 @@ const $ = etch.dom
 
 export {ISeverityTabDefinition}
 
+export interface IElementObject<T> {
+  element: HTMLElement
+  update (props: T): Promise<void>
+}
+
 interface IState {
   visibility?: boolean
   width?: number
@@ -170,6 +175,8 @@ export class OutputPanel {
     this.statusMap.clear()
   }
 
+  public addPanelControl (element: string, opts: IControlOpts): Disposable
+  public addPanelControl<T> (element: { new (arg: T): IElementObject<T> }, opts: T): Disposable
   public addPanelControl (element: string | Function, opts: IControlOpts | Object) {
     if (typeof element === 'string') {
       const {events, classes, style, attrs} = (opts as IControlOpts)
