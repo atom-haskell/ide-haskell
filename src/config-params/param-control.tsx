@@ -3,7 +3,7 @@ import * as etch from 'etch'
 
 import {IParamSpec, ConfigParamStore} from './param-store'
 
-interface IProps<T> {
+export interface IProps<T> {
   pluginName: string
   name: string
   spec: IParamSpec<T>

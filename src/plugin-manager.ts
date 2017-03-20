@@ -7,6 +7,8 @@ import {LinterSupport, ILinter} from './linter-support'
 import {TooltipRegistry} from './tooltip-registry'
 import {CheckResultsProvider} from './check-results-provider'
 
+export {IParamState, IOutputViewState}
+
 export type TEventType = 'keyboard' | 'context' | 'mouse' | 'selection'
 type TShowTooltipCallbackParams = {editor: TextEditor, pos: Point, eventType: TEventType}
 type TShowTooltipCallback = (pars: TShowTooltipCallbackParams) => void
@@ -70,7 +72,7 @@ export class PluginManager {
     }
   }
 
-  public serialize () {
+  public serialize (): IState {
     return {
       outputView: this.outputPanel.serialize(),
       configParams: this.configParamManager.serialize()

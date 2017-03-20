@@ -1,4 +1,3 @@
-/* tslint:disable: max-classes-per-file member-access */
 import { CompositeDisposable, TextEditor } from 'atom'
 import { MAIN_MENU_LABEL, getEventType } from '../utils'
 import {PluginManager} from '../plugin-manager'
@@ -10,7 +9,7 @@ import {TTooltipFunction, ITooltipData} from '../tooltip-registry'
 import {isTEventRangeType} from '../editor-control/event-table'
 import {TAtomMenu} from './'
 
-interface IShowTooltipParams {
+export interface IShowTooltipParams {
   editor: TextEditor
   eventType?: TEventRangeType
   detail?: Object
