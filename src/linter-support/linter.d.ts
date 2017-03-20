@@ -48,3 +48,8 @@ export interface ILinter {
   setMessages (messages: ILinterMessage[]): void
   dispose (): void
 }
+
+
+export interface ILinterRegistry {
+  register: (arg: {name: string}) => ILinter
+}

@@ -2,6 +2,7 @@ import {CompositeDisposable} from 'atom'
 import {PluginManager, IState} from './plugin-manager'
 import {prettifyFile} from './prettify'
 import {MAIN_MENU_LABEL} from './utils'
+import {ILinterRegistry} from './linter-support'
 import * as UPI from './upi-2'
 import * as UPI3 from './upi-3'
 
@@ -134,11 +135,6 @@ export function consumeUpi3 (registration: UPI3.IRegistrationOptions) {
   upiProvided = true
   // tslint:disable-next-line: no-non-null-assertion
   return UPI3.consume(pluginManager!, registration) // TODO: not entirely sure it's OK...
-}
-
-interface ILinterRegistry {
-  // TODO: steal this from atom-typescript
-  register: Function
 }
 
 export function consumeLinter (indieRegistry: ILinterRegistry) {
