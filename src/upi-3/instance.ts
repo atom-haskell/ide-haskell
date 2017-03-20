@@ -8,11 +8,12 @@ import {TEventRangeType} from '../editor-control/tooltip-manager'
 import {IParamSpec} from '../config-params'
 import {TTooltipFunction, ITooltipData} from '../tooltip-registry'
 import {isTEventRangeType} from '../editor-control/event-table'
+import {TAtomMenu} from './'
 
 interface IShowTooltipParams {
   editor: TextEditor
   eventType?: TEventRangeType
-  detail?: any
+  detail?: Object
   tooltip: TTooltipFunction | ITooltipData
 }
 
@@ -22,7 +23,7 @@ export function instance (pluginManager: PluginManager, pluginName: string) {
   disposables.add(messageProvider)
 
   return {
-    setMenu (name: string, menu: any[]) {
+    setMenu (name: string, menu: TAtomMenu[]) {
       const menuDisp = atom.menu.add([{
         label: MAIN_MENU_LABEL,
         submenu: [ {label: name, submenu: menu} ]
@@ -59,7 +60,7 @@ export function instance (pluginManager: PluginManager, pluginName: string) {
         return pluginManager.outputPanel.addPanelControl(element, opts)
       }
     },
-    addConfigParam (paramName: string, spec: IParamSpec<any>) {
+    addConfigParam (paramName: string, spec: IParamSpec<Object>) {
       return pluginManager.configParamManager.add(pluginName, paramName, spec)
     },
     async getConfigParam (name: string) {
@@ -68,7 +69,7 @@ export function instance (pluginManager: PluginManager, pluginName: string) {
     async getOthersConfigParam (plugin: string, name: string) {
       return pluginManager.configParamManager.get(plugin, name)
     },
-    async setConfigParam (name: string, value: any) {
+    async setConfigParam (name: string, value: Object) {
       return pluginManager.configParamManager.set(pluginName, name, value)
     },
     getEventRange (editor: TextEditor, typeOrDetail: TEventRangeType | Object) {

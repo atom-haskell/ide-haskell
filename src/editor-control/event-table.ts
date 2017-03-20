@@ -19,7 +19,7 @@ export const TEventRangeType = strEnum([
   'keyboard', 'context', 'mouse', 'selection', 'gutter'
 ])
 
-export function isTEventRangeType (x: any): x is TEventRangeType {
+export function isTEventRangeType (x: Object): x is TEventRangeType {
   return typeof x === 'string' && Object.keys(TEventRangeType).includes(x)
 }
 

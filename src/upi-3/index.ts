@@ -45,7 +45,7 @@ export interface IRegistrationOptions {
     onDidStopChanging?: TSingleOrArray<TTextBufferCallback>
   }
   controls?: TUPIControlDefinition[]
-  params?: {[paramName: string]: IParamSpec<any>}
+  params?: {[paramName: string]: IParamSpec<Object>}
   tooltip?: TTooltipHandler | {priority?: number, handler: TTooltipHandler}
 }
 

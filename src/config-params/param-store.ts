@@ -18,16 +18,16 @@ interface IParamData<T> {
 }
 
 export interface IState {
-  [pluginNameParamName: string]: any
+  [pluginNameParamName: string]: Object
 }
 
-export type TUpdatedCallback = (arg: {pluginName: string, paramName: string, value: any}) => void
+export type TUpdatedCallback = (arg: {pluginName: string, paramName: string, value: Object}) => void
 
 export class ConfigParamStore {
   private disposables: CompositeDisposable
   private emitter: Emitter
   private saved: IState
-  private plugins: Map<string, Map<string, IParamData<any>>>
+  private plugins: Map<string, Map<string, IParamData<Object>>>
   constructor (state: IState = {}) {
     this.disposables = new CompositeDisposable()
     this.emitter = new Emitter()
@@ -71,7 +71,7 @@ export class ConfigParamStore {
     })
   }
 
-  public async setValue<T> (pluginName: string, paramName: string, value?: T) {
+  public async setValue (pluginName: string, paramName: string, value?: Object) {
     const paramConfig = this.getParamConfig(pluginName, paramName, 'set')
     if (value === undefined) { value = await this.showSelect(paramConfig.spec) }
     if (value !== undefined) {

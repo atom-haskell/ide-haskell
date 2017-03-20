@@ -1,5 +1,6 @@
 import {
-  Range, TextEditor, Point, CompositeDisposable, Gutter, TextBuffer
+  Range, TextEditor, Point, CompositeDisposable, Gutter, TextBuffer,
+  Disposable
 } from 'atom'
 
 import {
@@ -21,9 +22,15 @@ export class EditorControl implements IEditorController {
   private lastMouseBufferPt?: Point
   private exprTypeTimeout?: number
   private selTimeout?: number
-  private editorElement: any
+  private editorElement: HTMLElement & {
+    onDidChangeScrollTop (a: () => void): Disposable
+    onDidChangeScrollLeft (a: () => void): Disposable
+    pixelRectForScreenRange (r: Range): {
+      left: number, top: number, width: number, height: number
+    }
+  }
   private gutter: Gutter
-  private gutterElement: any
+  private gutterElement: HTMLElement
   private tooltipRegistry: TooltipRegistry
   constructor (private editor: TextEditor, pluginManager: PluginManager) {
     this.disposables = new CompositeDisposable()
@@ -191,7 +198,9 @@ export class EditorControl implements IEditorController {
     const tooltipElement = document.querySelector('ide-haskell-tooltip')
     if (!tooltipElement) { return }
     const slcl = this.editorElement.pixelRectForScreenRange(this.editor.screenRangeForBufferRange(currentRange))
-    const eecl = this.editorElement.querySelector('.scroll-view').getBoundingClientRect()
+    const sv = this.editorElement.querySelector('.scroll-view')
+    if (!sv) { return }
+    const eecl = sv.getBoundingClientRect()
     const ttcl = tooltipElement.getBoundingClientRect()
     const div = tooltipElement.querySelector('div')
     if (!div) { return }

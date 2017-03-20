@@ -22,7 +22,7 @@ export class ConfigParamManager {
     return this.store.serialize()
   }
 
-  public add (pluginName: string, paramName: string, spec: IParamSpec<any>) {
+  public add (pluginName: string, paramName: string, spec: IParamSpec<Object>) {
     const disp = new CompositeDisposable()
     disp.add(
       this.store.addParamSpec(pluginName, paramName, spec),
@@ -40,7 +40,7 @@ export class ConfigParamManager {
     return this.store.getValue(pluginName, name)
   }
 
-  public async set (pluginName: string, name: string, value: any) {
+  public async set (pluginName: string, name: string, value: Object) {
     return this.store.setValue(pluginName, name, value)
   }
 }
