@@ -9,7 +9,6 @@ let upiProvided = false
 let disposables: CompositeDisposable | undefined
 let pluginManager: PluginManager | undefined
 let menu: CompositeDisposable | undefined
-let upi3: UPI3.UPI | undefined
 
 export {config} from './config'
 
@@ -90,13 +89,10 @@ export function activate (state: IState) {
       {label: 'Prettify', command: 'ide-haskell:prettify-file'},
       {label: 'Toggle Panel', command: 'ide-haskell:toggle-output'}
     ]}]))
-
-  upi3 = new UPI3.UPI(pluginManager)
 }
 
 export function deactivate () {
   pluginManager && pluginManager.deactivate()
-  upi3 && upi3.dispose()
 
   atom.keymaps.removeBindingsFromSource('ide-haskell')
 
@@ -121,7 +117,13 @@ export function provideUpi () {
 
 export function provideUpi3 () {
   upiProvided = true
-  return upi3
+  return pluginManager
+}
+
+export function consumeUpi3 (registration: UPI3.IRegistrationOptions) {
+  upiProvided = true
+  // tslint:disable-next-line: no-non-null-assertion
+  return UPI3.consume(pluginManager!, registration) // TODO: not entirely sure it's OK...
 }
 
 interface ILinterRegistry {

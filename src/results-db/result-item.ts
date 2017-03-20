@@ -1,5 +1,4 @@
 import {Point} from 'atom'
-import {ResultsDB} from './'
 import {TMessage, MessageObject} from '../utils'
 
 export type TSeverity = 'error' | 'warning' | 'lint' | string
@@ -13,20 +12,24 @@ export interface IResultItem {
 }
 
 export class ResultItem {
-  public uri?: string
-  public position?: Point
-  public message: MessageObject
-  public severity: TSeverity
-  public parent?: ResultsDB
-  constructor (parent: ResultsDB, {uri, message, severity, position}: IResultItem) {
-    this.parent = parent
+  public readonly uri?: string
+  public readonly position?: Point
+  public readonly message: MessageObject
+  public readonly severity: TSeverity
+  private _isValid: boolean
+  constructor (public readonly providerId: number, {uri, message, severity, position}: IResultItem) {
     this.uri = uri
     this.message = MessageObject.fromObject(message)
     this.severity = severity
     this.position = position && Point.fromObject(position)
+    this._isValid = true
   }
 
-  public destroy () {
-    this.parent && this.parent.removeResult(this)
+  public isValid () {
+    return this._isValid
+  }
+
+  public setValid (isValid: boolean) {
+    this._isValid = isValid
   }
 }
