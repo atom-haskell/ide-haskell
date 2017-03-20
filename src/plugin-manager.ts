@@ -1,19 +1,16 @@
 import {CompositeDisposable, Emitter, TextEditor, Point, TextBuffer, Grammar, Disposable} from 'atom'
 import {ResultsDB} from './results-db'
-import {OutputPanel} from './output-panel'
+import {OutputPanel, IState as IOutputViewState} from './output-panel'
 import {ConfigParamManager, IState as IParamState} from './config-params'
 import {EditorControl, TTextBufferCallback} from './editor-control'
-import {LinterSupport} from './linter-support'
+import {LinterSupport, ILinter} from './linter-support'
 import {TooltipRegistry} from './tooltip-registry'
 import {CheckResultsProvider} from './check-results-provider'
-
-type Linter = any // TODO: Steal this from atom-typescript
 
 export type TEventType = 'keyboard' | 'context' | 'mouse' | 'selection'
 type TShowTooltipCallbackParams = {editor: TextEditor, pos: Point, eventType: TEventType}
 type TShowTooltipCallback = (pars: TShowTooltipCallbackParams) => void
 
-type IOutputViewState = any
 export interface IState {
   outputView: IOutputViewState
   configParams: IParamState
@@ -112,7 +109,7 @@ export class PluginManager {
     return this.controllers.get(editor)
   }
 
-  public setLinter (linter: Linter) {
+  public setLinter (linter: ILinter) {
     if (atom.config.get('ide-haskell.messageDisplayFrontend') !== 'linter') { return }
     this.linterSupport = new LinterSupport(linter, this.resultsDB)
   }

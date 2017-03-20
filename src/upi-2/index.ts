@@ -14,16 +14,28 @@ export interface IShowTooltipParams {
   editor: TextEditor
   pos: TPosition
   eventType?: TEventRangeType
-  detail?: any
+  detail?: Object
   tooltip: TTooltipFunction
 }
 
 export interface IEventRangeParams {
   editor: TextEditor
-  detail?: any
+  detail?: Object
   eventType?: TEventRangeType
   pos: TPosition
 }
+
+export interface IAtomMenuCommand {
+  label: string
+  command: string
+}
+
+export interface IAtomSubmenu {
+  label: string
+  submenu: TAtomMenu[]
+}
+
+export type TAtomMenu = IAtomMenuCommand | IAtomSubmenu
 
 export type TEventRangeCallback<T> = (pars: {pos: Point, crange: Range, eventType: TEventRangeType}) => T
 
@@ -41,7 +53,7 @@ export function instance (pluginManager: PluginManager, outerDisposables: Compos
 
   Returns Disposable.
   */
-  setMenu (name: string, menu: any[]) {
+  setMenu (name: string, menu: TAtomMenu[]) {
     let menuDisp
     disposables.add(menuDisp = atom.menu.add([{
       label: MAIN_MENU_LABEL,
@@ -253,7 +265,7 @@ export function instance (pluginManager: PluginManager, outerDisposables: Compos
     disp: Disposable
     change: object of change functions, keys being param_name
   */
-  addConfigParam (specs: { [paramName: string]: IParamSpec<any> }) {
+  addConfigParam (specs: { [paramName: string]: IParamSpec<Object> }) {
     const disp = new CompositeDisposable()
     for (const name of Object.keys(specs)) {
       const spec = specs[name]
@@ -291,7 +303,7 @@ export function instance (pluginManager: PluginManager, outerDisposables: Compos
   Promise can be rejected with either error, or 'undefined'. Latter
   in case user cancels param selection dialog.
   */
-  async setConfigParam (otherPluginName: string, name: string, value: any) {
+  async setConfigParam (otherPluginName: string, name: string, value?: Object) {
     if (value === undefined) {
       value = name
       name = otherPluginName
@@ -314,7 +326,7 @@ export function instance (pluginManager: PluginManager, outerDisposables: Compos
     crange: Range, event range
     eventType: String, event type, one of 'keyboard', 'context', 'mouse'
   */
-  withEventRange ({editor, detail, eventType, pos}: IEventRangeParams, callback: TEventRangeCallback<any>) {
+  withEventRange<T> ({editor, detail, eventType, pos}: IEventRangeParams, callback: TEventRangeCallback<T>) {
     let ppos: Point | undefined
     if (pos) { ppos = Point.fromObject(pos) }
     if (!eventType) { eventType = getEventType(detail) }
