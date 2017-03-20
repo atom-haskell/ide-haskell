@@ -17,8 +17,8 @@ export type TEventRangeResult = { crange: Range, pos: Point, eventType: TEventRa
 export {TEventRangeType}
 
 export class EditorControl implements IEditorController {
-  public disposables: CompositeDisposable // TODO should be private...
   public tooltips: TooltipManager
+  private disposables: CompositeDisposable
   private lastMouseBufferPt?: Point
   private exprTypeTimeout?: number
   private selTimeout?: number
