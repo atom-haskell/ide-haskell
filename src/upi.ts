@@ -9,6 +9,7 @@ import {TPosition} from './results-db'
 import {IParamSpec} from './config-params'
 import {EditorControl, TTextBufferCallback} from './editor-control'
 import {TTooltipHandler, TTooltipFunction} from './tooltip-registry'
+import {Provider} from './results-db/provider'
 
 interface IShowTooltipParams {
   editor: TextEditor
@@ -34,6 +35,8 @@ export class UPI {
 
 class UPIInstance {
   private disposables: CompositeDisposable
+  private messageProvider: Provider
+  private messages: IResultItem[]
   constructor (
     private pluginManager: PluginManager,
     disposables: CompositeDisposable,
@@ -41,6 +44,9 @@ class UPIInstance {
   ) {
     this.disposables = new CompositeDisposable()
     disposables.add(this.disposables)
+    this.messageProvider = this.pluginManager.resultsDB.registerProvider(pluginName)
+    this.disposables.add(this.messageProvider)
+    this.messages = []
   }
 
   /*
@@ -83,7 +89,8 @@ class UPIInstance {
          will be taken from `messages`
   */
   addMessages (messages: IResultItem[], types?: TSeverity[]) {
-    return this.pluginManager.resultsDB.appendResults(messages, types)
+    this.messages.push(...messages)
+    this.messageProvider.setMessages(this.messages)
   }
 
   /*
@@ -99,11 +106,8 @@ class UPIInstance {
          will be taken from `messages`
   */
   setMessages (messages: IResultItem[], types: TSeverity[]) {
-    messages = messages.map((m) => {
-      if (m.position) { m.position = Point.fromObject(m.position) }
-      return m
-    })
-    return this.pluginManager.resultsDB.setResults(messages, types)
+    this.messages = [...messages]
+    this.messageProvider.setMessages(this.messages)
   }
 
   /*
@@ -111,7 +115,8 @@ class UPIInstance {
   This is shorthand from `setMessages([],types)`
   */
   clearMessages (types: TSeverity[]) {
-    return this.pluginManager.resultsDB.setResults([], types)
+    this.messages = this.messages.filter(({severity}) => !types.includes(severity))
+    this.messageProvider.setMessages(this.messages)
   }
 
   /*

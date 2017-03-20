@@ -51,6 +51,10 @@ export class Button {
     this.update()
   }
 
+  public getCount () {
+    return this.props.count
+  }
+
   private didClick () {
     this.toggleActive()
     this.props.emitter.emit('button-clicked', this.props.ref)

@@ -85,6 +85,12 @@ export class OutputPanelButtons {
     }
   }
 
+  public getCount (btn: string) {
+    if (this.refs[btn]) {
+      this.refs[btn].getCount()
+    }
+  }
+
   public clickButton (btn: string) {
     if (btn === this.getActive()) { return }
     if (this.refs[btn]) {

@@ -114,17 +114,14 @@ export class OutputPanel {
       }
     }))
 
-    this.disposables.add(this.results.onDidUpdate(({types}) => {
+    this.disposables.add(this.results.onDidUpdate(() => {
       this.currentResult = 0
-      if (atom.config.get('ide-haskell.autoHideOutput') &&
-          types.map((type) => this.results.filter(({severity}) => severity === type).length).every((l) => l === 0)) {
-        this.refs.buttons.disableAll()
-      } else {
-        if (atom.config.get('ide-haskell.switchTabOnCheck')) {
-          this.activateFirstNonEmptyTab(types)
-        }
-      }
       this.updateItems()
+      if (atom.config.get('ide-haskell.autoHideOutput') && this.results.isEmpty()) {
+        this.refs.buttons.disableAll()
+      } else if (atom.config.get('ide-haskell.switchTabOnCheck')) {
+        this.activateFirstNonEmptyTab()
+      }
     }))
 
     this.setProgress(NaN)
@@ -232,15 +229,12 @@ export class OutputPanel {
     this.refs.buttons.clickButton(tab)
   }
 
-  public activateFirstNonEmptyTab (types: string[]) {
-    const names = this.refs.buttons.buttonNames()
-    for (const i of names) {
-      const name = names[i]
-      if (!types || types.includes(name)) {
-        if ((this.results.filter(({severity}) => severity === name)).length > 0) {
-          this.activateTab(name)
-          break
-        }
+  public activateFirstNonEmptyTab () {
+    for (const i of this.refs.buttons.buttonNames()) {
+      const count = this.refs.buttons.getCount(i)
+      if (count && count > 0) {
+        this.activateTab(i)
+        break
       }
     }
   }

@@ -1649,7 +1649,7 @@ declare module AtomTypes {
         Markers can be invalidated when a region surrounding them in the buffer is
         changed.
          */
-        isValid(): boolean;
+        isValid: boolean;
         /**
          * @returns {boolean} Returns a {Boolean} indicating whether the marker has been
         destroyed. A marker can be invalid without being destroyed, in which case
