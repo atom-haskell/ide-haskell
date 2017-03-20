@@ -14,7 +14,7 @@ export interface IElementObject<T> {
   update (props: T): Promise<void>
 }
 
-interface IState {
+export interface IState {
   visibility?: boolean
   width?: number
   height?: number
@@ -180,7 +180,7 @@ export class OutputPanel {
   public addPanelControl (element: string | Function, opts: IControlOpts | Object) {
     if (typeof element === 'string') {
       const {events, classes, style, attrs} = (opts as IControlOpts)
-      const props: any = {}
+      const props: {[key: string]: Object} = {}
       if (classes) { props.class = classes.join(' ') }
       if (style) { props.style = style }
       if (attrs) { props.attributes = attrs }

@@ -15,11 +15,13 @@ export class ParamControl<T> {
   public element: HTMLElement
   private pluginName: string
   private name: string
-  private spec: IParamSpec<any>
+  private spec: IParamSpec<T>
   private store: ConfigParamStore
   private disposables: CompositeDisposable
   private hiddenValue?: boolean
-  private value?: T
+  // TODO: initialized in initStore. Fix this in linter
+  // tslint:disable-next-line: no-uninitialized-class-properties
+  private value: T
   private storeDisposable?: Disposable
   constructor ({pluginName, name, spec, store}: IProps<T>) {
     this.pluginName = pluginName
@@ -93,12 +95,12 @@ export class ParamControl<T> {
     this.storeDisposable =
       this.store.onDidUpdate(({pluginName, paramName, value}) => {
         if (this.pluginName === pluginName && this.name === paramName) {
-          this.value = value
+          this.value = value as T
           this.update()
         }
       })
     this.disposables.add(this.storeDisposable)
-    this.value = this.store.getValueRaw(this.pluginName, this.name)
+    this.value = this.store.getValueRaw(this.pluginName, this.name) as T
   }
 
   private initSpec () {

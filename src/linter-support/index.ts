@@ -1,15 +1,10 @@
 import {CompositeDisposable, Range} from 'atom'
 import {ResultsDB} from '../results-db'
-
-interface ILinter {
-  deleteMessages (): void
-  setMessages (messages: any[]): void
-  dispose (): void
-}
+import * as Linter from './linter'
 
 export class LinterSupport {
   private disposables: CompositeDisposable
-  constructor (private linter: ILinter, private resultDb: ResultsDB) {
+  constructor (private linter: Linter.ILinter, private resultDb: ResultsDB) {
     this.disposables = new CompositeDisposable()
 
     this.disposables.add(resultDb.onDidUpdate(this.update.bind(this)))
