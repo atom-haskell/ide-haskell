@@ -2,7 +2,7 @@ import {Point} from 'atom'
 import {TMessage, MessageObject} from '../utils'
 
 export type TSeverity = 'error' | 'warning' | 'lint' | string
-export type TPosition = Point | [number, number] | {row: number, column: number}
+export type TPosition = Point | [number, number]
 
 export interface IResultItem {
   uri?: string

@@ -19,6 +19,10 @@ export const TEventRangeType = strEnum([
   'keyboard', 'context', 'mouse', 'selection', 'gutter'
 ])
 
+export function isTEventRangeType (x: any): x is TEventRangeType {
+  return typeof x === 'string' && Object.keys(TEventRangeType).includes(x)
+}
+
 export type TEventRangeType = keyof typeof TEventRangeType
 export type IMarkerGroup = Array<{type: TEventRangeType, source?: string}>
 

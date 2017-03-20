@@ -2,7 +2,7 @@ import {CompositeDisposable} from 'atom'
 import {PluginManager, IState} from './plugin-manager'
 import {prettifyFile} from './prettify'
 import {MAIN_MENU_LABEL} from './utils'
-import * as UPI from './upi'
+import * as UPI from './upi-2'
 import * as UPI3 from './upi-3'
 
 let upiProvided = false
@@ -112,12 +112,22 @@ export function serialize () {
 export function provideUpi () {
   upiProvided = true
   // tslint:disable-next-line: no-non-null-assertion
-  return new UPI.UPI(pluginManager!) // TODO: not entirely sure it's OK...
+  return {
+     register (disp: CompositeDisposable, pluginName: string) {
+       // tslint:disable-next-line: no-non-null-assertion
+       return UPI.instance(pluginManager!, disp, pluginName) // TODO: not entirely sure it's OK...
+     }
+   }
 }
 
 export function provideUpi3 () {
   upiProvided = true
-  return pluginManager
+  return {
+    register (pluginName: string) {
+      // tslint:disable-next-line: no-non-null-assertion
+      return UPI3.instance(pluginManager!, pluginName) // TODO: not entirely sure it's OK...
+    }
+  }
 }
 
 export function consumeUpi3 (registration: UPI3.IRegistrationOptions) {

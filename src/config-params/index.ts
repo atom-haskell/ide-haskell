@@ -22,20 +22,17 @@ export class ConfigParamManager {
     return this.store.serialize()
   }
 
-  public add (pluginName: string, specs: { [paramName: string]: IParamSpec<any> }) {
+  public add (pluginName: string, paramName: string, spec: IParamSpec<any>) {
     const disp = new CompositeDisposable()
-    for (const name of Object.keys(specs)) {
-      const spec = specs[name]
-      disp.add(this.store.addParamSpec(pluginName, name, spec))
-      disp.add(
-        this.outputPanel.addPanelControl(ParamControl, {
-          pluginName,
-          name,
-          spec,
-          store: this.store
-        })
-      )
-    }
+    disp.add(
+      this.store.addParamSpec(pluginName, name, spec),
+      this.outputPanel.addPanelControl(ParamControl, {
+        pluginName,
+        name,
+        spec,
+        store: this.store
+      })
+    )
     return disp
   }
 
