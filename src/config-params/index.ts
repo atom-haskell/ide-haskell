@@ -25,10 +25,10 @@ export class ConfigParamManager {
   public add (pluginName: string, paramName: string, spec: IParamSpec<any>) {
     const disp = new CompositeDisposable()
     disp.add(
-      this.store.addParamSpec(pluginName, name, spec),
+      this.store.addParamSpec(pluginName, paramName, spec),
       this.outputPanel.addPanelControl(ParamControl, {
         pluginName,
-        name,
+        name: paramName,
         spec,
         store: this.store
       })

@@ -11,13 +11,14 @@ interface IProps<T> {
 }
 
 export class ParamControl<T> {
+  // tslint:disable-next-line: no-uninitialized-class-properties
+  public element: HTMLElement
   private pluginName: string
   private name: string
   private spec: IParamSpec<any>
   private store: ConfigParamStore
   private disposables: CompositeDisposable
   private hiddenValue?: boolean
-  private element: HTMLElement | undefined
   private value?: T
   private storeDisposable?: Disposable
   constructor ({pluginName, name, spec, store}: IProps<T>) {
