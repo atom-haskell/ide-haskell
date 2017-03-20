@@ -3917,7 +3917,7 @@ declare module AtomTypes {
  * @param  An optional boolean indicating whether to force the copying of objects that are already ranges.˚
  * @returns {Range} Returns: A {Range} based on the given object.
  */
-  static fromObject(object: Range | [Point, Point] | [[number, number], [number, number]], copy?: boolean): Range;
+  static fromObject(object: Range | [Point | [number, number], Point | [number, number]], copy?: boolean): Range;
 /**
  * Call this with the result of {Range::serialize} to construct a new Range.
  * @param {any[]} {Array} of params to pass to the {::constructor}
