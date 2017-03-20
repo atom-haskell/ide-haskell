@@ -2,7 +2,7 @@
 import { CompositeDisposable, TextEditor } from 'atom'
 import { MAIN_MENU_LABEL, getEventType } from '../utils'
 import {PluginManager} from '../plugin-manager'
-import {IStatus, ISeverityTabDefinition, IControlOpts} from '../output-panel'
+import {IStatus, ISeverityTabDefinition, IControlOpts, IElementObject} from '../output-panel'
 import {IResultItem} from '../results-db'
 import {TEventRangeType} from '../editor-control/tooltip-manager'
 import {IParamSpec} from '../config-params'
@@ -52,8 +52,12 @@ export function instance (pluginManager: PluginManager, pluginName: string) {
         editor, eventType, {pluginName, tooltip}
       )
     },
-    addPanelControl (element: string | Function, opts: IControlOpts | Object) {
-      return pluginManager.outputPanel.addPanelControl(element, opts)
+    addPanelControl<T> (element: string | { new (opts: T): IElementObject<T> }, opts: IControlOpts | T) {
+      if (typeof element === 'string') {
+        return pluginManager.outputPanel.addPanelControl(element, opts)
+      } else {
+        return pluginManager.outputPanel.addPanelControl(element, opts)
+      }
     },
     addConfigParam (paramName: string, spec: IParamSpec<any>) {
       return pluginManager.configParamManager.add(pluginName, paramName, spec)

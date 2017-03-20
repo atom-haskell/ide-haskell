@@ -34,7 +34,7 @@ export class ResultsDB {
   }
 
   public registerProvider (providerName: string) {
-    const p = new Provider(this, ++this.currentId, name)
+    const p = new Provider(this, ++this.currentId, providerName)
     this.disposables.add(p)
     return p
   }
