@@ -2,6 +2,7 @@ import {CompositeDisposable, Disposable} from 'atom'
 import * as etch from 'etch'
 
 import {IParamSpec, ConfigParamStore} from './param-store'
+import {IElementObject} from '../output-panel'
 
 export interface IProps<T> {
   pluginName: string
@@ -10,7 +11,7 @@ export interface IProps<T> {
   store: ConfigParamStore
 }
 
-export class ParamControl<T> {
+export class ParamControl<T> implements IElementObject<IProps<T>> {
   // tslint:disable-next-line: no-uninitialized-class-properties
   public element: HTMLElement
   private pluginName: string
