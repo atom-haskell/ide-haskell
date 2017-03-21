@@ -28,16 +28,13 @@ export class ResultsDB {
   }
 
   public didUpdate (providerId: number, msgs: ResultItem[]) {
-    const newMsgs = new Map(msgs.map((m) => [m.hash(), m]))
     for (const [k, v] of this.messages) {
-      if (newMsgs.has(k)) {
-        newMsgs.delete(k)
-      } else if (v.providerId === providerId) {
+      if (v.providerId === providerId) {
         this.messages.delete(k)
       }
     }
-    for (const [k, v] of newMsgs) {
-      this.messages.set(k, v)
+    for (const msg of msgs) {
+      this.messages.set(msg.hash(), msg)
     }
     this.emitter.emit('did-update', this)
   }
@@ -48,10 +45,8 @@ export class ResultsDB {
     return p
   }
 
-  public * results () {
-    for (const v of this.messages.values()) {
-      if (v.isValid()) { yield v }
-    }
+  public results () {
+    return this.messages.values()
   }
 
   public * filter (f: (item: ResultItem) => boolean) {
