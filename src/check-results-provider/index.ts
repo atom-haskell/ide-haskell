@@ -30,6 +30,7 @@ export class CheckResultsProvider implements IEditorController {
       priority: 200,
       handler: this.tooltipProvider.bind(this)
     }))
+    this.updateResults(results)
   }
 
   public destroy () {
@@ -38,6 +39,7 @@ export class CheckResultsProvider implements IEditorController {
   }
 
   private tooltipProvider (editor: TextEditor, crange: Range, type: TEventRangeType) {
+    if (this.editor !== editor) { return }
     const msg = this.getMessageAt(crange.start, type)
     if (msg.length > 0) {
       return { range: crange, text: msg }

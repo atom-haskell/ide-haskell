@@ -23,10 +23,10 @@ export declare function instance(pluginManager: PluginManager, options: IRegistr
     getConfigParam(name: string): Promise<Object>;
     getOthersConfigParam(plugin: string, name: string): Promise<Object>;
     setConfigParam(name: string, value: Object): Promise<Object | undefined>;
-    getEventRange(editor: TextEditor, typeOrDetail: Object | "context" | "keyboard" | "mouse" | "selection" | "gutter"): {
+    getEventRange(editor: TextEditor, typeOrDetail: Object | "keyboard" | "context" | "mouse" | "selection" | "gutter"): {
         crange: AtomTypes.Range;
         pos: AtomTypes.Point;
-        eventType: "context" | "keyboard" | "mouse" | "selection" | "gutter";
+        eventType: "keyboard" | "context" | "mouse" | "selection" | "gutter";
     } | undefined;
     dispose(): void;
 };
