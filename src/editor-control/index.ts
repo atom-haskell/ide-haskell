@@ -1,5 +1,5 @@
 import {
-  Range, TextEditor, Point, CompositeDisposable, Gutter, TextBuffer,
+  Range, TextEditor, Point, CompositeDisposable, TextBuffer,
   Disposable
 } from 'atom'
 
@@ -7,7 +7,7 @@ import {
   bufferPositionFromMouseEvent
 } from '../utils'
 
-import {listen} from './element-listener'
+import {listen} from '../utils'
 import {TooltipManager, TEventRangeType} from './tooltip-manager'
 import {TooltipRegistry} from '../tooltip-registry'
 import {PluginManager, IEditorController} from '../plugin-manager'
@@ -29,25 +29,14 @@ export class EditorControl implements IEditorController {
       left: number, top: number, width: number, height: number
     }
   }
-  private gutter: Gutter
-  private gutterElement: HTMLElement
   private tooltipRegistry: TooltipRegistry
   constructor (private editor: TextEditor, pluginManager: PluginManager) {
     this.disposables = new CompositeDisposable()
     this.tooltips = new TooltipManager(this.editor)
     this.disposables.add(this.tooltips)
     this.tooltipRegistry = pluginManager.tooltipRegistry
-    this.gutter = this.editor.addGutter({
-      name: 'ide-haskell-check-results',
-      priority: 10
-    })
 
     this.editorElement = atom.views.getView(this.editor)
-    this.gutterElement = atom.views.getView(this.gutter)
-
-    if (atom.config.get('ide-haskell.messageDisplayFrontend') === 'builtin') {
-      this.registerGutterEvents()
-    }
 
     const buffer = this.editor.getBuffer()
 
@@ -72,11 +61,6 @@ export class EditorControl implements IEditorController {
     if (this.selTimeout) {
       clearTimeout(this.selTimeout)
     }
-    try {
-      this.gutter.destroy()
-    } catch (e) {
-      console.warn(e)
-    }
     this.disposables.dispose()
     this.lastMouseBufferPt = undefined
   }
@@ -87,7 +71,6 @@ export class EditorControl implements IEditorController {
     let crange: Range, pos: Point
     switch (eventType) {
       case 'mouse':
-      case 'gutter':
       case 'context':
         if (!this.lastMouseBufferPt) { return }
         pos = this.lastMouseBufferPt
@@ -115,22 +98,6 @@ export class EditorControl implements IEditorController {
     } else {
       this.tooltipRegistry.showTooltip(this.editor, type)
     }
-  }
-
-  private registerGutterEvents () {
-    this.disposables.add(listen(
-      this.gutterElement, 'mouseover', '.decoration',
-      (e) => {
-        const bufferPt = bufferPositionFromMouseEvent(this.editor, e as MouseEvent)
-        if (bufferPt) {
-          this.lastMouseBufferPt = bufferPt
-          this.shouldShowTooltip(bufferPt, 'gutter')
-        }
-      }
-    ))
-    this.disposables.add(listen(
-      this.gutterElement, 'mouseout', '.decoration', (e) => this.tooltips.hide('gutter')
-    ))
   }
 
   private trackMouseBufferPosition (e: MouseEvent) {

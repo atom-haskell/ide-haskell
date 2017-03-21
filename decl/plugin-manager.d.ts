@@ -17,6 +17,7 @@ export interface IEditorController {
 export interface IEditorControllerFactory {
     new (editor: TextEditor, manager: PluginManager): IEditorController;
 }
+export declare type ECMap<T extends IEditorController> = WeakMap<TextEditor, T>;
 export declare class PluginManager {
     resultsDB: ResultsDB;
     outputPanel: OutputPanel;
@@ -43,7 +44,7 @@ export declare class PluginManager {
     nextError(): void;
     prevError(): void;
     removeController(editor: TextEditor): void;
-    private addEditorController(factory, map?);
+    addEditorController(factory: IEditorControllerFactory, map?: ECMap<IEditorController>): void;
     private controllerOnGrammar(editor, grammar);
     private subscribeEditorController();
     private deleteEditorControllers();

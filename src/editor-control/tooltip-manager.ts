@@ -15,7 +15,7 @@ export class TooltipManager {
   constructor (private editor: TextEditor) {
     this.markers = new EventTable(editor, [
       [{type: 'keyboard'}, {type: 'context'}],
-      [{type: 'mouse'}, {type: 'selection'}, {type: 'gutter'}],
+      [{type: 'mouse'}, {type: 'selection'}],
     ])
   }
 
