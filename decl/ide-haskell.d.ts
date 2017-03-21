@@ -48,10 +48,10 @@ export declare function provideUpi3(): {
         getConfigParam(name: string): Promise<Object>;
         getOthersConfigParam(plugin: string, name: string): Promise<Object>;
         setConfigParam(name: string, value: Object): Promise<Object | undefined>;
-        getEventRange(editor: AtomTypes.TextEditor, typeOrDetail: Object | "keyboard" | "context" | "mouse" | "selection" | "gutter"): {
+        getEventRange(editor: AtomTypes.TextEditor, typeOrDetail: Object | "keyboard" | "context" | "mouse" | "selection"): {
             crange: AtomTypes.Range;
             pos: AtomTypes.Point;
-            eventType: "keyboard" | "context" | "mouse" | "selection" | "gutter";
+            eventType: "keyboard" | "context" | "mouse" | "selection";
         } | undefined;
         dispose(): void;
     };
