@@ -2,7 +2,7 @@ import {CompositeDisposable, Disposable} from 'atom'
 
 import {PluginManager} from '../plugin-manager'
 import {TTextBufferCallback} from '../editor-control'
-import {ISetTypesParams, IControlOpts, IElementObject} from '../output-panel'
+import {ISetTypesParams, TControlDefinition} from '../output-panel'
 import {IParamSpec} from '../config-params'
 import {TTooltipHandler} from '../tooltip-registry'
 import {MAIN_MENU_LABEL} from '../utils'
@@ -19,18 +19,6 @@ export interface IAtomSubmenu {
   submenu: TAtomMenu[]
 }
 
-export interface IUPIControlSimpleDefinition {
-  element: string
-  opts: IControlOpts
-}
-
-export interface IUPIControlCustomDefinition<T> {
-  element: { new (arg: T): IElementObject<T> }
-  opts: T
-}
-
-export type TUPIControlDefinition = IUPIControlCustomDefinition<Object> | IUPIControlSimpleDefinition
-
 export type TAtomMenu = IAtomMenuCommand | IAtomSubmenu
 
 export type TSingleOrArray<T> = T | T[]
@@ -44,7 +32,7 @@ export interface IRegistrationOptions {
     onDidSaveBuffer?: TSingleOrArray<TTextBufferCallback>
     onDidStopChanging?: TSingleOrArray<TTextBufferCallback>
   }
-  controls?: TUPIControlDefinition[]
+  controls?: Array<TControlDefinition<Object>>
   params?: {[paramName: string]: IParamSpec<Object>}
   tooltip?: TTooltipHandler | {priority?: number, handler: TTooltipHandler}
 }
@@ -89,12 +77,8 @@ export function consume (pluginManager: PluginManager, options: IRegistrationOpt
     disp.add(pluginManager.tooltipRegistry.register(name, {priority, handler}))
   }
   if (controls) {
-    for (const {element, opts} of controls) {
-      if (typeof element === 'string') {
-        disp.add(pluginManager.outputPanel.addPanelControl(element, opts))
-      } else {
-        disp.add(pluginManager.outputPanel.addPanelControl(element, opts))
-      }
+    for (const i of controls) {
+      disp.add(pluginManager.outputPanel.addPanelControl(i))
     }
   }
   if (params) {

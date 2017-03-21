@@ -45,6 +45,18 @@ export interface IControlOpts {
   attrs?: {[key: string]: string}
 }
 
+export interface IControlSimpleDefinition {
+  element: string
+  opts: IControlOpts
+}
+
+export interface IControlCustomDefinition<T> {
+  element: { new (arg: T): IElementObject<T> }
+  opts: T
+}
+
+export type TControlDefinition<T> = IControlCustomDefinition<T> | IControlSimpleDefinition
+
 export class OutputPanel {
   // tslint:disable-next-line:no-uninitialized-class-properties
   private refs: {
@@ -175,9 +187,7 @@ export class OutputPanel {
     this.statusMap.clear()
   }
 
-  public addPanelControl (element: string, opts: IControlOpts): Disposable
-  public addPanelControl<T> (element: { new (arg: T): IElementObject<T> }, opts: T): Disposable
-  public addPanelControl (element: string | Function, opts: IControlOpts | Object) {
+  public addPanelControl<T> ({element, opts}: TControlDefinition<T>) {
     if (typeof element === 'string') {
       const {events, classes, style, attrs} = (opts as IControlOpts)
       const props: {[key: string]: Object} = {}
