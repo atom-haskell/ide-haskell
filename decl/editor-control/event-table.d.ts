@@ -1,7 +1,7 @@
 import { TextEditor, DisplayMarkerLayer } from 'atom';
 export declare const TEventRangeType: {
-    context: "context";
     keyboard: "keyboard";
+    context: "context";
     mouse: "mouse";
     selection: "selection";
     gutter: "gutter";
