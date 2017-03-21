@@ -40,6 +40,17 @@ export interface IControlOpts {
         [key: string]: string;
     };
 }
+export interface IControlSimpleDefinition {
+    element: string;
+    opts: IControlOpts;
+}
+export interface IControlCustomDefinition<T> {
+    element: {
+        new (arg: T): IElementObject<T>;
+    };
+    opts: T;
+}
+export declare type TControlDefinition<T> = IControlCustomDefinition<T> | IControlSimpleDefinition;
 export declare class OutputPanel {
     private state;
     private results;
@@ -56,10 +67,7 @@ export declare class OutputPanel {
     render(): JSX.Element;
     update(): any;
     destroy(): Promise<void>;
-    addPanelControl(element: string, opts: IControlOpts): Disposable;
-    addPanelControl<T>(element: {
-        new (arg: T): IElementObject<T>;
-    }, opts: T): Disposable;
+    addPanelControl<T>({element, opts}: TControlDefinition<T>): Disposable;
     updateItems(): void;
     activateTab(tab: string): void;
     activateFirstNonEmptyTab(): void;

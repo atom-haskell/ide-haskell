@@ -1,11 +1,12 @@
 import { IParamSpec, ConfigParamStore } from './param-store';
+import { IElementObject } from '../output-panel';
 export interface IProps<T> {
     pluginName: string;
     name: string;
     spec: IParamSpec<T>;
     store: ConfigParamStore;
 }
-export declare class ParamControl<T> {
+export declare class ParamControl<T> implements IElementObject<IProps<T>> {
     element: HTMLElement;
     private pluginName;
     private name;

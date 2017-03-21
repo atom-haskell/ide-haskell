@@ -7,7 +7,7 @@ import * as UPI from './upi-2'
 import * as UPI3 from './upi-3'
 
 // for typings
-import {IShowTooltipParams} from './upi-3'
+import {IShowTooltipParams, IRegistrationOptions} from './upi-3'
 import {IStatus, ISeverityTabDefinition, IControlOpts, IElementObject, TControlDefinition} from './output-panel'
 import {IResultItem, TSeverity} from './results-db'
 import {IParamSpec} from './config-params'
@@ -132,9 +132,9 @@ export function provideUpi () {
 export function provideUpi3 () {
   upiProvided = true
   return {
-    register (pluginName: string) {
+    register (options: IRegistrationOptions) {
       // tslint:disable-next-line: no-non-null-assertion
-      return UPI3.instance(pluginManager!, pluginName) // TODO: not entirely sure it's OK...
+      return UPI3.instance(pluginManager!, options) // TODO: not entirely sure it's OK...
     }
   }
 }

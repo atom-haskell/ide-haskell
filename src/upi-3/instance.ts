@@ -7,7 +7,7 @@ import {TEventRangeType} from '../editor-control/tooltip-manager'
 import {IParamSpec} from '../config-params'
 import {TTooltipFunction, ITooltipData} from '../tooltip-registry'
 import {isTEventRangeType} from '../editor-control/event-table'
-import {TAtomMenu} from './'
+import {TAtomMenu, consume, IRegistrationOptions} from './'
 
 export interface IShowTooltipParams {
   editor: TextEditor
@@ -16,10 +16,14 @@ export interface IShowTooltipParams {
   tooltip: TTooltipFunction | ITooltipData
 }
 
-export function instance (pluginManager: PluginManager, pluginName: string) {
+export function instance (
+  pluginManager: PluginManager, options: IRegistrationOptions
+) {
+  const pluginName = options.name
   const disposables = new CompositeDisposable()
   const messageProvider = pluginManager.resultsDB.registerProvider(pluginName)
   disposables.add(messageProvider)
+  disposables.add(consume(pluginManager, options))
 
   return {
     setMenu (name: string, menu: TAtomMenu[]) {
@@ -77,6 +81,9 @@ export function instance (pluginManager: PluginManager, pluginName: string) {
       const controller = pluginManager.controller(editor)
       if (!controller) { return }
       return controller.getEventRange(type)
+    },
+    dispose () {
+      disposables.dispose()
     }
   }
 }
