@@ -18,4 +18,5 @@ export declare class ResultItem {
     constructor(providerId: number, {uri, message, severity, position}: IResultItem);
     isValid(): boolean;
     setValid(isValid: boolean): void;
+    hash(): string;
 }

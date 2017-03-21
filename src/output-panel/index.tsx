@@ -235,9 +235,9 @@ export class OutputPanel {
       const f: {severity: string, uri?: string} = {severity: btn}
       const ato = this.refs.buttons.options(btn)
       if (currentUri && ato && ato.uriFilter) { f.uri = currentUri }
-      this.refs.buttons.setCount(btn, this.results.filter(
+      this.refs.buttons.setCount(btn, Array.from(this.results.filter(
         ({uri, severity}) => (severity === f.severity) && (!f.uri || uri === f.uri)
-      ).length)
+      )).length)
     })
     this.update()
   }
@@ -318,7 +318,7 @@ export class OutputPanel {
   }
 
   public showNextError () {
-    const rs = this.results.filter(({uri}) => !!uri)
+    const rs = Array.from(this.results.filter(({uri}) => !!uri))
     if (rs.length === 0) { return }
 
     if (this.currentResult !== undefined) {
@@ -332,7 +332,7 @@ export class OutputPanel {
   }
 
   public showPrevError () {
-    const rs = this.results.filter(({uri}) => !!uri)
+    const rs = Array.from(this.results.filter(({uri}) => !!uri))
     if (rs.length === 0) { return }
 
     if (this.currentResult !== undefined) {
