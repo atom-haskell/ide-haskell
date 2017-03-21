@@ -54,7 +54,9 @@ export class PluginManager {
     this.configParamManager = new ConfigParamManager(this.outputPanel, state.configParams)
 
     this.addEditorController(EditorControl, this.controllers)
-    this.addEditorController(CheckResultsProvider)
+    if (atom.config.get('ide-haskell.messageDisplayFrontend') === 'builtin') {
+      this.addEditorController(CheckResultsProvider)
+    }
 
     this.subscribeEditorController()
   }
