@@ -94,7 +94,7 @@ export class CREditorControl implements IEditorController {
   private updateResults (res: ResultsDB) {
     this.markers.clear()
     const path = this.editor.getPath()
-    for (const r of res.filter(({uri}) => uri === path)) {
+    for (const r of res.filter((m) => m.uri === path && m.isValid())) {
       this.markerFromCheckResult(r)
     }
   }
@@ -104,7 +104,7 @@ export class CREditorControl implements IEditorController {
     if (!position) { return }
 
     const range = new Range(position, Point.fromObject([position.row, position.column + 1]))
-    const marker = this.markers.markBufferRange(range, { invalidate: 'touch' })
+    const marker = this.markers.markBufferRange(range, { invalidate: 'inside' })
     this.markerProps.set(marker, resItem)
     const disp = new CompositeDisposable()
     disp.add(
