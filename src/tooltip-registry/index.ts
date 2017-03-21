@@ -16,7 +16,7 @@ export type TTooltipHandler =
   => ITooltipData | undefined | Promise<ITooltipData | undefined>
 
 export type TTooltipHandlerSpec = {priority: number, handler: TTooltipHandler}
-export type TTooltipSpec = {pluginName: string, tooltip: TTooltipFunction}
+export type TTooltipSpec = {pluginName: string, tooltip: TTooltipFunction | ITooltipData}
 
 export class TooltipRegistry {
   private providers: Array<TTooltipHandlerSpec & {pluginName: string}>
@@ -48,24 +48,28 @@ export class TooltipRegistry {
     const controller = this.pluginManager.controller(editor)
     if (!controller) { return }
     let pluginName, tooltipData
-    const eventRange = controller.getEventRange(type)
-    if (!eventRange) { return }
-    if (spec) {
-      let tooltip
-      ({pluginName, tooltip} = spec)
-      tooltipData = await Promise.resolve(tooltip(eventRange.crange))
+    if (spec && typeof spec.tooltip !== 'function') {
+      tooltipData = spec.tooltip
+      pluginName = spec.pluginName
     } else {
-      const tooltip = await this.defaultTooltipFunction(editor, type, eventRange.crange)
-      if (!tooltip) {
-        // if nobody wants to show anything, might as well hide...
-        // TODO: this doesn't seem like a particularly bright idea?
-        controller.tooltips.hide(type)
-        return
+      const eventRange = controller.getEventRange(type)
+      if (!eventRange) { return }
+      if (spec && typeof spec.tooltip === 'function') {
+        pluginName = spec.pluginName
+        tooltipData = await Promise.resolve(spec.tooltip(eventRange.crange))
+      } else {
+        const tooltip = await this.defaultTooltipFunction(editor, type, eventRange.crange)
+        if (!tooltip) {
+          // if nobody wants to show anything, might as well hide...
+          // TODO: this doesn't seem like a particularly bright idea?
+          controller.tooltips.hide(type)
+          return
+        }
+        ({pluginName, tooltipData} = tooltip)
       }
-      ({pluginName, tooltipData} = tooltip)
+      const newEventRange = controller.getEventRange(type)
+      if (!newEventRange || !eventRange.crange.isEqual(newEventRange.crange)) { return }
     }
-    const newEventRange = controller.getEventRange(type)
-    if (!newEventRange || !eventRange.crange.isEqual(newEventRange.crange)) { return }
     const {persistOnCursorMove = false} = tooltipData
     let msg
     if (Array.isArray(tooltipData.text)) {
@@ -76,6 +80,12 @@ export class TooltipRegistry {
     controller.tooltips.show(
       Range.fromObject(tooltipData.range), msg, type, pluginName, {persistOnCursorMove}
     )
+  }
+
+  public hideTooltip (editor: TextEditor, type?: TEventRangeType, source?: string) {
+    const controller = this.pluginManager.controller(editor)
+    if (!controller) { return }
+    controller.tooltips.hide(type, source)
   }
 
   private async defaultTooltipFunction (editor: TextEditor, type: TEventRangeType, crange: Range) {

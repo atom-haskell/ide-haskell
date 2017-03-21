@@ -1,17 +1,10 @@
-import { TextEditor, Gutter } from 'atom';
-import { PluginManager, IEditorController } from '../plugin-manager';
-export declare class CheckResultsProvider implements IEditorController {
+import { TextEditor } from 'atom';
+import { PluginManager } from '../plugin-manager';
+export declare class CheckResultsProvider {
     private editor;
-    gutter: Gutter;
-    private markers;
     private disposables;
-    private markerProps;
+    private editorMap;
     constructor(editor: TextEditor, pluginManager: PluginManager);
     destroy(): void;
     private tooltipProvider(editor, crange, type);
-    private getMessageAt(pos, type);
-    private updateResults(res);
-    private markerFromCheckResult(resItem);
-    private decorateMarker(m, r);
-    private find(pos, type);
 }

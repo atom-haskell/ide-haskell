@@ -16,14 +16,11 @@ export declare class EditorControl implements IEditorController {
     private exprTypeTimeout?;
     private selTimeout?;
     private editorElement;
-    private gutter;
-    private gutterElement;
     private tooltipRegistry;
     constructor(editor: TextEditor, pluginManager: PluginManager);
     destroy(): void;
     getEventRange(eventType: TEventRangeType): TEventRangeResult;
     private shouldShowTooltip(pos, type);
-    private registerGutterEvents();
     private trackMouseBufferPosition(e);
     private stopTrackingMouseBufferPosition(e);
     private trackSelection({newBufferRange});

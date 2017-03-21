@@ -4,7 +4,6 @@ export declare const TEventRangeType: {
     context: "context";
     mouse: "mouse";
     selection: "selection";
-    gutter: "gutter";
 };
 export declare function isTEventRangeType(x: Object): x is TEventRangeType;
 export declare type TEventRangeType = keyof typeof TEventRangeType;

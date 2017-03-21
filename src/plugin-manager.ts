@@ -26,7 +26,7 @@ export interface IEditorControllerFactory {
   new (editor: TextEditor, manager: PluginManager): IEditorController
 }
 
-type ECMap<T extends IEditorController> = WeakMap<TextEditor, T>
+export type ECMap<T extends IEditorController> = WeakMap<TextEditor, T>
 
 export class PluginManager {
   public resultsDB: ResultsDB
@@ -137,7 +137,7 @@ export class PluginManager {
     }
   }
 
-  private addEditorController (factory: IEditorControllerFactory, map?: ECMap<IEditorController>) {
+  public addEditorController (factory: IEditorControllerFactory, map?: ECMap<IEditorController>) {
     this.controllerClasses.add({map, factory})
   }
 

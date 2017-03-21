@@ -17,7 +17,7 @@ export declare type TTooltipHandlerSpec = {
 };
 export declare type TTooltipSpec = {
     pluginName: string;
-    tooltip: TTooltipFunction;
+    tooltip: TTooltipFunction | ITooltipData;
 };
 export declare class TooltipRegistry {
     private pluginManager;
@@ -26,5 +26,6 @@ export declare class TooltipRegistry {
     dispose(): void;
     register(pluginName: string, provider: TTooltipHandlerSpec): Disposable;
     showTooltip(editor: TextEditor, type: TEventRangeType, spec?: TTooltipSpec): Promise<void>;
+    hideTooltip(editor: TextEditor, type?: TEventRangeType, source?: string): void;
     private defaultTooltipFunction(editor, type, crange);
 }

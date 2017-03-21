@@ -16,7 +16,7 @@ function strEnum<T extends string> (o: T[]): {[K in T]: K} {
 
 // tslint:disable-next-line:variable-name
 export const TEventRangeType = strEnum([
-  'keyboard', 'context', 'mouse', 'selection', 'gutter'
+  'keyboard', 'context', 'mouse', 'selection'
 ])
 
 export function isTEventRangeType (x: Object): x is TEventRangeType {
