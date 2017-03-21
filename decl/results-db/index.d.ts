@@ -12,7 +12,7 @@ export declare class ResultsDB {
     onDidUpdate(callback: TUpdateCallback): AtomTypes.Disposable;
     didUpdate(providerId: number, msgs: ResultItem[]): void;
     registerProvider(providerName: string): Provider;
-    results(): ResultItem[];
-    filter(f: (item: ResultItem) => boolean): ResultItem[];
+    results(): IterableIterator<ResultItem>;
+    filter(f: (item: ResultItem) => boolean): IterableIterator<ResultItem>;
     isEmpty(): boolean;
 }

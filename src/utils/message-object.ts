@@ -57,7 +57,11 @@ export class MessageObject {
     }
   }
 
-  public paste (element: HTMLElement) {
-    element.innerHTML = this.toHtml()
+  public raw () {
+    if (isTextMessage(this.msg)) {
+      return this.msg.text
+    } else {
+      return this.msg
+    }
   }
 }
