@@ -1,3 +1,4 @@
+import {createHash} from 'crypto'
 import {Point} from 'atom'
 import {TMessage, MessageObject} from '../utils'
 
@@ -31,5 +32,14 @@ export class ResultItem {
 
   public setValid (isValid: boolean) {
     this._isValid = isValid
+  }
+
+  public hash () {
+    const h = createHash('md5')
+    h.update(JSON.stringify({
+      uri: this.uri, position: this.position && this.position.serialize(),
+      message: this.message.raw(), severity: this.severity
+    }))
+    return h.digest('latin1')
   }
 }

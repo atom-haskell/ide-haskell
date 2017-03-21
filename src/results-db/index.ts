@@ -8,7 +8,7 @@ export type TUpdateCallback = (arg: ResultsDB) => void
 
 export class ResultsDB {
   private currentId: number
-  private messages: ResultItem[]
+  private messages: Map<string, ResultItem>
   private disposables: CompositeDisposable
   private emitter: Emitter
   constructor () {
@@ -16,7 +16,7 @@ export class ResultsDB {
     this.disposables = new CompositeDisposable()
     this.emitter = new Emitter()
     this.disposables.add(this.emitter)
-    this.messages = []
+    this.messages = new Map()
   }
 
   public destroy () {
@@ -28,8 +28,17 @@ export class ResultsDB {
   }
 
   public didUpdate (providerId: number, msgs: ResultItem[]) {
-    this.messages = this.messages.filter((m) => m.providerId !== providerId)
-    this.messages.push(...msgs)
+    const newMsgs = new Map(msgs.map((m) => [m.hash(), m]))
+    for (const [k, v] of this.messages) {
+      if (newMsgs.has(k)) {
+        newMsgs.delete(k)
+      } else if (v.providerId === providerId) {
+        this.messages.delete(k)
+      }
+    }
+    for (const [k, v] of newMsgs) {
+      this.messages.set(k, v)
+    }
     this.emitter.emit('did-update', this)
   }
 
@@ -39,15 +48,19 @@ export class ResultsDB {
     return p
   }
 
-  public results () {
-    return this.messages.filter((i) => i.isValid())
+  public * results () {
+    for (const v of this.messages.values()) {
+      if (v.isValid()) { yield v }
+    }
   }
 
-  public filter (f: (item: ResultItem) => boolean) {
-    return this.messages.filter(f)
+  public * filter (f: (item: ResultItem) => boolean) {
+    for (const v of this.results()) {
+      if (f(v)) { yield v }
+    }
   }
 
   public isEmpty () {
-    return this.messages.length === 0
+    return this.messages.size === 0
   }
 }

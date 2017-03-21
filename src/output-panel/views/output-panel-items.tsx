@@ -35,7 +35,7 @@ export class OutputPanelItems {
   public async filter (activeFilter: (item: ResultItem) => boolean) {
     this.activeFilter = activeFilter
     if (this.model) {
-      this.items = this.model.filter(this.activeFilter)
+      this.items = Array.from(this.model.filter(this.activeFilter))
     } else {
       this.items = []
     }

@@ -27,14 +27,6 @@
     }
   },
   "consumedServices": {
-    "ide-haskell-upi-declarative": {
-      "description": "Universal pluggable interface",
-      "versions": {
-        "0.3.0": "consumeUpi3"
-      }
-    }
-  },
-  "consumedServices": {
     "linter-indie": {
       "versions": {
         "1.0.0": "consumeLinter"

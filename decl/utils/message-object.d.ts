@@ -12,5 +12,5 @@ export declare class MessageObject {
     private htmlCache?;
     constructor(msg: string | IMessageText | IMessageHTML);
     toHtml(): string;
-    paste(element: HTMLElement): void;
+    raw(): string | IMessageHTML;
 }
