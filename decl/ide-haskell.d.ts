@@ -4,7 +4,7 @@ import { ILinterRegistry } from './linter-support';
 import * as UPI from './upi-2';
 import * as UPI3 from './upi-3';
 import { IShowTooltipParams } from './upi-3';
-import { IStatus, ISeverityTabDefinition, IControlOpts, IElementObject } from './output-panel';
+import { IStatus, ISeverityTabDefinition, IControlOpts, TControlDefinition } from './output-panel';
 import { IResultItem } from './results-db';
 import { IParamSpec } from './config-params';
 import { TTooltipHandler } from './tooltip-registry';
@@ -37,22 +37,23 @@ export declare function provideUpi(): {
     };
 };
 export declare function provideUpi3(): {
-    register(pluginName: string): {
+    register(options: UPI3.IRegistrationOptions): {
         setMenu(name: string, menu: UPI3.TAtomMenu[]): Disposable;
         setStatus(status: IStatus): void;
         setMessages(messages: IResultItem[]): void;
         addMessageTab(name: string, opts: ISeverityTabDefinition): void;
         showTooltip({editor, eventType, detail, tooltip}: IShowTooltipParams): void;
-        addPanelControl<T>(element: string | (new (opts: T) => IElementObject<T>), opts: T | IControlOpts): Disposable;
+        addPanelControl<T>(def: TControlDefinition<Object>): Disposable;
         addConfigParam(paramName: string, spec: IParamSpec<Object>): CompositeDisposable;
         getConfigParam(name: string): Promise<Object>;
         getOthersConfigParam(plugin: string, name: string): Promise<Object>;
         setConfigParam(name: string, value: Object): Promise<Object | undefined>;
-        getEventRange(editor: AtomTypes.TextEditor, typeOrDetail: Object | "keyboard" | "context" | "mouse" | "selection" | "gutter"): {
+        getEventRange(editor: AtomTypes.TextEditor, typeOrDetail: Object | "context" | "keyboard" | "mouse" | "selection" | "gutter"): {
             crange: AtomTypes.Range;
             pos: AtomTypes.Point;
-            eventType: "keyboard" | "context" | "mouse" | "selection" | "gutter";
+            eventType: "context" | "keyboard" | "mouse" | "selection" | "gutter";
         } | undefined;
+        dispose(): void;
     };
 };
 export declare function consumeUpi3(registration: UPI3.IRegistrationOptions): Disposable;

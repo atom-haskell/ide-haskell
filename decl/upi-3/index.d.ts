@@ -1,7 +1,7 @@
 import { Disposable } from 'atom';
 import { PluginManager } from '../plugin-manager';
 import { TTextBufferCallback } from '../editor-control';
-import { ISetTypesParams, IControlOpts, IElementObject } from '../output-panel';
+import { ISetTypesParams, TControlDefinition } from '../output-panel';
 import { IParamSpec } from '../config-params';
 import { TTooltipHandler } from '../tooltip-registry';
 export * from './instance';
@@ -13,17 +13,6 @@ export interface IAtomSubmenu {
     label: string;
     submenu: TAtomMenu[];
 }
-export interface IUPIControlSimpleDefinition {
-    element: string;
-    opts: IControlOpts;
-}
-export interface IUPIControlCustomDefinition<T> {
-    element: {
-        new (arg: T): IElementObject<T>;
-    };
-    opts: T;
-}
-export declare type TUPIControlDefinition = IUPIControlCustomDefinition<Object> | IUPIControlSimpleDefinition;
 export declare type TAtomMenu = IAtomMenuCommand | IAtomSubmenu;
 export declare type TSingleOrArray<T> = T | T[];
 export interface IRegistrationOptions {
@@ -38,7 +27,7 @@ export interface IRegistrationOptions {
         onDidSaveBuffer?: TSingleOrArray<TTextBufferCallback>;
         onDidStopChanging?: TSingleOrArray<TTextBufferCallback>;
     };
-    controls?: TUPIControlDefinition[];
+    controls?: Array<TControlDefinition<Object>>;
     params?: {
         [paramName: string]: IParamSpec<Object>;
     };
