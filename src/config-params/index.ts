@@ -26,11 +26,14 @@ export class ConfigParamManager {
     const disp = new CompositeDisposable()
     disp.add(
       this.store.addParamSpec(pluginName, paramName, spec),
-      this.outputPanel.addPanelControl(ParamControl, {
-        pluginName,
-        name: paramName,
-        spec,
-        store: this.store
+      this.outputPanel.addPanelControl({
+        element: ParamControl,
+        opts: {
+          pluginName,
+          name: paramName,
+          spec,
+          store: this.store
+        }
       })
     )
     return disp

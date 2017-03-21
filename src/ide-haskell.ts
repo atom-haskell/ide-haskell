@@ -8,7 +8,7 @@ import * as UPI3 from './upi-3'
 
 // for typings
 import {IShowTooltipParams} from './upi-3'
-import {IStatus, ISeverityTabDefinition, IControlOpts, IElementObject} from './output-panel'
+import {IStatus, ISeverityTabDefinition, IControlOpts, IElementObject, TControlDefinition} from './output-panel'
 import {IResultItem, TSeverity} from './results-db'
 import {IParamSpec} from './config-params'
 import {TTooltipHandler, TTooltipFunction} from './tooltip-registry'

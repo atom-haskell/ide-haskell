@@ -242,10 +242,10 @@ export function instance (pluginManager: PluginManager, outerDisposables: Compos
   */
   addPanelControl (element: string | HTMLElement, opts: IControlOpts) {
     if (typeof element === 'string') {
-      return pluginManager.outputPanel.addPanelControl(element, opts)
+      return pluginManager.outputPanel.addPanelControl({element, opts})
     } else {
       const newOpts: IControlOpts & {element: HTMLElement} = {...opts, element}
-      return pluginManager.outputPanel.addPanelControl(DummyElement, newOpts)
+      return pluginManager.outputPanel.addPanelControl({element: DummyElement, opts: newOpts})
     }
   },
 
