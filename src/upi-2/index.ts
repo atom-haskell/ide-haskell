@@ -1,3 +1,4 @@
+/* tslint:disable:member-access */
 import { CompositeDisposable, Point, TextEditor, Range } from 'atom'
 import { MAIN_MENU_LABEL, getEventType } from '../utils'
 import {PluginManager} from '../plugin-manager'
@@ -5,6 +6,7 @@ import {IStatus, ISeverityTabDefinition, IControlOpts} from '../output-panel'
 import {IResultItem, TSeverity} from '../results-db'
 import {TEventRangeType} from '../editor-control/tooltip-manager'
 import {TPosition} from '../results-db'
+import {Provider as MessageProvider} from '../results-db/provider'
 import {IParamSpec} from '../config-params'
 import {TTextBufferCallback} from '../editor-control'
 import {TTooltipHandler, TTooltipFunction} from '../tooltip-registry'
@@ -40,12 +42,20 @@ export type TAtomMenu = IAtomMenuCommand | IAtomSubmenu
 export type TEventRangeCallback<T> = (pars: {pos: Point, crange: Range, eventType: TEventRangeType}) => T
 
 export function instance (pluginManager: PluginManager, outerDisposables: CompositeDisposable, pluginName: string) {
-  const disposables = new CompositeDisposable()
-  outerDisposables.add(disposables)
-  const messageProvider = pluginManager.resultsDB.registerProvider(pluginName)
-  disposables.add(messageProvider)
-  let messages: IResultItem[] = []
-  return {
+  return new UPIInstance(pluginManager, outerDisposables, pluginName)
+}
+
+export class UPIInstance {
+  private messages: IResultItem[] = []
+  private disposables = new CompositeDisposable()
+  private messageProvider: MessageProvider
+  constructor (
+    private pluginManager: PluginManager, outerDisposables: CompositeDisposable, private pluginName: string
+  ) {
+    outerDisposables.add(this.disposables)
+    this.messageProvider = pluginManager.resultsDB.registerProvider(pluginName)
+    this.disposables.add(this.messageProvider)
+  }
   /*
   Adds new sumbenu to 'Haskell IDE' menu item
   name -- submenu label, should be descriptive of a package
@@ -55,13 +65,13 @@ export function instance (pluginManager: PluginManager, outerDisposables: Compos
   */
   setMenu (name: string, menu: TAtomMenu[]) {
     let menuDisp
-    disposables.add(menuDisp = atom.menu.add([{
+    this.disposables.add(menuDisp = atom.menu.add([{
       label: MAIN_MENU_LABEL,
       submenu: [ {label: name, submenu: menu} ]
     }
     ]))
     return menuDisp
-  },
+  }
 
   /*
   Sets backend status
@@ -71,8 +81,8 @@ export function instance (pluginManager: PluginManager, outerDisposables: Compos
               if 0 or undefined, progress bar is not shown
   */
   setStatus (status: IStatus) {
-    return pluginManager.outputPanel.backendStatus(pluginName, status)
-  },
+    return this.pluginManager.outputPanel.backendStatus(this.pluginName, status)
+  }
 
   /*
   Add messages to ide-haskell output
@@ -86,9 +96,9 @@ export function instance (pluginManager: PluginManager, outerDisposables: Compos
          will be taken from `messages`
   */
   addMessages (newMessages: IResultItem[], types?: TSeverity[]) {
-    messages.push(...newMessages)
-    messageProvider.setMessages(messages)
-  },
+    this.messages.push(...newMessages)
+    this.messageProvider.setMessages(this.messages)
+  }
 
   /*
   Set messages in ide-haskell output. Clears all existing messages with
@@ -103,18 +113,18 @@ export function instance (pluginManager: PluginManager, outerDisposables: Compos
          will be taken from `messages`
   */
   setMessages (newMessages: IResultItem[], types: TSeverity[]) {
-    messages = [...newMessages]
-    messageProvider.setMessages(messages)
-  },
+    this.messages = [...newMessages]
+    this.messageProvider.setMessages(this.messages)
+  }
 
   /*
   Clear all existing messages with `severity` in `types`
   This is shorthand from `setMessages([],types)`
   */
   clearMessages (types: TSeverity[]) {
-    messages = messages.filter(({severity}) => !types.includes(severity))
-    messageProvider.setMessages(messages)
-  },
+    this.messages = this.messages.filter(({severity}) => !types.includes(severity))
+    this.messageProvider.setMessages(this.messages)
+  }
 
   /*
   Set possible message `severity` that your package will use.
@@ -130,11 +140,11 @@ export function instance (pluginManager: PluginManager, outerDisposables: Compos
       const result = []
       for (const type of Object.keys(types)) {
         const opts = types[type]
-        result.push(pluginManager.outputPanel.createTab(type, opts))
+        result.push(this.pluginManager.outputPanel.createTab(type, opts))
       }
       return result
     })()
-  },
+  }
 
   /*
   Editor event subscription. Fires when mouse cursor stopped over a symbol in
@@ -155,12 +165,12 @@ export function instance (pluginManager: PluginManager, outerDisposables: Compos
   returns Disposable
   */
   onShouldShowTooltip (callback: TTooltipHandler) {
-    const disp = pluginManager.tooltipRegistry.register(
-      pluginName, {priority: 100, handler: callback}
+    const disp = this.pluginManager.tooltipRegistry.register(
+      this.pluginName, {priority: 100, handler: callback}
     )
-    disposables.add(disp)
+    this.disposables.add(disp)
     return disp
-  },
+  }
 
   /*
   Show tooltip in editor.
@@ -185,10 +195,10 @@ export function instance (pluginManager: PluginManager, outerDisposables: Compos
     if (!eventType) {
       eventType = getEventType(detail)
     }
-    pluginManager.tooltipRegistry.showTooltip(
-      editor, eventType, {pluginName, tooltip}
+    this.pluginManager.tooltipRegistry.showTooltip(
+      editor, eventType, {pluginName: this.pluginName, tooltip}
     )
-  },
+  }
 
   /*
   Convenience function. Will fire before Haskell buffer is saved.
@@ -199,10 +209,10 @@ export function instance (pluginManager: PluginManager, outerDisposables: Compos
   Returns Disposable
   */
   onWillSaveBuffer (callback: TTextBufferCallback) {
-    let disp
-    disposables.add(disp = pluginManager.onWillSaveBuffer(callback))
+    const disp = this.pluginManager.onWillSaveBuffer(callback)
+    this.disposables.add(disp)
     return disp
-  },
+  }
 
   /*
   Convenience function. Will fire after Haskell buffer is saved.
@@ -213,16 +223,16 @@ export function instance (pluginManager: PluginManager, outerDisposables: Compos
   Returns Disposable
   */
   onDidSaveBuffer (callback: TTextBufferCallback) {
-    let disp
-    disposables.add(disp = pluginManager.onDidSaveBuffer(callback))
+    const disp = this.pluginManager.onDidSaveBuffer(callback)
+    this.disposables.add(disp)
     return disp
-  },
+  }
 
   onDidStopChanging (callback: TTextBufferCallback) {
-    let disp
-    disposables.add(disp = pluginManager.onDidStopChanging(callback))
+    const disp = this.pluginManager.onDidStopChanging(callback)
+    this.disposables.add(disp)
     return disp
-  },
+  }
 
   /*
   Add a new control to ouptut panel heading.
@@ -242,12 +252,12 @@ export function instance (pluginManager: PluginManager, outerDisposables: Compos
   */
   addPanelControl (element: string | HTMLElement, opts: IControlOpts) {
     if (typeof element === 'string') {
-      return pluginManager.outputPanel.addPanelControl({element, opts})
+      return this.pluginManager.outputPanel.addPanelControl({element, opts})
     } else {
       const newOpts: IControlOpts & {element: HTMLElement} = {...opts, element}
-      return pluginManager.outputPanel.addPanelControl({element: DummyElement, opts: newOpts})
+      return this.pluginManager.outputPanel.addPanelControl({element: DummyElement, opts: newOpts})
     }
-  },
+  }
 
   /*
   addConfigParam
@@ -270,11 +280,11 @@ export function instance (pluginManager: PluginManager, outerDisposables: Compos
     for (const name of Object.keys(specs)) {
       const spec = specs[name]
       disp.add(
-        pluginManager.configParamManager.add(pluginName, name, spec)
+        this.pluginManager.configParamManager.add(this.pluginName, name, spec)
       )
     }
     return disp
-  },
+  }
 
   /*
   getConfigParam(paramName) or getConfigParam(pluginName, paramName)
@@ -288,10 +298,10 @@ export function instance (pluginManager: PluginManager, outerDisposables: Compos
   async getConfigParam (otherPluginName: string, name: string) {
     if (!name) {
       name = otherPluginName
-      otherPluginName = pluginName
+      otherPluginName = this.pluginName
     }
-    return pluginManager.configParamManager.get(otherPluginName, name)
-  },
+    return this.pluginManager.configParamManager.get(otherPluginName, name)
+  }
 
   /*
   setConfigParam(paramName, value) or setConfigParam(pluginName, paramName, value)
@@ -307,10 +317,10 @@ export function instance (pluginManager: PluginManager, outerDisposables: Compos
     if (value === undefined) {
       value = name
       name = otherPluginName
-      otherPluginName = pluginName
+      otherPluginName = this.pluginName
     }
-    return pluginManager.configParamManager.set(otherPluginName, name, value)
-  },
+    return this.pluginManager.configParamManager.set(otherPluginName, name, value)
+  }
 
   /*
   Utility function to extract event range/type for a given event
@@ -330,11 +340,10 @@ export function instance (pluginManager: PluginManager, outerDisposables: Compos
     let ppos: Point | undefined
     if (pos) { ppos = Point.fromObject(pos) }
     if (!eventType) { eventType = getEventType(detail) }
-    const controller = pluginManager.controller(editor)
+    const controller = this.pluginManager.controller(editor)
     if (!controller) { return }
     const res = controller.getEventRange(eventType)
     if (!res) { return }
     return callback(res)
-  }
   }
 }
