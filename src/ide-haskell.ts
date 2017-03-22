@@ -11,7 +11,6 @@ import {IShowTooltipParams, IRegistrationOptions} from './upi-3'
 import {IStatus, ISeverityTabDefinition, IControlOpts, IElementObject, TControlDefinition} from './output-panel'
 import {IResultItem, TSeverity} from './results-db'
 import {IParamSpec} from './config-params'
-import {TTooltipHandler, TTooltipFunction} from './tooltip-registry'
 // end
 
 let upiProvided = false
@@ -131,12 +130,8 @@ export function provideUpi () {
 
 export function provideUpi3 () {
   upiProvided = true
-  return {
-    register (options: IRegistrationOptions) {
-      // tslint:disable-next-line: no-non-null-assertion
-      return UPI3.instance(pluginManager!, options) // TODO: not entirely sure it's OK...
-    }
-  }
+  // tslint:disable-next-line: no-non-null-assertion
+  return (options: IRegistrationOptions) => UPI3.instance(pluginManager!, options) // TODO: not entirely sure it's OK...
 }
 
 export function consumeUpi3 (registration: UPI3.IRegistrationOptions) {
