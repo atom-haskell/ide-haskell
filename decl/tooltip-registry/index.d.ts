@@ -11,10 +11,11 @@ export interface ITooltipData {
     persistOnCursorMove?: boolean;
 }
 export declare type TTooltipHandler = (editor: TextEditor, crange: Range, type: TEventRangeType) => ITooltipData | undefined | Promise<ITooltipData | undefined>;
-export declare type TTooltipHandlerSpec = {
+export interface TTooltipHandlerSpec {
     priority: number;
     handler: TTooltipHandler;
-};
+    eventTypes?: TEventRangeType[];
+}
 export declare type TTooltipSpec = {
     pluginName: string;
     tooltip: TTooltipFunction | ITooltipData;
