@@ -26,7 +26,7 @@ export class LinterSupport {
       if (result.uri && result.position) {
         yield {
           type: result.severity === 'lint' ? 'info' : result.severity,
-          html: result.message.toHtml(),
+          html: result.message.toHtml(true),
           filePath: result.uri,
           range: new Range(result.position, result.position.translate([0, 1]))
         }

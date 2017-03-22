@@ -1,3 +1,5 @@
+import highlight = require('atom-highlight')
+
 export interface IMessageText {
   text: string
   highlighter?: string
@@ -30,13 +32,14 @@ export class MessageObject {
     // noop
   }
 
-  public toHtml (): string {
+  public toHtml (linter: boolean = false): string {
     if (this.htmlCache !== undefined) { return this.htmlCache }
     if (isTextMessage(this.msg) && this.msg.highlighter) {
-      const html = require('atom-highlight')({
+      const html = highlight({
         fileContents: this.msg.text,
         scopeName: this.msg.highlighter,
-        nbsp: false
+        nbsp: linter,
+        lineDivs: linter,
       })
       if (html) { return this.htmlCache = html }
 
