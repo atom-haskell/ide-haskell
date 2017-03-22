@@ -1,4 +1,4 @@
-import SelectListView from 'atom-select-list'
+import SelectListView = require('atom-select-list')
 import {Panel} from 'atom'
 
 export interface ISelectListParams<T> {
