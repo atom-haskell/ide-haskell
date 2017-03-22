@@ -11,6 +11,6 @@ export declare class MessageObject {
     static fromObject(message: TMessage): MessageObject;
     private htmlCache?;
     constructor(msg: string | IMessageText | IMessageHTML);
-    toHtml(): string;
+    toHtml(linter?: boolean): string;
     raw(): string | IMessageHTML;
 }
