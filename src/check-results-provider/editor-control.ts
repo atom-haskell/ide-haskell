@@ -132,12 +132,10 @@ export class CREditorControl implements IEditorController {
   private find (pos: Point, type: TEventRangeType | 'gutter') {
     switch (type) {
       case 'gutter':
-      case 'selection': // TODO: this is not good
         return this.markers.findMarkers({ startBufferRow: pos.row })
       case 'keyboard':
         return this.markers.findMarkers({ startBufferPosition: pos })
       case 'mouse':
-      case 'context':
         return this.markers.findMarkers({ containsBufferPosition: pos })
       default: throw new TypeError('Switch assertion failed')
     }

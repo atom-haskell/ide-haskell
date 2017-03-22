@@ -16,7 +16,8 @@ export class CheckResultsProvider {
     this.disposables = new CompositeDisposable()
     this.disposables.add(tooltipRegistry.register('builtin:check-results', {
       priority: 1000,
-      handler: this.tooltipProvider.bind(this)
+      handler: this.tooltipProvider.bind(this),
+      eventTypes: ['mouse', 'keyboard'],
     }))
     pluginManager.addEditorController(CREditorControl, this.editorMap)
   }

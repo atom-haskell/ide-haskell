@@ -1,7 +1,7 @@
 import { CompositeDisposable, Point, TextEditor, Range } from 'atom';
 import { PluginManager } from '../plugin-manager';
 import { IStatus, ISeverityTabDefinition, IControlOpts } from '../output-panel';
-import { IResultItem } from '../results-db';
+import { IResultItem, TSeverity } from '../results-db';
 import { TEventRangeType } from '../editor-control/tooltip-manager';
 import { TPosition } from '../results-db';
 import { IParamSpec } from '../config-params';
@@ -34,12 +34,19 @@ export declare type TEventRangeCallback<T> = (pars: {
     crange: Range;
     eventType: TEventRangeType;
 }) => T;
-export declare function instance(pluginManager: PluginManager, outerDisposables: CompositeDisposable, pluginName: string): {
+export declare function instance(pluginManager: PluginManager, outerDisposables: CompositeDisposable, pluginName: string): UPIInstance;
+export declare class UPIInstance {
+    private pluginManager;
+    private pluginName;
+    private messages;
+    private disposables;
+    private messageProvider;
+    constructor(pluginManager: PluginManager, outerDisposables: CompositeDisposable, pluginName: string);
     setMenu(name: string, menu: TAtomMenu[]): AtomTypes.Disposable;
     setStatus(status: IStatus): void;
-    addMessages(newMessages: IResultItem[], types?: string[] | undefined): void;
-    setMessages(newMessages: IResultItem[], types: string[]): void;
-    clearMessages(types: string[]): void;
+    addMessages(newMessages: IResultItem[], types?: TSeverity[]): void;
+    setMessages(newMessages: IResultItem[], types: TSeverity[]): void;
+    clearMessages(types: TSeverity[]): void;
     setMessageTypes(types: {
         [severity: string]: ISeverityTabDefinition;
     }): void[];
@@ -53,6 +60,6 @@ export declare function instance(pluginManager: PluginManager, outerDisposables:
         [paramName: string]: IParamSpec<Object>;
     }): CompositeDisposable;
     getConfigParam(otherPluginName: string, name: string): Promise<Object>;
-    setConfigParam(otherPluginName: string, name: string, value?: Object | undefined): Promise<Object | undefined>;
+    setConfigParam(otherPluginName: string, name: string, value?: Object): Promise<Object | undefined>;
     withEventRange<T>({editor, detail, eventType, pos}: IEventRangeParams, callback: TEventRangeCallback<T>): T | undefined;
-};
+}

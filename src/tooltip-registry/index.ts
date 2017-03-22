@@ -15,11 +15,15 @@ export type TTooltipHandler =
   (editor: TextEditor, crange: Range, type: TEventRangeType)
   => ITooltipData | undefined | Promise<ITooltipData | undefined>
 
-export type TTooltipHandlerSpec = {priority: number, handler: TTooltipHandler}
+export interface TTooltipHandlerSpec {
+  priority: number
+  handler: TTooltipHandler
+  eventTypes?: TEventRangeType[]
+}
 export type TTooltipSpec = {pluginName: string, tooltip: TTooltipFunction | ITooltipData}
 
 export class TooltipRegistry {
-  private providers: Array<TTooltipHandlerSpec & {pluginName: string}>
+  private providers: Array<TTooltipHandlerSpec & {pluginName: string, eventTypes: TEventRangeType[]}>
   constructor (private pluginManager: PluginManager) {
     this.providers = []
   }
@@ -30,7 +34,13 @@ export class TooltipRegistry {
 
   public register (pluginName: string, provider: TTooltipHandlerSpec): Disposable {
     const idx = this.providers.findIndex(({priority}) => priority < provider.priority)
-    const record = {pluginName, ...provider}
+    const defaultEvT: TEventRangeType[] = ['selection', 'mouse']
+    const record = {
+      pluginName,
+      eventTypes: provider.eventTypes || defaultEvT,
+      priority: provider.priority,
+      handler: provider.handler
+    }
     if (idx === -1) {
       this.providers.push(record)
     } else {
@@ -89,7 +99,8 @@ export class TooltipRegistry {
   }
 
   private async defaultTooltipFunction (editor: TextEditor, type: TEventRangeType, crange: Range) {
-    for (const {pluginName, handler} of this.providers) {
+    for (const {pluginName, handler, eventTypes} of this.providers) {
+      if (!eventTypes.includes(type)) { continue }
       try {
         const tooltipData = await Promise.resolve(handler(editor, crange, type))
         if (!tooltipData) {

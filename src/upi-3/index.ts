@@ -1,7 +1,7 @@
 import {CompositeDisposable, Disposable} from 'atom'
 
 import {PluginManager} from '../plugin-manager'
-import {TTextBufferCallback} from '../editor-control'
+import {TTextBufferCallback, TEventRangeType} from '../editor-control'
 import {ISetTypesParams, TControlDefinition} from '../output-panel'
 import {IParamSpec} from '../config-params'
 import {TTooltipHandler} from '../tooltip-registry'
@@ -34,7 +34,7 @@ export interface IRegistrationOptions {
   }
   controls?: Array<TControlDefinition<Object>>
   params?: {[paramName: string]: IParamSpec<Object>}
-  tooltip?: TTooltipHandler | {priority?: number, handler: TTooltipHandler}
+  tooltip?: TTooltipHandler | {priority?: number, handler: TTooltipHandler, eventTypes?: TEventRangeType[]}
 }
 
 export function consume (pluginManager: PluginManager, options: IRegistrationOptions): Disposable {
@@ -67,14 +67,14 @@ export function consume (pluginManager: PluginManager, options: IRegistrationOpt
     }
   }
   if (tooltip) {
-    let handler: TTooltipHandler, priority: number | undefined
+    let handler: TTooltipHandler, priority: number | undefined, eventTypes: TEventRangeType[] | undefined
     if (typeof tooltip === 'function') {
       handler = tooltip
     } else {
-      ({handler, priority} = tooltip)
+      ({handler, priority, eventTypes} = tooltip)
     }
     if (!priority) { priority = 100 }
-    disp.add(pluginManager.tooltipRegistry.register(name, {priority, handler}))
+    disp.add(pluginManager.tooltipRegistry.register(name, {priority, handler, eventTypes}))
   }
   if (controls) {
     for (const i of controls) {

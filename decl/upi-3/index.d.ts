@@ -1,6 +1,6 @@
 import { Disposable } from 'atom';
 import { PluginManager } from '../plugin-manager';
-import { TTextBufferCallback } from '../editor-control';
+import { TTextBufferCallback, TEventRangeType } from '../editor-control';
 import { ISetTypesParams, TControlDefinition } from '../output-panel';
 import { IParamSpec } from '../config-params';
 import { TTooltipHandler } from '../tooltip-registry';
@@ -34,6 +34,7 @@ export interface IRegistrationOptions {
     tooltip?: TTooltipHandler | {
         priority?: number;
         handler: TTooltipHandler;
+        eventTypes?: TEventRangeType[];
     };
 }
 export declare function consume(pluginManager: PluginManager, options: IRegistrationOptions): Disposable;

@@ -27,6 +27,7 @@
       "no-switch-case-fall-through": true,
       "no-null-keyword": true,
       "no-var-requires": true,
-      "no-uninitialized-class-properties": true
+      "no-uninitialized-class-properties": true,
+      "interface-name": false,
     }
 }
