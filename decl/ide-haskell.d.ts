@@ -25,10 +25,10 @@ export declare function provideUpi3(): (options: UPI3.IRegistrationOptions) => {
     getConfigParam(name: string): Promise<Object>;
     getOthersConfigParam(plugin: string, name: string): Promise<Object>;
     setConfigParam(name: string, value: Object): Promise<Object | undefined>;
-    getEventRange(editor: AtomTypes.TextEditor, typeOrDetail: Object | "context" | "keyboard" | "mouse" | "selection"): {
+    getEventRange(editor: AtomTypes.TextEditor, typeOrDetail: Object | "keyboard" | "context" | "mouse" | "selection"): {
         crange: AtomTypes.Range;
         pos: AtomTypes.Point;
-        eventType: "context" | "keyboard" | "mouse" | "selection";
+        eventType: "keyboard" | "context" | "mouse" | "selection";
     } | undefined;
     dispose(): void;
 };

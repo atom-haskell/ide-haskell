@@ -56,6 +56,7 @@ export class CREditorControl implements IEditorController {
     const markers = this.find(pos, type)
     const result: MessageObject[] = []
     for (const marker of markers) {
+      if (!marker.isValid()) { continue }
       const res = this.markerProps.get(marker)
       if (!res) { continue }
       result.push(res.message)
