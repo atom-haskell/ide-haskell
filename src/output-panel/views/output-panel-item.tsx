@@ -10,6 +10,7 @@ export class OutputPanelItem {
     return (
       <ide-haskell-panel-item>
         {this.renderPosition()}
+        <ide-haskell-item-context>{this.props.model.context || ""}</ide-haskell-item-context>
         <ide-haskell-item-description innerHTML={this.props.model.message.toHtml()}/>
       </ide-haskell-panel-item>
     )
