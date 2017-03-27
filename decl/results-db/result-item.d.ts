@@ -7,6 +7,7 @@ export interface IResultItem {
     position?: TPosition;
     message: TMessage;
     severity: TSeverity;
+    context?: string;
 }
 export declare class ResultItem {
     readonly providerId: number;
@@ -14,8 +15,9 @@ export declare class ResultItem {
     readonly position?: Point;
     readonly message: MessageObject;
     readonly severity: TSeverity;
+    readonly context?: string;
     private _isValid;
-    constructor(providerId: number, {uri, message, severity, position}: IResultItem);
+    constructor(providerId: number, {uri, message, severity, position, context}: IResultItem);
     isValid(): boolean;
     setValid(isValid: boolean): void;
     hash(): string;
