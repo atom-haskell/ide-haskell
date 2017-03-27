@@ -2,14 +2,48 @@ import {selectListView} from './param-select-view'
 import {Emitter, CompositeDisposable, Disposable} from 'atom'
 
 export interface IParamSpec<T> {
-  onChanged: (value: T) => void
+  /**
+  will be called whenever the value of parameter changes
+
+  @param value new value of the parameter
+  */
+  onChanged (value: T): void
+  /**
+  possible values of the parameter. can be a callback.
+  */
   items: T[] | Promise<T[]> | (() => T[] | Promise<T[]>)
-  itemTemplate: (item: T) => string
+  /**
+  how an item should be displayed to user
+
+  @param item item to be displayed
+
+  @returns HTML string representing the item
+  */
+  itemTemplate (item: T): string
+  /**
+  name of item key that the filter in select dialog will match
+  */
   itemFilterKey: string
+  /**
+  this will be displayed in the heading of select dialog
+  */
   description?: string
+  /**
+  display name of the parameter in output panel
+  */
   displayName?: string
-  displayTemplate: (item: T) => string
-  default: T
+  /**
+  template for displaying value of parameter in output panel
+
+  @param item item to be displayed
+
+  @returns plaintext string representing the item
+  */
+  displayTemplate (item: T): string
+  /**
+  default value
+  */
+  default?: T
 }
 
 interface IParamData<T> {
@@ -57,7 +91,7 @@ export class ConfigParamStore {
     if (pluginConfig.has(paramName)) {
       throw new Error(`Parameter ${pluginName}.${paramName} already defined!`)
     }
-    let value = this.saved[`${pluginName}.${paramName}`]
+    let value: Object | undefined = this.saved[`${pluginName}.${paramName}`]
     if (value === undefined) { value = spec.default }
     pluginConfig.set(paramName, {spec, value})
     this.emitter.emit('did-update', {pluginName, paramName, value})

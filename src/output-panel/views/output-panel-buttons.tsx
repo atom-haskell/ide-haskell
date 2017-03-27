@@ -4,7 +4,9 @@ import * as etch from 'etch'
 const $ = etch.dom
 
 export interface ISeverityTabDefinition {
+  /** should uri filter apply to tab? */
   uriFilter?: boolean
+  /** should tab auto-scroll? */
   autoScroll?: boolean
 }
 
