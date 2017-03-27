@@ -10,6 +10,7 @@ export interface IResultItem {
   position?: TPosition
   message: TMessage
   severity: TSeverity
+  context?: string
 }
 
 export class ResultItem {
@@ -17,12 +18,14 @@ export class ResultItem {
   public readonly position?: Point
   public readonly message: MessageObject
   public readonly severity: TSeverity
+  public readonly context?: string
   private _isValid: boolean
-  constructor (public readonly providerId: number, {uri, message, severity, position}: IResultItem) {
+  constructor (public readonly providerId: number, {uri, message, severity, position, context}: IResultItem) {
     this.uri = uri
     this.message = MessageObject.fromObject(message)
     this.severity = severity
     this.position = position && Point.fromObject(position)
+    this.context = context
     this._isValid = true
   }
 
@@ -38,7 +41,8 @@ export class ResultItem {
     const h = createHash('md5')
     h.update(JSON.stringify({
       uri: this.uri, position: this.position && this.position.serialize(),
-      message: this.message.raw(), severity: this.severity
+      message: this.message.raw(), severity: this.severity,
+      context: this.context
     }))
     return h.digest('latin1')
   }
