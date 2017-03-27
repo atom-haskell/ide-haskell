@@ -21,7 +21,7 @@ export declare class OutputPanelButtons {
     buttonNames(): string[];
     disableAll(name?: string): void;
     setCount(btn: string, count: number): void;
-    getCount(btn: string): void;
+    getCount(btn: string): number | undefined;
     clickButton(btn: string): void;
     destroy(): Promise<void>;
     getActive(): string | undefined;
