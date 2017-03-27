@@ -28,6 +28,10 @@ export interface INormalStatus {
 
 export interface IProgressStatus {
   status: 'progress'
+  /**
+  float between 0 and 1, only relevant when status is 'progress'
+  if 0 or undefined, progress bar is not shown
+  */
   progress?: number
 }
 
@@ -38,10 +42,15 @@ export type TPanelPosition = 'bottom' | 'left' | 'top' | 'right'
 export interface ISetTypesParams {[severity: string]: ISeverityTabDefinition}
 
 export interface IControlOpts {
+  /** element `id` */
   id?: string
+  /** event callbacks, key is event name, e.g. "click" */
   events?: {[key: string]: EventListener}
+  /** additional classes to set on element */
   classes?: string[]
+  /** css attributes to set on element */
   style?: {[key: string]: string}
+  /** html attributes to set on element */
   attrs?: {[key: string]: string}
 }
 
