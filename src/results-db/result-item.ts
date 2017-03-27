@@ -6,10 +6,17 @@ export type TSeverity = 'error' | 'warning' | 'lint' | string
 export type TPosition = Point | [number, number]
 
 export interface IResultItem {
+
+    /** File URI message relates to */
   uri?: string
+  /** position to which message relates */
   position?: TPosition
+  /** message itself */
   message: TMessage
+  /** message severity, will be shown in corresponding tab */
   severity: TSeverity
+  /** any context related to message, will be displayed alongside
+      uri and position */
   context?: string
 }
 

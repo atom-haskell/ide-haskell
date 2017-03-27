@@ -43,7 +43,7 @@ export class ConfigParamManager {
     return this.store.getValue(pluginName, name)
   }
 
-  public async set (pluginName: string, name: string, value: Object) {
+  public async set (pluginName: string, name: string, value?: Object) {
     return this.store.setValue(pluginName, name, value)
   }
 }
