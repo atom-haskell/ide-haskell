@@ -14,7 +14,7 @@ export interface IParamSpec<T> {
 
 interface IParamData<T> {
   spec: IParamSpec<T>
-  value: T
+  value?: T
 }
 
 export interface IState {
