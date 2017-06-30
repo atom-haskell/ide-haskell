@@ -94,7 +94,7 @@ ide-haskell-panel {
     }
   }
 
-  atom-dock.bottom &, & {
+  atom-dock.bottom &, atom-workspace-axis > atom-pane-container & {
     width: auto !important;
     flex-direction: column;
     ide-haskell-panel-heading {
@@ -141,22 +141,6 @@ ide-haskell-panel {
         }
       }
     }
-  }
-
-  atom-dock.bottom &, & {
-    ide-haskell-checkbox:after { bottom: 100%; }
-    ide-haskell-param:after { bottom: 100%; }
-    ide-haskell-param.hidden-value ide-haskell-param-value { bottom: 100%; }
-  }
-  atom-dock.left & {
-    ide-haskell-checkbox:after { left: 100%; top: 0; }
-    ide-haskell-param:after { left: 100%; top: 0; }
-    ide-haskell-param.hidden-value ide-haskell-param-value { left: 100%; top: 0; }
-  }
-  atom-dock.right & {
-    ide-haskell-checkbox:after { right: 100%; top: 0; }
-    ide-haskell-param:after { right: 100%; top: 0; }
-    ide-haskell-param.hidden-value ide-haskell-param-value { right: 100%; top: 0; }
   }
 
   ide-haskell-panel-heading {
