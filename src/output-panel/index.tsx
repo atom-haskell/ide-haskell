@@ -1,5 +1,5 @@
 import * as etch from 'etch'
-import {Disposable, CompositeDisposable, Panel} from 'atom'
+import {Disposable, CompositeDisposable, Emitter} from 'atom'
 import {OutputPanelButtons, ISeverityTabDefinition} from './views/output-panel-buttons'
 import {OutputPanelCheckbox} from './views/output-panel-checkbox'
 import {ProgressBar} from './views/progress-bar'
@@ -78,6 +78,8 @@ export class OutputPanel {
   private disposables: CompositeDisposable
   private element?: HTMLElement
   private currentResult: number
+  private currentStatus: IStatus
+  private emitter: Emitter
   constructor (private state: IState | undefined = {}, private results: ResultsDB) {
     this.hiddenOutput = true
 
@@ -87,7 +89,11 @@ export class OutputPanel {
 
     this.disposables = new CompositeDisposable()
 
+    this.disposables.add(this.emitter = new Emitter())
+
     this.currentResult = 0
+
+    this.currentStatus = { status: 'ready' } as IStatus
 
     etch.initialize(this)
 
@@ -136,7 +142,7 @@ export class OutputPanel {
     return (
       <ide-haskell-panel class={this.hiddenOutput ? 'hidden-output' : ''}>
         <ide-haskell-panel-heading ref="heading">
-          <ide-haskell-status-icon ref="status" id="status" dataset={{status: 'ready'}}/>
+          <ide-haskell-status-icon ref="status" id="status" dataset={{status: this.currentStatus.status}}/>
           <OutputPanelButtons ref="buttons" id="buttons"/>
           <OutputPanelCheckbox ref="checkboxUriFilter" id="checkboxUriFilter"
             enabled={this.state.fileFilter}/>
@@ -168,6 +174,14 @@ export class OutputPanel {
 
   public getDefaultLocation() {
     return atom.config.get('ide-haskell.panelPosition')
+  }
+
+  getIconName() : string {
+    return `ide-haskell-${this.currentStatus.status}`
+  }
+
+  onDidChangeIcon(callback : (arg : any) => void) : Disposable {
+    return this.emitter.on('did-change-icon', callback)
   }
 
   public addPanelControl<T> ({element, opts}: TControlDefinition<T>) {
@@ -276,7 +290,9 @@ export class OutputPanel {
     this.statusMap.set(pluginName, st)
     const stArr = Array.from(this.statusMap.values())
     const [consensus] = stArr.sort((a, b) => prio[b.status] - prio[a.status])
-    this.refs.status.setAttribute('data-status', consensus.status)
+    this.currentStatus = consensus
+    this.update()
+    this.emitter.emit('did-change-icon')
     let count = 0
     let tot = 0
     for (const i of stArr) {
