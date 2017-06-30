@@ -71,9 +71,9 @@ export const config = {
     type: 'string',
     default: 'bottom',
     description: `,
-    Output panel position
+    Default output panel position
     `,
-    enum: ['bottom', 'left', 'top', 'right'],
+    enum: ['bottom', 'left', 'right', 'center'],
     order: 41
   },
   hideParameterValues: {

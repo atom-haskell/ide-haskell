@@ -50,6 +50,7 @@ export class PluginManager {
 
     this.resultsDB = new ResultsDB()
     this.outputPanel = new OutputPanel(state.outputView, this.resultsDB)
+    atom.workspace.open(this.outputPanel)
     this.tooltipRegistry = new TooltipRegistry(this)
     this.configParamManager = new ConfigParamManager(this.outputPanel, state.configParams)
 
@@ -66,7 +67,7 @@ export class PluginManager {
     this.disposables.dispose()
 
     this.deleteEditorControllers()
-    this.outputPanel.destroy()
+    this.outputPanel.reallyDestroy()
     this.configParamManager.destroy()
     if (this.linterSupport) {
       this.linterSupport.destroy()
@@ -106,7 +107,7 @@ export class PluginManager {
   }
 
   public togglePanel () {
-    this.outputPanel.toggle()
+    atom.workspace.toggle(this.outputPanel)
   }
 
   public controller (editor: TextEditor) {

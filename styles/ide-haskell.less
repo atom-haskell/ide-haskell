@@ -65,10 +65,6 @@
 ide-haskell-panel {
   display: flex;
 
-  resize-handle {
-    position: absolute;
-  }
-
   &.hidden-output {
     height: auto !important;
     width: auto !important;
@@ -79,9 +75,7 @@ ide-haskell-panel {
     }
   }
 
-  &[data-pos=top], &[data-pos=bottom] {
-    min-height: 120px;
-    max-height: 50vh;
+  atom-dock.bottom &, & {
     width: auto !important;
     flex-direction: column;
     ide-haskell-panel-heading {
@@ -104,16 +98,8 @@ ide-haskell-panel {
         }
       }
     }
-    resize-handle {
-      cursor: row-resize;
-      height: 10px;
-      left: 0;
-      right: 0;
-    }
   }
-  &[data-pos=left], &[data-pos=right] {
-    min-width: 120px;
-    max-width: 50vw;
+  atom-dock.left &, atom-dock.right & {
     height: auto !important;
     flex-direction: row;
     ide-haskell-panel-heading {
@@ -136,31 +122,19 @@ ide-haskell-panel {
         }
       }
     }
-    resize-handle {
-      cursor: col-resize;
-      width: 10px;
-      top: 0;
-      bottom: 0;
-    }
   }
 
-  &[data-pos=top]{
-    resize-handle { bottom: 0; }
-  }
-  &[data-pos=bottom] {
-    resize-handle { top: 0; }
+  atom-dock.bottom &, & {
     ide-haskell-checkbox:after { bottom: 100%; }
     ide-haskell-param:after { bottom: 100%; }
     ide-haskell-param.hidden-value ide-haskell-param-value { bottom: 100%; }
   }
-  &[data-pos=left] {
-    resize-handle { right: 0; }
+  atom-dock.left & {
     ide-haskell-checkbox:after { left: 100%; top: 0; }
     ide-haskell-param:after { left: 100%; top: 0; }
     ide-haskell-param.hidden-value ide-haskell-param-value { left: 100%; top: 0; }
   }
-  &[data-pos=right] {
-    resize-handle { left: 0; }
+  atom-dock.right & {
     ide-haskell-checkbox:after { right: 100%; top: 0; }
     ide-haskell-param:after { right: 100%; top: 0; }
     ide-haskell-param.hidden-value ide-haskell-param-value { right: 100%; top: 0; }
@@ -255,18 +229,24 @@ ide-haskell-panel {
     }
   }
 
-  &[data-pos=left], &[data-pos=right] {
+  atom-dock.left &, atom-dock.right & {
     ide-haskell-progress-bar {
       min-height: 50px;
       max-height: 300px;
       width: 1.25em;
+      span {
+        width: 100% !important;
+      }
     }
   }
-  &[data-pos=top], &[data-pos=bottom] {
+  atom-dock.bottom &, & {
     ide-haskell-progress-bar {
       min-width: 50px;
       max-width: 300px;
       height: 1.25em;
+      span {
+        height: 100% !important;
+      }
     }
   }
 
@@ -422,12 +402,4 @@ ide-haskell-tooltip {
 // A hack to catch mouse events only on .scroll-view
 atom-overlay.ide-haskell {
   pointer-events: none;
-}
-
-.platform-win32 {
-  ide-haskell-panel {
-    resize-handle {
-      cursor: ns-resize;
-    }
-  }
 }

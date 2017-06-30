@@ -1,12 +1,8 @@
 import * as etch from 'etch'
 
-export type TDirection = 'horizontal' | 'vertical'
-
 export class ProgressBar {
-  private direction: TDirection
   private progress: number
-  constructor ({orientation = 'horizontal'}: {orientation?: TDirection} = {}) {
-    this.direction = orientation
+  constructor () {
     this.progress = NaN
     etch.initialize(this)
   }
@@ -14,14 +10,13 @@ export class ProgressBar {
   public render () {
     return (
       <ide-haskell-progress-bar className={isNaN(this.progress) ? '' : 'visible'}>
-        <span style={`${this.direction === 'horizontal' ? 'width' : 'height'}: ${this.progress * 100}%`}>
+        <span style={{width: `${this.progress * 100}%`, height: `${this.progress * 100}%`}}>
         </span>
       </ide-haskell-progress-bar>
     )
   }
 
-  public update ({orientation = 'horizontal'}: {orientation?: TDirection} = {}) {
-    this.direction = orientation
+  public update () {
     return etch.update(this)
   }
 

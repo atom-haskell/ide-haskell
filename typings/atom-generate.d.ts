@@ -6970,6 +6970,9 @@ declare module AtomTypes {
          * @returns {Promise<any>} Returns a {Promise} that resolves to the {TextEditor} for the file URI.
          */
         open(uri?: string, options?: Object): Promise<any>;
+        open(item: Object): Promise<any>;
+        hide(itemOrURI: Object | String): boolean;
+        toggle(itemOrURI: Object | String): Promise<void>;
         /**
          * @param {Object} An {Object} you want to perform the check against.
          * @returns {boolean} Returns a {Boolean} that is `true` if `object` is a `TextEditor`.

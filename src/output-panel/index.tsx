@@ -15,9 +15,6 @@ export interface IElementObject<T> {
 }
 
 export interface IState {
-  visibility?: boolean
-  width?: string
-  height?: string
   fileFilter?: boolean
   activeTab?: string
 }
@@ -79,10 +76,6 @@ export class OutputPanel {
   private elements: Set<JSX.Element>
   private statusMap: Map<string, IStatus>
   private disposables: CompositeDisposable
-  // tslint:disable-next-line:no-uninitialized-class-properties
-  private pos: TPanelPosition
-  // tslint:disable-next-line:no-uninitialized-class-properties
-  private panel: Panel
   private element?: HTMLElement
   private currentResult: number
   constructor (private state: IState | undefined = {}, private results: ResultsDB) {
@@ -97,32 +90,6 @@ export class OutputPanel {
     this.currentResult = 0
 
     etch.initialize(this)
-
-    atom.config.observe('ide-haskell.panelPosition', (value: TPanelPosition) => {
-      this.pos = value
-      const options = {
-        item: this,
-        visible: this.state.visibility || true
-      }
-      switch (this.pos) {
-        case 'top':
-          this.panel = atom.workspace.addTopPanel(options)
-          break
-        case 'bottom':
-          this.panel = atom.workspace.addBottomPanel(options)
-          break
-        case 'left':
-          this.panel = atom.workspace.addLeftPanel(options)
-          break
-        case 'right':
-          this.panel = atom.workspace.addRightPanel(options)
-          break
-        default: throw new TypeError('Switch assertion failed')
-      }
-      if (this.element) {
-        this.update()
-      }
-    })
 
     this.disposables.add(atom.tooltips.add(this.refs.status, {
       class: 'ide-haskell-status-tooltip',
@@ -167,18 +134,14 @@ export class OutputPanel {
       right: 'vertical'
     }
     return (
-      <ide-haskell-panel style={{width: this.state.width, height: this.state.height}}
-        dataset={{pos: this.pos}}
-        class={this.hiddenOutput ? 'hidden-output' : ''}>
-        <resize-handle on={{mousedown: this.resizeStart.bind(this)}} />
+      <ide-haskell-panel class={this.hiddenOutput ? 'hidden-output' : ''}>
         <ide-haskell-panel-heading ref="heading">
           <ide-haskell-status-icon ref="status" id="status" dataset={{status: 'ready'}}/>
           <OutputPanelButtons ref="buttons" id="buttons"/>
           <OutputPanelCheckbox ref="checkboxUriFilter" id="checkboxUriFilter"
             enabled={this.state.fileFilter}/>
           {Array.from(this.elements.values())}
-          <ProgressBar ref="progressBar" id="progressBar"
-            orientation={orientMap[this.pos]}/>
+          <ProgressBar ref="progressBar" id="progressBar"/>
         </ide-haskell-panel-heading>
         <OutputPanelItems model={this.results} ref="items" id="items"/>
       </ide-haskell-panel>
@@ -190,10 +153,21 @@ export class OutputPanel {
   }
 
   public async destroy () {
+    atom.workspace.hide(this)
+  }
+
+  public async reallyDestroy () {
     await etch.destroy(this)
     this.disposables.dispose()
-    this.panel.destroy()
     this.statusMap.clear()
+  }
+
+  public getTitle() {
+    return "IDE-Haskell"
+  }
+
+  public getDefaultLocation() {
+    return atom.config.get('ide-haskell.panelPosition')
   }
 
   public addPanelControl<T> ({element, opts}: TControlDefinition<T>) {
@@ -285,19 +259,8 @@ export class OutputPanel {
     this.refs.progressBar.setProgress(progress)
   }
 
-  public toggle () {
-    if (this.panel.isVisible()) {
-      this.panel.hide()
-    } else {
-      this.panel.show()
-    }
-  }
-
   public serialize (): IState {
     return {
-      visibility: this.panel.isVisible(),
-      height: this.element && this.element.style.height || this.state.height,
-      width: this.element && this.element.style.width || this.state.width,
       activeTab: this.getActiveTab(),
       fileFilter: this.refs.checkboxUriFilter.getFileFilter()
     }
@@ -352,34 +315,5 @@ export class OutputPanel {
     if (this.currentResult < 0) { this.currentResult = rs.length - 1 }
 
     this.showItem(rs[this.currentResult])
-  }
-
-  private resizeStart (e: MouseEvent) {
-    if (!this.element) { return }
-    const varsMap = {
-      top: {axis: 'Y', param: 'height', dir: 1},
-      bottom: {axis: 'Y', param: 'height', dir: -1},
-      left: {axis: 'X', param: 'width', dir: 1},
-      right: {axis: 'X', param: 'width', dir: -1}
-    }
-
-    const vars = varsMap[this.pos]
-
-    vars.axis = `client${vars.axis}`
-    const startAxis = e[vars.axis]
-    const startParam = parseInt(document.defaultView.getComputedStyle(this.element)[vars.param], 10)
-
-    const doDrag = (event: MouseEvent) => {
-      this.state[vars.param] =
-        (startParam + vars.dir * (event[vars.axis] - startAxis)) + 'px'
-      this.update()
-    }
-    const stopDrag = () => {
-      document.documentElement.removeEventListener('mousemove', doDrag)
-      document.documentElement.removeEventListener('mouseup', stopDrag)
-    }
-
-    document.documentElement.addEventListener('mousemove', doDrag)
-    document.documentElement.addEventListener('mouseup', stopDrag)
   }
 }
