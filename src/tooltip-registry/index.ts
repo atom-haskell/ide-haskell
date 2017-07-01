@@ -20,7 +20,10 @@ export interface TTooltipHandlerSpec {
   handler: TTooltipHandler
   eventTypes?: TEventRangeType[]
 }
-export type TTooltipSpec = {pluginName: string, tooltip: TTooltipFunction | ITooltipData}
+export interface ITooltipSpec {
+  pluginName: string
+  tooltip: TTooltipFunction | ITooltipData
+}
 
 export class TooltipRegistry {
   private providers: Array<TTooltipHandlerSpec & {pluginName: string, eventTypes: TEventRangeType[]}>
@@ -53,7 +56,7 @@ export class TooltipRegistry {
   }
 
   public async showTooltip (
-    editor: TextEditor, type: TEventRangeType, spec?: TTooltipSpec
+    editor: TextEditor, type: TEventRangeType, spec?: ITooltipSpec
   ) {
     const controller = this.pluginManager.controller(editor)
     if (!controller) { return }

@@ -8,6 +8,7 @@ async function makeTempFile (contents: string) {
       {prefix: 'ide-haskell', suffix: '.cabal'},
       (err, info) => {
         if (err) {
+          // tslint:disable-next-line:no-console
           console.error(err)
           return reject(err)
         }
@@ -21,6 +22,7 @@ async function read (path: string): Promise<string> {
   return new Promise<string>((resolve, reject) => {
     FS.readFile(path, {encoding: 'utf-8'}, (error, text) => {
       if (error) {
+        // tslint:disable-next-line:no-console
         console.error(error)
         reject(error)
       } else { resolve(text) }

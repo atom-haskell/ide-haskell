@@ -9,7 +9,7 @@ import {CREditorControl} from './editor-control'
 export class CheckResultsProvider {
   private disposables: CompositeDisposable
   private editorMap: WeakMap<TextEditor, CREditorControl>
-  constructor (private editor: TextEditor, pluginManager: PluginManager) {
+  constructor (editor: TextEditor, pluginManager: PluginManager) {
     const tooltipRegistry = pluginManager.tooltipRegistry
 
     this.editorMap = new WeakMap()

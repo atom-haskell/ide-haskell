@@ -40,8 +40,8 @@ export class ResultsDB {
     this.emitter.emit('did-update', this)
   }
 
-  public registerProvider (providerName: string) {
-    const p = new Provider(this, ++this.currentId, providerName)
+  public registerProvider () {
+    const p = new Provider(this, ++this.currentId)
     this.disposables.add(p)
     return p
   }

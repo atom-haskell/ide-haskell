@@ -60,7 +60,7 @@ export class UPIInstance {
     private pluginManager: PluginManager, outerDisposables: CompositeDisposable, private pluginName: string
   ) {
     outerDisposables.add(this.disposables)
-    this.messageProvider = pluginManager.resultsDB.registerProvider(pluginName)
+    this.messageProvider = pluginManager.resultsDB.registerProvider()
     this.disposables.add(this.messageProvider)
   }
   /**
@@ -242,6 +242,7 @@ export class UPIInstance {
   dialog, it will resolve to `undefined`
   */
   async getConfigParam (name: string): Promise<Object | undefined>
+  // tslint:disable-next-line:unified-signatures
   async getConfigParam (otherPluginName: string, name: string): Promise<Object | undefined>
   async getConfigParam (otherPluginName: string, name?: string) {
     if (!name) {

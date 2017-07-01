@@ -48,6 +48,7 @@ export class CREditorControl implements IEditorController {
     try {
       this.gutter.destroy()
     } catch (e) {
+      // tslint:disable-next-line:no-console
       console.warn(e)
     }
   }

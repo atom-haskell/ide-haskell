@@ -1,12 +1,12 @@
 import {IResultItem, ResultItem} from './result-item'
-import {ResultsDB} from  './'
+import {ResultsDB} from './'
 
 export type TMessageProviderFunction = (pushMessages: (messages: IResultItem[]) => void) => void
 
 export class Provider {
   private disposed: boolean
   constructor (
-    private parent: ResultsDB, public readonly id: number, private name: string
+    private parent: ResultsDB, public readonly id: number
   ) {
     this.disposed = false
   }

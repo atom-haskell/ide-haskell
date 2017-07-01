@@ -21,7 +21,7 @@ export function instance (
 ) {
   const pluginName = options.name
   const disposables = new CompositeDisposable()
-  const messageProvider = pluginManager.resultsDB.registerProvider(pluginName)
+  const messageProvider = pluginManager.resultsDB.registerProvider()
   disposables.add(messageProvider)
   disposables.add(consume(pluginManager, options))
 
@@ -56,7 +56,7 @@ export function instance (
         editor, eventType, {pluginName, tooltip}
       )
     },
-    addPanelControl<T> (def: TControlDefinition<Object>) {
+    addPanelControl<T> (def: TControlDefinition<T>) {
       return pluginManager.outputPanel.addPanelControl(def)
     },
     addConfigParam (paramName: string, spec: IParamSpec<Object>) {

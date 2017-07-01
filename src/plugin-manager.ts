@@ -10,8 +10,6 @@ import {CheckResultsProvider} from './check-results-provider'
 export {IParamState, IOutputViewState}
 
 export type TEventType = 'keyboard' | 'context' | 'mouse' | 'selection'
-type TShowTooltipCallbackParams = {editor: TextEditor, pos: Point, eventType: TEventType}
-type TShowTooltipCallback = (pars: TShowTooltipCallbackParams) => void
 
 export interface IState {
   outputView: IOutputViewState

@@ -29,6 +29,7 @@ export async function runFilter ({command, args, cwd, stdin}: IRunFilterArgs) {
         proc.stdin.end()
       }
     } catch (error) {
+     // tslint:disable-next-line:no-console
      console.error(error)
      reject(error)
     }
