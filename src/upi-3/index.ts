@@ -85,7 +85,7 @@ export function consume (pluginManager: PluginManager, options: IRegistrationOpt
     for (const paramName of Object.keys(params)) {
       const spec = params[paramName]
       disp.add(
-        pluginManager.configParamManager.add(this.pluginName, paramName, spec)
+        pluginManager.configParamManager.add(name, paramName, spec)
       )
     }
   }
