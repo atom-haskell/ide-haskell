@@ -3,24 +3,6 @@ import {Emitter, CompositeDisposable, Disposable} from 'atom'
 
 export interface IParamSpec<T> {
   /**
-  will be called whenever the value of parameter changes
-
-  @param value new value of the parameter
-  */
-  onChanged (value: T): void
-  /**
-  possible values of the parameter. can be a callback.
-  */
-  items: T[] | Promise<T[]> | (() => T[] | Promise<T[]>)
-  /**
-  how an item should be displayed to user
-
-  @param item item to be displayed
-
-  @returns HTML string representing the item
-  */
-  itemTemplate (item: T): string
-  /**
   name of item key that the filter in select dialog will match
   */
   itemFilterKey: string
@@ -33,6 +15,28 @@ export interface IParamSpec<T> {
   */
   displayName?: string
   /**
+  default value
+  */
+  default?: T
+  /**
+  possible values of the parameter. can be a callback.
+  */
+  items: T[] | Promise<T[]> | (() => T[] | Promise<T[]>)
+  /**
+  will be called whenever the value of parameter changes
+
+  @param value new value of the parameter
+  */
+  onChanged (value: T): void
+  /**
+  how an item should be displayed to user
+
+  @param item item to be displayed
+
+  @returns HTML string representing the item
+  */
+  itemTemplate (item: T): string
+  /**
   template for displaying value of parameter in output panel
 
   @param item item to be displayed
@@ -40,10 +44,6 @@ export interface IParamSpec<T> {
   @returns plaintext string representing the item
   */
   displayTemplate (item: T): string
-  /**
-  default value
-  */
-  default?: T
 }
 
 interface IParamData<T> {
@@ -143,7 +143,7 @@ export class ConfigParamStore {
     return selectListView<T>({
       items: (typeof spec.items === 'function') ? spec.items() : spec.items,
       heading: spec.description,
-      itemTemplate: spec.itemTemplate,
+      itemTemplate: spec.itemTemplate.bind(spec),
       itemFilterKey: spec.itemFilterKey
     })
   }

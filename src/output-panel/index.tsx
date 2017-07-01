@@ -76,11 +76,10 @@ export class OutputPanel {
   private elements: Set<JSX.Element>
   private statusMap: Map<string, IStatus>
   private disposables: CompositeDisposable
-  private element?: HTMLElement
   private currentResult: number
   private currentStatus: IStatus
   private emitter: Emitter
-  constructor (private state: IState | undefined = {}, private results: ResultsDB) {
+  constructor (private state: IState = {}, private results: ResultsDB) {
     this.hiddenOutput = true
 
     this.elements = new Set()
@@ -89,7 +88,8 @@ export class OutputPanel {
 
     this.disposables = new CompositeDisposable()
 
-    this.disposables.add(this.emitter = new Emitter())
+    this.emitter = new Emitter()
+    this.disposables.add(this.emitter)
 
     this.currentResult = 0
 
@@ -133,12 +133,6 @@ export class OutputPanel {
   }
 
   public render () {
-    const orientMap = {
-      top: 'horizontal',
-      bottom: 'horizontal',
-      left: 'vertical',
-      right: 'vertical'
-    }
     return (
       <ide-haskell-panel class={this.hiddenOutput ? 'hidden-output' : ''}>
         <ide-haskell-panel-heading ref="heading">
@@ -168,19 +162,19 @@ export class OutputPanel {
     this.statusMap.clear()
   }
 
-  public getTitle() {
-    return "IDE-Haskell"
+  public getTitle () {
+    return 'IDE-Haskell'
   }
 
-  public getDefaultLocation() {
+  public getDefaultLocation () {
     return atom.config.get('ide-haskell.panelPosition')
   }
 
-  getIconName() : string {
+  public getIconName (): string {
     return `ide-haskell-${this.currentStatus.status}`
   }
 
-  onDidChangeIcon(callback : (arg : any) => void) : Disposable {
+  public onDidChangeIcon (callback: (arg: any) => void): Disposable {
     return this.emitter.on('did-change-icon', callback)
   }
 

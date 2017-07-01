@@ -1,5 +1,6 @@
 import * as etch from 'etch'
 import {ResultItem} from '../../results-db'
+import {TextEditor} from 'atom'
 
 export class OutputPanelItem {
   constructor (private props: {model: ResultItem}) {
@@ -10,7 +11,7 @@ export class OutputPanelItem {
     return (
       <ide-haskell-panel-item>
         {this.renderPosition()}
-        <ide-haskell-item-context>{this.props.model.context || ""}</ide-haskell-item-context>
+        <ide-haskell-item-context>{this.props.model.context || ''}</ide-haskell-item-context>
         <ide-haskell-item-description innerHTML={this.props.model.message.toHtml()}/>
       </ide-haskell-panel-item>
     )
@@ -38,7 +39,10 @@ export class OutputPanelItem {
   }
 
   private didClickPosition () {
-    atom.workspace.open(this.props.model.uri).then((editor) =>
-      editor.setCursorBufferPosition(this.props.model.position))
+    atom.workspace.open(this.props.model.uri).then((editor: TextEditor) => {
+      if (this.props.model.position) {
+        editor.setCursorBufferPosition(this.props.model.position)
+      }
+    })
   }
 }

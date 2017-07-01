@@ -28,6 +28,6 @@
       "no-null-keyword": true,
       "no-var-requires": true,
       "no-uninitialized-class-properties": true,
-      "interface-name": false,
+      "interface-name": false
     }
 }

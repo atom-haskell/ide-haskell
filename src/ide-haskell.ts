@@ -7,10 +7,12 @@ import * as UPI from './upi-2'
 import * as UPI3 from './upi-3'
 
 // for typings
+/* tslint:disable:no-unused-variable */
 import {IShowTooltipParams, IRegistrationOptions} from './upi-3'
 import {IStatus, ISeverityTabDefinition, IControlOpts, IElementObject, TControlDefinition} from './output-panel'
 import {IResultItem, TSeverity} from './results-db'
 import {IParamSpec} from './config-params'
+/* tslint:enable:no-unused-variable */
 // end
 
 let upiProvided = false
