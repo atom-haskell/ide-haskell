@@ -3,6 +3,7 @@ import {PluginManager, IState} from './plugin-manager'
 import {prettifyFile} from './prettify'
 import {MAIN_MENU_LABEL} from './utils'
 import {ILinterRegistry} from './linter-support'
+import {IStatusBar} from './status-bar'
 import * as UPI from './upi-2'
 import * as UPI3 from './upi-3'
 
@@ -148,4 +149,14 @@ export function consumeLinter (indieRegistry: ILinterRegistry): Disposable | und
   disposables.add(linter)
   pluginManager.setLinter(linter)
   return linter
+}
+
+export function consumeStatusBar (statusBar: IStatusBar): Disposable | undefined {
+  if (!(disposables && pluginManager)) { return }
+  pluginManager.setStatusBar(statusBar)
+  return new Disposable(() => {
+    if (pluginManager) {
+      pluginManager.removeStatusBar()
+    }
+  })
 }

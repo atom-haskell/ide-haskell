@@ -178,6 +178,10 @@ export class OutputPanel {
     return this.emitter.on('did-change-icon', callback)
   }
 
+  public getStatus (): IStatus {
+    return this.currentStatus
+  }
+
   public addPanelControl<T> ({element, opts}: TControlDefinition<T>) {
     if (typeof element === 'string') {
       const {events, classes, style, attrs} = (opts as IControlOpts)

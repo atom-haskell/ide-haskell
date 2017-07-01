@@ -31,6 +31,16 @@
       "versions": {
         "1.0.0": "consumeLinter"
       }
+    },
+    "status-bar": {
+      "versions": {
+        "^1.0.0": "consumeStatusBar"
+      }
+    },
+    "ide-haskell-upi-plugin": {
+      "versions": {
+        "^0.3.0": "consumeUpi3"
+      }
     }
   },
   "dependencies": {

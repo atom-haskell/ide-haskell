@@ -406,3 +406,25 @@ ide-haskell-tooltip {
 atom-overlay.ide-haskell {
   pointer-events: none;
 }
+
+.status-bar-right .ide-haskell {
+  padding-bottom: -0.3em;
+  &:hover span {
+    border-bottom: solid 1px;
+  }
+  ide-haskell-lambda {
+    -webkit-mask: url('atom://ide-haskell/resources/haskell.svg') no-repeat 50% 50%;
+    mask: url('atom://ide-haskell/resources/haskell.svg') no-repeat 50% 50%;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    background-color: @text-color;
+    width: 2em;
+    height: 1em;
+    display: inline-block;
+    margin-bottom: -0.1em;
+  }
+  ide-haskell-status-icon {
+    .status-icon();
+    margin-right: 0;
+  }
+}

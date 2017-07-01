@@ -6,6 +6,7 @@ import {EditorControl, TTextBufferCallback} from './editor-control'
 import {LinterSupport, ILinter} from './linter-support'
 import {TooltipRegistry} from './tooltip-registry'
 import {CheckResultsProvider} from './check-results-provider'
+import {IStatusBar, ITile, StatusBarView} from './status-bar'
 
 export {IParamState, IOutputViewState}
 
@@ -37,6 +38,9 @@ export class PluginManager {
   private controllers: ECMap<EditorControl>
   private controllerClasses: Set<{map?: ECMap<IEditorController>, factory: IEditorControllerFactory}>
   private editorDispMap: WeakMap<TextEditor, CompositeDisposable>
+  private statusBarTile?: ITile
+  private statusBarView?: StatusBarView
+  private statusBarDisp?: Disposable
   constructor (state: IState) {
     this.disposables = new CompositeDisposable()
     this.emitter = new Emitter()
@@ -67,6 +71,7 @@ export class PluginManager {
     this.deleteEditorControllers()
     this.outputPanel.reallyDestroy()
     this.configParamManager.destroy()
+    this.removeStatusBar()
     if (this.linterSupport) {
       this.linterSupport.destroy()
       this.linterSupport = undefined
@@ -138,6 +143,34 @@ export class PluginManager {
 
   public addEditorController (factory: IEditorControllerFactory, map?: ECMap<IEditorController>) {
     this.controllerClasses.add({map, factory})
+  }
+
+  public setStatusBar (sb: IStatusBar) {
+    this.statusBarView = new StatusBarView(this.outputPanel)
+    this.statusBarTile = sb.addRightTile({
+      item: this.statusBarView.element,
+      priority: 100
+    })
+    this.statusBarDisp = this.outputPanel.onDidChangeIcon(() => {
+      if (this.statusBarView) {
+        this.statusBarView.setStatus(this.outputPanel.getStatus())
+      }
+    })
+  }
+
+  public removeStatusBar () {
+    if (this.statusBarTile) {
+      this.statusBarTile.destroy()
+      this.statusBarTile = undefined
+    }
+    if (this.statusBarView) {
+      this.statusBarView.destroy()
+      this.statusBarView = undefined
+    }
+    if (this.statusBarDisp) {
+      this.statusBarDisp.dispose()
+      this.statusBarDisp = undefined
+    }
   }
 
   private controllerOnGrammar (editor: TextEditor, grammar: Grammar) {
