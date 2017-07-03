@@ -4,7 +4,8 @@ export function listen (
   element: HTMLElement, event: string, selector: string, callback: (event: Event) => void
 ): Disposable {
   const bound = (evt: Event) => {
-    if ((evt.target as HTMLElement).matches(selector)) {
+    const sel = (evt.target as HTMLElement).closest(selector)
+    if (sel && element.contains(sel)) {
       callback(evt)
     }
   }

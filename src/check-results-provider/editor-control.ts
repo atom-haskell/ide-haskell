@@ -128,7 +128,6 @@ export class CREditorControl implements IEditorController {
     const cls = {class: `ide-haskell-${r.severity}`}
     this.gutter.decorateMarker(m, { type: 'line-number', ...cls })
     this.editor.decorateMarker(m, { type: 'highlight', ...cls })
-    this.editor.decorateMarker(m, { type: 'line', ...cls })
   }
 
   private find (pos: Point, type: TEventRangeType | 'gutter') {

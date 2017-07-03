@@ -101,7 +101,7 @@ export class EditorControl implements IEditorController {
   }
 
   private trackMouseBufferPosition (e: MouseEvent) {
-    const bufferPt = bufferPositionFromMouseEvent(this.editor, e as MouseEvent)
+    const bufferPt = bufferPositionFromMouseEvent(this.editor, e)
     if (!bufferPt) { return }
 
     if (this.lastMouseBufferPt && this.lastMouseBufferPt.isEqual(bufferPt)) {
