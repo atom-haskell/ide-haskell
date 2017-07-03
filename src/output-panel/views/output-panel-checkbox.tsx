@@ -28,8 +28,7 @@ export class OutputPanelCheckbox {
     )
   }
 
-  public update (props?: {enabled?: boolean}) {
-    if (props && props.enabled !== undefined) { this.state = props.enabled }
+  public update () {
     return etch.update(this)
   }
 
