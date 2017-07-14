@@ -11,7 +11,7 @@ export class OutputPanelItem {
     return (
       <ide-haskell-panel-item>
         {this.renderPosition()}
-        <ide-haskell-item-context>{this.props.model.context || ''}</ide-haskell-item-context>
+        {this.renderContext()}
         <ide-haskell-item-description innerHTML={this.props.model.message.toHtml()}/>
       </ide-haskell-panel-item>
     )
@@ -32,6 +32,16 @@ export class OutputPanelItem {
         <ide-haskell-item-position on={{click: this.didClickPosition.bind(this)}}>
           {this.props.model.uri}: {this.props.model.position.row + 1}, {this.props.model.position.column + 1}
         </ide-haskell-item-position>
+      )
+    } else {
+      return ''
+    }
+  }
+
+  private renderContext () {
+    if (this.props.model.context) {
+      return (
+        <ide-haskell-item-context>{this.props.model.context}</ide-haskell-item-context>
       )
     } else {
       return ''
