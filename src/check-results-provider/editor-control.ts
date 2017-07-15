@@ -18,6 +18,7 @@ export class CREditorControl implements IEditorController {
   private disposables: CompositeDisposable
   private markerProps: WeakMap<DisplayMarker, ResultItem>
   private tooltipRegistry: TooltipRegistry
+  private resultsDB: ResultsDB
   constructor (private editor: TextEditor, pluginManager: PluginManager) {
     this.gutter = this.editor.gutterWithName('ide-haskell-check-results')
     if (!this.gutter) {
@@ -28,7 +29,7 @@ export class CREditorControl implements IEditorController {
     }
     this.gutterElement = atom.views.getView(this.gutter)
 
-    const results = pluginManager.resultsDB
+    this.resultsDB = pluginManager.resultsDB
     this.tooltipRegistry = pluginManager.tooltipRegistry
 
     this.disposables = new CompositeDisposable()
@@ -37,8 +38,8 @@ export class CREditorControl implements IEditorController {
       persistent: false
     })
     this.markerProps = new WeakMap()
-    this.disposables.add(results.onDidUpdate(this.updateResults.bind(this)))
-    this.updateResults(results)
+    this.disposables.add(this.resultsDB.onDidUpdate(this.updateResults.bind(this)))
+    this.updateResults()
     this.registerGutterEvents()
   }
 
@@ -93,10 +94,10 @@ export class CREditorControl implements IEditorController {
     ))
   }
 
-  private updateResults (res: ResultsDB) {
+  private updateResults () {
     this.markers.clear()
     const path = this.editor.getPath()
-    for (const r of res.filter((m) => m.uri === path && m.isValid())) {
+    for (const r of this.resultsDB.filter((m) => m.uri === path && m.isValid())) {
       this.markerFromCheckResult(r)
     }
   }

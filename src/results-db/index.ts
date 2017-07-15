@@ -4,7 +4,7 @@ import {Provider, TMessageProviderFunction} from './provider'
 
 export {TPosition, TSeverity, IResultItem, TMessageProviderFunction, ResultItem}
 
-export type TUpdateCallback = (arg: ResultsDB) => void
+export type TUpdateCallback = (severities: TSeverity[]) => void
 
 export class ResultsDB {
   private currentId: number
@@ -37,7 +37,8 @@ export class ResultsDB {
     for (const msg of msgs) {
       this.messages.set(msg.hash(), msg)
     }
-    this.emitter.emit('did-update', this)
+    const severities: TSeverity[] = msgs.map((v) => v.severity)
+    this.emitter.emit('did-update', severities)
   }
 
   public registerProvider () {

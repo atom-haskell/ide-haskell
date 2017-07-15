@@ -4,7 +4,7 @@ import {OutputPanelButtons, ISeverityTabDefinition} from './views/output-panel-b
 import {OutputPanelCheckbox} from './views/output-panel-checkbox'
 import {ProgressBar} from './views/progress-bar'
 import {OutputPanelItems} from './views/output-panel-items'
-import {ResultsDB, ResultItem} from '../results-db'
+import {ResultsDB, ResultItem, TSeverity} from '../results-db'
 const $ = etch.dom
 
 export {ISeverityTabDefinition}
@@ -113,13 +113,13 @@ export class OutputPanel {
       }
     }))
 
-    this.disposables.add(this.results.onDidUpdate(() => {
+    this.disposables.add(this.results.onDidUpdate((severities: TSeverity[]) => {
       this.currentResult = 0
       this.updateItems()
       if (atom.config.get('ide-haskell.autoHideOutput') && this.results.isEmpty()) {
         this.refs.buttons.disableAll()
       } else if (atom.config.get('ide-haskell.switchTabOnCheck')) {
-        this.activateFirstNonEmptyTab()
+        this.activateFirstNonEmptyTab(severities)
       }
     }))
 
@@ -241,8 +241,9 @@ export class OutputPanel {
     this.refs.buttons.clickButton(tab)
   }
 
-  public activateFirstNonEmptyTab () {
-    for (const i of this.refs.buttons.buttonNames()) {
+  public activateFirstNonEmptyTab (severities: TSeverity[]) {
+    const sevs: TSeverity[] = severities || this.refs.buttons.buttonNames()
+    for (const i of sevs) {
       const count = this.refs.buttons.getCount(i)
       if (count && count > 0) {
         this.activateTab(i)
