@@ -33,7 +33,7 @@ export class OutputPanelItems implements JSX.ElementClass {
 
   public async showItem (item: ResultItem) {
     await etch.update(this)
-    const view = this.element.querySelector(`ide-haskell-panel-item[data-hash=${item.hash()}]`) as HTMLElement
+    const view = this.element.querySelector(`ide-haskell-panel-item[data-hash="${item.hash()}"]`) as HTMLElement
     if (view) {
       const pos = view.querySelector('ide-haskell-item-position') as HTMLElement
       if (pos) { pos.click() }

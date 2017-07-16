@@ -51,6 +51,6 @@ export class ResultItem {
       message: this.message.raw(), severity: this.severity,
       context: this.context
     }))
-    return h.digest('latin1')
+    return h.digest('base64')
   }
 }
