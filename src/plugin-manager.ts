@@ -1,6 +1,6 @@
 import {CompositeDisposable, Emitter, TextEditor, Point, TextBuffer, Grammar, Disposable} from 'atom'
 import {ResultsDB} from './results-db'
-import {OutputPanel, IState as IOutputViewState} from './output-panel'
+import {OutputPanel, IState as IOutputViewState, IStatus} from './output-panel'
 import {ConfigParamManager, IState as IParamState} from './config-params'
 import {EditorControl, TTextBufferCallback} from './editor-control'
 import {LinterSupport, ILinter} from './linter-support'
@@ -40,7 +40,6 @@ export class PluginManager {
   private editorDispMap: WeakMap<TextEditor, CompositeDisposable>
   private statusBarTile?: ITile
   private statusBarView?: StatusBarView
-  private statusBarDisp?: Disposable
   constructor (state: IState) {
     this.disposables = new CompositeDisposable()
     this.emitter = new Emitter()
@@ -132,6 +131,15 @@ export class PluginManager {
     this.outputPanel.showPrevError()
   }
 
+  public backendStatus (pluginName: string, st: IStatus) {
+    if (this.outputPanel) {
+      this.outputPanel.backendStatus(pluginName, st)
+    }
+    if (this.statusBarView) {
+      this.statusBarView.backendStatus(pluginName, st)
+    }
+  }
+
   public removeController (editor: TextEditor) {
     const disp = this.editorDispMap.get(editor)
     if (disp) {
@@ -151,11 +159,6 @@ export class PluginManager {
       item: this.statusBarView.element,
       priority: 100
     })
-    this.statusBarDisp = this.outputPanel.onDidChangeIcon(() => {
-      if (this.statusBarView) {
-        this.statusBarView.setStatus(this.outputPanel.getStatus())
-      }
-    })
   }
 
   public removeStatusBar () {
@@ -166,10 +169,6 @@ export class PluginManager {
     if (this.statusBarView) {
       this.statusBarView.destroy()
       this.statusBarView = undefined
-    }
-    if (this.statusBarDisp) {
-      this.statusBarDisp.dispose()
-      this.statusBarDisp = undefined
     }
   }
 

@@ -36,7 +36,7 @@ export function instance (
       return menuDisp
     },
     setStatus (status: IStatus) {
-      return pluginManager.outputPanel.backendStatus(pluginName, status)
+      return pluginManager.backendStatus(pluginName, status)
     },
     setMessages (messages: IResultItem[]) {
       messageProvider.setMessages(messages)

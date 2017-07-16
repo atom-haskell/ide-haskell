@@ -85,7 +85,7 @@ export class UPIInstance {
   @param status current backend status
   */
   setStatus (status: IStatus) {
-    return this.pluginManager.outputPanel.backendStatus(this.pluginName, status)
+    return this.pluginManager.backendStatus(this.pluginName, status)
   }
 
   /**

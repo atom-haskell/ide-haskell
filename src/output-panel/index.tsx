@@ -5,9 +5,10 @@ import {OutputPanelCheckbox} from './views/output-panel-checkbox'
 import {ProgressBar} from './views/progress-bar'
 import {OutputPanelItems} from './views/output-panel-items'
 import {ResultsDB, ResultItem, TSeverity} from '../results-db'
+import {StatusIcon, IStatus} from './views/status-icon'
 const $ = etch.dom
 
-export {ISeverityTabDefinition}
+export {ISeverityTabDefinition, IStatus}
 
 export interface IElementObject<T> {
   element: HTMLElement
@@ -18,21 +19,6 @@ export interface IState {
   fileFilter?: boolean
   activeTab?: string
 }
-
-export interface INormalStatus {
-  status: 'ready' | 'error' | 'warning'
-}
-
-export interface IProgressStatus {
-  status: 'progress'
-  /**
-  float between 0 and 1, only relevant when status is 'progress'
-  if 0 or undefined, progress bar is not shown
-  */
-  progress?: number
-}
-
-export type IStatus = (INormalStatus | IProgressStatus) & {detail: string}
 
 export type TPanelPosition = 'bottom' | 'left' | 'top' | 'right'
 
@@ -68,17 +54,15 @@ export class OutputPanel {
   private refs: {
     items: OutputPanelItems
     buttons: OutputPanelButtons
-    status: HTMLElement
+    // status: HTMLElement
     checkboxUriFilter: OutputPanelCheckbox
     progressBar: ProgressBar
   }
   private hiddenOutput: boolean
   private elements: Set<JSX.Element>
-  private statusMap: Map<string, IStatus>
   private disposables: CompositeDisposable
   private currentResult: number
-  private currentStatus: IStatus
-  private emitter: Emitter
+  private statusMap: Map<string, IStatus>
   constructor (private state: IState = {}, private results: ResultsDB) {
     this.hiddenOutput = true
 
@@ -88,30 +72,9 @@ export class OutputPanel {
 
     this.disposables = new CompositeDisposable()
 
-    this.emitter = new Emitter()
-    this.disposables.add(this.emitter)
-
     this.currentResult = 0
 
-    this.currentStatus = { status: 'ready' } as IStatus
-
     etch.initialize(this)
-
-    this.disposables.add(atom.tooltips.add(this.refs.status, {
-      class: 'ide-haskell-status-tooltip',
-      title: () => {
-        const res = []
-        for (const [plugin, {status, detail}] of this.statusMap.entries()) {
-          res.push(`
-          <ide-haskell-status-item>
-            <ide-haskell-status-icon data-status="${status}">${plugin}</ide-haskell-status-icon>
-            <ide-haskell-status-detail>${detail || ''}</ide-haskell-status-detail>
-          </ide-haskell-status-item>
-          `)
-        }
-        return res.join('')
-      }
-    }))
 
     this.disposables.add(this.results.onDidUpdate((severities: TSeverity[]) => {
       this.currentResult = 0
@@ -136,7 +99,7 @@ export class OutputPanel {
     return (
       <ide-haskell-panel class={this.hiddenOutput ? 'hidden-output' : ''}>
         <ide-haskell-panel-heading>
-          <ide-haskell-status-icon ref="status" dataset={{status: this.currentStatus.status}}/>
+          <StatusIcon ref="status" statusMap={this.statusMap}/>
           <OutputPanelButtons ref="buttons"/>
           <OutputPanelCheckbox ref="checkboxUriFilter" class="ide-haskell-checkbox--uri-filter"
             enabled={this.state.fileFilter}/>
@@ -159,7 +122,6 @@ export class OutputPanel {
   public async reallyDestroy () {
     await etch.destroy(this)
     this.disposables.dispose()
-    this.statusMap.clear()
   }
 
   public getTitle () {
@@ -168,18 +130,6 @@ export class OutputPanel {
 
   public getDefaultLocation () {
     return atom.config.get('ide-haskell.panelPosition')
-  }
-
-  public getIconName (): string {
-    return `ide-haskell-${this.currentStatus.status}`
-  }
-
-  public onDidChangeIcon (callback: (arg: any) => void): Disposable {
-    return this.emitter.on('did-change-icon', callback)
-  }
-
-  public getStatus (): IStatus {
-    return this.currentStatus
   }
 
   public addPanelControl<T> ({element, opts}: TControlDefinition<T>) {
@@ -280,21 +230,11 @@ export class OutputPanel {
   }
 
   public backendStatus (pluginName: string, st: IStatus) {
-    const prio = {
-      progress: 5,
-      error: 20,
-      warning: 10,
-      ready: 0
-    }
     this.statusMap.set(pluginName, st)
-    const stArr = Array.from(this.statusMap.values())
-    const [consensus] = stArr.sort((a, b) => prio[b.status] - prio[a.status])
-    this.currentStatus = consensus
     this.update()
-    this.emitter.emit('did-change-icon')
     let count = 0
     let tot = 0
-    for (const i of stArr) {
+    for (const i of this.statusMap.values()) {
       if (i.status === 'progress' && i.progress !== undefined) {
         tot += i.progress
         count++

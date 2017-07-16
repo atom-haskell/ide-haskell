@@ -1,5 +1,6 @@
 import * as etch from 'etch'
 import {IStatus, OutputPanel} from '../output-panel'
+import {StatusIcon} from '../output-panel/views/status-icon'
 
 export interface ITile {
   getPriority (): number
@@ -15,9 +16,9 @@ export interface IStatusBar {
 export class StatusBarView {
   // tslint:disable-next-line:no-uninitialized-class-properties
   public element: HTMLElement
-  private currentStatus: IStatus
+  private statusMap: Map<string, IStatus>
   constructor (private panel: OutputPanel) {
-    this.currentStatus = { status: 'ready', detail: '' }
+    this.statusMap = new Map()
     etch.initialize(this)
   }
 
@@ -26,7 +27,7 @@ export class StatusBarView {
       <div class="ide-haskell inline-block" on={{click: this.didClick.bind(this)}}>
         <span>
           <ide-haskell-lambda/>
-          <ide-haskell-status-icon dataset={{status: this.currentStatus.status}}/>
+          <StatusIcon statusMap={this.statusMap}/>
         </span>
       </div>
     )
@@ -36,8 +37,8 @@ export class StatusBarView {
     return etch.update(this)
   }
 
-  public setStatus (status: IStatus) {
-    this.currentStatus = status
+  public backendStatus (pluginName: string, st: IStatus) {
+    this.statusMap.set(pluginName, st)
     this.update()
   }
 
