@@ -182,7 +182,7 @@ export class OutputPanel {
   }
 
   public activateFirstNonEmptyTab (severities: TSeverity[]) {
-    const sevs: TSeverity[] = severities || this.refs.buttons.buttonNames()
+    const sevs: TSeverity[] = severities
     for (const i of sevs) {
       const count = this.refs.buttons.getCount(i)
       if (count && count > 0) {
