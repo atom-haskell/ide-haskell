@@ -1,11 +1,10 @@
 import * as etch from 'etch'
-import {Emitter} from 'atom'
 
 export interface IProps {
   active: boolean
-  ref: string
+  name: string
   count: number
-  emitter: Emitter
+  onClick: () => void
 }
 
 export class Button {
@@ -17,8 +16,8 @@ export class Button {
     return (
       <ide-haskell-button
         class={this.props.active ? 'active' : ''}
-        dataset={{caption: this.props.ref, count: this.props.count}}
-        on={{click: this.didClick.bind(this)}}/>
+        dataset={{caption: this.props.name, count: this.props.count}}
+        on={{click: this.props.onClick}}/>
     )
   }
 
@@ -29,34 +28,5 @@ export class Button {
 
   public async destroy () {
     await etch.destroy(this)
-  }
-
-  public toggleActive () {
-    this.props.active = !this.props.active
-    this.update()
-  }
-
-  public deactivate () {
-    this.props.active = false
-    this.update()
-  }
-
-  public activate () {
-    this.props.active = true
-    this.update()
-  }
-
-  public setCount (count: number) {
-    this.props.count = count
-    this.update()
-  }
-
-  public getCount () {
-    return this.props.count
-  }
-
-  private didClick () {
-    this.toggleActive()
-    this.props.emitter.emit('button-clicked', this.props.ref)
   }
 }

@@ -1,5 +1,5 @@
 import * as etch from 'etch'
-import {Disposable, CompositeDisposable, Emitter} from 'atom'
+import {Disposable, CompositeDisposable} from 'atom'
 import {OutputPanelButtons, ISeverityTabDefinition} from './views/output-panel-buttons'
 import {OutputPanelCheckbox} from './views/output-panel-checkbox'
 import {ProgressBar} from './views/progress-bar'
@@ -56,7 +56,6 @@ export class OutputPanel {
     buttons: OutputPanelButtons
     checkboxUriFilter: OutputPanelCheckbox
   }
-  private hiddenOutput: boolean
   private elements: Set<JSX.Element>
   private disposables: CompositeDisposable
   private currentResult: number
@@ -67,7 +66,6 @@ export class OutputPanel {
     this.statusMap = new Map()
     this.disposables = new CompositeDisposable()
 
-    this.hiddenOutput = true
     this.currentResult = 0
     this.progress = []
 
@@ -77,13 +75,13 @@ export class OutputPanel {
       this.currentResult = 0
       this.updateItems()
       if (atom.config.get('ide-haskell.autoHideOutput') && this.results.isEmpty()) {
-        this.refs.buttons.disableAll()
+        atom.workspace.hide(this)
       } else if (atom.config.get('ide-haskell.switchTabOnCheck')) {
+        atom.workspace.open(this, {searchAllPanes: true})
         this.activateFirstNonEmptyTab(severities)
       }
     }))
 
-    this.disposables.add(this.refs.buttons.onButtonClicked(() => this.updateItems()))
     this.disposables.add(this.refs.checkboxUriFilter.onCheckboxSwitched(() => this.updateItems()))
     this.disposables.add(atom.workspace.onDidChangeActivePaneItem(() => {
       if (this.refs.checkboxUriFilter.getFileFilter()) { this.updateItems() }
@@ -92,10 +90,10 @@ export class OutputPanel {
 
   public render () {
     return (
-      <ide-haskell-panel class={this.hiddenOutput ? 'hidden-output' : ''}>
+      <ide-haskell-panel>
         <ide-haskell-panel-heading>
           <StatusIcon ref="status" statusMap={this.statusMap}/>
-          <OutputPanelButtons ref="buttons"/>
+          <OutputPanelButtons ref="buttons" onChange={this.updateItems.bind(this)}/>
           <OutputPanelCheckbox ref="checkboxUriFilter" class="ide-haskell-checkbox--uri-filter"
             enabled={this.state.fileFilter}/>
           {Array.from(this.elements.values())}
@@ -152,7 +150,6 @@ export class OutputPanel {
     const activeTab = this.getActiveTab()
     let currentUri: string
     if (activeTab) {
-      this.hiddenOutput = false
       let filterUri: string | undefined
       const filterSeverity = activeTab
       const ato = this.refs.buttons.options(activeTab)
@@ -167,8 +164,6 @@ export class OutputPanel {
         (severity === filterSeverity) && (!filterUri || uri === filterUri)
       )
       if (scroll) { this.refs.items.scrollToEnd() }
-    } else {
-      this.hiddenOutput = true
     }
 
     this.refs.buttons.buttonNames().forEach((btn) => {
@@ -183,7 +178,7 @@ export class OutputPanel {
   }
 
   public activateTab (tab: string) {
-    this.refs.buttons.clickButton(tab)
+    this.refs.buttons.setActive(tab)
   }
 
   public activateFirstNonEmptyTab (severities: TSeverity[]) {

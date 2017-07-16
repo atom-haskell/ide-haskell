@@ -6970,7 +6970,7 @@ declare module AtomTypes {
          * @returns {Promise<any>} Returns a {Promise} that resolves to the {TextEditor} for the file URI.
          */
         open(uri?: string, options?: Object): Promise<any>;
-        open(item: Object): Promise<any>;
+        open(item: Object, options?: Object): Promise<any>;
         hide(itemOrURI: Object | String): boolean;
         toggle(itemOrURI: Object | String): Promise<void>;
         /**

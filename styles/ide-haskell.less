@@ -65,16 +65,6 @@
 ide-haskell-panel {
   display: flex;
 
-  &.hidden-output {
-    height: auto !important;
-    width: auto !important;
-    min-height: inherit !important;
-    min-width: inherit !important;
-    ide-haskell-panel-items {
-      display: none;
-    }
-  }
-
   atom-dock.bottom &, atom-workspace-axis > atom-pane-container & {
     width: auto !important;
     flex-direction: column;
