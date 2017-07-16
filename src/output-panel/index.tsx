@@ -54,25 +54,22 @@ export class OutputPanel {
   private refs: {
     items: OutputPanelItems
     buttons: OutputPanelButtons
-    // status: HTMLElement
     checkboxUriFilter: OutputPanelCheckbox
-    progressBar: ProgressBar
   }
   private hiddenOutput: boolean
   private elements: Set<JSX.Element>
   private disposables: CompositeDisposable
   private currentResult: number
   private statusMap: Map<string, IStatus>
+  private progress: number[]
   constructor (private state: IState = {}, private results: ResultsDB) {
-    this.hiddenOutput = true
-
     this.elements = new Set()
-
     this.statusMap = new Map()
-
     this.disposables = new CompositeDisposable()
 
+    this.hiddenOutput = true
     this.currentResult = 0
+    this.progress = []
 
     etch.initialize(this)
 
@@ -85,8 +82,6 @@ export class OutputPanel {
         this.activateFirstNonEmptyTab(severities)
       }
     }))
-
-    this.setProgress(NaN)
 
     this.disposables.add(this.refs.buttons.onButtonClicked(() => this.updateItems()))
     this.disposables.add(this.refs.checkboxUriFilter.onCheckboxSwitched(() => this.updateItems()))
@@ -104,7 +99,7 @@ export class OutputPanel {
           <OutputPanelCheckbox ref="checkboxUriFilter" class="ide-haskell-checkbox--uri-filter"
             enabled={this.state.fileFilter}/>
           {Array.from(this.elements.values())}
-          <ProgressBar ref="progressBar"/>
+          <ProgressBar progress={this.progress}/>
         </ide-haskell-panel-heading>
         <OutputPanelItems model={this.results} ref="items"/>
       </ide-haskell-panel>
@@ -218,10 +213,6 @@ export class OutputPanel {
     }
   }
 
-  public setProgress (progress: number) {
-    this.refs.progressBar.setProgress(progress)
-  }
-
   public serialize (): IState {
     return {
       activeTab: this.getActiveTab(),
@@ -231,17 +222,18 @@ export class OutputPanel {
 
   public backendStatus (pluginName: string, st: IStatus) {
     this.statusMap.set(pluginName, st)
+    this.progress =
+      Array.from(this.statusMap.values())
+      .reduce(
+        (cv, i) => {
+          if (i.status === 'progress' && i.progress !== undefined) {
+            cv.push(i.progress)
+          }
+          return cv
+        },
+        [] as number[]
+      )
     this.update()
-    let count = 0
-    let tot = 0
-    for (const i of this.statusMap.values()) {
-      if (i.status === 'progress' && i.progress !== undefined) {
-        tot += i.progress
-        count++
-      }
-    }
-    const progressAve = tot / count
-    this.setProgress(progressAve)
   }
 
   public showNextError () {
