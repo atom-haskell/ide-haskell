@@ -26,7 +26,7 @@ export class StatusBarView {
       <div class="ide-haskell inline-block" on={{click: this.didClick.bind(this)}}>
         <span>
           <ide-haskell-lambda/>
-          <ide-haskell-status-icon ref="status" id="status" dataset={{status: this.currentStatus.status}}/>
+          <ide-haskell-status-icon dataset={{status: this.currentStatus.status}}/>
         </span>
       </div>
     )

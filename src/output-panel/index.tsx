@@ -135,15 +135,15 @@ export class OutputPanel {
   public render () {
     return (
       <ide-haskell-panel class={this.hiddenOutput ? 'hidden-output' : ''}>
-        <ide-haskell-panel-heading ref="heading">
-          <ide-haskell-status-icon ref="status" id="status" dataset={{status: this.currentStatus.status}}/>
-          <OutputPanelButtons ref="buttons" id="buttons"/>
-          <OutputPanelCheckbox ref="checkboxUriFilter" id="checkboxUriFilter"
+        <ide-haskell-panel-heading>
+          <ide-haskell-status-icon ref="status" dataset={{status: this.currentStatus.status}}/>
+          <OutputPanelButtons ref="buttons"/>
+          <OutputPanelCheckbox ref="checkboxUriFilter" class="ide-haskell-checkbox--uri-filter"
             enabled={this.state.fileFilter}/>
           {Array.from(this.elements.values())}
-          <ProgressBar ref="progressBar" id="progressBar"/>
+          <ProgressBar ref="progressBar"/>
         </ide-haskell-panel-heading>
-        <OutputPanelItems model={this.results} ref="items" id="items"/>
+        <OutputPanelItems model={this.results} ref="items"/>
       </ide-haskell-panel>
     )
   }

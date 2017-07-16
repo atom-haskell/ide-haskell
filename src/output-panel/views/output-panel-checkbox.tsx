@@ -2,15 +2,15 @@ import {Emitter, CompositeDisposable} from 'atom'
 import * as etch from 'etch'
 
 export class OutputPanelCheckbox {
-  private id?: string
   private state: boolean
+  private class: string
   private disposables: CompositeDisposable
   private emitter: Emitter
   // tslint:disable-next-line:no-uninitialized-class-properties
   private element: HTMLElement
-  constructor ({id, enabled = false}: {id?: string, enabled?: boolean} = {}) {
-    this.id = id
-    this.state = enabled
+  constructor (props: {enabled?: boolean, class?: string} = {}) {
+    this.state = props.enabled !== undefined ? props.enabled : false
+    this.class = props.class || ''
     this.disposables = new CompositeDisposable()
     this.emitter = new Emitter()
     this.disposables.add(this.emitter)
@@ -22,8 +22,8 @@ export class OutputPanelCheckbox {
 
   public render () {
     return (
-      <ide-haskell-checkbox id={this.id}
-        class={this.state ? 'enabled' : ''}
+      <ide-haskell-checkbox
+        class={`${this.class}${this.state ? ' enabled' : ''}`}
         on={{click: this.toggleFileFilter.bind(this)}}/>
     )
   }
