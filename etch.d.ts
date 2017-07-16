@@ -8,7 +8,7 @@ declare namespace JSX {
   class ElementClass {
     props: Props
     constructor (props: Props)
-    render (): Element
+    render? (): Element
     update (props: Props) : Promise<void>
   }
   interface IntrinsicElements {
