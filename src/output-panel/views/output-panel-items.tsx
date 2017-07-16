@@ -2,16 +2,15 @@ import * as etch from 'etch'
 import {OutputPanelItem} from './output-panel-item'
 import {ResultsDB, ResultItem} from '../../results-db'
 
-export class OutputPanelItems {
-  private model: ResultsDB
-  private items: ResultItem[]
-  private activeFilter: (item: ResultItem) => boolean
+export interface IProps extends JSX.Props {
+  model: ResultsDB
+  filter: (item: ResultItem) => boolean
+}
+
+export class OutputPanelItems implements JSX.ElementClass {
   // tslint:disable-next-line:no-uninitialized-class-properties
   private element: HTMLElement
-  constructor ({model}: {model: ResultsDB}) {
-    this.model = model
-    this.items = []
-    this.activeFilter = () => true
+  constructor (public props: IProps) {
     etch.initialize(this)
   }
 
@@ -23,8 +22,8 @@ export class OutputPanelItems {
     )
   }
 
-  public update (props?: {model: ResultsDB}) {
-    if (props && props.model) { this.model = props.model }
+  public async update (props: IProps) {
+    this.props = props
     return etch.update(this)
   }
 
@@ -32,21 +31,12 @@ export class OutputPanelItems {
     await etch.destroy(this)
   }
 
-  public async filter (activeFilter: (item: ResultItem) => boolean) {
-    this.activeFilter = activeFilter
-    if (this.model) {
-      this.items = Array.from(this.model.filter(this.activeFilter))
-    } else {
-      this.items = []
-    }
-    await this.update()
-  }
-
   public async showItem (item: ResultItem) {
-    await this.update()
-    const view = [].slice.call(this.element.querySelectorAll(`ide-haskell-panel-item`))[this.items.indexOf(item)]
+    await etch.update(this)
+    const view = this.element.querySelector(`ide-haskell-panel-item[data-hash=${item.hash()}]`) as HTMLElement
     if (view) {
-      view.querySelector('ide-haskell-item-position').click()
+      const pos = view.querySelector('ide-haskell-item-position') as HTMLElement
+      if (pos) { pos.click() }
       view.scrollIntoView({
         block: 'start',
         behavior: 'smooth'
@@ -55,7 +45,7 @@ export class OutputPanelItems {
   }
 
   public async scrollToEnd () {
-    await this.update()
+    await etch.update(this)
     this.element.scrollTop = this.element.scrollHeight
   }
 
@@ -64,7 +54,7 @@ export class OutputPanelItems {
   }
 
   private renderItems () {
-    return this.items.map(
+    return Array.from(this.props.model.filter(this.props.filter)).map(
       (item) => <OutputPanelItem model={item} />
     )
   }

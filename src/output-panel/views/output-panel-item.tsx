@@ -2,14 +2,16 @@ import * as etch from 'etch'
 import {ResultItem} from '../../results-db'
 import {TextEditor} from 'atom'
 
-export class OutputPanelItem {
-  constructor (private props: {model: ResultItem}) {
+export interface IProps extends JSX.Props {model: ResultItem}
+
+export class OutputPanelItem implements JSX.ElementClass {
+  constructor (public props: IProps) {
     etch.initialize(this)
   }
 
   public render () {
     return (
-      <ide-haskell-panel-item>
+      <ide-haskell-panel-item dataset={{hash: this.props.model.hash()}}>
         {this.renderPosition()}
         {this.renderContext()}
         <ide-haskell-item-description innerHTML={this.props.model.message.toHtml()}/>
@@ -17,7 +19,7 @@ export class OutputPanelItem {
     )
   }
 
-  public update (props: {model: ResultItem}) {
+  public async update (props: IProps) {
     if (props && props.model) { this.props.model = props.model }
     return etch.update(this)
   }

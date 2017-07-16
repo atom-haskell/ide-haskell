@@ -17,14 +17,14 @@ export interface IBtnDesc {
   autoScroll: boolean
 }
 
-export class OutputPanelButtons {
+export interface IProps extends JSX.Props {onChange?: (btn: string) => void}
+
+export class OutputPanelButtons implements JSX.ElementClass {
   private buttons: Map<string, IBtnDesc>
   private activeBtn: string
-  private onChange?: (btn: string) => void
-  constructor (props: {onChange?: (btn: string) => void}) {
+  constructor (public props: IProps) {
     this.buttons = new Map()
-    this.activeBtn = 'error'
-    this.onChange = props.onChange;
+    this.activeBtn = 'error';
     ['error', 'warning', 'lint'].forEach((btn) => this.createButton(btn))
     this.createButton('build', {uriFilter: false, autoScroll: true})
     etch.initialize(this)
@@ -38,7 +38,8 @@ export class OutputPanelButtons {
     )
   }
 
-  public update () {
+  public async update (props?: IProps) {
+    if (props) { this.props = props }
     return etch.update(this)
   }
 
@@ -83,7 +84,7 @@ export class OutputPanelButtons {
     if (! this.buttons.has(btn)) { throw new Error(`Unknown button ${btn}`)}
     this.activeBtn = btn
     this.update()
-    if (this.onChange) { this.onChange(btn) }
+    if (this.props.onChange) { this.props.onChange(btn) }
   }
 
   public async destroy () {

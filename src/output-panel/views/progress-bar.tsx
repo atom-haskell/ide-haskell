@@ -1,9 +1,11 @@
 import * as etch from 'etch'
 
-export class ProgressBar {
-  private progress: number[]
-  constructor (props: {progress: number[]}) {
-    this.progress = props.progress
+export interface IProps extends JSX.Props {
+  progress: number[]
+}
+
+export class ProgressBar implements JSX.ElementClass {
+  constructor (public props: IProps) {
     etch.initialize(this)
   }
 
@@ -17,10 +19,12 @@ export class ProgressBar {
     )
   }
 
-  public update (props: {progress: number[]}) {
-    if (props && this.progress !== props.progress) {
-      this.progress = props.progress
-      etch.update(this)
+  public async update (props: IProps) {
+    if (this.props.progress !== props.progress) {
+      this.props.progress = props.progress
+      return etch.update(this)
+    } else {
+      return Promise.resolve()
     }
   }
 
@@ -29,6 +33,6 @@ export class ProgressBar {
   }
 
   private aveProgress () {
-    return this.progress.reduce((a, b) => a + b, 0) / this.progress.length
+    return this.props.progress.reduce((a, b) => a + b, 0) / this.props.progress.length
   }
 }

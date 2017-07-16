@@ -1,13 +1,13 @@
 import * as etch from 'etch'
 
-export interface IProps {
+export interface IProps extends JSX.Props {
   active: boolean
   name: string
   count: number
   onClick: () => void
 }
 
-export class Button {
+export class Button implements JSX.ElementClass {
   constructor (public props: IProps) {
     etch.initialize(this)
   }
@@ -21,8 +21,8 @@ export class Button {
     )
   }
 
-  public update (props?: IProps) {
-    if (props) { this.props = props }
+  public async update (props: IProps) {
+    this.props = props
     return etch.update(this)
   }
 

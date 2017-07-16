@@ -61,6 +61,7 @@ export class OutputPanel {
   private currentResult: number
   private statusMap: Map<string, IStatus>
   private progress: number[]
+  private itemFilter: (item: ResultItem) => boolean
   constructor (private state: IState = {}, private results: ResultsDB) {
     this.elements = new Set()
     this.statusMap = new Map()
@@ -68,6 +69,7 @@ export class OutputPanel {
 
     this.currentResult = 0
     this.progress = []
+    this.itemFilter = () => true
 
     etch.initialize(this)
 
@@ -82,9 +84,8 @@ export class OutputPanel {
       }
     }))
 
-    this.disposables.add(this.refs.checkboxUriFilter.onCheckboxSwitched(() => this.updateItems()))
     this.disposables.add(atom.workspace.onDidChangeActivePaneItem(() => {
-      if (this.refs.checkboxUriFilter.getFileFilter()) { this.updateItems() }
+      if (this.refs.checkboxUriFilter.getState()) { this.updateItems() }
     }))
   }
 
@@ -95,16 +96,19 @@ export class OutputPanel {
           <StatusIcon ref="status" statusMap={this.statusMap}/>
           <OutputPanelButtons ref="buttons" onChange={this.updateItems.bind(this)}/>
           <OutputPanelCheckbox ref="checkboxUriFilter" class="ide-haskell-checkbox--uri-filter"
-            enabled={this.state.fileFilter}/>
+            initialState={this.state.fileFilter} onSwitched={this.updateItems.bind(this)}
+            enabledHint="Show current file messages"
+            disabledHint="Show all project messages"
+            />
           {Array.from(this.elements.values())}
           <ProgressBar progress={this.progress}/>
         </ide-haskell-panel-heading>
-        <OutputPanelItems model={this.results} ref="items"/>
+        <OutputPanelItems model={this.results} filter={this.itemFilter} ref="items"/>
       </ide-haskell-panel>
     )
   }
 
-  public update () {
+  public async update () {
     return etch.update(this)
   }
 
@@ -153,16 +157,14 @@ export class OutputPanel {
       let filterUri: string | undefined
       const filterSeverity = activeTab
       const ato = this.refs.buttons.options(activeTab)
-      if (this.refs.checkboxUriFilter.getFileFilter()) {
+      if (this.refs.checkboxUriFilter.getState()) {
         currentUri = atom.workspace.getActiveTextEditor().getPath()
         if (currentUri && ato && ato.uriFilter) {
           filterUri = currentUri
         }
       }
       const scroll = ato && ato.autoScroll && this.refs.items.atEnd()
-      this.refs.items.filter(({uri, severity}) =>
-        (severity === filterSeverity) && (!filterUri || uri === filterUri)
-      )
+      this.itemFilter = ({uri, severity}) => (severity === filterSeverity) && (!filterUri || uri === filterUri)
       if (scroll) { this.refs.items.scrollToEnd() }
     }
 
@@ -211,7 +213,7 @@ export class OutputPanel {
   public serialize (): IState {
     return {
       activeTab: this.getActiveTab(),
-      fileFilter: this.refs.checkboxUriFilter.getFileFilter()
+      fileFilter: this.refs.checkboxUriFilter.getState()
     }
   }
 

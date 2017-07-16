@@ -33,7 +33,7 @@ export class StatusBarView {
     )
   }
 
-  public update () {
+  public async update () {
     return etch.update(this)
   }
 

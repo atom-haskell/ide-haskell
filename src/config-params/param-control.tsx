@@ -56,7 +56,7 @@ export class ParamControl<T> implements IElementObject<IProps<T>> {
     const classList = [`ide-haskell--${this.pluginName}`, `ide-haskell-param--${this.name}`]
     if (this.hiddenValue) { classList.push('hidden-value') }
     return (
-      <ide-haskell-param class={classList.join(' ')} on={{click: this.setValue.bind(this)}}>
+      <ide-haskell-param class={classList.join(' ')} on={{click: async () => this.setValue()}}>
         <ide-haskell-param-value>
           {this.spec.displayTemplate(this.value)}
         </ide-haskell-param-value>
@@ -64,7 +64,7 @@ export class ParamControl<T> implements IElementObject<IProps<T>> {
     )
   }
 
-  public update (props?: IProps<T>) {
+  public async update (props?: IProps<T>) {
     if (props) {
       const {pluginName, name, spec, store} = props
       if (pluginName) { this.pluginName = pluginName }
@@ -81,8 +81,8 @@ export class ParamControl<T> implements IElementObject<IProps<T>> {
     return etch.update(this)
   }
 
-  public async setValue (e: T) {
-    await this.store.setValue(this.pluginName, this.name)
+  public async setValue (e?: T) {
+    await this.store.setValue(this.pluginName, this.name, e)
     this.update()
   }
 

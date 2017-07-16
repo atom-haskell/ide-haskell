@@ -2,8 +2,34 @@
 
 declare namespace JSX {
   type Element = {}
-  // interface IntrinsicElements extends etch.dom {}
-  interface IntrinsicElements { [elemName: string]: any; }
+  interface Props {
+     ref?: string
+  }
+  class ElementClass {
+    props: Props
+    constructor (props: Props)
+    render (): Element
+    update (props: Props) : Promise<void>
+  }
+  interface IntrinsicElements {
+    [elemName: string]: {
+      ref?: string
+      class?: string
+      className?: string
+      on?: {
+        click: (e: MouseEvent) => any
+      }
+      dataset?: {
+        [propName: string]: string | number
+      }
+      innerHTML?: string
+      tabIndex?: string
+      style?: { [propName: string]: string }
+    }
+  }
+  interface ElementAttributesProperty {
+    props: Props // specify the property name to use
+  }
 }
 
 declare module "etch" {
@@ -14,7 +40,7 @@ declare module "etch" {
   export function initialize(component: any): void;
   export function render(virtualNode: any, options: any): any;
   export function setScheduler(customScheduler: any): void;
-  export function update(component: any, replaceNode?: boolean): any;
+  export function update(component: any, replaceNode?: boolean): Promise<void>;
   export function updateSync(component: any, replaceNode: any): void;
   export interface dom {
       a(props: any, children: any): any;

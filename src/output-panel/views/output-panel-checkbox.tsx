@@ -1,19 +1,22 @@
-import {Emitter, CompositeDisposable} from 'atom'
+import {CompositeDisposable} from 'atom'
 import * as etch from 'etch'
 
-export class OutputPanelCheckbox {
-  private state: boolean
-  private class: string
+interface IProps extends JSX.Props {
+  initialState?: boolean
+  class?: string
+  onSwitched?: (state: boolean) => void
+  enabledHint?: string
+  disabledHint?: string
+}
+
+export class OutputPanelCheckbox implements JSX.ElementClass {
   private disposables: CompositeDisposable
-  private emitter: Emitter
   // tslint:disable-next-line:no-uninitialized-class-properties
   private element: HTMLElement
-  constructor (props: {enabled?: boolean, class?: string} = {}) {
-    this.state = props.enabled !== undefined ? props.enabled : false
-    this.class = props.class || ''
+  private state: boolean
+  constructor (public props: IProps = {}) {
+    this.state = !! props.initialState
     this.disposables = new CompositeDisposable()
-    this.emitter = new Emitter()
-    this.disposables.add(this.emitter)
     etch.initialize(this)
     this.disposables.add(
       atom.tooltips.add(this.element, {title: this.tooltipTitle.bind(this)})
@@ -23,31 +26,18 @@ export class OutputPanelCheckbox {
   public render () {
     return (
       <ide-haskell-checkbox
-        class={`${this.class}${this.state ? ' enabled' : ''}`}
-        on={{click: this.toggleFileFilter.bind(this)}}/>
+        class={`${this.props.class}${this.state ? ' enabled' : ''}`}
+        on={{click: this.toggleState.bind(this)}}/>
     )
   }
 
-  public update () {
+  public async update (props?: IProps) {
+    if (props) { this.props = props }
     return etch.update(this)
   }
 
-  public onCheckboxSwitched (callback: (state: boolean) => void) {
-    return this.emitter.on('checkbox-switched', callback)
-  }
-
-  public setFileFilter (state: boolean) {
-    this.state = state
-    this.emitter.emit('checkbox-switched', this.state)
-    this.update()
-  }
-
-  public getFileFilter () {
+  public getState () {
     return this.state
-  }
-
-  public toggleFileFilter () {
-    this.setFileFilter(!this.getFileFilter())
   }
 
   public async destroy () {
@@ -55,11 +45,21 @@ export class OutputPanelCheckbox {
     this.disposables.dispose()
   }
 
+  private setState (state: boolean) {
+    this.state = state
+    if (this.props.onSwitched) { this.props.onSwitched(this.state) }
+    this.update()
+  }
+
+  private toggleState () {
+    this.setState(!this.getState())
+  }
+
   private tooltipTitle () {
-    if (this.getFileFilter()) {
-      return 'Show current file messages'
+    if (this.getState()) {
+      return this.props.enabledHint
     } else {
-      return 'Show all project messages'
+      return this.props.disabledHint
     }
   }
 }

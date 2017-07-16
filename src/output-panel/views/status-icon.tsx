@@ -16,13 +16,13 @@ export interface IProgressStatus {
 
 export type IStatus = (INormalStatus | IProgressStatus) & {detail: string}
 
-export class StatusIcon {
+export interface IProps extends JSX.Props {statusMap: Map<string, IStatus>}
+
+export class StatusIcon implements JSX.ElementClass {
   private disposables: CompositeDisposable
   // tslint:disable-next-line:no-uninitialized-class-properties
   private element: HTMLElement
-  private statusMap: Map<string, IStatus>
-  constructor (props: {statusMap: Map<string, IStatus>}) {
-    this.statusMap = props.statusMap
+  constructor (public props: IProps) {
     this.disposables = new CompositeDisposable()
 
     etch.initialize(this)
@@ -31,7 +31,7 @@ export class StatusIcon {
       class: 'ide-haskell-status-tooltip',
       title: () => {
         const res = []
-        for (const [plugin, {status, detail}] of this.statusMap.entries()) {
+        for (const [plugin, {status, detail}] of this.props.statusMap.entries()) {
           res.push(`
           <ide-haskell-status-item>
             <ide-haskell-status-icon data-status="${status}">${plugin}</ide-haskell-status-icon>
@@ -50,17 +50,15 @@ export class StatusIcon {
     )
   }
 
-  public update (props?: {statusMap: Map<string, IStatus>}) {
-    if (props) {
-      // TODO: Diff algo
-      this.statusMap = props.statusMap
-      etch.update(this)
-    }
+  public async update (props: IProps) {
+    // TODO: Diff algo
+    this.props.statusMap = props.statusMap
+    return etch.update(this)
   }
 
   public async destroy () {
     await etch.destroy(this)
-    this.statusMap.clear()
+    this.props.statusMap.clear()
   }
 
   private calcCurrentStatus (): 'ready' | 'warning' | 'error' | 'progress' {
@@ -70,7 +68,7 @@ export class StatusIcon {
       warning: 10,
       ready: 0
     }
-    const stArr = Array.from(this.statusMap.values())
+    const stArr = Array.from(this.props.statusMap.values())
     const [consensus] = stArr.sort((a, b) => prio[b.status] - prio[a.status])
     return consensus ? consensus.status : 'ready'
   }
