@@ -31,18 +31,24 @@ export class OutputPanelItem implements JSX.ElementClass {
   }
 
   public clickPosition () {
-    atom.workspace.open(this.props.model.uri).then((editor: TextEditor) => {
-      if (this.props.model.position) {
-        editor.setCursorBufferPosition(this.props.model.position)
-      }
-    })
+    if (this.props.model.uri) {
+      atom.workspace.open(this.props.model.uri).then((editor: TextEditor) => {
+        if (this.props.model.position) {
+          editor.setCursorBufferPosition(this.props.model.position)
+        }
+      })
+    }
   }
 
   private renderPosition () {
-    if (this.props.model.uri && this.props.model.position) {
+    if (this.props.model.uri) {
+      const positionText =
+        this.props.model.position
+        ? `${this.props.model.uri}: ${this.props.model.position.row + 1}, ${this.props.model.position.column + 1}`
+        : this.props.model.uri
       return (
         <ide-haskell-item-position on={{click: this.clickPosition.bind(this)}}>
-          {this.props.model.uri}: {this.props.model.position.row + 1}, {this.props.model.position.column + 1}
+          {positionText}
         </ide-haskell-item-position>
       )
     } else {
