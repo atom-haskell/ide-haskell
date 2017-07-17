@@ -14,7 +14,7 @@ export function getEventType (detail: any) {
 
   // screen position from mouse event
 export function bufferPositionFromMouseEvent (editor: TextEditor, event: MouseEvent) {
-  const sp = atom.views.getView(editor).component.screenPositionForMouseEvent(event)
+  const sp = (atom.views.getView(editor) as any).component.screenPositionForMouseEvent(event)
   if (isNaN(sp.row) || isNaN(sp.column)) { return }
   return editor.bufferPositionForScreenPosition(sp)
 }

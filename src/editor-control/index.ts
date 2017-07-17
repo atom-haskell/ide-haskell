@@ -36,7 +36,7 @@ export class EditorControl implements IEditorController {
     this.disposables.add(this.tooltips)
     this.tooltipRegistry = pluginManager.tooltipRegistry
 
-    this.editorElement = atom.views.getView(this.editor)
+    this.editorElement = atom.views.getView(this.editor) as any
 
     const buffer = this.editor.getBuffer()
 

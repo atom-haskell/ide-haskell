@@ -81,7 +81,11 @@ export class OutputPanelButtons implements JSX.ElementClass {
 
   public setActive (btn: string) {
     if (btn === this.activeBtn) { return }
-    if (! this.buttons.has(btn)) { throw new Error(`Unknown button ${btn}`)}
+    if (! this.buttons.has(btn)) {
+      // tslint:disable-next-line: no-console
+      console.warn(`IDE-Haskell: Unknown button activated: ${btn}`)
+      return
+    }
     this.activeBtn = btn
     this.update()
     if (this.props.onChange) { this.props.onChange(btn) }
