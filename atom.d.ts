@@ -5,6 +5,8 @@ declare module AtomTypes {
   type TextEditorRegistry = any;
   type ReadStream = any;
   type WriteStream = any;
+  type IPoint = Point | [number, number] | {row: number, column: number}
+  type IRange = Range | [IPoint, IPoint]
 }
 
 declare module "atom" {
