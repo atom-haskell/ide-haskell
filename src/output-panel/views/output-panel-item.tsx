@@ -5,13 +5,15 @@ import {TextEditor} from 'atom'
 export interface IProps extends JSX.Props {model: ResultItem}
 
 export class OutputPanelItem implements JSX.ElementClass {
+  // tslint:disable-next-line: no-uninitialized-class-properties
+  public element: HTMLElement
   constructor (public props: IProps) {
     etch.initialize(this)
   }
 
   public render () {
     return (
-      <ide-haskell-panel-item dataset={{hash: this.props.model.hash()}}>
+      <ide-haskell-panel-item>
         {this.renderPosition()}
         {this.renderContext()}
         <ide-haskell-item-description innerHTML={this.props.model.message.toHtml()}/>
@@ -28,10 +30,18 @@ export class OutputPanelItem implements JSX.ElementClass {
     await etch.destroy(this)
   }
 
+  public clickPosition () {
+    atom.workspace.open(this.props.model.uri).then((editor: TextEditor) => {
+      if (this.props.model.position) {
+        editor.setCursorBufferPosition(this.props.model.position)
+      }
+    })
+  }
+
   private renderPosition () {
     if (this.props.model.uri && this.props.model.position) {
       return (
-        <ide-haskell-item-position on={{click: this.didClickPosition.bind(this)}}>
+        <ide-haskell-item-position on={{click: this.clickPosition.bind(this)}}>
           {this.props.model.uri}: {this.props.model.position.row + 1}, {this.props.model.position.column + 1}
         </ide-haskell-item-position>
       )
@@ -48,13 +58,5 @@ export class OutputPanelItem implements JSX.ElementClass {
     } else {
       return ''
     }
-  }
-
-  private didClickPosition () {
-    atom.workspace.open(this.props.model.uri).then((editor: TextEditor) => {
-      if (this.props.model.position) {
-        editor.setCursorBufferPosition(this.props.model.position)
-      }
-    })
   }
 }

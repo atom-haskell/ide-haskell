@@ -10,7 +10,9 @@ export interface IProps extends JSX.Props {
 export class OutputPanelItems implements JSX.ElementClass {
   // tslint:disable-next-line:no-uninitialized-class-properties
   private element: HTMLElement
+  private itemMap: WeakMap<ResultItem, any>
   constructor (public props: IProps) {
+    this.itemMap = new WeakMap()
     etch.initialize(this)
   }
 
@@ -33,11 +35,10 @@ export class OutputPanelItems implements JSX.ElementClass {
 
   public async showItem (item: ResultItem) {
     await etch.update(this)
-    const view = this.element.querySelector(`ide-haskell-panel-item[data-hash="${item.hash()}"]`) as HTMLElement
+    const view = this.itemMap.get(item)
     if (view) {
-      const pos = view.querySelector('ide-haskell-item-position') as HTMLElement
-      if (pos) { pos.click() }
-      view.scrollIntoView({
+      view.component.clickPosition()
+      view.domNode.scrollIntoView({
         block: 'start',
         behavior: 'smooth'
       })
@@ -55,7 +56,11 @@ export class OutputPanelItems implements JSX.ElementClass {
 
   private renderItems () {
     return Array.from(this.props.model.filter(this.props.filter)).map(
-      (item) => <OutputPanelItem model={item} />
+      (item) => {
+        const view = <OutputPanelItem model={item} />
+        this.itemMap.set(item, view)
+        return view
+      }
     )
   }
 }
