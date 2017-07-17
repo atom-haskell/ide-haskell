@@ -64,22 +64,24 @@ export function activate (state: IState) {
   }))
 
   disposables.add(
-    atom.commands.add('atom-text-editor[data-grammar~="haskell"]', {
+    atom.commands.add('atom-text-editor.ide-haskell', {
       'ide-haskell:prettify-file': ({currentTarget}: IEventDesc) => {
         prettifyFile(currentTarget.getModel())
       },
+      'ide-haskell:next-error': () => pluginManager && pluginManager.nextError(),
+      'ide-haskell:prev-error': () => pluginManager && pluginManager.prevError()
+    }),
+    atom.commands.add('atom-text-editor.ide-haskell--has-tooltips', {
       'ide-haskell:close-tooltip': ({currentTarget, abortKeyBinding}: IEventDesc) => {
         const controller = pluginManager && pluginManager.controller(currentTarget.getModel())
-        if (!controller) { return }
-        if (controller.tooltips.has()) {
+        if (controller && controller.tooltips.has()) {
           controller.tooltips.hide()
         } else if (abortKeyBinding) {
           abortKeyBinding()
         }
-      },
-      'ide-haskell:next-error': () => pluginManager && pluginManager.nextError(),
-      'ide-haskell:prev-error': () => pluginManager && pluginManager.prevError()
-    }))
+      }
+    }),
+  )
 
   disposables.add(
     atom.commands.add('atom-text-editor[data-grammar~="cabal"]', {
@@ -89,7 +91,7 @@ export function activate (state: IState) {
     }))
 
   atom.keymaps.add('ide-haskell', {
-    'atom-text-editor[data-grammar~="haskell"]':
+    'atom-text-editor.ide-haskell--has-tooltips':
       {escape: 'ide-haskell:close-tooltip'}
   })
 

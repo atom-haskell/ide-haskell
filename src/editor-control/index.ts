@@ -52,9 +52,12 @@ export class EditorControl implements IEditorController {
       listen(this.editorElement, 'mouseout', '.scroll-view', this.stopTrackingMouseBufferPosition.bind(this)),
       this.editor.onDidChangeSelectionRange(this.trackSelection.bind(this)),
     )
+
+    this.editorElement.classList.add('ide-haskell')
   }
 
   public destroy () {
+    this.editorElement.classList.remove('ide-haskell')
     if (this.exprTypeTimeout) {
       clearTimeout(this.exprTypeTimeout)
     }
