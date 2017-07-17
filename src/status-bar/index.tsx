@@ -47,6 +47,6 @@ export class StatusBarView {
   }
 
   private didClick () {
-    atom.workspace.toggle(this.panel)
+    this.panel.toggle()
   }
 }

@@ -6,6 +6,7 @@ import {ProgressBar} from './views/progress-bar'
 import {OutputPanelItems} from './views/output-panel-items'
 import {ResultsDB, ResultItem, TSeverity} from '../results-db'
 import {StatusIcon, IStatus} from './views/status-icon'
+import {isDock} from '../utils'
 const $ = etch.dom
 
 export {ISeverityTabDefinition, IStatus}
@@ -77,9 +78,9 @@ export class OutputPanel {
       this.currentResult = 0
       this.updateItems()
       if (atom.config.get('ide-haskell.autoHideOutput') && this.results.isEmpty()) {
-        atom.workspace.hide(this)
+        this.hide()
       } else if (atom.config.get('ide-haskell.switchTabOnCheck')) {
-        atom.workspace.open(this, {searchAllPanes: true})
+        this.show()
         this.activateFirstNonEmptyTab(severities)
       }
     }))
@@ -113,12 +114,31 @@ export class OutputPanel {
   }
 
   public async destroy () {
-    atom.workspace.hide(this)
+    this.hide()
   }
 
   public async reallyDestroy () {
     await etch.destroy(this)
     this.disposables.dispose()
+  }
+
+  public async toggle () {
+    const pane = atom.workspace.paneContainerForItem(this)
+    if (! pane || isDock(pane) && ! pane.isVisible()) {
+      this.show()
+    } else {
+      this.hide()
+    }
+  }
+
+  public async show () {
+    await atom.workspace.open(this, {searchAllPanes: true, activatePane: false})
+    const pane = atom.workspace.paneContainerForItem(this)
+    if (pane && isDock(pane)) { pane.show() }
+  }
+
+  public async hide () {
+    atom.workspace.hide(this)
   }
 
   public getTitle () {
