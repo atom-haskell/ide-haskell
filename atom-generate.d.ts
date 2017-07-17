@@ -876,7 +876,9 @@ declare module AtomTypes {
          * @returns {Disposable} Returns a {Disposable} with the following keys on which you can call
         `.dispose()` to unsubscribe.
          */
-        onDidChange(keyPath?: string, options?: Object, callback?: Function): Disposable;
+         onDidChange(callback: (event: {newValue: Object, oldValue: Object}) => void): Disposable;
+         onDidChange(keyPath: string, callback: (event: {newValue: Object, oldValue: Object}) => void): Disposable;
+         onDidChange(keyPath: string, options: {scope: ScopeDescriptor}, callback: (event: {newValue: Object, oldValue: Object}) => void): Disposable;
         /**
          * Retrieves the setting for the given key.
          *
@@ -1637,7 +1639,38 @@ declare module AtomTypes {
          * @param {Function} {Function} to be called when the marker changes.
          * @returns {Disposable} Returns a {Disposable} on which `.dispose()` can be called to unsubscribe.
          */
-        onDidChange(callback: Function): Disposable;
+        onDidChange(callback: (event: {
+          oldHeadBufferPosition: Point,
+          // Point representing the former head buffer position
+          newHeadBufferPosition: Point,
+          // Point representing the new head buffer position
+          oldTailBufferPosition: Point,
+          // Point representing the former tail buffer position
+          newTailBufferPosition: Point,
+          // Point representing the new tail buffer position
+          oldHeadScreenPosition: Point,
+          // Point representing the former head screen position
+          newHeadScreenPosition: Point,
+          // Point representing the new head screen position
+          oldTailScreenPosition: Point,
+          // Point representing the former tail screen position
+          newTailScreenPosition: Point,
+          // Point representing the new tail screen position
+          wasValid: boolean,
+          // Boolean indicating whether the marker was valid before the change
+          isValid: boolean,
+          // Boolean indicating whether the marker is now valid
+          hadTail: boolean,
+          // Boolean indicating whether the marker had a tail before the change
+          hasTail: boolean,
+          // Boolean indicating whether the marker now has a tail
+          oldProperties: Object,
+          // Object containing the marker's custom properties before the change.
+          newProperties: Object,
+          // Object containing the marker's custom properties after the change.
+          textChanged: boolean,
+          // Boolean indicating whether this change was caused by a textual change to the buffer or whether the marker was manipulated directly via its public API.
+        }) => void): Disposable;
         /**
          * Invoke the given callback when the marker is destroyed.
          * @param {Function} {Function} to be called when the marker is destroyed.
@@ -6886,7 +6919,7 @@ declare module AtomTypes {
          * @param {Function} {Function} to be called when the active pane item changes.
          * @returns {Disposable} Returns a {Disposable} on which `.dispose()` can be called to unsubscribe.
          */
-        observeActivePaneItem(callback: Function): Disposable;
+        observeActivePaneItem(callback: (item: Object) => void): Disposable;
         /**
          * Invoke the given callback whenever an item is opened. Unlike
          * {::onDidAddPaneItem}, observers will be notified for items that are already
@@ -6979,7 +7012,7 @@ declare module AtomTypes {
          * @param {Object} An {Object} you want to perform the check against.
          * @returns {boolean} Returns a {Boolean} that is `true` if `object` is a `TextEditor`.
          */
-        isTextEditor(object: Object): boolean;
+        isTextEditor(object: Object): object is TextEditor;
         /**
          * Create a new text editor.
          * @returns {TextEditor} Returns a {TextEditor}.
