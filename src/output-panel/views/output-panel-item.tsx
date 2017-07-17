@@ -30,13 +30,12 @@ export class OutputPanelItem implements JSX.ElementClass {
     await etch.destroy(this)
   }
 
-  public clickPosition () {
+  public async clickPosition () {
     if (this.props.model.uri) {
-      atom.workspace.open(this.props.model.uri).then((editor: TextEditor) => {
-        if (this.props.model.position) {
-          editor.setCursorBufferPosition(this.props.model.position)
-        }
-      })
+      const editor: TextEditor = await atom.workspace.open(this.props.model.uri)
+      if (this.props.model.position) {
+        editor.setCursorBufferPosition(this.props.model.position)
+      }
     }
   }
 
