@@ -86,11 +86,6 @@ export function activate (state: IState) {
     })
   )
 
-  atom.keymaps.add('ide-haskell', {
-    'atom-text-editor.ide-haskell--has-tooltips':
-      {escape: 'ide-haskell:close-tooltip'}
-  })
-
   menu = new CompositeDisposable()
   menu.add(atom.menu.add([{
     label: MAIN_MENU_LABEL,
@@ -102,8 +97,6 @@ export function activate (state: IState) {
 
 export function deactivate () {
   pluginManager && pluginManager.deactivate()
-
-  atom.keymaps.removeBindingsFromSource('ide-haskell')
 
   // clear commands
   disposables && disposables.dispose()
