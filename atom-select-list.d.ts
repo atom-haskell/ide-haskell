@@ -8,10 +8,10 @@ declare class SelectListView<T> {
 }
 declare interface IProps<T> {
   skipCommandsRegistration?: boolean
-  items?: any[]
+  items?: T[]
   maxResults?: number
   filter?: (items: T[], query: string) => T[]
-  filterQuery?: (query: any) => string
+  filterQuery?: (query: string) => string
   order?: (a: T, b: T) => number
   emptyMessage?: string | JSX.Element | JSX.Element[]
   errorMessage?: string | JSX.Element | JSX.Element[]
@@ -19,7 +19,7 @@ declare interface IProps<T> {
   loadingMessage?: string | JSX.Element | JSX.Element[]
   loadingBadge?: string | JSX.Element | JSX.Element[]
   itemsClassList?: string[]
-  elementForItem: (item: any) => HTMLElement
+  elementForItem: (item: T) => HTMLElement
   didChangeQuery?: (query: string) => void
   filterKeyForItem?: (item: T) => string
   didChangeSelection?: (item: T) => void
