@@ -139,23 +139,10 @@ export class EditorControl implements IEditorController {
         clearTimeout(this.exprTypeTimeout)
       }
       this.tooltipRegistry.showTooltip(this.editor, 'keyboard')
-      // TODO:
-      // switch (atom.config.get('ide-haskell.onCursorMove')) {
-      //   case 'Show Tooltip':
-      //     if (this.exprTypeTimeout) {
-      //       clearTimeout(this.exprTypeTimeout)
-      //     }
-      //     if (!this.showCheckResult(newBufferRange.start, 'keyboard')) {
-      //       return
-      //     }
-      //     break
-      //   case 'Hide Tooltip':
-      //     if (this.exprTypeTimeout) {
-      //       clearTimeout(this.exprTypeTimeout)
-      //     }
-      //     return this.tooltips.hide({persistOnCursorMove: false})
-      //   default: // impossible, but tslint complains
-      // }
+      if (atom.config.get('ide-haskell.onCursorMove') === 'Hide Tooltip') {
+        this.tooltips.hide('mouse', undefined, {persistOnCursorMove: false})
+        this.tooltips.hide('context', undefined, {persistOnCursorMove: false})
+      }
     } else {
       this.selTimeout = setTimeout(
         () => this.shouldShowTooltip(newBufferRange.start, 'selection'),
