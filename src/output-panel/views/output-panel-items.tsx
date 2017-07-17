@@ -10,7 +10,7 @@ export interface IProps extends JSX.Props {
 export class OutputPanelItems implements JSX.ElementClass {
   // tslint:disable-next-line:no-uninitialized-class-properties
   private element: HTMLElement
-  private itemMap: WeakMap<ResultItem, any>
+  private itemMap: WeakMap<ResultItem, {component: OutputPanelItem, domNode: HTMLElement}>
   constructor (public props: IProps) {
     this.itemMap = new WeakMap()
     etch.initialize(this)
@@ -58,7 +58,7 @@ export class OutputPanelItems implements JSX.ElementClass {
     return Array.from(this.props.model.filter(this.props.filter)).map(
       (item) => {
         const view = <OutputPanelItem model={item} />
-        this.itemMap.set(item, view)
+        this.itemMap.set(item, view as any)
         return view
       }
     )
