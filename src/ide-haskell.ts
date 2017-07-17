@@ -58,18 +58,16 @@ export function activate (state: IState) {
   pluginManager = new PluginManager(state)
 
   // global commands
-  disposables.add(atom.commands.add('atom-workspace', {
-    'ide-haskell:toggle-output': () =>
-      pluginManager && pluginManager.togglePanel()
-  }))
-
   disposables.add(
+    atom.commands.add('atom-workspace', {
+      'ide-haskell:toggle-output': () => { pluginManager && pluginManager.togglePanel() },
+      'ide-haskell:next-error': () => { pluginManager && pluginManager.nextError() },
+      'ide-haskell:prev-error': () => { pluginManager && pluginManager.prevError() },
+    }),
     atom.commands.add('atom-text-editor.ide-haskell', {
       'ide-haskell:prettify-file': ({currentTarget}: IEventDesc) => {
         prettifyFile(currentTarget.getModel())
       },
-      'ide-haskell:next-error': () => pluginManager && pluginManager.nextError(),
-      'ide-haskell:prev-error': () => pluginManager && pluginManager.prevError()
     }),
     atom.commands.add('atom-text-editor.ide-haskell--has-tooltips', {
       'ide-haskell:close-tooltip': ({currentTarget, abortKeyBinding}: IEventDesc) => {
@@ -81,14 +79,12 @@ export function activate (state: IState) {
         }
       }
     }),
-  )
-
-  disposables.add(
     atom.commands.add('atom-text-editor[data-grammar~="cabal"]', {
       'ide-haskell:prettify-file': ({currentTarget}: IEventDesc) => {
         prettifyFile(currentTarget.getModel() , 'cabal')
       }
-    }))
+    })
+  )
 
   atom.keymaps.add('ide-haskell', {
     'atom-text-editor.ide-haskell--has-tooltips':
