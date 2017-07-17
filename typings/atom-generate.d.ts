@@ -155,7 +155,7 @@ declare module AtomTypes {
          * Get the size of current window.
          * @returns {Object} Returns an {Object} in the format `{width: 1000, height: 700}`
          */
-        getSize(): Object;
+        getSize(): {width: number, height: number};
         /**
          * Set the size of current window.
          * @param {number} The {Number} of pixels.
@@ -868,7 +868,9 @@ declare module AtomTypes {
          * @returns {Disposable} Returns a {Disposable} with the following keys on which you can call
         `.dispose()` to unsubscribe.
          */
-        onDidChange(keyPath?: string, options?: Object, callback?: Function): Disposable;
+         onDidChange(callback: (event: {newValue: Object, oldValue: Object}) => void): Disposable;
+         onDidChange(keyPath: string, callback: (event: {newValue: Object, oldValue: Object}) => void): Disposable;
+         onDidChange(keyPath: string, options: {scope: ScopeDescriptor}, callback: (event: {newValue: Object, oldValue: Object}) => void): Disposable;
         /**
          * Retrieves the setting for the given key.
          *
@@ -1623,7 +1625,38 @@ declare module AtomTypes {
          * @param {Function} {Function} to be called when the marker changes.
          * @returns {Disposable} Returns a {Disposable} on which `.dispose()` can be called to unsubscribe.
          */
-        onDidChange(callback: Function): Disposable;
+        onDidChange(callback: (event: {
+          oldHeadBufferPosition: Point,
+          // Point representing the former head buffer position
+          newHeadBufferPosition: Point,
+          // Point representing the new head buffer position
+          oldTailBufferPosition: Point,
+          // Point representing the former tail buffer position
+          newTailBufferPosition: Point,
+          // Point representing the new tail buffer position
+          oldHeadScreenPosition: Point,
+          // Point representing the former head screen position
+          newHeadScreenPosition: Point,
+          // Point representing the new head screen position
+          oldTailScreenPosition: Point,
+          // Point representing the former tail screen position
+          newTailScreenPosition: Point,
+          // Point representing the new tail screen position
+          wasValid: boolean,
+          // Boolean indicating whether the marker was valid before the change
+          isValid: boolean,
+          // Boolean indicating whether the marker is now valid
+          hadTail: boolean,
+          // Boolean indicating whether the marker had a tail before the change
+          hasTail: boolean,
+          // Boolean indicating whether the marker now has a tail
+          oldProperties: Object,
+          // Object containing the marker's custom properties before the change.
+          newProperties: Object,
+          // Object containing the marker's custom properties after the change.
+          textChanged: boolean,
+          // Boolean indicating whether this change was caused by a textual change to the buffer or whether the marker was manipulated directly via its public API.
+        }) => void): Disposable;
         /**
          * Invoke the given callback when the marker is destroyed.
          * @param {Function} {Function} to be called when the marker is destroyed.
@@ -1703,7 +1736,7 @@ declare module AtomTypes {
          * @param {Range} The new {Range} to use
          * @param {Object} {Object} properties to associate with the marker.
          */
-        setBufferRange(bufferRange: Range, properties?: Object): void;
+        setBufferRange(bufferRange: IRange, properties?: Object): void;
         /**
          * Modifies the screen range of this marker.
          * @param {Range} The new {Range} to use
@@ -3638,6 +3671,7 @@ declare module AtomTypes {
      *
      * file: src/point.coffee
      */
+    type IPoint = Point | [number, number] | {row: number, column: number}
     class Point {
         /**
          * A zero-indexed {Number} representing the row of the {Point}.
@@ -3656,7 +3690,7 @@ declare module AtomTypes {
        * @param  An optional boolean indicating whether to force the copying of objects that are already points.
        * @returns {Point} Returns: A {Point} based on the given object.
        */
-        static fromObject(object: Point | [number, number] | {row: number, column: number}, copy?: any): Point;
+        static fromObject(object: IPoint, copy?: any): Point;
       /**
        * @param {Point} {Point}
        * @param {Point} {Point}
@@ -3863,6 +3897,7 @@ declare module AtomTypes {
      *
      * file: src/range.coffee
      */
+    type IRange = Range | [IPoint, IPoint]
     class Range {
         /**
          * A {Point} representing the start of the {Range}.
@@ -3881,7 +3916,7 @@ declare module AtomTypes {
  * @param  An optional boolean indicating whether to force the copying of objects that are already ranges.˚
  * @returns {Range} Returns: A {Range} based on the given object.
  */
-  static fromObject(object: Range | [Point | [number, number], Point | [number, number]], copy?: boolean): Range;
+  static fromObject(object: IRange, copy?: boolean): Range;
 /**
  * Call this with the result of {Range::serialize} to construct a new Range.
  * @param {any[]} {Array} of params to pass to the {::constructor}
@@ -5402,7 +5437,7 @@ declare module AtomTypes {
          * @param {Range} A {Range} or range-compatible {Array}.
          * @returns {string} Returns a {String}.
          */
-        getTextInBufferRange(range: Range): string;
+        getTextInBufferRange(range: IRange): string;
         /**
          * @returns {number} Returns a {Number} representing the number of lines in the buffer.
          */
@@ -5771,7 +5806,7 @@ declare module AtomTypes {
          * @param  A hash of key-value pairs to associate with the marker. There are also reserved property names that have marker-specific meaning.
          * @returns {DisplayMarker} Returns a {DisplayMarker}.
          */
-        markBufferRange(range: Range, properties?: any): DisplayMarker;
+        markBufferRange(range: IRange, properties?: any): DisplayMarker;
         /**
          * Create a marker on the default marker layer with the given range
          * in screen coordinates. This marker will maintain its logical location as the
@@ -6837,7 +6872,7 @@ declare module AtomTypes {
          * @param {Function} {Function} to be called when the active pane item changes.
          * @returns {Disposable} Returns a {Disposable} on which `.dispose()` can be called to unsubscribe.
          */
-        observeActivePaneItem(callback: Function): Disposable;
+        observeActivePaneItem(callback: (item: Object) => void): Disposable;
         /**
          * Invoke the given callback whenever an item is opened. Unlike
          * {::onDidAddPaneItem}, observers will be notified for items that are already
@@ -6930,7 +6965,7 @@ declare module AtomTypes {
          * @param {Object} An {Object} you want to perform the check against.
          * @returns {boolean} Returns a {Boolean} that is `true` if `object` is a `TextEditor`.
          */
-        isTextEditor(object: Object): boolean;
+        isTextEditor(object: Object): object is TextEditor;
         /**
          * Create a new text editor.
          * @returns {TextEditor} Returns a {TextEditor}.
