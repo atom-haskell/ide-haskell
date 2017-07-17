@@ -6534,6 +6534,7 @@ declare module AtomTypes {
          * @returns {Range} Returns a {Range}.
          */
         bufferRangeForScopeAtCursor(scopeSelector: string): Range;
+        bufferRangeForScopeAtPosition(scopeSelector: string, position: IPoint): Range;
         /**
          * Determine if the given row is entirely a comment
          */
