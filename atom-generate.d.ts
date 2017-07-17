@@ -1619,21 +1619,21 @@ declare module AtomTypes {
          * @returns {Disposable} Returns a {Disposable} on which `.dispose()` can be called to unsubscribe.
          */
         onDidChange(callback: (event: {
-          oldHeadBufferPosition: IPoint,
+          oldHeadBufferPosition: Point,
           // Point representing the former head buffer position
-          newHeadBufferPosition: IPoint,
+          newHeadBufferPosition: Point,
           // Point representing the new head buffer position
-          oldTailBufferPosition: IPoint,
+          oldTailBufferPosition: Point,
           // Point representing the former tail buffer position
-          newTailBufferPosition: IPoint,
+          newTailBufferPosition: Point,
           // Point representing the new tail buffer position
-          oldHeadScreenPosition: IPoint,
+          oldHeadScreenPosition: Point,
           // Point representing the former head screen position
-          newHeadScreenPosition: IPoint,
+          newHeadScreenPosition: Point,
           // Point representing the new head screen position
-          oldTailScreenPosition: IPoint,
+          oldTailScreenPosition: Point,
           // Point representing the former tail screen position
-          newTailScreenPosition: IPoint,
+          newTailScreenPosition: Point,
           // Point representing the new tail screen position
           wasValid: boolean,
           // Boolean indicating whether the marker was valid before the change
