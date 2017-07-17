@@ -5,7 +5,6 @@ declare module AtomTypes {
      * An instance of this class is always available as the `atom` global.
      *
      * file: src/atom-environment.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/atom-environment.coffee#L60
      */
     class AtomEnvironment {
         /**
@@ -252,7 +251,6 @@ declare module AtomTypes {
      * This is necessary on Windows since it doesn't support shebang `#!` lines.
      *
      * file: src/buffered-node-process.js
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/buffered-node-process.js#L15
      */
     class BufferedNodeProcess extends BufferedProcess {
         /**
@@ -273,7 +271,6 @@ declare module AtomTypes {
      * Node's ChildProcess.
      *
      * file: src/buffered-process.js
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/buffered-process.js#L22
      */
     class BufferedProcess {
         /**
@@ -315,7 +312,6 @@ declare module AtomTypes {
      * An instance of this class is always available as the `atom.clipboard` global.
      *
      * file: src/clipboard.js
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/clipboard.js#L17
      */
     class Clipboard {
         /**
@@ -348,7 +344,6 @@ declare module AtomTypes {
      * at the key path is of type 'color'.
      *
      * file: src/color.js
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/color.js#L7
      */
     class Color {
         /**
@@ -409,7 +404,6 @@ declare module AtomTypes {
      * ```
      *
      * file: src/command-registry.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/command-registry.coffee#L46
      */
     class CommandRegistry {
         /**
@@ -458,7 +452,6 @@ declare module AtomTypes {
      * These are very useful when subscribing to multiple events.
      *
      * file: src/composite-disposable.coffee
-     * srcUrl: https://github.com/atom/event-kit/blob/v2.2.0/src/composite-disposable.coffee#L24
      */
     class CompositeDisposable {
         /**
@@ -843,7 +836,6 @@ declare module AtomTypes {
      * * Don't depend on (or write to) configuration keys outside of your keypath.
      *
      * file: src/config.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/config.coffee#L369
      */
     class Config {
         /**
@@ -1039,7 +1031,6 @@ declare module AtomTypes {
      * {::add} for more information.
      *
      * file: src/context-menu-manager.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/context-menu-manager.coffee#L42
      */
     class ContextMenuManager {
         /**
@@ -1059,7 +1050,6 @@ declare module AtomTypes {
      * of a {DisplayMarker}.
      *
      * file: src/cursor.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/cursor.coffee#L14
      */
     class Cursor {
         /**
@@ -1387,7 +1377,6 @@ declare module AtomTypes {
      * the marker.
      *
      * file: src/decoration.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/decoration.coffee#L37
      */
     class Decoration {
         /**
@@ -1435,7 +1424,6 @@ declare module AtomTypes {
      * global.
      *
      * file: src/deserializer-manager.js
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/deserializer-manager.js#L24
      */
     class DeserializerManager {
         /**
@@ -1454,7 +1442,6 @@ declare module AtomTypes {
      * Represents a directory on disk that can be watched for changes.
      *
      * file: src/directory.coffee
-     * srcUrl: https://github.com/atom/node-pathwatcher/blob/v6.8.0/src/directory.coffee#L13
      */
     class Directory {
         /**
@@ -1611,7 +1598,6 @@ declare module AtomTypes {
      * See {TextBuffer::markRange} for usage.
      *
      * file: src/display-marker.coffee
-     * srcUrl: https://github.com/atom/text-buffer/blob/v10.3.12/src/display-marker.coffee#L43
      */
     class DisplayMarker {
         /**
@@ -1819,7 +1805,6 @@ declare module AtomTypes {
      * This API is experimental and subject to change on any release.
      *
      * file: src/display-marker-layer.coffee
-     * srcUrl: https://github.com/atom/text-buffer/blob/v10.3.12/src/display-marker-layer.coffee#L11
      */
     class DisplayMarkerLayer {
         /**
@@ -1929,7 +1914,6 @@ declare module AtomTypes {
      * {Emitter::on} returns disposables representing subscriptions.
      *
      * file: src/disposable.coffee
-     * srcUrl: https://github.com/atom/event-kit/blob/v2.2.0/src/disposable.coffee#L4
      */
     class Disposable {
         /**
@@ -1979,7 +1963,6 @@ declare module AtomTypes {
      * ```
      *
      * file: src/emitter.coffee
-     * srcUrl: https://github.com/atom/event-kit/blob/v2.2.0/src/emitter.coffee#L25
      */
     class Emitter {
         /**
@@ -2035,7 +2018,6 @@ declare module AtomTypes {
      * written to.
      *
      * file: src/file.coffee
-     * srcUrl: https://github.com/atom/node-pathwatcher/blob/v6.8.0/src/file.coffee#L18
      */
     class File {
         /**
@@ -2187,7 +2169,6 @@ declare module AtomTypes {
      * ```
      *
      * file: src/git-repository.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/git-repository.coffee#L44
      */
     class GitRepository {
         /**
@@ -2432,7 +2413,6 @@ declare module AtomTypes {
      * a {GrammarRegistry} by calling {GrammarRegistry::loadGrammar}.
      *
      * file: src/grammar.coffee
-     * srcUrl: https://github.com/atom/first-mate/blob/v6.3.0/src/grammar.coffee#L19
      */
     class Grammar {
         /**
@@ -2475,7 +2455,6 @@ declare module AtomTypes {
      * Registry containing one or more grammars.
      *
      * file: src/grammar-registry.coffee
-     * srcUrl: https://github.com/atom/first-mate/blob/v6.3.0/src/grammar-registry.coffee#L11
      */
     class GrammarRegistry {
         /**
@@ -2551,7 +2530,6 @@ declare module AtomTypes {
      * See {TextEditor::addGutter} for information on creating a gutter.
      *
      * file: src/gutter.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/gutter.coffee#L9
      */
     class Gutter {
         /**
@@ -2602,7 +2580,6 @@ declare module AtomTypes {
      * The project history is used to enable the 'Reopen Project' menu.
      *
      * file: src/history-manager.js
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/history-manager.js#L10
      */
     class HistoryManager {
         /**
@@ -2678,7 +2655,6 @@ declare module AtomTypes {
      * again.
      *
      * file: src/keymap-manager.coffee
-     * srcUrl: https://github.com/atom/atom-keymap/blob/v7.1.20/src/keymap-manager.coffee#L66
      */
     class KeymapManager {
         /**
@@ -2816,7 +2792,6 @@ declare module AtomTypes {
      * layer. Created via {TextEditor::decorateMarkerLayer}.
      *
      * file: src/layer-decoration.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/layer-decoration.coffee#L7
      */
     class LayerDecoration {
         /**
@@ -2852,7 +2827,6 @@ declare module AtomTypes {
      * This API is experimental and subject to change on any release.
      *
      * file: src/marker-layer.coffee
-     * srcUrl: https://github.com/atom/text-buffer/blob/v10.3.12/src/marker-layer.coffee#L15
      */
     class MarkerLayer {
         /**
@@ -2990,7 +2964,6 @@ declare module AtomTypes {
      * See {::add} for more info about adding menu's directly.
      *
      * file: src/menu-manager.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/menu-manager.coffee#L61
      */
     class MenuManager {
         /**
@@ -3010,7 +2983,6 @@ declare module AtomTypes {
      * A notification to the user containing a message and type.
      *
      * file: src/notification.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/notification.coffee#L6
      */
     class Notification {
         /**
@@ -3048,7 +3020,6 @@ declare module AtomTypes {
      * global.
      *
      * file: src/notification-manager.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/notification-manager.coffee#L10
      */
     class NotificationManager {
         /**
@@ -3099,7 +3070,6 @@ declare module AtomTypes {
      * stylesheets, keymaps, grammar, editor properties, and menus.
      *
      * file: src/package.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/package.coffee#L17
      */
     class Package {
         /**
@@ -3150,7 +3120,6 @@ declare module AtomTypes {
      * settings and also by calling `enablePackage()/disablePackage()`.
      *
      * file: src/package-manager.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/package-manager.coffee#L30
      */
     class PackageManager {
         /**
@@ -3299,7 +3268,6 @@ declare module AtomTypes {
      * pending items is shown in italics.
      *
      * file: src/pane.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/pane.coffee#L18
      */
     class Pane {
         /**
@@ -3616,7 +3584,6 @@ declare module AtomTypes {
      * panels.
      *
      * file: src/panel.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/panel.coffee#L12
      */
     class Panel {
         /**
@@ -3670,7 +3637,6 @@ declare module AtomTypes {
      * ```
      *
      * file: src/point.coffee
-     * srcUrl: https://github.com/atom/text-buffer/blob/v10.3.12/src/point.coffee#L12
      */
     class Point {
         /**
@@ -3795,7 +3761,6 @@ declare module AtomTypes {
      * An instance of this class is always available as the `atom.project` global.
      *
      * file: src/project.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/project.coffee#L16
      */
     class Project {
         /**
@@ -3897,7 +3862,6 @@ declare module AtomTypes {
      * arrays. So the following are equivalent:
      *
      * file: src/range.coffee
-     * srcUrl: https://github.com/atom/text-buffer/blob/v10.3.12/src/range.coffee#L18
      */
     class Range {
         /**
@@ -4071,7 +4035,6 @@ declare module AtomTypes {
      * for more information.
      *
      * file: src/scope-descriptor.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/scope-descriptor.coffee#L21
      */
     class ScopeDescriptor {
         /**
@@ -4089,7 +4052,6 @@ declare module AtomTypes {
      * Represents a selection in the {TextEditor}.
      *
      * file: src/selection.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/selection.coffee#L10
      */
     class Selection {
         /**
@@ -4449,7 +4411,6 @@ declare module AtomTypes {
      * which clone and attach style elements in different contexts.
      *
      * file: src/style-manager.js
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/style-manager.js#L15
      */
     class StyleManager {
         /**
@@ -4510,7 +4471,6 @@ declare module AtomTypes {
      * and the [instantiation of the task](https://github.com/atom/atom/blob/4a20f13162f65afc816b512ad7201e528c3443d7/src/project.coffee#L245).
      *
      * file: src/task.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/task.coffee#L40
      */
     class Task {
         /**
@@ -4570,7 +4530,6 @@ declare module AtomTypes {
      * annotate logical regions in the text.
      *
      * file: src/text-buffer.coffee
-     * srcUrl: https://github.com/atom/text-buffer/blob/v10.3.12/src/text-buffer.coffee#L23
      */
     class TextBuffer {
         /**
@@ -5178,7 +5137,6 @@ declare module AtomTypes {
      * soft wraps and folds to ensure your code interacts with them correctly.
      *
      * file: src/text-editor.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/text-editor.coffee#L60
      */
     class TextEditor {
         constructor(params: Object)
@@ -6667,7 +6625,6 @@ declare module AtomTypes {
      * An instance of this class is always available as the `atom.themes` global.
      *
      * file: src/theme-manager.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/theme-manager.coffee#L11
      */
     class ThemeManager {
         /**
@@ -6705,7 +6662,6 @@ declare module AtomTypes {
      * You can get the `TooltipManager` via `atom.tooltips`.
      *
      * file: src/tooltip-manager.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/tooltip-manager.coffee#L47
      */
     class TooltipManager {
         /**
@@ -6732,7 +6688,6 @@ declare module AtomTypes {
      * Extending classes must implement a `@content` method.
      *
      * file: src/space-pen.coffee
-     * srcUrl: https://github.com/atom/space-pen/blob/v5.1.2/src/space-pen.coffee#L75
      */
     class View extends JQuery {
         /**
@@ -6788,7 +6743,6 @@ declare module AtomTypes {
      * You can access the `ViewRegistry` object via `atom.views`.
      *
      * file: src/view-registry.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/view-registry.coffee#L49
      */
     class ViewRegistry {
         /**
@@ -6837,7 +6791,6 @@ declare module AtomTypes {
      * and friends.
      *
      * file: src/workspace.coffee
-     * srcUrl: https://github.com/atom/atom/blob/v1.15.0/src/workspace.coffee#L25
      */
     class Workspace {
         /**
