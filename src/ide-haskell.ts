@@ -116,22 +116,22 @@ export function provideUpi () {
   // tslint:disable-next-line: no-non-null-assertion
   return {
      registerPlugin (disp: CompositeDisposable, pluginName: string) {
-       // tslint:disable-next-line: no-non-null-assertion
-       return UPI.instance(pluginManager!, disp, pluginName) // TODO: not entirely sure it's OK...
+       if (!pluginManager) { return }
+       return UPI.instance(pluginManager, disp, pluginName)
      }
    }
 }
 
 export function provideUpi3 () {
   upiProvided = true
-  // tslint:disable-next-line: no-non-null-assertion
-  return (options: IRegistrationOptions) => UPI3.instance(pluginManager!, options) // TODO: not entirely sure it's OK...
+  return (options: IRegistrationOptions) => pluginManager && UPI3.instance(pluginManager, options)
 }
 
 export function consumeUpi3 (registration: UPI3.IRegistrationOptions) {
   upiProvided = true
-  // tslint:disable-next-line: no-non-null-assertion
-  return UPI3.consume(pluginManager!, registration) // TODO: not entirely sure it's OK...
+  if (pluginManager) {
+    return UPI3.consume(pluginManager, registration)
+  }
 }
 
 export function consumeLinter (indieRegistry: ILinterRegistry): Disposable | undefined {
@@ -143,7 +143,7 @@ export function consumeLinter (indieRegistry: ILinterRegistry): Disposable | und
 }
 
 export function consumeStatusBar (statusBar: IStatusBar): Disposable | undefined {
-  if (!(disposables && pluginManager)) { return }
+  if (!pluginManager) { return }
   pluginManager.setStatusBar(statusBar)
   return new Disposable(() => {
     if (pluginManager) {
