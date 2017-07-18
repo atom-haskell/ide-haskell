@@ -1,7 +1,7 @@
 import {CompositeDisposable} from 'atom'
 import * as etch from 'etch'
 
-interface IProps extends JSX.Props {
+export interface IProps extends JSX.Props {
   initialState?: boolean
   class?: string
   onSwitched?: (state: boolean) => void
