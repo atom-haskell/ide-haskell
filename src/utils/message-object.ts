@@ -1,25 +1,15 @@
 import highlight = require('atom-highlight')
 
-export interface IMessageText {
-  text: string
-  highlighter?: string
+function isTextMessage (msg: UPI.TMessage): msg is UPI.IMessageText {
+  return !!(msg && (msg as UPI.IMessageText).text)
 }
 
-export interface IMessageHTML {
-  html: string
+function isHTMLMessage (msg: UPI.TMessage): msg is UPI.IMessageHTML {
+  return !!(msg && (msg as UPI.IMessageHTML).html)
 }
-
-function isTextMessage (msg: TMessage): msg is IMessageText {
-  return !!(msg && (msg as IMessageText).text)
-}
-
-function isHTMLMessage (msg: TMessage): msg is IMessageHTML {
-  return !!(msg && (msg as IMessageHTML).html)
-}
-export type TMessage = string | IMessageText | IMessageHTML | MessageObject
 
 export class MessageObject {
-  public static fromObject (message: TMessage): MessageObject  {
+  public static fromObject (message: UPI.TMessage): MessageObject  {
     if (message instanceof MessageObject) {
       return message
     } else {
@@ -28,7 +18,7 @@ export class MessageObject {
   }
 
   private htmlCache?: string
-  constructor (private msg: string | IMessageText | IMessageHTML) {
+  constructor (private msg: UPI.TMessage) {
     // noop
   }
 

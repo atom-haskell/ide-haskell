@@ -1,7 +1,6 @@
 import {CompositeDisposable} from 'atom'
 import {ParamControl} from './param-control'
-import {ConfigParamStore, IParamSpec, IState as IStoreState} from './param-store'
-export {IParamSpec}
+import {ConfigParamStore, IState as IStoreState} from './param-store'
 
 import {OutputPanel} from '../output-panel'
 
@@ -22,7 +21,7 @@ export class ConfigParamManager {
     return this.store.serialize()
   }
 
-  public add (pluginName: string, paramName: string, spec: IParamSpec<Object>) {
+  public add (pluginName: string, paramName: string, spec: UPI.IParamSpec<Object>) {
     const disp = new CompositeDisposable()
     disp.add(
       this.store.addParamSpec(pluginName, paramName, spec),

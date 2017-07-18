@@ -1,22 +1,21 @@
 import {CompositeDisposable, Disposable} from 'atom'
 import * as etch from 'etch'
 
-import {IParamSpec, ConfigParamStore} from './param-store'
-import {IElementObject} from '../output-panel'
+import {ConfigParamStore} from './param-store'
 
 export interface IProps<T> {
   pluginName: string
   name: string
-  spec: IParamSpec<T>
+  spec: UPI.IParamSpec<T>
   store: ConfigParamStore
 }
 
-export class ParamControl<T> implements IElementObject<IProps<T>> {
+export class ParamControl<T> implements UPI.IElementObject<IProps<T>> {
   // tslint:disable-next-line: no-uninitialized-class-properties
   public element: HTMLElement
   private pluginName: string
   private name: string
-  private spec: IParamSpec<T>
+  private spec: UPI.IParamSpec<T>
   private store: ConfigParamStore
   private disposables: CompositeDisposable
   private hiddenValue?: boolean

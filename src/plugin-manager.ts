@@ -1,8 +1,8 @@
 import {CompositeDisposable, Emitter, TextEditor, Point, TextBuffer, Grammar, Disposable} from 'atom'
 import {ResultsDB} from './results-db'
-import {OutputPanel, IState as IOutputViewState, IStatus} from './output-panel'
+import {OutputPanel, IState as IOutputViewState} from './output-panel'
 import {ConfigParamManager, IState as IParamState} from './config-params'
-import {EditorControl, TTextBufferCallback} from './editor-control'
+import {EditorControl} from './editor-control'
 import {LinterSupport, ILinter} from './linter-support'
 import {TooltipRegistry} from './tooltip-registry'
 import {CheckResultsProvider} from './check-results-provider'
@@ -84,15 +84,15 @@ export class PluginManager {
     }
   }
 
-  public onWillSaveBuffer (callback: TTextBufferCallback) {
+  public onWillSaveBuffer (callback: UPI.TTextBufferCallback) {
     return this.emitter.on('will-save-buffer', callback)
   }
 
-  public onDidSaveBuffer (callback: TTextBufferCallback) {
+  public onDidSaveBuffer (callback: UPI.TTextBufferCallback) {
     return this.emitter.on('did-save-buffer', callback)
   }
 
-  public onDidStopChanging (callback: TTextBufferCallback) {
+  public onDidStopChanging (callback: UPI.TTextBufferCallback) {
     return this.emitter.on('did-stop-changing', callback)
   }
 
@@ -131,7 +131,7 @@ export class PluginManager {
     this.outputPanel.showPrevError()
   }
 
-  public backendStatus (pluginName: string, st: IStatus) {
+  public backendStatus (pluginName: string, st: UPI.IStatus) {
     if (this.outputPanel) {
       this.outputPanel.backendStatus(pluginName, st)
     }

@@ -1,43 +1,11 @@
 import {CompositeDisposable, Disposable} from 'atom'
 
 import {PluginManager} from '../plugin-manager'
-import {TTextBufferCallback, TEventRangeType} from '../editor-control'
-import {ISetTypesParams, TControlDefinition} from '../output-panel'
-import {IParamSpec} from '../config-params'
-import {TTooltipHandler} from '../tooltip-registry'
 import {MAIN_MENU_LABEL} from '../utils'
 
 export * from './instance'
 
-export interface IAtomMenuCommand {
-  label: string
-  command: string
-}
-
-export interface IAtomSubmenu {
-  label: string
-  submenu: TAtomMenu[]
-}
-
-export type TAtomMenu = IAtomMenuCommand | IAtomSubmenu
-
-export type TSingleOrArray<T> = T | T[]
-
-export interface IRegistrationOptions {
-  name: string
-  menu?: {label: string, menu: TAtomMenu}
-  messageTypes?: ISetTypesParams
-  events?: {
-    onWillSaveBuffer?: TSingleOrArray<TTextBufferCallback>
-    onDidSaveBuffer?: TSingleOrArray<TTextBufferCallback>
-    onDidStopChanging?: TSingleOrArray<TTextBufferCallback>
-  }
-  controls?: Array<TControlDefinition<Object>>
-  params?: {[paramName: string]: IParamSpec<Object>}
-  tooltip?: TTooltipHandler | {priority?: number, handler: TTooltipHandler, eventTypes?: TEventRangeType[]}
-}
-
-export function consume (pluginManager: PluginManager, options: IRegistrationOptions): Disposable {
+export function consume (pluginManager: PluginManager, options: UPI.IRegistrationOptions): Disposable {
   const {name, menu, messageTypes, events, controls, params, tooltip} = options
   const disp = new CompositeDisposable()
 
@@ -58,7 +26,7 @@ export function consume (pluginManager: PluginManager, options: IRegistrationOpt
   if (events) {
     for (const k in events) {
       if (k.startsWith('on') && pluginManager[k]) {
-        let v: TTextBufferCallback | TTextBufferCallback[] = events[k]
+        let v: UPI.TTextBufferCallback | UPI.TTextBufferCallback[] = events[k]
         if (!Array.isArray(v)) { v = [v] }
         for (const i of v) {
           disp.add(pluginManager[k](i))
@@ -67,7 +35,7 @@ export function consume (pluginManager: PluginManager, options: IRegistrationOpt
     }
   }
   if (tooltip) {
-    let handler: TTooltipHandler, priority: number | undefined, eventTypes: TEventRangeType[] | undefined
+    let handler: UPI.TTooltipHandler, priority: number | undefined, eventTypes: UPI.TEventRangeType[] | undefined
     if (typeof tooltip === 'function') {
       handler = tooltip
     } else {

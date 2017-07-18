@@ -1,53 +1,8 @@
 import {selectListView} from './param-select-view'
 import {Emitter, CompositeDisposable, Disposable} from 'atom'
 
-export interface IParamSpec<T> {
-  /**
-  name of item key that the filter in select dialog will match
-  */
-  itemFilterKey: string
-  /**
-  this will be displayed in the heading of select dialog
-  */
-  description?: string
-  /**
-  display name of the parameter in output panel
-  */
-  displayName?: string
-  /**
-  default value
-  */
-  default?: T
-  /**
-  possible values of the parameter. can be a callback.
-  */
-  items: T[] | Promise<T[]> | (() => T[] | Promise<T[]>)
-  /**
-  will be called whenever the value of parameter changes
-
-  @param value new value of the parameter
-  */
-  onChanged (value: T): void
-  /**
-  how an item should be displayed to user
-
-  @param item item to be displayed
-
-  @returns HTML string representing the item
-  */
-  itemTemplate (item: T): string
-  /**
-  template for displaying value of parameter in output panel
-
-  @param item item to be displayed
-
-  @returns plaintext string representing the item
-  */
-  displayTemplate (item: T): string
-}
-
 interface IParamData<T> {
-  spec: IParamSpec<T>
+  spec: UPI.IParamSpec<T>
   value?: T
 }
 
@@ -82,7 +37,7 @@ export class ConfigParamStore {
     return this.emitter.on('did-update', callback)
   }
 
-  public addParamSpec<T> (pluginName: string, paramName: string, spec: IParamSpec<T>) {
+  public addParamSpec<T> (pluginName: string, paramName: string, spec: UPI.IParamSpec<T>) {
     let pluginConfig = this.plugins.get(pluginName)
     if (!pluginConfig) {
       pluginConfig = new Map()
@@ -139,7 +94,7 @@ export class ConfigParamStore {
     return paramConfig
   }
 
-  private async showSelect<T> (spec: IParamSpec<T>): Promise<T | undefined> {
+  private async showSelect<T> (spec: UPI.IParamSpec<T>): Promise<T | undefined> {
     return selectListView<T>({
       items: (typeof spec.items === 'function') ? spec.items() : spec.items,
       heading: spec.description,

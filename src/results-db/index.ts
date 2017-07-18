@@ -1,10 +1,10 @@
-import {TPosition, TSeverity, IResultItem, ResultItem} from './result-item'
+import {ResultItem} from './result-item'
 import {CompositeDisposable, Emitter} from 'atom'
 import {Provider, TMessageProviderFunction} from './provider'
 
-export {TPosition, TSeverity, IResultItem, TMessageProviderFunction, ResultItem}
+export {TMessageProviderFunction, ResultItem}
 
-export type TUpdateCallback = (severities: TSeverity[]) => void
+export type TUpdateCallback = (severities: UPI.TSeverity[]) => void
 
 export class ResultsDB {
   private currentId: number
@@ -37,7 +37,7 @@ export class ResultsDB {
     for (const msg of msgs) {
       this.messages.set(msg.hash(), msg)
     }
-    const severities: TSeverity[] = msgs.map((v) => v.severity)
+    const severities: UPI.TSeverity[] = msgs.map((v) => v.severity)
     this.emitter.emit('did-update', severities)
   }
 

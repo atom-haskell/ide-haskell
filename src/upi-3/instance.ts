@@ -1,23 +1,11 @@
 import { CompositeDisposable, TextEditor } from 'atom'
 import { MAIN_MENU_LABEL, getEventType } from '../utils'
 import {PluginManager} from '../plugin-manager'
-import {IStatus, ISeverityTabDefinition, TControlDefinition} from '../output-panel'
-import {IResultItem} from '../results-db'
-import {TEventRangeType} from '../editor-control/tooltip-manager'
-import {IParamSpec} from '../config-params'
-import {TTooltipFunction, ITooltipData} from '../tooltip-registry'
 import {isTEventRangeType} from '../editor-control/event-table'
-import {TAtomMenu, consume, IRegistrationOptions} from './'
-
-export interface IShowTooltipParams {
-  editor: TextEditor
-  eventType?: TEventRangeType
-  detail?: Object
-  tooltip: TTooltipFunction | ITooltipData
-}
+import {consume} from './'
 
 export function instance (
-  pluginManager: PluginManager, options: IRegistrationOptions
+  pluginManager: PluginManager, options: UPI.IRegistrationOptions
 ) {
   const pluginName = options.name
   const disposables = new CompositeDisposable()
@@ -26,7 +14,7 @@ export function instance (
   disposables.add(consume(pluginManager, options))
 
   return {
-    setMenu (name: string, menu: TAtomMenu[]) {
+    setMenu (name: string, menu: UPI.TAtomMenu[]) {
       const menuDisp = atom.menu.add([{
         label: MAIN_MENU_LABEL,
         submenu: [ {label: name, submenu: menu} ]
@@ -35,16 +23,16 @@ export function instance (
       disposables.add(menuDisp)
       return menuDisp
     },
-    setStatus (status: IStatus) {
+    setStatus (status: UPI.IStatus) {
       return pluginManager.backendStatus(pluginName, status)
     },
-    setMessages (messages: IResultItem[]) {
+    setMessages (messages: UPI.IResultItem[]) {
       messageProvider.setMessages(messages)
     },
-    addMessageTab (name: string, opts: ISeverityTabDefinition) {
+    addMessageTab (name: string, opts: UPI.ISeverityTabDefinition) {
       pluginManager.outputPanel.createTab(name, opts)
     },
-    showTooltip ({editor, eventType, detail, tooltip}: IShowTooltipParams) {
+    showTooltip ({editor, eventType, detail, tooltip}: UPI.IShowTooltipParams) {
       if (!eventType) {
         eventType = getEventType(detail)
       }
@@ -56,10 +44,10 @@ export function instance (
         editor, eventType, {pluginName, tooltip}
       )
     },
-    addPanelControl<T> (def: TControlDefinition<T>) {
+    addPanelControl<T> (def: UPI.TControlDefinition<T>) {
       return pluginManager.outputPanel.addPanelControl(def)
     },
-    addConfigParam (paramName: string, spec: IParamSpec<Object>) {
+    addConfigParam (paramName: string, spec: UPI.IParamSpec<Object>) {
       return pluginManager.configParamManager.add(pluginName, paramName, spec)
     },
     async getConfigParam (name: string) {
@@ -71,8 +59,8 @@ export function instance (
     async setConfigParam (name: string, value: Object) {
       return pluginManager.configParamManager.set(pluginName, name, value)
     },
-    getEventRange (editor: TextEditor, typeOrDetail: TEventRangeType | Object) {
-      let type: TEventRangeType
+    getEventRange (editor: TextEditor, typeOrDetail: UPI.TEventRangeType | Object) {
+      let type: UPI.TEventRangeType
       if (isTEventRangeType(typeOrDetail)) {
         type = typeOrDetail
       } else {

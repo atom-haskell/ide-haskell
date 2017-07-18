@@ -4,17 +4,8 @@ import {prettifyFile} from './prettify'
 import {MAIN_MENU_LABEL} from './utils'
 import {ILinterRegistry} from './linter-support'
 import {IStatusBar} from './status-bar'
-import * as UPI from './upi-2'
+import * as UPI2 from './upi-2'
 import * as UPI3 from './upi-3'
-
-// for typings
-/* tslint:disable:no-unused-variable */
-import {IShowTooltipParams, IRegistrationOptions} from './upi-3'
-import {IStatus, ISeverityTabDefinition, IControlOpts, IElementObject, TControlDefinition} from './output-panel'
-import {IResultItem, TSeverity} from './results-db'
-import {IParamSpec} from './config-params'
-/* tslint:enable:no-unused-variable */
-// end
 
 let upiProvided = false
 let disposables: CompositeDisposable | undefined
@@ -117,17 +108,17 @@ export function provideUpi () {
   return {
      registerPlugin (disp: CompositeDisposable, pluginName: string) {
        if (!pluginManager) { return }
-       return UPI.instance(pluginManager, disp, pluginName)
+       return UPI2.instance(pluginManager, disp, pluginName)
      }
    }
 }
 
 export function provideUpi3 () {
   upiProvided = true
-  return (options: IRegistrationOptions) => pluginManager && UPI3.instance(pluginManager, options)
+  return (options: UPI.IRegistrationOptions) => pluginManager && UPI3.instance(pluginManager, options)
 }
 
-export function consumeUpi3 (registration: UPI3.IRegistrationOptions) {
+export function consumeUpi3 (registration: UPI.IRegistrationOptions) {
   upiProvided = true
   if (pluginManager) {
     return UPI3.consume(pluginManager, registration)

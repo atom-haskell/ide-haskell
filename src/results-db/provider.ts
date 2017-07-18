@@ -1,7 +1,7 @@
-import {IResultItem, ResultItem} from './result-item'
+import {ResultItem} from './result-item'
 import {ResultsDB} from './'
 
-export type TMessageProviderFunction = (pushMessages: (messages: IResultItem[]) => void) => void
+export type TMessageProviderFunction = (pushMessages: (messages: UPI.IResultItem[]) => void) => void
 
 export class Provider {
   private disposed: boolean
@@ -17,7 +17,7 @@ export class Provider {
     this.parent.didUpdate(this.id, [])
   }
 
-  public setMessages (messages: IResultItem[]): void {
+  public setMessages (messages: UPI.IResultItem[]): void {
     if (this.disposed) { return }
     const msgs = messages.map((m) => new ResultItem(this.id, m))
     this.parent.didUpdate(this.id, msgs)

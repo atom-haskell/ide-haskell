@@ -2,7 +2,6 @@ import {
   Range, TextEditor, CompositeDisposable
 } from 'atom'
 
-import {TEventRangeType} from '../editor-control/tooltip-manager'
 import {PluginManager} from '../plugin-manager'
 import {CREditorControl} from './editor-control'
 
@@ -26,13 +25,14 @@ export class CheckResultsProvider {
     this.disposables.dispose()
   }
 
-  private tooltipProvider (editor: TextEditor, crange: Range, type: TEventRangeType) {
+  private tooltipProvider (editor: TextEditor, crange: Range, type: UPI.TEventRangeType): UPI.ITooltipData | undefined {
     const controller = this.editorMap.get(editor)
     if (!controller) { return }
     if (type === 'keyboard' && atom.config.get('ide-haskell.onCursorMove') !== 'Show Tooltip') { return }
     const msg = controller.getMessageAt(crange.start, type)
     if (msg.length > 0) {
-      return { range: crange, text: msg }
+      // TODO: WTF? MessageObject forbidden?
+      return { range: crange, text: msg.map((m) => m.toHtml()) }
     }
   }
 }

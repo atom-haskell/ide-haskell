@@ -1,59 +1,18 @@
 /* tslint:disable:member-access */
-import { CompositeDisposable, Point, TextEditor, Range } from 'atom'
+import { CompositeDisposable, Point } from 'atom'
 import { MAIN_MENU_LABEL, getEventType } from '../utils'
 import {PluginManager} from '../plugin-manager'
-import {IStatus, ISeverityTabDefinition, IControlOpts} from '../output-panel'
-import {IResultItem, TSeverity} from '../results-db'
-import {TEventRangeType} from '../editor-control/tooltip-manager'
-import {TPosition} from '../results-db'
 import {Provider as MessageProvider} from '../results-db/provider'
-import {IParamSpec} from '../config-params'
-import {TTextBufferCallback} from '../editor-control'
-import {TTooltipHandler, TTooltipFunction} from '../tooltip-registry'
 import {DummyElement} from './dummy-element'
 
-export interface IShowTooltipParams {
-  editor: TextEditor
-  pos: TPosition
-  eventType?: TEventRangeType
-  detail?: Object
-  tooltip: TTooltipFunction
-}
-
-export interface IEventRangeParams {
-  editor: TextEditor
-  detail?: Object
-  eventType?: TEventRangeType
-  pos: TPosition
-}
-
-export interface IAtomMenuCommand {
-  label: string
-  command: string
-}
-
-export interface IAtomSubmenu {
-  label: string
-  submenu: TAtomMenu[]
-}
-
-export type TAtomMenu = IAtomMenuCommand | IAtomSubmenu
-
-export type TEventRangeCallback<T> = (pars: {
-  /** event position */
-  pos: Point
-  /** event range */
-  crange: Range
-  /** event type */
-  eventType: TEventRangeType
-}) => T
+import * as UPI2 from './def'
 
 export function instance (pluginManager: PluginManager, outerDisposables: CompositeDisposable, pluginName: string) {
   return new UPIInstance(pluginManager, outerDisposables, pluginName)
 }
 
 export class UPIInstance {
-  private messages: IResultItem[] = []
+  private messages: UPI2.IResultItem[] = []
   private disposables = new CompositeDisposable()
   private messageProvider: MessageProvider
   constructor (
@@ -69,7 +28,7 @@ export class UPIInstance {
   @param name submenu label, should be descriptive of a package
   @param menu Atom menu object
   */
-  setMenu (name: string, menu: TAtomMenu[]) {
+  setMenu (name: string, menu: UPI2.TAtomMenu[]) {
     let menuDisp
     this.disposables.add(menuDisp = atom.menu.add([{
       label: MAIN_MENU_LABEL,
@@ -84,7 +43,7 @@ export class UPIInstance {
 
   @param status current backend status
   */
-  setStatus (status: IStatus) {
+  setStatus (status: UPI2.IStatus) {
     return this.pluginManager.backendStatus(this.pluginName, status)
   }
 
@@ -95,7 +54,7 @@ export class UPIInstance {
   @param types array, containing possible message `severity`. If undefined,
          will be taken from `messages`
   */
-  addMessages (newMessages: IResultItem[], types?: TSeverity[]) {
+  addMessages (newMessages: UPI2.IResultItem[], types?: UPI2.TSeverity[]) {
     this.messages.push(...newMessages)
     this.messageProvider.setMessages(this.messages)
   }
@@ -108,7 +67,7 @@ export class UPIInstance {
   @param types array, containing possible message `severity`. If undefined,
          will be taken from `messages`
   */
-  setMessages (newMessages: IResultItem[], types: TSeverity[]) {
+  setMessages (newMessages: UPI2.IResultItem[], types: UPI2.TSeverity[]) {
     this.messages = [...newMessages]
     this.messageProvider.setMessages(this.messages)
   }
@@ -118,7 +77,7 @@ export class UPIInstance {
 
   @param types message severities to clean out
   */
-  clearMessages (types: TSeverity[]) {
+  clearMessages (types: UPI2.TSeverity[]) {
     this.messages = this.messages.filter(({severity}) => !types.includes(severity))
     this.messageProvider.setMessages(this.messages)
   }
@@ -130,7 +89,7 @@ export class UPIInstance {
   @param types: Object with keys representing possible message `severity` (i.e. tab name)
          and values being Objects with keys
   */
-  setMessageTypes (types: { [severity: string]: ISeverityTabDefinition}) {
+  setMessageTypes (types: { [severity: string]: UPI2.ISeverityTabDefinition}) {
     return (() => {
       const result = []
       for (const type of Object.keys(types)) {
@@ -147,7 +106,7 @@ export class UPIInstance {
 
   @param callback will be called to provide a tooltip once needed
   */
-  onShouldShowTooltip (callback: TTooltipHandler) {
+  onShouldShowTooltip (callback: UPI2.TTooltipHandler) {
     const disp = this.pluginManager.tooltipRegistry.register(
       this.pluginName, {priority: 100, handler: callback}
     )
@@ -164,7 +123,7 @@ export class UPIInstance {
   @param detail DOM event detail, for automatic event type selection, ignored if `eventType` is set.
   @param tooltip tooltip generator function
   */
-  showTooltip ({editor, pos, eventType, detail, tooltip}: IShowTooltipParams) {
+  showTooltip ({editor, pos, eventType, detail, tooltip}: UPI2.IShowTooltipParams) {
     if (!eventType) {
       eventType = getEventType(detail)
     }
@@ -176,7 +135,7 @@ export class UPIInstance {
   /**
   Convenience function. Will fire before Haskell buffer is saved.
   */
-  onWillSaveBuffer (callback: TTextBufferCallback) {
+  onWillSaveBuffer (callback: UPI2.TTextBufferCallback) {
     const disp = this.pluginManager.onWillSaveBuffer(callback)
     this.disposables.add(disp)
     return disp
@@ -185,7 +144,7 @@ export class UPIInstance {
   /**
   Convenience function. Will fire after Haskell buffer is saved.
   */
-  onDidSaveBuffer (callback: TTextBufferCallback) {
+  onDidSaveBuffer (callback: UPI2.TTextBufferCallback) {
     const disp = this.pluginManager.onDidSaveBuffer(callback)
     this.disposables.add(disp)
     return disp
@@ -194,7 +153,7 @@ export class UPIInstance {
   /**
   Convenience function. Will fire after Haskell buffer stoped changing.
   */
-  onDidStopChanging (callback: TTextBufferCallback) {
+  onDidStopChanging (callback: UPI2.TTextBufferCallback) {
     const disp = this.pluginManager.onDidStopChanging(callback)
     this.disposables.add(disp)
     return disp
@@ -206,11 +165,11 @@ export class UPIInstance {
   @param element HTMLElement of control, or string with tag name
   @param opts description of element
   */
-  addPanelControl (element: string | HTMLElement, opts: IControlOpts) {
+  addPanelControl (element: string | HTMLElement, opts: UPI2.IControlOpts) {
     if (typeof element === 'string') {
       return this.pluginManager.outputPanel.addPanelControl({element, opts})
     } else {
-      const newOpts: IControlOpts & {element: HTMLElement} = {...opts, element}
+      const newOpts: UPI2.IControlOpts & {element: HTMLElement} = {...opts, element}
       return this.pluginManager.outputPanel.addPanelControl({element: DummyElement, opts: newOpts})
     }
   }
@@ -222,7 +181,7 @@ export class UPIInstance {
   @param specs specification of parameters
   @param paramName name of a parameter
   */
-  addConfigParam (specs: { [paramName: string]: IParamSpec<Object> }) {
+  addConfigParam (specs: { [paramName: string]: UPI2.IParamSpec<Object> }) {
     const disp = new CompositeDisposable()
     for (const name of Object.keys(specs)) {
       const spec = specs[name]
@@ -273,7 +232,7 @@ export class UPIInstance {
 
   @param callback will be called immediately with event range/type as arguments
   */
-  withEventRange<T> ({editor, detail, eventType, pos}: IEventRangeParams, callback: TEventRangeCallback<T>) {
+  withEventRange<T> ({editor, detail, eventType, pos}: UPI2.IEventRangeParams, callback: UPI2.TEventRangeCallback<T>) {
     let ppos: Point | undefined
     if (pos) { ppos = Point.fromObject(pos) }
     if (!eventType) { eventType = getEventType(detail) }

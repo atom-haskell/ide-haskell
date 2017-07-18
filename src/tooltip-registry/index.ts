@@ -1,32 +1,19 @@
 import {TextEditor, Disposable, Range} from 'atom'
-import {TMessage, MessageObject} from '../utils'
+import {MessageObject} from '../utils'
 import {PluginManager} from '../plugin-manager'
-import {TEventRangeType} from '../editor-control/tooltip-manager'
-import {TPosition} from '../results-db'
-
-export type TTooltipFunction = (crange: Range) => ITooltipData | Promise<ITooltipData>
-export type TRange = Range | [TPosition, TPosition]
-export interface ITooltipData {
-  range: TRange
-  text: TMessage | TMessage[]
-  persistOnCursorMove?: boolean
-}
-export type TTooltipHandler =
-  (editor: TextEditor, crange: Range, type: TEventRangeType)
-  => ITooltipData | undefined | Promise<ITooltipData | undefined>
 
 export interface TTooltipHandlerSpec {
   priority: number
-  handler: TTooltipHandler
-  eventTypes?: TEventRangeType[]
+  handler: UPI.TTooltipHandler
+  eventTypes?: UPI.TEventRangeType[]
 }
 export interface ITooltipSpec {
   pluginName: string
-  tooltip: TTooltipFunction | ITooltipData
+  tooltip: UPI.TTooltipFunction | UPI.ITooltipData
 }
 
 export class TooltipRegistry {
-  private providers: Array<TTooltipHandlerSpec & {pluginName: string, eventTypes: TEventRangeType[]}>
+  private providers: Array<TTooltipHandlerSpec & {pluginName: string, eventTypes: UPI.TEventRangeType[]}>
   constructor (private pluginManager: PluginManager) {
     this.providers = []
   }
@@ -37,7 +24,7 @@ export class TooltipRegistry {
 
   public register (pluginName: string, provider: TTooltipHandlerSpec): Disposable {
     const idx = this.providers.findIndex(({priority}) => priority < provider.priority)
-    const defaultEvT: TEventRangeType[] = ['selection', 'mouse']
+    const defaultEvT: UPI.TEventRangeType[] = ['selection', 'mouse']
     const record = {
       pluginName,
       eventTypes: provider.eventTypes || defaultEvT,
@@ -56,7 +43,7 @@ export class TooltipRegistry {
   }
 
   public async showTooltip (
-    editor: TextEditor, type: TEventRangeType, spec?: ITooltipSpec
+    editor: TextEditor, type: UPI.TEventRangeType, spec?: ITooltipSpec
   ) {
     const controller = this.pluginManager.controller(editor)
     if (!controller) { return }
@@ -95,13 +82,13 @@ export class TooltipRegistry {
     )
   }
 
-  public hideTooltip (editor: TextEditor, type?: TEventRangeType, source?: string) {
+  public hideTooltip (editor: TextEditor, type?: UPI.TEventRangeType, source?: string) {
     const controller = this.pluginManager.controller(editor)
     if (!controller) { return }
     controller.tooltips.hide(type, source)
   }
 
-  private async defaultTooltipFunction (editor: TextEditor, type: TEventRangeType, crange: Range) {
+  private async defaultTooltipFunction (editor: TextEditor, type: UPI.TEventRangeType, crange: Range) {
     for (const {pluginName, handler, eventTypes} of this.providers) {
       if (!eventTypes.includes(type)) { continue }
       try {

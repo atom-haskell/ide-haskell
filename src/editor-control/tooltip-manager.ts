@@ -4,8 +4,8 @@ import {
 
 import {TooltipMessage} from './tooltip-view'
 import {MessageObject} from '../utils'
-import {EventTable, TEventRangeType} from './event-table'
-export {TEventRangeType}
+import {EventTable} from './event-table'
+
 export interface IMarkerProperties {
   persistOnCursorMove: boolean
 }
@@ -28,7 +28,7 @@ export class TooltipManager {
 
   public show (
     range: Range, text: MessageObject | MessageObject[],
-    type: TEventRangeType, source: string, detail: IMarkerProperties
+    type: UPI.TEventRangeType, source: string, detail: IMarkerProperties
   ) {
     this.hide(type, source)
     const highlightMarker = this.markers.get(type, source).markBufferRange(range)
@@ -37,7 +37,7 @@ export class TooltipManager {
     this.editorElement.classList.add('ide-haskell--has-tooltips')
   }
 
-  public hide (type?: TEventRangeType, source?: string, template?: IMarkerProperties) {
+  public hide (type?: UPI.TEventRangeType, source?: string, template?: IMarkerProperties) {
     if (!type) {
       this.markers.clear()
       return
@@ -45,12 +45,12 @@ export class TooltipManager {
     if (!template) {
       this.markers.get(type, source).clear()
     } else {
-      this.markers.get(type, source).findMarkers(template).forEach((m) => m.destroy())
+      this.markers.get(type, source).findMarkers(template).forEach((m: DisplayMarker) => m.destroy())
     }
     if (! this.has()) { this.editorElement.classList.remove('ide-haskell--has-tooltips') }
   }
 
-  public has (type?: TEventRangeType, source?: string, template?: IMarkerProperties) {
+  public has (type?: UPI.TEventRangeType, source?: string, template?: IMarkerProperties) {
     if (!type) {
       return this.markers.getMarkerCount() > 0
     }

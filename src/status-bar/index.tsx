@@ -1,5 +1,5 @@
 import * as etch from 'etch'
-import {IStatus, OutputPanel} from '../output-panel'
+import {OutputPanel} from '../output-panel'
 import {StatusIcon} from '../output-panel/views/status-icon'
 
 export interface ITile {
@@ -16,7 +16,7 @@ export interface IStatusBar {
 export class StatusBarView {
   // tslint:disable-next-line:no-uninitialized-class-properties
   public element: HTMLElement
-  private statusMap: Map<string, IStatus>
+  private statusMap: Map<string, UPI.IStatus>
   constructor (private panel: OutputPanel) {
     this.statusMap = new Map()
     etch.initialize(this)
@@ -37,7 +37,7 @@ export class StatusBarView {
     return etch.update(this)
   }
 
-  public backendStatus (pluginName: string, st: IStatus) {
+  public backendStatus (pluginName: string, st: UPI.IStatus) {
     this.statusMap.set(pluginName, st)
     this.update()
   }

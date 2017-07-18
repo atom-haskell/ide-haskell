@@ -6,7 +6,6 @@ import {
 import {ResultItem} from '../results-db'
 import {MessageObject} from '../utils'
 import {ResultsDB} from '../results-db'
-import {TEventRangeType} from '../editor-control/tooltip-manager'
 import {PluginManager, IEditorController} from '../plugin-manager'
 import {listen, bufferPositionFromMouseEvent} from '../utils'
 import {TooltipRegistry} from '../tooltip-registry'
@@ -54,7 +53,7 @@ export class CREditorControl implements IEditorController {
     }
   }
 
-  public getMessageAt (pos: Point, type: TEventRangeType | 'gutter') {
+  public getMessageAt (pos: Point, type: UPI.TEventRangeType | 'gutter') {
     const markers = this.find(pos, type)
     const result: MessageObject[] = []
     for (const marker of markers) {
@@ -79,7 +78,7 @@ export class CREditorControl implements IEditorController {
               {
                 pluginName: 'builtin:check-results',
                 tooltip: {
-                  text: msg,
+                  text: msg.map((m) => m.toHtml()), // TODO: MessageObject
                   range: new Range(bufferPt, bufferPt)
                 }
               }
@@ -131,7 +130,7 @@ export class CREditorControl implements IEditorController {
     this.editor.decorateMarker(m, { type: 'highlight', ...cls })
   }
 
-  private find (pos: Point, type: TEventRangeType | 'gutter') {
+  private find (pos: Point, type: UPI.TEventRangeType | 'gutter') {
     switch (type) {
       case 'gutter':
         return this.markers.findMarkers({ startBufferRow: pos.row })

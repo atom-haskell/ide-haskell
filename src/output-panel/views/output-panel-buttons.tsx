@@ -2,13 +2,6 @@ import {Button, IProps as IBtnProps} from './output-panel-button'
 import * as etch from 'etch'
 const $ = etch.dom
 
-export interface ISeverityTabDefinition {
-  /** should uri filter apply to tab? */
-  uriFilter?: boolean
-  /** should tab auto-scroll? */
-  autoScroll?: boolean
-}
-
 export interface IBtnDesc {
   name: string
   count: number
@@ -43,7 +36,7 @@ export class OutputPanelButtons implements JSX.ElementClass {
     return etch.update(this)
   }
 
-  public createButton (btn: string, {uriFilter = true, autoScroll = false}: ISeverityTabDefinition = {}) {
+  public createButton (btn: string, {uriFilter = true, autoScroll = false}: UPI.ISeverityTabDefinition = {}) {
     if (atom.config.get('ide-haskell.messageDisplayFrontend') !== 'builtin' &&
           uriFilter === true) { return }
     const button: IBtnDesc = {

@@ -1,20 +1,13 @@
 import * as etch from 'etch'
 import {Disposable, CompositeDisposable} from 'atom'
-import {OutputPanelButtons, ISeverityTabDefinition} from './views/output-panel-buttons'
+import {OutputPanelButtons} from './views/output-panel-buttons'
 import {OutputPanelCheckbox} from './views/output-panel-checkbox'
 import {ProgressBar} from './views/progress-bar'
 import {OutputPanelItems} from './views/output-panel-items'
-import {ResultsDB, ResultItem, TSeverity} from '../results-db'
-import {StatusIcon, IStatus} from './views/status-icon'
+import {ResultsDB, ResultItem} from '../results-db'
+import {StatusIcon} from './views/status-icon'
 import {isDock} from '../utils'
 const $ = etch.dom
-
-export {ISeverityTabDefinition, IStatus}
-
-export interface IElementObject<T> {
-  element: HTMLElement
-  update (props: T): Promise<void>
-}
 
 export interface IState {
   fileFilter?: boolean
@@ -22,33 +15,6 @@ export interface IState {
 }
 
 export type TPanelPosition = 'bottom' | 'left' | 'top' | 'right'
-
-export interface ISetTypesParams {[severity: string]: ISeverityTabDefinition}
-
-export interface IControlOpts {
-  /** element `id` */
-  id?: string
-  /** event callbacks, key is event name, e.g. "click" */
-  events?: {[key: string]: EventListener}
-  /** additional classes to set on element */
-  classes?: string[]
-  /** css attributes to set on element */
-  style?: {[key: string]: string}
-  /** html attributes to set on element */
-  attrs?: {[key: string]: string}
-}
-
-export interface IControlSimpleDefinition {
-  element: string
-  opts: IControlOpts
-}
-
-export interface IControlCustomDefinition<T> {
-  element: { new (arg: T): IElementObject<T> }
-  opts: T
-}
-
-export type TControlDefinition<T> = IControlCustomDefinition<T> | IControlSimpleDefinition
 
 export class OutputPanel {
   // tslint:disable-next-line:no-uninitialized-class-properties
@@ -60,7 +26,7 @@ export class OutputPanel {
   private elements: Set<JSX.Element>
   private disposables: CompositeDisposable
   private currentResult: number
-  private statusMap: Map<string, IStatus>
+  private statusMap: Map<string, UPI.IStatus>
   private progress: number[]
   private itemFilter: (item: ResultItem) => boolean
   constructor (private state: IState = {}, private results: ResultsDB) {
@@ -74,7 +40,7 @@ export class OutputPanel {
 
     etch.initialize(this)
 
-    this.disposables.add(this.results.onDidUpdate((severities: TSeverity[]) => {
+    this.disposables.add(this.results.onDidUpdate((severities: UPI.TSeverity[]) => {
       this.currentResult = 0
       this.updateItems()
       if (atom.config.get('ide-haskell.autoHideOutput') && this.results.isEmpty()) {
@@ -149,9 +115,9 @@ export class OutputPanel {
     return atom.config.get('ide-haskell.panelPosition')
   }
 
-  public addPanelControl<T> ({element, opts}: TControlDefinition<T>) {
+  public addPanelControl<T> ({element, opts}: UPI.TControlDefinition<T>) {
     if (typeof element === 'string') {
-      const {events, classes, style, attrs} = (opts as IControlOpts)
+      const {events, classes, style, attrs} = (opts as UPI.IControlOpts)
       const props: {[key: string]: Object} = {}
       if (classes) { props.class = classes.join(' ') }
       if (style) { props.style = style }
@@ -203,8 +169,8 @@ export class OutputPanel {
     this.refs.buttons.setActive(tab)
   }
 
-  public activateFirstNonEmptyTab (severities: TSeverity[]) {
-    const sevs: TSeverity[] = severities
+  public activateFirstNonEmptyTab (severities: UPI.TSeverity[]) {
+    const sevs: UPI.TSeverity[] = severities
     for (const i of sevs) {
       const count = this.refs.buttons.getCount(i)
       if (count && count > 0) {
@@ -223,7 +189,7 @@ export class OutputPanel {
     return this.refs.buttons.getActive()
   }
 
-  public createTab (name: string, opts: ISeverityTabDefinition) {
+  public createTab (name: string, opts: UPI.ISeverityTabDefinition) {
     if (!this.refs.buttons.buttonNames().includes(name)) {
       this.refs.buttons.createButton(name, opts)
       this.state.activeTab && this.activateTab(this.state.activeTab)
@@ -237,7 +203,7 @@ export class OutputPanel {
     }
   }
 
-  public backendStatus (pluginName: string, st: IStatus) {
+  public backendStatus (pluginName: string, st: UPI.IStatus) {
     this.statusMap.set(pluginName, st)
     this.progress =
       Array.from(this.statusMap.values())

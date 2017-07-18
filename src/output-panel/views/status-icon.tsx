@@ -1,22 +1,7 @@
 import * as etch from 'etch'
 import {CompositeDisposable} from 'atom'
 
-export interface INormalStatus {
-  status: 'ready' | 'error' | 'warning'
-}
-
-export interface IProgressStatus {
-  status: 'progress'
-  /**
-  float between 0 and 1, only relevant when status is 'progress'
-  if 0 or undefined, progress bar is not shown
-  */
-  progress?: number
-}
-
-export type IStatus = (INormalStatus | IProgressStatus) & {detail: string}
-
-export interface IProps extends JSX.Props {statusMap: Map<string, IStatus>}
+export interface IProps extends JSX.Props {statusMap: Map<string, UPI.IStatus>}
 
 export class StatusIcon implements JSX.ElementClass {
   private disposables: CompositeDisposable

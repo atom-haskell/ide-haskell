@@ -8,13 +8,11 @@ import {
 } from '../utils'
 
 import {listen} from '../utils'
-import {TooltipManager, TEventRangeType} from './tooltip-manager'
+import {TooltipManager} from './tooltip-manager'
 import {TooltipRegistry} from '../tooltip-registry'
 import {PluginManager, IEditorController} from '../plugin-manager'
 
-export type TTextBufferCallback = (buffer: TextBuffer) => void
-export type TEventRangeResult = { crange: Range, pos: Point, eventType: TEventRangeType } | undefined
-export {TEventRangeType}
+export type TEventRangeResult = { crange: Range, pos: Point, eventType: UPI.TEventRangeType } | undefined
 
 export class EditorControl implements IEditorController {
   public tooltips: TooltipManager
@@ -69,7 +67,7 @@ export class EditorControl implements IEditorController {
   }
 
   public getEventRange (
-    eventType: TEventRangeType
+    eventType: UPI.TEventRangeType
   ): TEventRangeResult {
     let crange: Range, pos: Point
     switch (eventType) {
@@ -93,7 +91,7 @@ export class EditorControl implements IEditorController {
     return { crange, pos, eventType }
   }
 
-  private shouldShowTooltip (pos: Point, type: TEventRangeType) {
+  private shouldShowTooltip (pos: Point, type: UPI.TEventRangeType) {
     if ((pos.row < 0) ||
       (pos.row >= this.editor.getLineCount()) ||
       pos.isEqual(this.editor.bufferRangeForBufferRow(pos.row).end)) {
