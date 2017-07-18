@@ -24,7 +24,7 @@ export class TooltipRegistry {
 
   public register (pluginName: string, provider: TTooltipHandlerSpec): Disposable {
     const idx = this.providers.findIndex(({priority}) => priority < provider.priority)
-    const defaultEvT: UPI.TEventRangeType[] = ['selection', 'mouse']
+    const defaultEvT: UPI.TEventRangeType[] = [UPI.TEventRangeType.selection, UPI.TEventRangeType.mouse]
     const record = {
       pluginName,
       eventTypes: provider.eventTypes || defaultEvT,

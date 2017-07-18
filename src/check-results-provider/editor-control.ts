@@ -74,7 +74,7 @@ export class CREditorControl implements IEditorController {
           const msg = this.getMessageAt(bufferPt, 'gutter')
           if (msg.length > 0) {
             this.tooltipRegistry.showTooltip(
-              this.editor, 'mouse',
+              this.editor, UPI.TEventRangeType.mouse,
               {
                 pluginName: 'builtin:check-results',
                 tooltip: {
@@ -89,7 +89,7 @@ export class CREditorControl implements IEditorController {
     ))
     this.disposables.add(listen(
       this.gutterElement, 'mouseout', '.decoration', (e) =>
-        this.tooltipRegistry.hideTooltip(this.editor, 'mouse', 'builtin:check-results')
+        this.tooltipRegistry.hideTooltip(this.editor, UPI.TEventRangeType.mouse, 'builtin:check-results')
     ))
   }
 

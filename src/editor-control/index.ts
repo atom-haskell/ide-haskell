@@ -44,8 +44,8 @@ export class EditorControl implements IEditorController {
       buffer.onDidSave(() => pluginManager.didSaveBuffer(buffer)),
       this.editor.onDidStopChanging(() => pluginManager.didStopChanging(buffer)),
       // tooltip tracking (mouse and selection)
-      this.editorElement.onDidChangeScrollLeft(() => this.tooltips.hide('mouse')),
-      this.editorElement.onDidChangeScrollTop(() => this.tooltips.hide('mouse')),
+      this.editorElement.onDidChangeScrollLeft(() => this.tooltips.hide(UPI.TEventRangeType.mouse)),
+      this.editorElement.onDidChangeScrollTop(() => this.tooltips.hide(UPI.TEventRangeType.mouse)),
       listen(this.editorElement, 'mousemove', '.scroll-view', this.trackMouseBufferPosition.bind(this)),
       listen(this.editorElement, 'mouseout', '.scroll-view', this.stopTrackingMouseBufferPosition.bind(this)),
       this.editor.onDidChangeSelectionRange(this.trackSelection.bind(this)),
@@ -114,7 +114,7 @@ export class EditorControl implements IEditorController {
       clearTimeout(this.exprTypeTimeout)
     }
     this.exprTypeTimeout = setTimeout(
-      () => bufferPt && this.shouldShowTooltip(bufferPt, 'mouse'),
+      () => bufferPt && this.shouldShowTooltip(bufferPt, UPI.TEventRangeType.mouse),
       atom.config.get('ide-haskell.expressionTypeInterval')
     )
   }
@@ -132,18 +132,18 @@ export class EditorControl implements IEditorController {
       clearTimeout(this.selTimeout)
     }
     if (newBufferRange.isEmpty()) {
-      this.tooltips.hide('selection')
+      this.tooltips.hide(UPI.TEventRangeType.selection)
       if (this.exprTypeTimeout) {
         clearTimeout(this.exprTypeTimeout)
       }
-      this.tooltipRegistry.showTooltip(this.editor, 'keyboard')
+      this.tooltipRegistry.showTooltip(this.editor, UPI.TEventRangeType.keyboard)
       if (atom.config.get('ide-haskell.onCursorMove') === 'Hide Tooltip') {
-        this.tooltips.hide('mouse', undefined, {persistOnCursorMove: false})
-        this.tooltips.hide('context', undefined, {persistOnCursorMove: false})
+        this.tooltips.hide(UPI.TEventRangeType.mouse, undefined, {persistOnCursorMove: false})
+        this.tooltips.hide(UPI.TEventRangeType.context, undefined, {persistOnCursorMove: false})
       }
     } else {
       this.selTimeout = setTimeout(
-        () => this.shouldShowTooltip(newBufferRange.start, 'selection'),
+        () => this.shouldShowTooltip(newBufferRange.start, UPI.TEventRangeType.selection),
         atom.config.get('ide-haskell.expressionTypeInterval')
       )
     }

@@ -8,8 +8,8 @@ export const MAIN_MENU_LABEL = 'Haskell IDE'
 
 export function getEventType (detail: any) {
   if (detail && (detail.contextCommand || (detail[0] && detail[0].contextCommand))) {
-    return 'context'
-  } else { return 'keyboard' }
+    return UPI.TEventRangeType.context
+  } else { return UPI.TEventRangeType.keyboard }
 }
 
   // screen position from mouse event

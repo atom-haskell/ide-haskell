@@ -16,7 +16,7 @@ export class CheckResultsProvider {
     this.disposables.add(tooltipRegistry.register('builtin:check-results', {
       priority: 1000,
       handler: this.tooltipProvider.bind(this),
-      eventTypes: ['mouse', 'keyboard'],
+      eventTypes: [UPI.TEventRangeType.mouse, UPI.TEventRangeType.keyboard],
     }))
     pluginManager.addEditorController(CREditorControl, this.editorMap)
   }
@@ -28,7 +28,10 @@ export class CheckResultsProvider {
   private tooltipProvider (editor: TextEditor, crange: Range, type: UPI.TEventRangeType): UPI.ITooltipData | undefined {
     const controller = this.editorMap.get(editor)
     if (!controller) { return }
-    if (type === 'keyboard' && atom.config.get('ide-haskell.onCursorMove') !== 'Show Tooltip') { return }
+    if (type === UPI.TEventRangeType.keyboard
+      && atom.config.get('ide-haskell.onCursorMove') !== 'Show Tooltip') {
+        return
+    }
     const msg = controller.getMessageAt(crange.start, type)
     if (msg.length > 0) {
       // TODO: WTF? MessageObject forbidden?

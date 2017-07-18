@@ -15,8 +15,8 @@ export class TooltipManager {
   private editorElement: HTMLElement
   constructor (private editor: TextEditor) {
     this.markers = new EventTable(editor, [
-      [{type: 'keyboard'}, {type: 'context'}],
-      [{type: 'mouse'}, {type: 'selection'}],
+      [{type: UPI.TEventRangeType.keyboard}, {type: UPI.TEventRangeType.context}],
+      [{type: UPI.TEventRangeType.mouse}, {type: UPI.TEventRangeType.selection}],
     ])
     this.editorElement = atom.views.getView(this.editor)
   }

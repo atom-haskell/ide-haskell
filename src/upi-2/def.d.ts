@@ -1,10 +1,4 @@
-export const TEventRangeType: {
-    context: "context";
-    keyboard: "keyboard";
-    mouse: "mouse";
-    selection: "selection";
-};
-export type TEventRangeType = keyof typeof TEventRangeType;
+export type TEventRangeType = UPI.TEventRangeType
 export type TRange = AtomTypes.Range | [TPosition, TPosition];
 export type TPosition = AtomTypes.Point | [number, number];
 
