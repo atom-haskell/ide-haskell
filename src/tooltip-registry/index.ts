@@ -47,7 +47,7 @@ export class TooltipRegistry {
   ) {
     const controller = this.pluginManager.controller(editor)
     if (!controller) { return }
-    let pluginName, tooltipData
+    let pluginName, tooltipData: UPI.TTooltipFunction | UPI.ITooltipData
     if (spec && typeof spec.tooltip !== 'function') {
       tooltipData = spec.tooltip
       pluginName = spec.pluginName

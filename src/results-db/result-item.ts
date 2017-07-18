@@ -5,7 +5,7 @@ import {MessageObject} from '../utils'
 export class ResultItem {
   public readonly uri?: string
   public readonly position?: Point
-  public readonly message: MessageObject
+  public readonly message: UPI.IMessageObject
   public readonly severity: UPI.TSeverity
   public readonly context?: string
   private _isValid: boolean

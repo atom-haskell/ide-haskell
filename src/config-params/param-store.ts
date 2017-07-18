@@ -16,7 +16,7 @@ export class ConfigParamStore {
   private disposables: CompositeDisposable
   private emitter: Emitter
   private saved: IState
-  private plugins: Map<string, Map<string, IParamData<Object>>>
+  private plugins: Map<string, Map<string, IParamData<any>>>
   constructor (state: IState = {}) {
     this.disposables = new CompositeDisposable()
     this.emitter = new Emitter()
@@ -60,9 +60,9 @@ export class ConfigParamStore {
     })
   }
 
-  public async setValue (pluginName: string, paramName: string, value?: Object) {
-    const paramConfig = this.getParamConfig(pluginName, paramName, 'set')
-    if (value === undefined) { value = await this.showSelect(paramConfig.spec) }
+  public async setValue<T> (pluginName: string, paramName: string, value?: T): Promise<T | undefined> {
+    const paramConfig = this.getParamConfig<T>(pluginName, paramName, 'set')
+    if (value === undefined) { value = await this.showSelect<T>(paramConfig.spec) }
     if (value !== undefined) {
       paramConfig.value = value
       this.saved[`${pluginName}.${paramName}`] = value
@@ -71,18 +71,18 @@ export class ConfigParamStore {
     return value
   }
 
-  public async getValue (pluginName: string, paramName: string) {
-    const paramConfig = this.getParamConfig(pluginName, paramName, 'get')
+  public async getValue<T> (pluginName: string, paramName: string): Promise<T | undefined> {
+    const paramConfig = this.getParamConfig<T>(pluginName, paramName, 'get')
     if (paramConfig.value === undefined) { await this.setValue(pluginName, paramName) }
     return paramConfig.value
   }
 
-  public getValueRaw (pluginName: string, paramName: string) {
-    const paramConfig = this.getParamConfig(pluginName, paramName, 'get raw')
+  public getValueRaw<T> (pluginName: string, paramName: string): T | undefined {
+    const paramConfig = this.getParamConfig<T>(pluginName, paramName, 'get raw')
     return paramConfig.value
   }
 
-  private getParamConfig (pluginName: string, paramName: string, reason: string) {
+  private getParamConfig<T> (pluginName: string, paramName: string, reason: string): IParamData<T> {
     const pluginConfig = this.plugins.get(pluginName)
     if (!pluginConfig) {
       throw new Error(`${pluginName} is not defined while trying to ${reason} ${pluginName}.${paramName}`)

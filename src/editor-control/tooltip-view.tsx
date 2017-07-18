@@ -1,12 +1,11 @@
 import * as etch from 'etch'
-import {MessageObject} from '../utils'
 
 export class TooltipMessage {
   // tslint:disable-next-line:no-uninitialized-class-properties // TODO: fix this?
   private message: JSX.Element[]
   // tslint:disable-next-line:no-uninitialized-class-properties
   private element: HTMLElement
-  constructor (message: MessageObject | MessageObject[]) {
+  constructor (message: UPI.IMessageObject | UPI.IMessageObject[]) {
     if (Array.isArray(message)) {
       this.message = message.map((m) => <div innerHTML={m.toHtml()}/>)
     } else {

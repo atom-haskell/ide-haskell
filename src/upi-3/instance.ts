@@ -14,7 +14,7 @@ export function instance (
   disposables.add(consume(pluginManager, options))
 
   return {
-    setMenu (name: string, menu: UPI.TAtomMenu[]) {
+    setMenu (name: string, menu: AtomTypes.AtomMenuItem[]) {
       const menuDisp = atom.menu.add([{
         label: MAIN_MENU_LABEL,
         submenu: [ {label: name, submenu: menu} ]
@@ -47,17 +47,17 @@ export function instance (
     addPanelControl<T> (def: UPI.TControlDefinition<T>) {
       return pluginManager.outputPanel.addPanelControl(def)
     },
-    addConfigParam (paramName: string, spec: UPI.IParamSpec<Object>) {
+    addConfigParam<T> (paramName: string, spec: UPI.IParamSpec<T>) {
       return pluginManager.configParamManager.add(pluginName, paramName, spec)
     },
-    async getConfigParam (name: string) {
-      return pluginManager.configParamManager.get(pluginName, name)
+    async getConfigParam<T> (name: string): Promise<T | undefined> {
+      return pluginManager.configParamManager.get<T>(pluginName, name)
     },
-    async getOthersConfigParam (plugin: string, name: string) {
-      return pluginManager.configParamManager.get(plugin, name)
+    async getOthersConfigParam<T> (plugin: string, name: string): Promise<T | undefined> {
+      return pluginManager.configParamManager.get<T>(plugin, name)
     },
-    async setConfigParam (name: string, value: Object) {
-      return pluginManager.configParamManager.set(pluginName, name, value)
+    async setConfigParam<T> (name: string, value?: T): Promise<T | undefined> {
+      return pluginManager.configParamManager.set<T>(pluginName, name, value)
     },
     getEventRange (editor: TextEditor, typeOrDetail: UPI.TEventRangeType | Object) {
       let type: UPI.TEventRangeType

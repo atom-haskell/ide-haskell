@@ -34,8 +34,7 @@ export class CheckResultsProvider {
     }
     const msg = controller.getMessageAt(crange.start, type)
     if (msg.length > 0) {
-      // TODO: WTF? MessageObject forbidden?
-      return { range: crange, text: msg.map((m) => m.toHtml()) }
+      return { range: crange, text: msg }
     }
   }
 }

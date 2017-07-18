@@ -38,11 +38,11 @@ export class ConfigParamManager {
     return disp
   }
 
-  public async get (pluginName: string, name: string) {
-    return this.store.getValue(pluginName, name)
+  public async get<T> (pluginName: string, name: string) {
+    return this.store.getValue<T>(pluginName, name)
   }
 
-  public async set (pluginName: string, name: string, value?: Object) {
+  public async set<T> (pluginName: string, name: string, value?: T) {
     return this.store.setValue(pluginName, name, value)
   }
 }

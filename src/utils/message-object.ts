@@ -8,9 +8,13 @@ function isHTMLMessage (msg: UPI.TMessage): msg is UPI.IMessageHTML {
   return !!(msg && (msg as UPI.IMessageHTML).html)
 }
 
-export class MessageObject {
-  public static fromObject (message: UPI.TMessage): MessageObject  {
-    if (message instanceof MessageObject) {
+function isIMessageObject (msg: UPI.TMessage | UPI.IMessageObject): msg is UPI.IMessageObject {
+  return !!(msg && (msg as UPI.IMessageObject).toHtml && (msg as UPI.IMessageObject).raw)
+}
+
+export class MessageObject implements UPI.IMessageObject {
+  public static fromObject (message: UPI.TMessage | UPI.IMessageObject): UPI.IMessageObject {
+    if (isIMessageObject(message)) {
       return message
     } else {
       return new MessageObject(message)
@@ -50,9 +54,11 @@ export class MessageObject {
     }
   }
 
-  public raw () {
+  public raw (): string {
     if (isTextMessage(this.msg)) {
       return this.msg.text
+    } else if (isHTMLMessage(this.msg)) {
+      return this.msg.html
     } else {
       return this.msg
     }

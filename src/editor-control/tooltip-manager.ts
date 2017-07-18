@@ -3,7 +3,6 @@ import {
 } from 'atom'
 
 import {TooltipMessage} from './tooltip-view'
-import {MessageObject} from '../utils'
 import {EventTable} from './event-table'
 
 export interface IMarkerProperties {
@@ -27,7 +26,7 @@ export class TooltipManager {
   }
 
   public show (
-    range: Range, text: MessageObject | MessageObject[],
+    range: Range, text: UPI.IMessageObject | UPI.IMessageObject[],
     type: UPI.TEventRangeType, source: string, detail: IMarkerProperties
   ) {
     this.hide(type, source)

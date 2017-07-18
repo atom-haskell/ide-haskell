@@ -3,9 +3,7 @@ import {
   DisplayMarkerLayer
 } from 'atom'
 
-import {ResultItem} from '../results-db'
-import {MessageObject} from '../utils'
-import {ResultsDB} from '../results-db'
+import {ResultsDB, ResultItem} from '../results-db'
 import {PluginManager, IEditorController} from '../plugin-manager'
 import {listen, bufferPositionFromMouseEvent} from '../utils'
 import {TooltipRegistry} from '../tooltip-registry'
@@ -55,7 +53,7 @@ export class CREditorControl implements IEditorController {
 
   public getMessageAt (pos: Point, type: UPI.TEventRangeType | 'gutter') {
     const markers = this.find(pos, type)
-    const result: MessageObject[] = []
+    const result: UPI.IMessageObject[] = []
     for (const marker of markers) {
       if (!marker.isValid()) { continue }
       const res = this.markerProps.get(marker)
@@ -78,7 +76,7 @@ export class CREditorControl implements IEditorController {
               {
                 pluginName: 'builtin:check-results',
                 tooltip: {
-                  text: msg.map((m) => m.toHtml()), // TODO: MessageObject
+                  text: msg,
                   range: new Range(bufferPt, bufferPt)
                 }
               }
