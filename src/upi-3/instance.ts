@@ -6,7 +6,7 @@ import {consume} from './'
 
 export function instance (
   pluginManager: PluginManager, options: UPI.IRegistrationOptions
-) {
+): UPI.IUPIInstance {
   const pluginName = options.name
   const disposables = new CompositeDisposable()
   const messageProvider = pluginManager.resultsDB.registerProvider()
