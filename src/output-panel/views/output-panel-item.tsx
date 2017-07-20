@@ -13,7 +13,7 @@ export class OutputPanelItem implements JSX.ElementClass {
 
   public render () {
     return (
-      <ide-haskell-panel-item>
+      <ide-haskell-panel-item key={this.props.model.hash()}>
         {this.renderPosition()}
         {this.renderContext()}
         <ide-haskell-item-description innerHTML={this.props.model.message.toHtml()}/>
