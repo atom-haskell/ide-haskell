@@ -95,7 +95,12 @@ export class OutputPanelButtons implements JSX.ElementClass {
 
   private * renderButtons () {
     for (const [btn, props] of this.buttons.entries()) {
-      yield $(Button, {...props, active: btn === this.activeBtn})
+      yield $(Button, {
+        active: btn === this.activeBtn,
+        name: props.name,
+        count: props.count,
+        onClick: props.onClick
+      })
     }
   }
 }

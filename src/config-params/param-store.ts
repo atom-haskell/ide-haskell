@@ -10,11 +10,20 @@ export interface IState {
   [pluginNameParamName: string]: Object
 }
 
-export type TUpdatedCallback = (arg: {pluginName: string, paramName: string, value: Object}) => void
+interface TUpdatedCallbackArg<T> { pluginName: string, paramName: string, value: T | undefined }
+export type TUpdatedCallback<T> = (arg: TUpdatedCallbackArg<T>) => void
+
+type Events = 'did-update'
+interface MyEmitter extends Emitter {
+  on<T> (event: Events, callback: TUpdatedCallback<T>): Disposable
+  once<T> (event: Events, callback: TUpdatedCallback<T>): Disposable
+  preempt<T> (event: Events, callback: TUpdatedCallback<T>): Disposable
+  emit<T> (event: Events, val: TUpdatedCallbackArg<T>): void
+}
 
 export class ConfigParamStore {
   private disposables: CompositeDisposable
-  private emitter: Emitter
+  private emitter: MyEmitter
   private saved: IState
   private plugins: Map<string, Map<string, IParamData<any>>>
   constructor (state: IState = {}) {
@@ -33,8 +42,12 @@ export class ConfigParamStore {
     this.disposables.dispose()
   }
 
-  public onDidUpdate (callback: TUpdatedCallback) {
-    return this.emitter.on('did-update', callback)
+  public onDidUpdate<T> (pluginName: string, paramName: string, callback: TUpdatedCallback<T>) {
+    return this.emitter.on<T>('did-update', (val) => {
+      if (val.pluginName === pluginName && val.paramName === paramName) {
+        callback(val)
+      }
+    })
   }
 
   public addParamSpec<T> (pluginName: string, paramName: string, spec: UPI.IParamSpec<T>) {
@@ -46,10 +59,10 @@ export class ConfigParamStore {
     if (pluginConfig.has(paramName)) {
       throw new Error(`Parameter ${pluginName}.${paramName} already defined!`)
     }
-    let value: Object | undefined = this.saved[`${pluginName}.${paramName}`]
+    let value: T | undefined = this.saved[`${pluginName}.${paramName}`] as T
     if (value === undefined) { value = spec.default }
     pluginConfig.set(paramName, {spec, value})
-    this.emitter.emit('did-update', {pluginName, paramName, value})
+    this.emitter.emit<T>('did-update', {pluginName, paramName, value})
     return new Disposable(() => {
       if (pluginConfig) {
         pluginConfig.delete(paramName)

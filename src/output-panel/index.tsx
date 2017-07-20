@@ -6,7 +6,7 @@ import {ProgressBar} from './views/progress-bar'
 import {OutputPanelItems} from './views/output-panel-items'
 import {ResultsDB, ResultItem} from '../results-db'
 import {StatusIcon} from './views/status-icon'
-import {isDock} from '../utils'
+import {isDock, isSimpleControlDef} from '../utils'
 const $ = etch.dom
 
 export interface IState {
@@ -115,23 +115,24 @@ export class OutputPanel {
     return atom.config.get('ide-haskell.panelPosition')
   }
 
-  public addPanelControl<T> ({element, opts}: UPI.TControlDefinition<T>) {
-    if (typeof element === 'string') {
-      const {events, classes, style, attrs} = (opts as UPI.IControlOpts)
+  public addPanelControl<T> (def: UPI.TControlDefinition<T>) {
+    let newElement: JSX.Element
+    if (isSimpleControlDef(def)) {
+      const {events, classes, style, attrs} = def.opts
       const props: {[key: string]: Object} = {}
       if (classes) { props.class = classes.join(' ') }
       if (style) { props.style = style }
       if (attrs) { props.attributes = attrs }
       if (events) { props.on = events }
 
-      element = $(element, props)
+      newElement = $(def.element, props)
     } else {
-      element = $(element, opts)
+      newElement = $(def.element, def.opts)
     }
-    this.elements.add(element)
+    this.elements.add(newElement)
     this.update()
     return new Disposable(() => {
-      this.elements.delete(element)
+      this.elements.delete(newElement)
       this.update()
     })
   }
