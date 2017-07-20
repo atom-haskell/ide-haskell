@@ -1,17 +1,5 @@
-import {
-  TextEditor, DisplayMarkerLayer
-} from 'atom'
-
-const enumVals = [
-  UPI.TEventRangeType.context,
-  UPI.TEventRangeType.keyboard,
-  UPI.TEventRangeType.mouse,
-  UPI.TEventRangeType.selection,
-]
-
-export function isTEventRangeType (x: Object): x is UPI.TEventRangeType {
-  return typeof x === 'string' && enumVals.includes(x as UPI.TEventRangeType)
-}
+import {TextEditor, DisplayMarkerLayer} from 'atom'
+import {eventRangeTypeVals} from '../utils'
 
 export type IMarkerGroup = Array<{type: UPI.TEventRangeType, source?: string}>
 
@@ -23,7 +11,7 @@ export class EventTable {
   constructor (private editor: TextEditor, groups: IMarkerGroup[]) {
     // tslint:disable-next-line:no-null-keyword
     this.table = Object.create(null)
-    for (const i of enumVals) {
+    for (const i of eventRangeTypeVals) {
       this.table[i] = new Map()
     }
     this.layers = new Set()
@@ -71,13 +59,13 @@ export class EventTable {
   }
 
   public * values () {
-    for (const i of enumVals){
+    for (const i of eventRangeTypeVals){
       yield this.table[i]
     }
   }
 
   public * entries () {
-    for (const i of enumVals){
+    for (const i of eventRangeTypeVals){
       yield [i, this.table[i]]
     }
   }

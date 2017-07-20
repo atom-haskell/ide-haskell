@@ -1,7 +1,7 @@
 import { CompositeDisposable, TextEditor } from 'atom'
 import { MAIN_MENU_LABEL, getEventType } from '../utils'
 import {PluginManager} from '../plugin-manager'
-import {isTEventRangeType} from '../editor-control/event-table'
+import {isTEventRangeType} from '../utils'
 import {consume} from './'
 
 export function instance (
