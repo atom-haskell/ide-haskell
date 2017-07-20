@@ -1,6 +1,7 @@
 import {ResultItem} from './result-item'
 import {CompositeDisposable, Emitter} from 'atom'
 import {Provider, TMessageProviderFunction} from './provider'
+import {notUndefined} from '../utils'
 
 export {TMessageProviderFunction, ResultItem}
 
@@ -28,7 +29,7 @@ export class ResultsDB {
   }
 
   public didUpdate (providerId: number, msgs: ResultItem[]) {
-    const uris = msgs.map((v) => v.uri).filter((v) => v) as string[]
+    const uris: string[] = msgs.map((v) => v.uri).filter(notUndefined)
     for (const [k, v] of Array.from(this.messages)) {
       if (v.providerId === providerId || v.uri && uris.includes(v.uri)) {
         this.messages.delete(k)
