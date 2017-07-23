@@ -43,7 +43,7 @@ export class OutputPanel {
     this.disposables.add(this.results.onDidUpdate((severities: UPI.TSeverity[]) => {
       this.currentResult = 0
       this.updateItems()
-      if (atom.config.get('ide-haskell.autoHideOutput') && this.results.isEmpty()) {
+      if (atom.config.get('ide-haskell.autoHideOutput') && this.results.isEmpty(severities)) {
         this.hide()
       } else if (atom.config.get('ide-haskell.switchTabOnCheck')) {
         this.show()
@@ -54,6 +54,12 @@ export class OutputPanel {
     this.disposables.add(atom.workspace.onDidChangeActivePaneItem(() => {
       if (this.refs.checkboxUriFilter.getState()) { this.updateItems() }
     }))
+    setImmediate(async () => {
+      await this.show()
+      if (atom.config.get('ide-haskell.autoHideOutput')) {
+        this.hide()
+      }
+    })
   }
 
   public render () {

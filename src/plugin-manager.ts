@@ -51,7 +51,6 @@ export class PluginManager {
 
     this.resultsDB = new ResultsDB()
     this.outputPanel = new OutputPanel(state.outputView, this.resultsDB)
-    this.outputPanel.show()
     this.tooltipRegistry = new TooltipRegistry(this)
     this.configParamManager = new ConfigParamManager(this.outputPanel, state.configParams)
 

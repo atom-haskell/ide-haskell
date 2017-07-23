@@ -38,8 +38,8 @@ export class ResultsDB {
     for (const msg of msgs) {
       this.messages.set(msg.hash(), msg)
     }
-    const severities: UPI.TSeverity[] = msgs.map((v) => v.severity)
-    this.emitter.emit('did-update', severities)
+    const severities: Set<UPI.TSeverity> = new Set(msgs.map((v) => v.severity))
+    this.emitter.emit('did-update', Array.from(severities))
   }
 
   public registerProvider () {
@@ -58,7 +58,7 @@ export class ResultsDB {
     }
   }
 
-  public isEmpty () {
-    return this.messages.size === 0
+  public isEmpty (severities: UPI.TSeverity[]) {
+    return ! Array.from(this.messages.values()).some(({severity}) => severities.includes(severity))
   }
 }
