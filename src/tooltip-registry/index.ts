@@ -62,7 +62,7 @@ export class TooltipRegistry {
         if (!tooltip) {
           // if nobody wants to show anything, might as well hide...
           // TODO: this doesn't seem like a particularly bright idea?
-          controller.tooltips.hide(type)
+          controller.tooltips.hide(type, undefined, {persistent: false})
           return
         }
         ({pluginName, tooltipData} = tooltip)
