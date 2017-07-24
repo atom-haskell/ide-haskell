@@ -175,11 +175,9 @@ export class EditorControl implements IEditorController {
     const tt = document.querySelector('ide-haskell-tooltip') as HTMLElement
     if (tt) {
       if ((ymax <= ymin) && (xmax <= xmin)) {
-        tt.style.setProperty(
-          'opacity', '0.3')
+        tt.classList.add('ide-haskell-tooltip-subdued')
       } else {
-        tt.style.removeProperty(
-          'opacity')
+        tt.classList.remove('ide-haskell-tooltip-subdued')
       }
     }
   }
