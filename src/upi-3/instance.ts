@@ -36,10 +36,6 @@ export function instance (
       if (!eventType) {
         eventType = getEventType(detail)
       }
-      if (typeof tooltip !== 'function') {
-        const tt = tooltip
-        tooltip = () => tt
-      }
       pluginManager.tooltipRegistry.showTooltip(
         editor, eventType, {pluginName, tooltip}
       )
