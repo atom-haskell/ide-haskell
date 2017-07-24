@@ -34,9 +34,10 @@ export class EventTable {
   }
 
   public get (type: UPI.TEventRangeType, source?: string) {
-    let res = this.table[type].get(source)
+    const tbl = this.table[type] as Map<string | undefined, DisplayMarkerLayer>
+    let res = tbl.get(source)
     if (!res) {
-      res = this.table[type].get(undefined)
+      res = tbl.get(undefined)
     }
     if (!res) {
       throw new Error(`Failed to classify ${type}:${source}`)
