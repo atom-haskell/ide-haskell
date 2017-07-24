@@ -6,7 +6,7 @@ import {TooltipMessage} from './tooltip-view'
 import {EventTable} from './event-table'
 
 export interface IMarkerProperties {
-  persistOnCursorMove: boolean
+  persistent: boolean
 }
 
 export class TooltipManager {

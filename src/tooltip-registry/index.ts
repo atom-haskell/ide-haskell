@@ -70,7 +70,7 @@ export class TooltipRegistry {
       const newEventRange = controller.getEventRange(type)
       if (!newEventRange || !eventRange.crange.isEqual(newEventRange.crange)) { return }
     }
-    const {persistOnCursorMove = false} = tooltipData
+    const {persistent = false} = tooltipData
     let msg
     if (Array.isArray(tooltipData.text)) {
       msg = tooltipData.text.map(MessageObject.fromObject.bind(MessageObject))
@@ -78,7 +78,7 @@ export class TooltipRegistry {
       msg = MessageObject.fromObject(tooltipData.text)
     }
     controller.tooltips.show(
-      Range.fromObject(tooltipData.range), msg, type, pluginName, {persistOnCursorMove}
+      Range.fromObject(tooltipData.range), msg, type, pluginName, {persistent}
     )
   }
 

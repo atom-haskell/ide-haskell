@@ -138,8 +138,8 @@ export class EditorControl implements IEditorController {
       }
       this.tooltipRegistry.showTooltip(this.editor, UPI.TEventRangeType.keyboard)
       if (atom.config.get('ide-haskell.onCursorMove') === 'Hide Tooltip') {
-        this.tooltips.hide(UPI.TEventRangeType.mouse, undefined, {persistOnCursorMove: false})
-        this.tooltips.hide(UPI.TEventRangeType.context, undefined, {persistOnCursorMove: false})
+        this.tooltips.hide(UPI.TEventRangeType.mouse, undefined, {persistent: false})
+        this.tooltips.hide(UPI.TEventRangeType.context, undefined, {persistent: false})
       }
     } else {
       this.selTimeout = setTimeout(
