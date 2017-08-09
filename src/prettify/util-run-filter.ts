@@ -8,7 +8,7 @@ export interface IRunFilterArgs {
 }
 
 export async function runFilter ({command, args, cwd, stdin}: IRunFilterArgs) {
-  return new Promise((resolve, reject) => {
+  return new Promise<string>((resolve, reject) => {
     try {
       const proc = CP.execFile(command, args, {cwd}, (error, stdout, stderr) => {
         if (stderr.length > 0) {
