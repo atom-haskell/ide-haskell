@@ -3,7 +3,7 @@ import {getRootDir} from 'atom-haskell-utils'
 import {format as cabalFormat} from './util-cabal-format'
 import {format as filterFormat} from './util-stylish-haskell'
 
-export async function prettifyFile (editor: TextEditor, format = 'haskell') {
+export async function prettifyFile (editor: TextEditor, format: 'haskell' | 'cabal' = 'haskell') {
   const [firstCursor, ...cursors] = editor.getCursors().map((cursor) => cursor.getBufferPosition())
   const modMap = {
     haskell: filterFormat,
@@ -27,3 +27,5 @@ export async function prettifyFile (editor: TextEditor, format = 'haskell') {
     })
   }
 }
+
+export {PrettifyEditorController} from './editor-controller'
