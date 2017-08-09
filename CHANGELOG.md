@@ -1,3 +1,16 @@
+## 2.0.0
+* New internal architecture (hopefully more robust)
+* Added statusbar icon to show status & to hide/show panel
+* Minimal Atom version required is 1.19
+* Panel uses Atom docks
+* Dropped space-pen dependency (using [atom-select-list](https://github.com/atom/atom-select-list) instead)
+* Whole thing rewritten in TypeScript
+* Using [etch](https://github.com/atom/etch/) for UI
+* Separate statuses for plugins
+* UPI 0.3
+* Universal atom-linter support
+* Autocomplete hint toolitps support
+
 ## 1.9.6
 * Use Atom tooltips for panel elements
 * Fix #197
