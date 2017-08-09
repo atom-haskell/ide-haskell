@@ -145,13 +145,14 @@ export class OutputPanel {
 
   public updateItems () {
     const activeTab = this.getActiveTab()
-    let currentUri: string
+    let currentUri: string | undefined
     if (activeTab) {
       let filterUri: string | undefined
       const filterSeverity = activeTab
       const ato = this.refs.buttons.options(activeTab)
       if (this.refs.checkboxUriFilter.getState()) {
-        currentUri = atom.workspace.getActiveTextEditor().getPath()
+        const ed = atom.workspace.getActiveTextEditor()
+        currentUri = ed && ed.getPath()
         if (currentUri && ato && ato.uriFilter) {
           filterUri = currentUri
         }
