@@ -7,6 +7,7 @@ import {LinterSupport, ILinter} from './linter-support'
 import {TooltipRegistry} from './tooltip-registry'
 import {CheckResultsProvider} from './check-results-provider'
 import {IStatusBar, ITile, StatusBarView} from './status-bar'
+import {PrettifyEditorController} from './prettify'
 
 export {IParamState, IOutputViewState}
 
@@ -21,42 +22,46 @@ export interface IEditorController {
   destroy (): void
 }
 
-export interface IEditorControllerFactory {
-  new (editor: TextEditor, manager: PluginManager): IEditorController
+export type IEditorControllerFactory = IEditorControllerFactoryT<IEditorController>
+
+export interface IEditorControllerFactoryT<T> {
+  new (editor: TextEditor, manager: PluginManager): T
+  supportsGrammar (grammar: string): boolean
 }
 
-export type ECMap<T extends IEditorController> = WeakMap<TextEditor, T>
+export type ECMap<T extends IEditorController> = WeakMap<TextEditor, {controller: T, disposable: Disposable}>
+
+export interface TMap extends Map<IEditorControllerFactory, ECMap<IEditorController>> {
+  get<U extends IEditorController, T extends IEditorControllerFactoryT<U>> (key: T): ECMap<U>
+  set<U extends IEditorController, T extends IEditorControllerFactoryT<U>> (key: T, val: ECMap<U>): this
+}
 
 export class PluginManager {
   public resultsDB: ResultsDB
   public outputPanel: OutputPanel
   public configParamManager: ConfigParamManager
   public tooltipRegistry: TooltipRegistry
+  private checkResultsProvider?: CheckResultsProvider
   private linterSupport?: LinterSupport
-  private disposables: CompositeDisposable
-  private emitter: Emitter
-  private controllers: ECMap<EditorControl>
-  private controllerClasses: Set<{map?: ECMap<IEditorController>, factory: IEditorControllerFactory}>
-  private editorDispMap: WeakMap<TextEditor, CompositeDisposable>
+  private disposables = new CompositeDisposable()
+  private emitter = new Emitter()
   private statusBarTile?: ITile
   private statusBarView?: StatusBarView
+  private controllers: TMap = new Map()
   constructor (state: IState) {
-    this.disposables = new CompositeDisposable()
-    this.emitter = new Emitter()
     this.disposables.add(this.emitter)
-
-    this.controllers = new WeakMap()
-    this.controllerClasses = new Set()
-    this.editorDispMap = new WeakMap()
 
     this.resultsDB = new ResultsDB()
     this.outputPanel = new OutputPanel(state.outputView, this.resultsDB)
     this.tooltipRegistry = new TooltipRegistry(this)
     this.configParamManager = new ConfigParamManager(this.outputPanel, state.configParams)
 
-    this.addEditorController(EditorControl, this.controllers)
+    this.disposables.add(
+      this.addEditorController(EditorControl),
+      this.addEditorController(PrettifyEditorController),
+    )
     if (atom.config.get('ide-haskell.messageDisplayFrontend') === 'builtin') {
-      this.addEditorController(CheckResultsProvider)
+      this.checkResultsProvider = new CheckResultsProvider(this)
     }
 
     this.subscribeEditorController()
@@ -65,8 +70,8 @@ export class PluginManager {
   public deactivate () {
     this.resultsDB.destroy()
     this.disposables.dispose()
+    this.checkResultsProvider && this.checkResultsProvider.destroy()
 
-    this.deleteEditorControllers()
     this.outputPanel.reallyDestroy()
     this.configParamManager.destroy()
     this.removeStatusBar()
@@ -111,8 +116,18 @@ export class PluginManager {
     atom.workspace.toggle(this.outputPanel)
   }
 
-  public controller (editor: TextEditor) {
-    return this.controllers.get(editor)
+  public controller (editor: TextEditor): EditorControl | undefined {
+    const ecmap = this.controllers.get<EditorControl, typeof EditorControl>(EditorControl)
+    const rec = ecmap && ecmap.get(editor)
+    return rec && rec.controller
+  }
+
+  public controllerType<U extends IEditorController, T extends IEditorControllerFactoryT<U>> (
+    factory: T, editor: TextEditor
+  ): U | undefined {
+    const ecmap = this.controllers.get<U, T>(factory)
+    const rec = ecmap && ecmap.get(editor)
+    return rec && rec.controller
   }
 
   public setLinter (linter: ILinter) {
@@ -139,17 +154,21 @@ export class PluginManager {
     }
   }
 
-  public removeController (editor: TextEditor) {
-    const disp = this.editorDispMap.get(editor)
-    if (disp) {
-      disp.dispose()
-      this.disposables.remove(disp)
-      this.editorDispMap.delete(editor)
+  public addEditorController<U extends IEditorController, T extends IEditorControllerFactoryT<U>> (
+    factory: T
+  ): Disposable {
+    if (this.controllers.has(factory)) {
+      throw new Error(`Duplicate controller factory ${factory.toString()}`)
     }
-  }
-
-  public addEditorController (factory: IEditorControllerFactory, map?: ECMap<IEditorController>) {
-    this.controllerClasses.add({map, factory})
+    const map: ECMap<U> = new WeakMap()
+    this.controllers.set(factory, map)
+    return new Disposable(() => {
+      this.controllers.delete(factory)
+      for (const te of atom.workspace.getTextEditors()) {
+        const rec = map.get(te)
+        rec && rec.disposable.dispose()
+      }
+    })
   }
 
   public setStatusBar (sb: IStatusBar) {
@@ -172,10 +191,22 @@ export class PluginManager {
   }
 
   private controllerOnGrammar (editor: TextEditor, grammar: Grammar) {
-    if (grammar.scopeName.match(/haskell$/)) {
-      this.addController(editor)
-    } else {
-      this.removeController(editor)
+    for (const [factory, map] of this.controllers.entries()) {
+      const rec = map.get(editor)
+      if (!rec && factory.supportsGrammar(grammar.scopeName)) {
+        const controller = new factory(editor, this)
+        const disposable = new CompositeDisposable()
+        disposable.add(
+          new Disposable(() => {
+            map.delete(editor)
+            controller.destroy()
+          }),
+          editor.onDidDestroy(() => disposable.dispose())
+        )
+        map.set(editor, {controller, disposable})
+      } else if (rec && !factory.supportsGrammar(grammar.scopeName)) {
+        rec.disposable.dispose()
+      }
     }
   }
 
@@ -183,36 +214,19 @@ export class PluginManager {
   private subscribeEditorController () {
     this.disposables.add(
       atom.workspace.observeTextEditors((editor) => {
-        this.disposables.add(
+        const editorDisp = new CompositeDisposable()
+        editorDisp.add(
           editor.onDidChangeGrammar((grammar) => {
             this.controllerOnGrammar(editor, grammar)
+          }),
+          editor.onDidDestroy(() => {
+            editorDisp.dispose()
+            this.disposables.remove(editorDisp)
           })
         )
+        this.disposables.add(editorDisp)
         this.controllerOnGrammar(editor, editor.getGrammar())
       })
     )
-  }
-
-  private deleteEditorControllers () {
-    for (const editor of atom.workspace.getTextEditors()) { this.removeController(editor) }
-  }
-
-  private addController (editor: TextEditor) {
-    const disp = this.editorDispMap.get(editor) || new CompositeDisposable()
-    if (!this.editorDispMap.has(editor)) {
-      disp.add(editor.onDidDestroy(() => this.removeController(editor)))
-      this.editorDispMap.set(editor, disp)
-      this.disposables.add(disp)
-    }
-    for (const {map, factory} of this.controllerClasses) {
-      if (!map || !map.has(editor)) {
-        const controller = new factory(editor, this)
-        if (map) { map.set(editor, controller) }
-        disp.add(new Disposable(() => {
-          if (map) { map.delete(editor) }
-          controller.destroy()
-        }))
-      }
-    }
   }
 }

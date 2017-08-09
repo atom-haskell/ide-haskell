@@ -15,6 +15,9 @@ import {PluginManager, IEditorController} from '../plugin-manager'
 export type TEventRangeResult = { crange: Range, pos: Point, eventType: UPI.TEventRangeType } | undefined
 
 export class EditorControl implements IEditorController {
+  public static supportsGrammar (grammar: string): boolean {
+    return !!grammar.match(/haskell$/)
+  }
   public tooltips: TooltipManager
   private disposables: CompositeDisposable
   private lastMouseBufferPt?: Point

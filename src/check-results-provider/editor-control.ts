@@ -9,6 +9,9 @@ import {listen, bufferPositionFromMouseEvent} from '../utils'
 import {TooltipRegistry} from '../tooltip-registry'
 
 export class CREditorControl implements IEditorController {
+  public static supportsGrammar (grammar: string): boolean {
+    return grammar.includes('haskell') || grammar.includes('cabal')
+  }
   private gutter: Gutter
   private gutterElement: HTMLElement
   private markers: DisplayMarkerLayer
