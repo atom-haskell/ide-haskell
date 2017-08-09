@@ -1,3 +1,6 @@
+## 2.0.1
+* Fix prettify-on-save
+
 ## 2.0.0
 * New internal architecture (hopefully more robust)
 * Added statusbar icon to show status & to hide/show panel
