@@ -1,3 +1,7 @@
+## 2.0.2
+* Fix #210
+* Update typings
+
 ## 2.0.1
 * Fix prettify-on-save
 
