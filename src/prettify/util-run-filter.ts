@@ -21,7 +21,11 @@ export async function runFilter ({command, args, cwd, stdin}: IRunFilterArgs) {
         if (!error) {
           resolve(stdout)
         } else {
-          reject(error)
+          if (stderr.length > 0) {
+              reject()
+          } else {
+              reject(error)
+          }
         }
       })
       if (stdin) {
