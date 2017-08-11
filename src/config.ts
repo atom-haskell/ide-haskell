@@ -42,12 +42,14 @@ export const config = {
   stylishHaskellPath: {
     type: 'string',
     default: 'stylish-haskell',
+    title: 'Prettifier Path',
     description: 'Path to `stylish-haskell` utility or other prettifier',
     order: 60
   },
   stylishHaskellArguments: {
     type: 'array',
     default: [],
+    title: 'Prettifier Arguments',
     description: 'Additional arguments to pass to prettifier; comma-separated',
     items: {
       type: 'string'
