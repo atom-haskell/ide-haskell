@@ -1,5 +1,5 @@
 import {ResultItem} from './result-item'
-import {CompositeDisposable, Emitter} from 'atom'
+import {CompositeDisposable, TEmitter, Emitter} from 'atom'
 import {Provider, TMessageProviderFunction} from './provider'
 import {notUndefined} from '../utils'
 
@@ -11,7 +11,9 @@ export class ResultsDB {
   private currentId: number
   private messages: Map<string, ResultItem>
   private disposables: CompositeDisposable
-  private emitter: Emitter
+  private emitter: TEmitter<{
+    'did-update': UPI.TSeverity[]
+  }>
   constructor () {
     this.currentId = 0
     this.disposables = new CompositeDisposable()

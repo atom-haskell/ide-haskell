@@ -1,4 +1,5 @@
-import {CompositeDisposable, Emitter, TextEditor, Point, TextBuffer, Grammar, Disposable} from 'atom'
+import {CompositeDisposable, TEmitter, Emitter, TextEditor,
+  Point, TextBuffer, Grammar, Disposable} from 'atom'
 import {ResultsDB} from './results-db'
 import {OutputPanel, IState as IOutputViewState} from './output-panel'
 import {ConfigParamManager, IState as IParamState} from './config-params'
@@ -44,7 +45,11 @@ export class PluginManager {
   private checkResultsProvider?: CheckResultsProvider
   private linterSupport?: LinterSupport
   private disposables = new CompositeDisposable()
-  private emitter = new Emitter()
+  private emitter: TEmitter<{
+    'will-save-buffer': TextBuffer
+    'did-save-buffer': TextBuffer
+    'did-stop-changing': TextBuffer
+  }> = new Emitter()
   private statusBarTile?: ITile
   private statusBarView?: StatusBarView
   private controllers: TMap = new Map()

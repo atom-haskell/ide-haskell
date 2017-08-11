@@ -1,5 +1,5 @@
 import {selectListView} from './param-select-view'
-import {Emitter, CompositeDisposable, Disposable} from 'atom'
+import {TEmitter, Emitter, CompositeDisposable, Disposable} from 'atom'
 
 interface IParamData<T> {
   spec: UPI.IParamSpec<T>
@@ -13,17 +13,11 @@ export interface IState {
 interface TUpdatedCallbackArg<T> { pluginName: string, paramName: string, value: T | undefined }
 export type TUpdatedCallback<T> = (arg: TUpdatedCallbackArg<T>) => void
 
-type Events = 'did-update'
-interface MyEmitter extends Emitter {
-  on<T> (event: Events, callback: TUpdatedCallback<T>): Disposable
-  once<T> (event: Events, callback: TUpdatedCallback<T>): Disposable
-  preempt<T> (event: Events, callback: TUpdatedCallback<T>): Disposable
-  emit<T> (event: Events, val: TUpdatedCallbackArg<T>): void
-}
-
 export class ConfigParamStore {
   private disposables: CompositeDisposable
-  private emitter: MyEmitter
+  private emitter: TEmitter<{
+    'did-update': {pluginName: string, paramName: string, value: any}
+  }>
   private saved: IState
   private plugins: Map<string, Map<string, IParamData<any>>>
   constructor (state: IState = {}) {
@@ -43,7 +37,7 @@ export class ConfigParamStore {
   }
 
   public onDidUpdate<T> (pluginName: string, paramName: string, callback: TUpdatedCallback<T>) {
-    return this.emitter.on<T>('did-update', (val) => {
+    return this.emitter.on('did-update', (val) => {
       if (val.pluginName === pluginName && val.paramName === paramName) {
         callback(val)
       }
@@ -62,7 +56,7 @@ export class ConfigParamStore {
     let value: T | undefined = this.saved[`${pluginName}.${paramName}`] as T
     if (value === undefined) { value = spec.default }
     pluginConfig.set(paramName, {spec, value})
-    this.emitter.emit<T>('did-update', {pluginName, paramName, value})
+    this.emitter.emit('did-update', {pluginName, paramName, value})
     return new Disposable(() => {
       if (pluginConfig) {
         pluginConfig.delete(paramName)
