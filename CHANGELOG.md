@@ -1,3 +1,11 @@
+## 2.0.3
+* Avoid duplicate prettifier messages
+* Resave after prettify
+* Change titles of prettifier-related settings
+* Use typings-provided IEventDesc
+* Typed emitter
+* bump submodules
+
 ## 2.0.2
 * Fix #210
 * Update typings
