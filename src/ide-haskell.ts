@@ -1,4 +1,4 @@
-import {CompositeDisposable, Disposable} from 'atom'
+import {IEventDesc, CompositeDisposable, Disposable} from 'atom'
 import {PluginManager, IState} from './plugin-manager'
 import {prettifyFile} from './prettify'
 import {MAIN_MENU_LABEL} from './utils'
@@ -15,11 +15,6 @@ let menu: CompositeDisposable | undefined
 export {config} from './config'
 
 function cleanConfig () { /*noop*/ }
-
-declare interface IEventDesc {
-  currentTarget: HTMLElement & { getModel (): AtomTypes.TextEditor }
-  abortKeyBinding? (): void
-}
 
 export function activate (state: IState) {
   cleanConfig()
