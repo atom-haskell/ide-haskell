@@ -30,15 +30,15 @@ async function read (path: string): Promise<string> {
   })
 }
 
-export async function format (text: string, workingDirectory: string): Promise<string> {
+export async function format (text: string, workingDirectory: string) {
   const {path, fd} = await makeTempFile(text)
   try {
-    await runFilter({
+    const {stderr} = await runFilter({
       command: atom.config.get('ide-haskell.cabalPath'),
       args: ['format', path],
       cwd: workingDirectory
     })
-    return read(path)
+    return {stdout: await read(path), stderr}
   } finally {
     FS.close(fd)
     FS.unlink(path)

@@ -8,20 +8,13 @@ export interface IRunFilterArgs {
 }
 
 export async function runFilter ({command, args, cwd, stdin}: IRunFilterArgs) {
-  return new Promise<string>((resolve, reject) => {
+  return new Promise<{stdout: string, stderr: string}>((resolve, reject) => {
     try {
       const proc = CP.execFile(command, args, {cwd}, (error, stdout, stderr) => {
-        if (stderr.length > 0) {
-          atom.notifications.addError('Prettifier problems', {
-            message: 'Prettifier reported some problems',
-            detail: stderr,
-            dismissable: true
-          })
-        }
         if (!error) {
-          resolve(stdout)
+          resolve({stdout, stderr})
         } else {
-          reject(error)
+          reject({error, stderr})
         }
       })
       if (stdin) {
