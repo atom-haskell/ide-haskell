@@ -2,8 +2,6 @@ import {IEventDesc, CompositeDisposable, Disposable} from 'atom'
 import {PluginManager, IState} from './plugin-manager'
 import {prettifyFile} from './prettify'
 import {MAIN_MENU_LABEL} from './utils'
-import {ILinterRegistry} from './linter-support'
-import {IStatusBar} from './status-bar'
 import * as UPI2 from './upi-2'
 import * as UPI3 from './upi-3'
 
@@ -123,7 +121,7 @@ export function consumeUpi3 (registration: UPI.IRegistrationOptions): Disposable
   }
 }
 
-export function consumeLinter (indieRegistry: ILinterRegistry): Disposable | undefined {
+export function consumeLinter (indieRegistry: Linter.IndieRegistry): Disposable | undefined {
   if (!(disposables && pluginManager)) { return }
   const linter = indieRegistry.register({name: 'IDE-Haskell'})
   disposables.add(linter)
@@ -131,7 +129,7 @@ export function consumeLinter (indieRegistry: ILinterRegistry): Disposable | und
   return linter
 }
 
-export function consumeStatusBar (statusBar: IStatusBar): Disposable | undefined {
+export function consumeStatusBar (statusBar: StatusBar.StatusBar): Disposable | undefined {
   if (!pluginManager) { return }
   pluginManager.setStatusBar(statusBar)
   return new Disposable(() => {

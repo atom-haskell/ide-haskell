@@ -1,11 +1,9 @@
 import {CompositeDisposable, Range} from 'atom'
 import {ResultsDB} from '../results-db'
-import * as Linter from './linter'
-export * from './linter'
 
 export class LinterSupport {
   private disposables: CompositeDisposable
-  constructor (private linter: Linter.ILinter, private resultDb: ResultsDB) {
+  constructor (private linter: Linter.Indie, private resultDb: ResultsDB) {
     this.disposables = new CompositeDisposable()
 
     this.disposables.add(resultDb.onDidUpdate(this.update.bind(this)))

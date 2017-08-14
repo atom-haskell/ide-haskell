@@ -2,17 +2,6 @@ import * as etch from 'etch'
 import {OutputPanel} from '../output-panel'
 import {StatusIcon} from '../output-panel/views/status-icon'
 
-export interface ITile {
-  getPriority (): number
-  getItem (): Object
-  destroy (): void
-}
-
-export interface IStatusBar {
-  addLeftTile (params: {item: Object, priority: number}): ITile
-  addRightTile (params: {item: Object, priority: number}): ITile
-}
-
 export class StatusBarView {
   // tslint:disable-next-line:no-uninitialized-class-properties
   public element: HTMLElement

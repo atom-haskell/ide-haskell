@@ -4,10 +4,10 @@ import {ResultsDB} from './results-db'
 import {OutputPanel, IState as IOutputViewState} from './output-panel'
 import {ConfigParamManager, IState as IParamState} from './config-params'
 import {EditorControl} from './editor-control'
-import {LinterSupport, ILinter} from './linter-support'
+import {LinterSupport} from './linter-support'
 import {TooltipRegistry} from './tooltip-registry'
 import {CheckResultsProvider} from './check-results-provider'
-import {IStatusBar, ITile, StatusBarView} from './status-bar'
+import {StatusBarView} from './status-bar'
 import {PrettifyEditorController} from './prettify'
 
 export {IParamState, IOutputViewState}
@@ -50,7 +50,7 @@ export class PluginManager {
     'did-save-buffer': TextBuffer
     'did-stop-changing': TextBuffer
   }> = new Emitter()
-  private statusBarTile?: ITile
+  private statusBarTile?: StatusBar.StatusBarTile
   private statusBarView?: StatusBarView
   private controllers: TMap = new Map()
   constructor (state: IState) {
@@ -135,7 +135,7 @@ export class PluginManager {
     return rec && rec.controller
   }
 
-  public setLinter (linter: ILinter) {
+  public setLinter (linter: Linter.Indie) {
     if (atom.config.get('ide-haskell.messageDisplayFrontend') !== 'linter') { return }
     this.linterSupport = new LinterSupport(linter, this.resultsDB)
   }
@@ -176,7 +176,7 @@ export class PluginManager {
     })
   }
 
-  public setStatusBar (sb: IStatusBar) {
+  public setStatusBar (sb: StatusBar.StatusBar) {
     this.statusBarView = new StatusBarView(this.outputPanel)
     this.statusBarTile = sb.addRightTile({
       item: this.statusBarView.element,
