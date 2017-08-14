@@ -6,12 +6,13 @@ import {Provider as MessageProvider} from '../results-db/provider'
 import {DummyElement} from './dummy-element'
 
 import * as UPI2 from './def'
+export * from './def'
 
 export function instance (pluginManager: PluginManager, outerDisposables: CompositeDisposable, pluginName: string) {
   return new UPIInstance(pluginManager, outerDisposables, pluginName)
 }
 
-export class UPIInstance {
+export class UPIInstance implements UPI2.IUPIInstance {
   private messages: UPI2.IResultItem[] = []
   private disposables = new CompositeDisposable()
   private messageProvider: MessageProvider

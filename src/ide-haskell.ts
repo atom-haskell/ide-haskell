@@ -95,11 +95,10 @@ export function serialize () {
   }
 }
 
-export function provideUpi () {
+export function provideUpi (): UPI2.IUPIProvided {
   upiProvided = true
-  // tslint:disable-next-line: no-non-null-assertion
   return {
-     registerPlugin (disp: CompositeDisposable, pluginName: string) {
+     registerPlugin (disp, pluginName) {
        if (!pluginManager) { return }
        return UPI2.instance(pluginManager, disp, pluginName)
      }
