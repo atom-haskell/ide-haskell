@@ -1,4 +1,3 @@
-/* tslint:disable:member-access */
 import { CompositeDisposable, Point } from 'atom'
 import { MAIN_MENU_LABEL, getEventType } from '../utils'
 import {PluginManager} from '../plugin-manager'
@@ -7,6 +6,7 @@ import {DummyElement} from './dummy-element'
 
 import * as UPI2 from './def'
 export * from './def'
+import * as UPI3 from '../upi-3'
 
 export function instance (pluginManager: PluginManager, outerDisposables: CompositeDisposable, pluginName: string) {
   return new UPIInstance(pluginManager, outerDisposables, pluginName)
@@ -14,100 +14,47 @@ export function instance (pluginManager: PluginManager, outerDisposables: Compos
 
 export class UPIInstance implements UPI2.IUPIInstance {
   private messages: UPI2.IResultItem[] = []
+  private upi3: UPI.IUPIInstance
   private disposables = new CompositeDisposable()
-  private messageProvider: MessageProvider
   constructor (
     private pluginManager: PluginManager, outerDisposables: CompositeDisposable, private pluginName: string
   ) {
+    this.upi3 = UPI3.instance(pluginManager, {name: pluginName})
+    this.disposables.add(this.upi3)
     outerDisposables.add(this.disposables)
-    this.messageProvider = pluginManager.resultsDB.registerProvider()
-    this.disposables.add(this.messageProvider)
-  }
-  /**
-  Adds new sumbenu to 'Haskell IDE' menu item
-
-  @param name submenu label, should be descriptive of a package
-  @param menu Atom menu object
-  */
-  setMenu (name: string, menu: UPI2.TAtomMenu[]) {
-    let menuDisp
-    this.disposables.add(menuDisp = atom.menu.add([{
-      label: MAIN_MENU_LABEL,
-      submenu: [ {label: name, submenu: menu} ]
-    }
-    ]))
-    return menuDisp
   }
 
-  /**
-  Sets backend status
-
-  @param status current backend status
-  */
-  setStatus (status: UPI2.IStatus) {
-    return this.pluginManager.backendStatus(this.pluginName, status)
+  public setMenu (name: string, menu: UPI2.TAtomMenu[]) {
+    return this.upi3.setMenu(name, menu)
   }
 
-  /**
-  Add messages to ide-haskell output
+  public setStatus (status: UPI2.IStatus) {
+    return this.upi3.setStatus(status)
+  }
 
-  @param messages array of messages
-  @param types array, containing possible message `severity`. If undefined,
-         will be taken from `messages`
-  */
-  addMessages (newMessages: UPI2.IResultItem[], types?: UPI2.TSeverity[]) {
+  public addMessages (newMessages: UPI2.IResultItem[], types?: UPI2.TSeverity[]) {
     this.messages.push(...newMessages)
-    this.messageProvider.setMessages(this.messages)
+    this.upi3.setMessages(this.messages)
   }
 
-  /**
-  Set messages in ide-haskell output. Clears all existing messages with
-  `severity` in `types`
-
-  @param messages: array of messages
-  @param types array, containing possible message `severity`. If undefined,
-         will be taken from `messages`
-  */
-  setMessages (newMessages: UPI2.IResultItem[], types: UPI2.TSeverity[]) {
+  public setMessages (newMessages: UPI2.IResultItem[], types: UPI2.TSeverity[]) {
     this.messages = [...newMessages]
-    this.messageProvider.setMessages(this.messages)
+    this.upi3.setMessages(this.messages)
   }
 
-  /**
-  Clear all existing messages with `severity` in `types`
-
-  @param types message severities to clean out
-  */
-  clearMessages (types: UPI2.TSeverity[]) {
+  public clearMessages (types: UPI2.TSeverity[]) {
     this.messages = this.messages.filter(({severity}) => !types.includes(severity))
-    this.messageProvider.setMessages(this.messages)
+    this.upi3.setMessages(this.messages)
   }
 
-  /**
-  Set possible message `severity` that your package will use.
-  This allows definition of custom output panel tabs.
-
-  @param types: Object with keys representing possible message `severity` (i.e. tab name)
-         and values being Objects with keys
-  */
-  setMessageTypes (types: { [severity: string]: UPI2.ISeverityTabDefinition}) {
-    return (() => {
-      const result = []
-      for (const type of Object.keys(types)) {
-        const opts = types[type]
-        result.push(this.pluginManager.outputPanel.createTab(type, opts))
-      }
-      return result
-    })()
+  public setMessageTypes (types: { [severity: string]: UPI2.ISeverityTabDefinition}) {
+    for (const type of Object.keys(types)) {
+      const opts = types[type]
+      this.upi3.addMessageTab(type, opts)
+    }
   }
 
-  /**
-  Editor event subscription. Fires when mouse cursor stopped over a symbol in
-  editor.
-
-  @param callback will be called to provide a tooltip once needed
-  */
-  onShouldShowTooltip (callback: UPI2.TTooltipHandler) {
+  public onShouldShowTooltip (callback: UPI2.TTooltipHandler) {
     const disp = this.pluginManager.tooltipRegistry.register(
       this.pluginName, {priority: 100, handler: callback}
     )
@@ -115,131 +62,61 @@ export class UPIInstance implements UPI2.IUPIInstance {
     return disp
   }
 
-  /**
-  Show tooltip in editor.
-
-  @param editor editor that will show tooltip
-  @param pos tooltip position
-  @param eventType type of event
-  @param detail DOM event detail, for automatic event type selection, ignored if `eventType` is set.
-  @param tooltip tooltip generator function
-  */
-  showTooltip ({editor, pos, eventType, detail, tooltip}: UPI2.IShowTooltipParams) {
-    if (!eventType) {
-      eventType = getEventType(detail)
-    }
-    this.pluginManager.tooltipRegistry.showTooltip(
-      editor, eventType, {pluginName: this.pluginName, tooltip}
-    )
+  public showTooltip (opts: UPI2.IShowTooltipParams) {
+    this.upi3.showTooltip(opts)
   }
 
-  /**
-  Convenience function. Will fire before Haskell buffer is saved.
-  */
-  onWillSaveBuffer (callback: UPI2.TTextBufferCallback) {
+  public onWillSaveBuffer (callback: UPI2.TTextBufferCallback) {
     const disp = this.pluginManager.onWillSaveBuffer(callback)
     this.disposables.add(disp)
     return disp
   }
 
-  /**
-  Convenience function. Will fire after Haskell buffer is saved.
-  */
-  onDidSaveBuffer (callback: UPI2.TTextBufferCallback) {
+  public onDidSaveBuffer (callback: UPI2.TTextBufferCallback) {
     const disp = this.pluginManager.onDidSaveBuffer(callback)
     this.disposables.add(disp)
     return disp
   }
 
-  /**
-  Convenience function. Will fire after Haskell buffer stoped changing.
-  */
-  onDidStopChanging (callback: UPI2.TTextBufferCallback) {
+  public onDidStopChanging (callback: UPI2.TTextBufferCallback) {
     const disp = this.pluginManager.onDidStopChanging(callback)
     this.disposables.add(disp)
     return disp
   }
 
-  /**
-  Add a new control to ouptut panel heading.
-
-  @param element HTMLElement of control, or string with tag name
-  @param opts description of element
-  */
-  addPanelControl (element: string | HTMLElement, opts: UPI2.IControlOpts) {
+  public addPanelControl (element: string | HTMLElement, opts: UPI2.IControlOpts) {
     if (typeof element === 'string') {
-      return this.pluginManager.outputPanel.addPanelControl({element, opts})
+      return this.upi3.addPanelControl({element, opts})
     } else {
       const newOpts: UPI2.IControlOpts & {element: HTMLElement} = {...opts, element}
-      return this.pluginManager.outputPanel.addPanelControl({element: DummyElement, opts: newOpts})
+      return this.upi3.addPanelControl({element: DummyElement, opts: newOpts})
     }
   }
 
-  /**
-  Add per-project configuration parameters to be managed by ide-haskell. This
-  will also add a control element to output panel.
-
-  @param specs specification of parameters
-  @param paramName name of a parameter
-  */
-  addConfigParam (specs: { [paramName: string]: UPI2.IParamSpec<Object> }) {
+  public addConfigParam (specs: { [paramName: string]: UPI2.IParamSpec<Object> }) {
     const disp = new CompositeDisposable()
-    for (const name of Object.keys(specs)) {
-      const spec = specs[name]
-      disp.add(
-        this.pluginManager.configParamManager.add(this.pluginName, name, spec)
-      )
+    for (const [n, s] of Object.entries(specs)) {
+      disp.add(this.upi3.addConfigParam(n, s))
     }
     return disp
   }
 
-  /**
-  Get value of a config parameter, either for this plugin, or for another
-  named plugin. If value isn't set and default is `undefined`, will show
-  a selection dialog.
-
-  @returns `Promise` that resolves to parameter value. If user cancels selection
-  dialog, it will resolve to `undefined`
-  */
-  async getConfigParam (name: string): Promise<Object | undefined>
-  // tslint:disable-next-line:unified-signatures
-  async getConfigParam (otherPluginName: string, name: string): Promise<Object | undefined>
-  async getConfigParam (otherPluginName: string, name?: string) {
+  public async getConfigParam (otherPluginName: string, name?: string) {
     if (!name) {
-      name = otherPluginName
-      otherPluginName = this.pluginName
+      return this.upi3.getConfigParam(otherPluginName)
+    } else {
+      return this.upi3.getOthersConfigParam(otherPluginName, name)
     }
-    return this.pluginManager.configParamManager.get(otherPluginName, name)
   }
 
-  /**
-  @param name Parameter name
-  @param value If omitted, a selection dialog will be presented to user.
-
-  @returns a `Promise` that resolves to parameter value. If `value` is `undefined`
-  and user cancels selection dialog, resolves to `undefined`
-  */
-  async setConfigParam (name: string, value?: Object) {
+  public async setConfigParam (name: string, value?: Object) {
     return this.pluginManager.configParamManager.set(this.pluginName, name, value)
   }
 
-  /**
-  Utility function to extract event range/type for a given event
-
-  @param editor editor that generated event
-  @param detail event detail, ignored if `eventType` is set
-  @param eventType type of event
-  @param pos event position, can be undefined
-
-  @param callback will be called immediately with event range/type as arguments
-  */
-  withEventRange<T> ({editor, detail, eventType, pos}: UPI2.IEventRangeParams, callback: UPI2.TEventRangeCallback<T>) {
-    let ppos: Point | undefined
-    if (pos) { ppos = Point.fromObject(pos) }
-    if (!eventType) { eventType = getEventType(detail) }
-    const controller = this.pluginManager.controller(editor)
-    if (!controller) { return }
-    const res = controller.getEventRange(eventType)
+  public withEventRange<T> (
+    {editor, detail, eventType}: UPI2.IEventRangeParams, callback: UPI2.TEventRangeCallback<T>
+  ) {
+    const res = this.upi3.getEventRange(editor, eventType || detail || {})
     if (!res) { return }
     return callback(res)
   }
