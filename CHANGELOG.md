@@ -1,3 +1,9 @@
+## 2.0.4
+* Handle exceptions in imperative tooltips
+* Rewrite UPI2 as a thin adapter to UPI3
+* Freeze UPI2 types in def.d.ts
+* Better typings.
+
 ## 2.0.3
 * Avoid duplicate prettifier messages
 * Resave after prettify
