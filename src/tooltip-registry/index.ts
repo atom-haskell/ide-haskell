@@ -56,7 +56,15 @@ export class TooltipRegistry {
       if (!eventRange) { return }
       if (spec && typeof spec.tooltip === 'function') {
         pluginName = spec.pluginName
-        tooltipData = await Promise.resolve(spec.tooltip(eventRange.crange))
+        try {
+          tooltipData = await Promise.resolve(spec.tooltip(eventRange.crange))
+        } catch (e) {
+          this.pluginManager.backendStatus(spec.pluginName, {
+            status: 'warning',
+            detail: e.toString(),
+          })
+          return
+        }
       } else {
         const tooltip = await this.defaultTooltipFunction(editor, type, eventRange.crange)
         if (!tooltip) {
