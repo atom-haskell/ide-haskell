@@ -1,41 +1,41 @@
 import * as etch from 'etch'
-import {OutputPanel} from '../output-panel'
-import {StatusIcon} from '../output-panel/views/status-icon'
+import { OutputPanel } from '../output-panel'
+import { StatusIcon } from '../output-panel/views/status-icon'
 
 export class StatusBarView {
-  // tslint:disable-next-line:no-uninitialized-class-properties
+  // tslint:disable-next-line:no-uninitialized
   public element: HTMLElement
   private statusMap: Map<string, UPI.IStatus>
-  constructor (private panel: OutputPanel) {
+  constructor(private panel: OutputPanel) {
     this.statusMap = new Map()
     etch.initialize(this)
   }
 
-  public render () {
+  public render() {
     return (
-      <div class="ide-haskell inline-block" on={{click: this.didClick.bind(this)}}>
+      <div class="ide-haskell inline-block" on={{ click: this.didClick.bind(this) }}>
         <span>
-          <ide-haskell-lambda/>
-          <StatusIcon statusMap={this.statusMap}/>
+          <ide-haskell-lambda />
+          <StatusIcon statusMap={this.statusMap} />
         </span>
       </div>
     )
   }
 
-  public async update () {
+  public async update() {
     return etch.update(this)
   }
 
-  public backendStatus (pluginName: string, st: UPI.IStatus) {
+  public backendStatus(pluginName: string, st: UPI.IStatus) {
     this.statusMap.set(pluginName, st)
     this.update()
   }
 
-  public async destroy () {
+  public async destroy() {
     await etch.destroy(this)
   }
 
-  private didClick () {
+  private didClick() {
     this.panel.toggle()
   }
 }

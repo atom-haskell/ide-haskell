@@ -1,13 +1,10 @@
 import {
-  TextEditor, CompositeDisposable, TextBuffer
+  TextEditor, CompositeDisposable,
 } from 'atom'
-import {PluginManager} from '../plugin-manager'
-import {prettifyFile} from './index'
+import { PluginManager } from '../plugin-manager'
+import { prettifyFile } from './index'
 
 export class PrettifyEditorController {
-  public static supportsGrammar (grammar: string): boolean {
-    return grammar.includes('haskell') || grammar.includes('cabal')
-  }
   private disposables = new CompositeDisposable()
   private isPretty: boolean = false
   constructor (private editor: TextEditor, pluginManager: PluginManager) {
@@ -15,6 +12,10 @@ export class PrettifyEditorController {
     this.disposables.add(
       buffer.onWillSave(this.prettify.bind(this)),
     )
+  }
+
+  public static supportsGrammar (grammar: string): boolean {
+    return grammar.includes('haskell') || grammar.includes('cabal')
   }
 
   public destroy () {

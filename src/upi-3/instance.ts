@@ -1,11 +1,11 @@
 import { CompositeDisposable, TextEditor } from 'atom'
 import { MAIN_MENU_LABEL, getEventType } from '../utils'
-import {PluginManager} from '../plugin-manager'
-import {isTEventRangeType} from '../utils'
-import {consume} from './'
+import { PluginManager } from '../plugin-manager'
+import { isTEventRangeType } from '../utils'
+import { consume } from './'
 
-export function instance (
-  pluginManager: PluginManager, options: UPI.IRegistrationOptions
+export function instance(
+  pluginManager: PluginManager, options: UPI.IRegistrationOptions,
 ): UPI.IUPIInstance {
   const pluginName = options.name
   const disposables = new CompositeDisposable()
@@ -17,8 +17,8 @@ export function instance (
     setMenu (name: string, menu: AtomTypes.AtomMenuItem[]) {
       const menuDisp = atom.menu.add([{
         label: MAIN_MENU_LABEL,
-        submenu: [ {label: name, submenu: menu} ]
-      }
+        submenu: [ {label: name, submenu: menu} ],
+      },
       ])
       disposables.add(menuDisp)
       return menuDisp
@@ -37,7 +37,7 @@ export function instance (
         eventType = getEventType(detail)
       }
       pluginManager.tooltipRegistry.showTooltip(
-        editor, eventType, {pluginName, tooltip}
+        editor, eventType, {pluginName, tooltip},
       )
     },
     addPanelControl<T> (def: UPI.TControlDefinition<T>) {
@@ -63,11 +63,11 @@ export function instance (
         type = getEventType(typeOrDetail)
       }
       const controller = pluginManager.controller(editor)
-      if (!controller) { return }
+      if (!controller) { return undefined }
       return controller.getEventRange(type)
     },
     dispose () {
       disposables.dispose()
-    }
+    },
   }
 }

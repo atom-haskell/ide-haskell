@@ -1,34 +1,3 @@
 {
-    "extends": "tslint:recommended",
-    "linterOptions": {
-      "typeCheck": true
-    },
-    "rules": {
-      "quotemark": [true, "single", "jsx-double", "avoid-escape"],
-      "semicolon": [true, "never"],
-      "object-literal-sort-keys": false,
-      "ordered-imports": false,
-      "jsdoc-format": false,
-      "trailing-comma": false,
-      "space-before-function-paren": true,
-      "one-variable-per-declaration": false,
-      "no-unused-expression": [true, "allow-fast-null-checks"],
-      "no-unused-new": true,
-      "no-unused-variable": true,
-      "no-unbound-method": true,
-      "promise-function-async": true,
-      "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"],
-      "no-default-export": true,
-      "prefer-const": true,
-      "align": [true, "parameters", "statements", "arguments"],
-      "arrow-return-shorthand": [true, "multiline"],
-      "no-unnecessary-qualifier": true,
-      "no-non-null-assertion": true,
-      "no-switch-case-fall-through": true,
-      "no-null-keyword": true,
-      "no-var-requires": true,
-      "no-uninitialized-class-properties": true,
-      "interface-name": false,
-      "ban-types": []
-    }
+  "extends": "atom-haskell-tslint-rules"
 }

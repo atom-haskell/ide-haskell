@@ -1,18 +1,18 @@
-import {CompositeDisposable, Disposable} from 'atom'
+import { CompositeDisposable, Disposable } from 'atom'
 
-import {PluginManager} from '../plugin-manager'
-import {MAIN_MENU_LABEL} from '../utils'
+import { PluginManager } from '../plugin-manager'
+import { MAIN_MENU_LABEL } from '../utils'
 
 export * from './instance'
 
-export function consume (pluginManager: PluginManager, options: UPI.IRegistrationOptions): Disposable {
-  const {name, menu, messageTypes, events, controls, params, tooltip} = options
+export function consume(pluginManager: PluginManager, options: UPI.IRegistrationOptions): Disposable {
+  const { name, menu, messageTypes, events, controls, params, tooltip } = options
   const disp = new CompositeDisposable()
 
   if (menu) {
     const menuDisp = atom.menu.add([{
       label: MAIN_MENU_LABEL,
-      submenu: [ {label: menu.label, submenu: menu.menu} ]
+      submenu: [{ label: menu.label, submenu: menu.menu }],
     }])
     disp.add(menuDisp)
   }
@@ -35,14 +35,16 @@ export function consume (pluginManager: PluginManager, options: UPI.IRegistratio
     }
   }
   if (tooltip) {
-    let handler: UPI.TTooltipHandler, priority: number | undefined, eventTypes: UPI.TEventRangeType[] | undefined
+    let handler: UPI.TTooltipHandler
+    let priority: number | undefined
+    let eventTypes: UPI.TEventRangeType[] | undefined
     if (typeof tooltip === 'function') {
       handler = tooltip
     } else {
-      ({handler, priority, eventTypes} = tooltip)
+      ({ handler, priority, eventTypes } = tooltip)
     }
     if (!priority) { priority = 100 }
-    disp.add(pluginManager.tooltipRegistry.register(name, {priority, handler, eventTypes}))
+    disp.add(pluginManager.tooltipRegistry.register(name, { priority, handler, eventTypes }))
   }
   if (controls) {
     for (const i of controls) {
@@ -53,7 +55,7 @@ export function consume (pluginManager: PluginManager, options: UPI.IRegistratio
     for (const paramName of Object.keys(params)) {
       const spec = params[paramName]
       disp.add(
-        pluginManager.configParamManager.add(name, paramName, spec)
+        pluginManager.configParamManager.add(name, paramName, spec),
       )
     }
   }

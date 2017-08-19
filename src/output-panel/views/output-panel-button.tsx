@@ -8,25 +8,26 @@ export interface IProps extends JSX.Props {
 }
 
 export class Button implements JSX.ElementClass {
-  constructor (public props: IProps) {
+  constructor(public props: IProps) {
     etch.initialize(this)
   }
 
-  public render () {
+  public render() {
     return (
       <ide-haskell-button
         class={this.props.active ? 'active' : ''}
-        dataset={{caption: this.props.name, count: this.props.count}}
-        on={{click: this.props.onClick}}/>
+        dataset={{ caption: this.props.name, count: this.props.count }}
+        on={{ click: this.props.onClick }}
+      />
     )
   }
 
-  public async update (props: IProps) {
+  public async update(props: IProps) {
     this.props = props
     return etch.update(this)
   }
 
-  public async destroy () {
+  public async destroy() {
     await etch.destroy(this)
   }
 }

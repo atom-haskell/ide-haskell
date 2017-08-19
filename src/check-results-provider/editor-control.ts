@@ -1,17 +1,14 @@
 import {
   Range, TextEditor, Point, CompositeDisposable, Gutter, DisplayMarker,
-  DisplayMarkerLayer
+  DisplayMarkerLayer,
 } from 'atom'
 
-import {ResultsDB, ResultItem} from '../results-db'
-import {PluginManager, IEditorController} from '../plugin-manager'
-import {listen, bufferPositionFromMouseEvent} from '../utils'
-import {TooltipRegistry} from '../tooltip-registry'
+import { ResultsDB, ResultItem } from '../results-db'
+import { PluginManager, IEditorController } from '../plugin-manager'
+import { listen, bufferPositionFromMouseEvent } from '../utils'
+import { TooltipRegistry } from '../tooltip-registry'
 
 export class CREditorControl implements IEditorController {
-  public static supportsGrammar (grammar: string): boolean {
-    return grammar.includes('haskell') || grammar.includes('cabal')
-  }
   private gutter: Gutter
   private gutterElement: HTMLElement
   private markers: DisplayMarkerLayer
@@ -19,12 +16,12 @@ export class CREditorControl implements IEditorController {
   private markerProps: WeakMap<DisplayMarker, ResultItem>
   private tooltipRegistry: TooltipRegistry
   private resultsDB: ResultsDB
-  constructor (private editor: TextEditor, pluginManager: PluginManager) {
+  constructor(private editor: TextEditor, pluginManager: PluginManager) {
     this.gutter = this.editor.gutterWithName('ide-haskell-check-results')
     if (!this.gutter) {
       this.gutter = this.editor.addGutter({
         name: 'ide-haskell-check-results',
-        priority: 10
+        priority: 10,
       })
     }
     this.gutterElement = atom.views.getView(this.gutter)
@@ -35,7 +32,7 @@ export class CREditorControl implements IEditorController {
     this.disposables = new CompositeDisposable()
     this.markers = editor.addMarkerLayer({
       maintainHistory: true,
-      persistent: false
+      persistent: false,
     })
     this.markerProps = new WeakMap()
     this.disposables.add(this.resultsDB.onDidUpdate(this.updateResults.bind(this)))
@@ -43,7 +40,11 @@ export class CREditorControl implements IEditorController {
     this.registerGutterEvents()
   }
 
-  public destroy () {
+  public static supportsGrammar(grammar: string): boolean {
+    return grammar.includes('haskell') || grammar.includes('cabal')
+  }
+
+  public destroy() {
     this.markers.destroy()
     this.disposables.dispose()
     try {
@@ -54,7 +55,7 @@ export class CREditorControl implements IEditorController {
     }
   }
 
-  public getMessageAt (pos: Point, type: UPI.TEventRangeType | 'gutter') {
+  public getMessageAt(pos: Point, type: UPI.TEventRangeType | 'gutter') {
     const markers = this.find(pos, type)
     const result: UPI.IMessageObject[] = []
     for (const marker of markers) {
@@ -66,7 +67,7 @@ export class CREditorControl implements IEditorController {
     return result
   }
 
-  private registerGutterEvents () {
+  private registerGutterEvents() {
     this.disposables.add(listen(
       this.gutterElement, 'mouseover', '.decoration',
       (e) => {
@@ -80,21 +81,21 @@ export class CREditorControl implements IEditorController {
                 pluginName: 'builtin:check-results',
                 tooltip: {
                   text: msg,
-                  range: new Range(bufferPt, bufferPt)
-                }
-              }
+                  range: new Range(bufferPt, bufferPt),
+                },
+              },
             )
           }
         }
-      }
+      },
     ))
     this.disposables.add(listen(
       this.gutterElement, 'mouseout', '.decoration', (e) =>
-        this.tooltipRegistry.hideTooltip(this.editor, UPI.TEventRangeType.mouse, 'builtin:check-results')
+        this.tooltipRegistry.hideTooltip(this.editor, UPI.TEventRangeType.mouse, 'builtin:check-results'),
     ))
   }
 
-  private updateResults () {
+  private updateResults() {
     this.markers.clear()
     const path = this.editor.getPath()
     for (const r of this.resultsDB.filter((m) => m.uri === path && m.isValid())) {
@@ -102,8 +103,8 @@ export class CREditorControl implements IEditorController {
     }
   }
 
-  private markerFromCheckResult (resItem: ResultItem) {
-    const {position} = resItem
+  private markerFromCheckResult(resItem: ResultItem) {
+    const { position } = resItem
     if (!position) { return }
 
     const range = new Range(position, Point.fromObject([position.row, position.column + 1]))
@@ -115,23 +116,23 @@ export class CREditorControl implements IEditorController {
         this.markerProps.delete(marker)
         disp.dispose()
       }),
-      marker.onDidChange(({isValid}: {isValid: boolean}) => {
+      marker.onDidChange(({ isValid }: { isValid: boolean }) => {
         resItem.setValid(isValid)
-      })
+      }),
     )
     this.decorateMarker(marker, resItem)
   }
 
-  private decorateMarker (m: DisplayMarker, r: ResultItem) {
+  private decorateMarker(m: DisplayMarker, r: ResultItem) {
     if (!this.gutter) {
       return
     }
-    const cls = {class: `ide-haskell-${r.severity}`}
+    const cls = { class: `ide-haskell-${r.severity}` }
     this.gutter.decorateMarker(m, { type: 'line-number', ...cls })
     this.editor.decorateMarker(m, { type: 'highlight', ...cls })
   }
 
-  private find (pos: Point, type: UPI.TEventRangeType | 'gutter') {
+  private find(pos: Point, type: UPI.TEventRangeType | 'gutter') {
     switch (type) {
       case 'gutter':
         return this.markers.findMarkers({ startBufferRow: pos.row })

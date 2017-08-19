@@ -1,13 +1,13 @@
 import * as CP from 'child_process'
 
 export interface IRunFilterArgs {
-    command: string
-    args: string[]
-    cwd: string
-    stdin?: string
+  command: string
+  args: string[]
+  cwd: string
+  stdin?: string
 }
 
-export async function runFilter ({command, args, cwd, stdin}: IRunFilterArgs) {
+export async function runFilter({command, args, cwd, stdin}: IRunFilterArgs) {
   return new Promise<{stdout: string, stderr: string}>((resolve, reject) => {
     try {
       const proc = CP.execFile(command, args, {cwd}, (error, stdout, stderr) => {
@@ -23,8 +23,8 @@ export async function runFilter ({command, args, cwd, stdin}: IRunFilterArgs) {
       }
     } catch (error) {
      // tslint:disable-next-line:no-console
-     console.error(error)
-     reject(error)
+      console.error(error)
+      reject(error)
     }
   })
 }

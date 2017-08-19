@@ -1,13 +1,13 @@
 import {
-  Range, TextEditor, CompositeDisposable
+  Range, TextEditor, CompositeDisposable,
 } from 'atom'
 
-import {PluginManager} from '../plugin-manager'
-import {CREditorControl} from './editor-control'
+import { PluginManager } from '../plugin-manager'
+import { CREditorControl } from './editor-control'
 
 export class CheckResultsProvider {
   private disposables: CompositeDisposable
-  constructor (private pluginManager: PluginManager) {
+  constructor(private pluginManager: PluginManager) {
     const tooltipRegistry = pluginManager.tooltipRegistry
 
     this.disposables = new CompositeDisposable()
@@ -17,23 +17,23 @@ export class CheckResultsProvider {
         handler: this.tooltipProvider.bind(this),
         eventTypes: [UPI.TEventRangeType.mouse, UPI.TEventRangeType.keyboard],
       }),
-      pluginManager.addEditorController(CREditorControl)
+      pluginManager.addEditorController(CREditorControl),
     )
   }
 
-  public destroy () {
+  public destroy() {
     this.disposables.dispose()
   }
 
-  private tooltipProvider (editor: TextEditor, crange: Range, type: UPI.TEventRangeType): UPI.ITooltipData | undefined {
+  private tooltipProvider(editor: TextEditor, crange: Range, type: UPI.TEventRangeType): UPI.ITooltipData | undefined {
     const controller
       = this.pluginManager.controllerType<CREditorControl, typeof CREditorControl>(
-          CREditorControl, editor
-        )
-    if (!controller) { return }
+        CREditorControl, editor,
+      )
+    if (!controller) { return undefined }
     if (type === UPI.TEventRangeType.keyboard
       && atom.config.get('ide-haskell.onCursorMove') !== 'Show Tooltip') {
-        return
+      return undefined
     }
     const msg = controller.getMessageAt(crange.start, type)
     if (msg.length > 0) {

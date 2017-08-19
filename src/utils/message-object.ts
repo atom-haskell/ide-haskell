@@ -2,7 +2,12 @@ import highlight = require('atom-highlight')
 import * as cast from './cast'
 
 export class MessageObject implements UPI.IMessageObject {
-  public static fromObject (message: UPI.TMessage | UPI.IMessageObject): UPI.IMessageObject {
+  private htmlCache?: string
+  constructor(private msg: UPI.TMessage) {
+    // noop
+  }
+
+  public static fromObject(message: UPI.TMessage | UPI.IMessageObject): UPI.IMessageObject {
     if (cast.isIMessageObject(message)) {
       return message
     } else {
@@ -10,12 +15,7 @@ export class MessageObject implements UPI.IMessageObject {
     }
   }
 
-  private htmlCache?: string
-  constructor (private msg: UPI.TMessage) {
-    // noop
-  }
-
-  public toHtml (linter: boolean = false): string {
+  public toHtml(linter: boolean = false): string {
     if (this.htmlCache !== undefined) { return this.htmlCache }
     if (cast.isTextMessage(this.msg) && this.msg.highlighter) {
       const html = highlight({
@@ -43,7 +43,7 @@ export class MessageObject implements UPI.IMessageObject {
     }
   }
 
-  public raw (): string {
+  public raw(): string {
     if (cast.isTextMessage(this.msg)) {
       return this.msg.text
     } else if (cast.isHTMLMessage(this.msg)) {

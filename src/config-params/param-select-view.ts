@@ -1,5 +1,5 @@
 import SelectListView = require('atom-select-list')
-import {Panel} from 'atom'
+import { Panel } from 'atom'
 
 export interface ISelectListParams<T> {
   items: T[] | Promise<T[]>
@@ -9,9 +9,9 @@ export interface ISelectListParams<T> {
   itemElement?: (item: T) => HTMLElement
 }
 
-export async function selectListView<T> (
-  {items, heading, itemTemplate, itemFilterKey, itemElement}: ISelectListParams<T>
-): Promise<T|undefined> {
+export async function selectListView<T>(
+  { items, heading, itemTemplate, itemFilterKey, itemElement }: ISelectListParams<T>,
+): Promise<T | undefined> {
   const itemElementDefault = (item: T) => {
     const li = document.createElement('li')
     if (itemTemplate) {
@@ -38,7 +38,7 @@ export async function selectListView<T> (
   let panel: Panel | undefined
   let res: T | undefined
   try {
-    res = await new Promise<T|undefined>((resolve, reject) => {
+    res = await new Promise<T | undefined>((resolve, reject) => {
       const select = new SelectListView({
         items: myitems,
         infoMessage: heading,
@@ -50,12 +50,12 @@ export async function selectListView<T> (
         },
         didConfirmSelection: (item: T) => {
           resolve(item)
-        }
+        },
       })
       select.element.classList.add('ide-haskell')
       panel = atom.workspace.addModalPanel({
         item: select,
-        visible: true
+        visible: true,
       })
       select.focus()
     })

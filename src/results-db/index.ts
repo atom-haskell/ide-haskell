@@ -1,9 +1,9 @@
-import {ResultItem} from './result-item'
-import {CompositeDisposable, TEmitter, Emitter} from 'atom'
-import {Provider, TMessageProviderFunction} from './provider'
-import {notUndefined} from '../utils'
+import { ResultItem } from './result-item'
+import { CompositeDisposable, TEmitter, Emitter } from 'atom'
+import { Provider, TMessageProviderFunction } from './provider'
+import { notUndefined } from '../utils'
 
-export {TMessageProviderFunction, ResultItem}
+export { TMessageProviderFunction, ResultItem }
 
 export type TUpdateCallback = (severities: UPI.TSeverity[]) => void
 
@@ -14,7 +14,7 @@ export class ResultsDB {
   private emitter: TEmitter<{
     'did-update': UPI.TSeverity[]
   }>
-  constructor () {
+  constructor() {
     this.currentId = 0
     this.disposables = new CompositeDisposable()
     this.emitter = new Emitter()
@@ -22,15 +22,15 @@ export class ResultsDB {
     this.messages = new Map()
   }
 
-  public destroy () {
+  public destroy() {
     this.disposables.dispose()
   }
 
-  public onDidUpdate (callback: TUpdateCallback) {
+  public onDidUpdate(callback: TUpdateCallback) {
     return this.emitter.on('did-update', callback)
   }
 
-  public didUpdate (providerId: number, msgs: ResultItem[]) {
+  public didUpdate(providerId: number, msgs: ResultItem[]) {
     const uris: string[] = msgs.map((v) => v.uri).filter(notUndefined)
     for (const [k, v] of Array.from(this.messages)) {
       if (v.providerId === providerId || v.uri && uris.includes(v.uri)) {
@@ -44,23 +44,23 @@ export class ResultsDB {
     this.emitter.emit('did-update', Array.from(severities))
   }
 
-  public registerProvider () {
+  public registerProvider() {
     const p = new Provider(this, ++this.currentId)
     this.disposables.add(p)
     return p
   }
 
-  public results () {
+  public results() {
     return this.messages.values()
   }
 
-  public * filter (f: (item: ResultItem) => boolean) {
+  public * filter(f: (item: ResultItem) => boolean) {
     for (const v of this.results()) {
       if (f(v)) { yield v }
     }
   }
 
-  public isEmpty (severities: UPI.TSeverity[]) {
-    return ! Array.from(this.messages.values()).some(({severity}) => severities.includes(severity))
+  public isEmpty(severities: UPI.TSeverity[]) {
+    return !Array.from(this.messages.values()).some(({ severity }) => severities.includes(severity))
   }
 }

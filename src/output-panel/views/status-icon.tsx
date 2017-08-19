@@ -1,13 +1,13 @@
 import * as etch from 'etch'
-import {CompositeDisposable} from 'atom'
+import { CompositeDisposable } from 'atom'
 
-export interface IProps extends JSX.Props {statusMap: Map<string, UPI.IStatus>}
+export interface IProps extends JSX.Props { statusMap: Map<string, UPI.IStatus> }
 
 export class StatusIcon implements JSX.ElementClass {
   private disposables: CompositeDisposable
-  // tslint:disable-next-line:no-uninitialized-class-properties
+  // tslint:disable-next-line:no-uninitialized
   private element: HTMLElement
-  constructor (public props: IProps) {
+  constructor(public props: IProps) {
     this.disposables = new CompositeDisposable()
 
     etch.initialize(this)
@@ -16,7 +16,7 @@ export class StatusIcon implements JSX.ElementClass {
       class: 'ide-haskell-status-tooltip',
       title: () => {
         const res = []
-        for (const [plugin, {status, detail}] of this.props.statusMap.entries()) {
+        for (const [plugin, { status, detail }] of this.props.statusMap.entries()) {
           res.push(`
           <ide-haskell-status-item>
             <ide-haskell-status-icon data-status="${status}">${plugin}</ide-haskell-status-icon>
@@ -25,33 +25,33 @@ export class StatusIcon implements JSX.ElementClass {
           `)
         }
         return res.join('')
-      }
+      },
     }))
   }
 
-  public render () {
+  public render() {
     return (
-      <ide-haskell-status-icon dataset={{status: this.calcCurrentStatus()}}/>
+      <ide-haskell-status-icon dataset={{ status: this.calcCurrentStatus() }} />
     )
   }
 
-  public async update (props: IProps) {
+  public async update(props: IProps) {
     // TODO: Diff algo
     this.props.statusMap = props.statusMap
     return etch.update(this)
   }
 
-  public async destroy () {
+  public async destroy() {
     await etch.destroy(this)
     this.props.statusMap.clear()
   }
 
-  private calcCurrentStatus (): 'ready' | 'warning' | 'error' | 'progress' {
+  private calcCurrentStatus(): 'ready' | 'warning' | 'error' | 'progress' {
     const prio = {
       progress: 5,
       error: 20,
       warning: 10,
-      ready: 0
+      ready: 0,
     }
     const stArr = Array.from(this.props.statusMap.values())
     const [consensus] = stArr.sort((a, b) => prio[b.status] - prio[a.status])

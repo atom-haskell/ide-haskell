@@ -1,14 +1,14 @@
-import {TextEditor, DisplayMarkerLayer} from 'atom'
-import {eventRangeTypeVals} from '../utils'
+import { TextEditor, DisplayMarkerLayer } from 'atom'
+import { eventRangeTypeVals } from '../utils'
 
-export type IMarkerGroup = Array<{type: UPI.TEventRangeType, source?: string}>
+export type IMarkerGroup = Array<{ type: UPI.TEventRangeType, source?: string }>
 
 export class EventTable {
   private table: {
     [K in UPI.TEventRangeType]: Map<string | undefined, DisplayMarkerLayer>
   }
   private layers: Set<DisplayMarkerLayer>
-  constructor (private editor: TextEditor, groups: IMarkerGroup[]) {
+  constructor(private editor: TextEditor, groups: IMarkerGroup[]) {
     // tslint:disable-next-line:no-null-keyword
     this.table = Object.create(null)
     for (const i of eventRangeTypeVals) {
@@ -18,13 +18,13 @@ export class EventTable {
     for (const i of groups) {
       const layer = this.editor.addMarkerLayer()
       this.layers.add(layer)
-      for (const {type, source} of i) {
+      for (const { type, source } of i) {
         this.table[type].set(source, layer)
       }
     }
   }
 
-  public destroy () {
+  public destroy() {
     for (const i of this.layers.values()) {
       i.destroy()
     }
@@ -33,7 +33,7 @@ export class EventTable {
     }
   }
 
-  public get (type: UPI.TEventRangeType, source?: string) {
+  public get(type: UPI.TEventRangeType, source?: string) {
     const tbl = this.table[type] as Map<string | undefined, DisplayMarkerLayer>
     let res = tbl.get(source)
     if (!res) {
@@ -45,13 +45,13 @@ export class EventTable {
     return res
   }
 
-  public clear () {
+  public clear() {
     for (const i of this.layers.values()) {
       i.clear()
     }
   }
 
-  public getMarkerCount () {
+  public getMarkerCount() {
     let count = 0
     for (const i of this.layers.values()) {
       count += i.getMarkerCount()
@@ -59,14 +59,14 @@ export class EventTable {
     return count
   }
 
-  public * values () {
-    for (const i of eventRangeTypeVals){
+  public * values() {
+    for (const i of eventRangeTypeVals) {
       yield this.table[i]
     }
   }
 
-  public * entries () {
-    for (const i of eventRangeTypeVals){
+  public * entries() {
+    for (const i of eventRangeTypeVals) {
       yield [i, this.table[i]]
     }
   }

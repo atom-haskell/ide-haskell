@@ -1,6 +1,6 @@
 import * as etch from 'etch'
-import {OutputPanelItem} from './output-panel-item'
-import {ResultsDB, ResultItem} from '../../results-db'
+import { OutputPanelItem } from './output-panel-item'
+import { ResultsDB, ResultItem } from '../../results-db'
 
 export interface IProps extends JSX.Props {
   model: ResultsDB
@@ -8,15 +8,15 @@ export interface IProps extends JSX.Props {
 }
 
 export class OutputPanelItems implements JSX.ElementClass {
-  // tslint:disable-next-line:no-uninitialized-class-properties
+  // tslint:disable-next-line:no-uninitialized
   private element: HTMLElement
-  private itemMap: WeakMap<ResultItem, {component: OutputPanelItem, domNode: HTMLElement}>
-  constructor (public props: IProps) {
+  private itemMap: WeakMap<ResultItem, { component: OutputPanelItem, domNode: HTMLElement }>
+  constructor(public props: IProps) {
     this.itemMap = new WeakMap()
     etch.initialize(this)
   }
 
-  public render () {
+  public render() {
     return (
       <ide-haskell-panel-items class="native-key-bindings" tabIndex="-1">
         {this.renderItems()}
@@ -24,43 +24,43 @@ export class OutputPanelItems implements JSX.ElementClass {
     )
   }
 
-  public async update (props: IProps) {
+  public async update(props: IProps) {
     this.props = props
     return etch.update(this)
   }
 
-  public async destroy () {
+  public async destroy() {
     await etch.destroy(this)
   }
 
-  public async showItem (item: ResultItem) {
+  public async showItem(item: ResultItem) {
     await etch.update(this)
     const view = this.itemMap.get(item)
     if (view) {
       view.component.clickPosition()
       view.domNode.scrollIntoView({
         block: 'start',
-        behavior: 'smooth'
+        behavior: 'smooth',
       })
     }
   }
 
-  public async scrollToEnd () {
+  public async scrollToEnd() {
     await etch.update(this)
     this.element.scrollTop = this.element.scrollHeight
   }
 
-  public atEnd () {
+  public atEnd() {
     return (this.element.scrollTop >= (this.element.scrollHeight - this.element.clientHeight))
   }
 
-  private renderItems () {
+  private renderItems() {
     return Array.from(this.props.model.filter(this.props.filter)).map(
       (item) => {
         const view = <OutputPanelItem model={item} />
         this.itemMap.set(item, view as any)
         return view
-      }
+      },
     )
   }
 }

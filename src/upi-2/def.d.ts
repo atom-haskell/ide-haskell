@@ -5,20 +5,20 @@ export type TPosition = AtomTypes.Point | [number, number];
 //////////////////////////////// message ///////////////////////////////////////
 
 export interface IMessageText {
-    text: string;
-    highlighter?: string;
+  text: string;
+  highlighter?: string;
 }
 export interface IMessageHTML {
-    html: string;
+  html: string;
 }
 export type TMessage = string | IMessageText | IMessageHTML;
 
 //////////////////////////////// tooltip ///////////////////////////////////////
 
 export interface ITooltipData {
-    range: TRange;
-    text: TMessage | TMessage[];
-    persistOnCursorMove?: boolean;
+  range: TRange;
+  text: TMessage | TMessage[];
+  persistOnCursorMove?: boolean;
 }
 export type TTooltipHandler = (editor: AtomTypes.TextEditor, crange: AtomTypes.Range, type: TEventRangeType) => ITooltipData | undefined | Promise<ITooltipData | undefined>;
 
@@ -32,58 +32,58 @@ export interface IShowTooltipParams {
 }
 
 export interface ISeverityTabDefinition {
-    uriFilter?: boolean;
-    autoScroll?: boolean;
+  uriFilter?: boolean;
+  autoScroll?: boolean;
 }
 
 ///////////////////////////////// controls//////////////////////////////////////
 
 export interface IControlOpts {
-    id?: string;
-    events?: {
-        [key: string]: EventListener;
-    };
-    classes?: string[];
-    style?: {
-        [key: string]: string;
-    };
-    attrs?: {
-        [key: string]: string;
-    };
+  id?: string;
+  events?: {
+    [key: string]: EventListener;
+  };
+  classes?: string[];
+  style?: {
+    [key: string]: string;
+  };
+  attrs?: {
+    [key: string]: string;
+  };
 }
 
 export interface IParamSpec<T> {
-    onChanged: (value: T) => void;
-    items: T[] | Promise<T[]> | (() => T[] | Promise<T[]>);
-    itemTemplate: (item: T) => string;
-    itemFilterKey: string;
-    description?: string;
-    displayName?: string;
-    displayTemplate: (item: T) => string;
-    default: T;
+  onChanged: (value: T) => void;
+  items: T[] | Promise<T[]> | (() => T[] | Promise<T[]>);
+  itemTemplate: (item: T) => string;
+  itemFilterKey: string;
+  description?: string;
+  displayName?: string;
+  displayTemplate: (item: T) => string;
+  default: T;
 }
 
 ////////////////////////////// check results ///////////////////////////////////
 
 export interface IResultItem {
-    uri?: string;
-    position?: TPosition;
-    message: TMessage;
-    severity: TSeverity;
+  uri?: string;
+  position?: TPosition;
+  message: TMessage;
+  severity: TSeverity;
 }
 export type TSeverity = 'error' | 'warning' | 'lint' | string;
 
 ///////////////////////////////// status ///////////////////////////////////////
 
 export interface INormalStatus {
-    status: 'ready' | 'error' | 'warning';
+  status: 'ready' | 'error' | 'warning';
 }
 export interface IProgressStatus {
-    status: 'progress';
-    progress?: number;
+  status: 'progress';
+  progress?: number;
 }
 export type IStatus = (INormalStatus | IProgressStatus) & {
-    detail: string;
+  detail: string;
 };
 
 export interface IAtomMenuCommand {
@@ -176,7 +176,7 @@ export declare interface IUPIInstance {
          and values being Objects with keys
   */
   setMessageTypes(types: {
-      [severity: string]: ISeverityTabDefinition;
+    [severity: string]: ISeverityTabDefinition;
   }): void;
   /**
   Editor event subscription. Fires when mouse cursor stopped over a symbol in
@@ -194,7 +194,7 @@ export declare interface IUPIInstance {
   @param detail DOM event detail, for automatic event type selection, ignored if `eventType` is set.
   @param tooltip tooltip generator function
   */
-  showTooltip({editor, pos, eventType, detail, tooltip}: IShowTooltipParams): void;
+  showTooltip({ editor, pos, eventType, detail, tooltip }: IShowTooltipParams): void;
   /**
   Convenience function. Will fire before Haskell buffer is saved.
   */
@@ -222,7 +222,7 @@ export declare interface IUPIInstance {
   @param paramName name of a parameter
   */
   addConfigParam(specs: {
-      [paramName: string]: IParamSpec<Object>;
+    [paramName: string]: IParamSpec<Object>;
   }): AtomTypes.IDisposable;
   /**
   Get value of a config parameter, either for this plugin, or for another
@@ -252,5 +252,5 @@ export declare interface IUPIInstance {
 
   @param callback will be called immediately with event range/type as arguments
   */
-  withEventRange<T>({editor, detail, eventType, pos}: IEventRangeParams, callback: TEventRangeCallback<T>): T | undefined;
+  withEventRange<T>({ editor, detail, eventType, pos }: IEventRangeParams, callback: TEventRangeCallback<T>): T | undefined;
 }

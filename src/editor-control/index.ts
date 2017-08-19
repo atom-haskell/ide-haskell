@@ -1,37 +1,34 @@
 import {
-  Range, TextEditor, Point, CompositeDisposable, TextBuffer,
-  Disposable
+  Range, TextEditor, Point, CompositeDisposable,
+  Disposable,
 } from 'atom'
 
 import {
-  bufferPositionFromMouseEvent
+  bufferPositionFromMouseEvent,
 } from '../utils'
 
-import {listen} from '../utils'
-import {TooltipManager} from './tooltip-manager'
-import {TooltipRegistry} from '../tooltip-registry'
-import {PluginManager, IEditorController} from '../plugin-manager'
+import { listen } from '../utils'
+import { TooltipManager } from './tooltip-manager'
+import { TooltipRegistry } from '../tooltip-registry'
+import { PluginManager, IEditorController } from '../plugin-manager'
 
 export type TEventRangeResult = { crange: Range, pos: Point, eventType: UPI.TEventRangeType } | undefined
 
 export class EditorControl implements IEditorController {
-  public static supportsGrammar (grammar: string): boolean {
-    return !!grammar.match(/haskell$/)
-  }
   public tooltips: TooltipManager
   private disposables: CompositeDisposable
   private lastMouseBufferPt?: Point
   private exprTypeTimeout?: number
   private selTimeout?: number
   private editorElement: HTMLElement & {
-    onDidChangeScrollTop (a: () => void): Disposable
-    onDidChangeScrollLeft (a: () => void): Disposable
-    pixelRectForScreenRange (r: Range): {
+    onDidChangeScrollTop(a: () => void): Disposable
+    onDidChangeScrollLeft(a: () => void): Disposable
+    pixelRectForScreenRange(r: Range): {
       left: number, top: number, width: number, height: number
     }
   }
   private tooltipRegistry: TooltipRegistry
-  constructor (private editor: TextEditor, pluginManager: PluginManager) {
+  constructor(private editor: TextEditor, pluginManager: PluginManager) {
     this.disposables = new CompositeDisposable()
     this.tooltips = new TooltipManager(this.editor)
     this.disposables.add(this.tooltips)
@@ -57,7 +54,11 @@ export class EditorControl implements IEditorController {
     this.editorElement.classList.add('ide-haskell')
   }
 
-  public destroy () {
+  public static supportsGrammar(grammar: string): boolean {
+    return !!grammar.match(/haskell$/)
+  }
+
+  public destroy() {
     this.editorElement.classList.remove('ide-haskell')
     if (this.exprTypeTimeout) {
       clearTimeout(this.exprTypeTimeout)
@@ -69,18 +70,19 @@ export class EditorControl implements IEditorController {
     this.lastMouseBufferPt = undefined
   }
 
-  public getEventRange (
-    eventType: UPI.TEventRangeType
+  public getEventRange(
+    eventType: UPI.TEventRangeType,
   ): TEventRangeResult {
-    let crange: Range, pos: Point
+    let crange: Range
+    let pos: Point
     switch (eventType) {
       case 'mouse':
       case 'context':
-        if (!this.lastMouseBufferPt) { return }
+        if (!this.lastMouseBufferPt) return undefined
         pos = this.lastMouseBufferPt
         const [selRange] = this.editor.getSelections()
-                           .map((sel) => sel.getBufferRange())
-                           .filter((sel) => sel.containsPoint(pos))
+          .map((sel) => sel.getBufferRange())
+          .filter((sel) => sel.containsPoint(pos))
         crange = selRange || new Range(pos, pos)
         break
       case 'keyboard':
@@ -94,7 +96,7 @@ export class EditorControl implements IEditorController {
     return { crange, pos, eventType }
   }
 
-  private shouldShowTooltip (pos: Point, type: UPI.TEventRangeType) {
+  private shouldShowTooltip(pos: Point, type: UPI.TEventRangeType) {
     if ((pos.row < 0) ||
       (pos.row >= this.editor.getLineCount()) ||
       pos.isEqual(this.editor.bufferRangeForBufferRow(pos.row).end)) {
@@ -104,7 +106,7 @@ export class EditorControl implements IEditorController {
     }
   }
 
-  private trackMouseBufferPosition (e: MouseEvent) {
+  private trackMouseBufferPosition(e: MouseEvent) {
     const bufferPt = bufferPositionFromMouseEvent(this.editor, e)
     if (!bufferPt) { return }
 
@@ -118,17 +120,17 @@ export class EditorControl implements IEditorController {
     }
     this.exprTypeTimeout = setTimeout(
       () => bufferPt && this.shouldShowTooltip(bufferPt, UPI.TEventRangeType.mouse),
-      atom.config.get('ide-haskell.expressionTypeInterval')
+      atom.config.get('ide-haskell.expressionTypeInterval'),
     )
   }
 
-  private stopTrackingMouseBufferPosition (e: MouseEvent) {
+  private stopTrackingMouseBufferPosition(e: MouseEvent) {
     if (this.exprTypeTimeout) {
       return clearTimeout(this.exprTypeTimeout)
     }
   }
 
-  private trackSelection ({newBufferRange}: {newBufferRange: Range}) {
+  private trackSelection({ newBufferRange }: { newBufferRange: Range }) {
     this.handleCursorUnderTooltip(newBufferRange)
 
     if (this.selTimeout) {
@@ -141,18 +143,18 @@ export class EditorControl implements IEditorController {
       }
       this.tooltipRegistry.showTooltip(this.editor, UPI.TEventRangeType.keyboard)
       if (atom.config.get('ide-haskell.onCursorMove') === 'Hide Tooltip') {
-        this.tooltips.hide(UPI.TEventRangeType.mouse, undefined, {persistent: false})
-        this.tooltips.hide(UPI.TEventRangeType.context, undefined, {persistent: false})
+        this.tooltips.hide(UPI.TEventRangeType.mouse, undefined, { persistent: false })
+        this.tooltips.hide(UPI.TEventRangeType.context, undefined, { persistent: false })
       }
     } else {
       this.selTimeout = setTimeout(
         () => this.shouldShowTooltip(newBufferRange.start, UPI.TEventRangeType.selection),
-        atom.config.get('ide-haskell.expressionTypeInterval')
+        atom.config.get('ide-haskell.expressionTypeInterval'),
       )
     }
   }
 
-  private handleCursorUnderTooltip (currentRange: Range) {
+  private handleCursorUnderTooltip(currentRange: Range) {
     const tooltipElement = document.querySelector('ide-haskell-tooltip')
     if (!tooltipElement) { return }
     const slcl = this.editorElement.pixelRectForScreenRange(this.editor.screenRangeForBufferRange(currentRange))
@@ -167,7 +169,7 @@ export class EditorControl implements IEditorController {
       left: ttcl.left - eecl.left,
       top: ttcld.top - eecl.top,
       width: ttcl.width,
-      height: ttcld.height
+      height: ttcld.height,
     }
     const xmax = Math.round(Math.max(ttbox.left, slcl.left))
     const xmin = Math.round(Math.min(ttbox.left + ttbox.width, slcl.left +

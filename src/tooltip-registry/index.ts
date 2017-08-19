@@ -1,6 +1,6 @@
-import {TextEditor, Disposable, Range} from 'atom'
-import {MessageObject} from '../utils'
-import {PluginManager} from '../plugin-manager'
+import { TextEditor, Disposable, Range } from 'atom'
+import { MessageObject } from '../utils'
+import { PluginManager } from '../plugin-manager'
 
 export interface TTooltipHandlerSpec {
   priority: number
@@ -13,23 +13,23 @@ export interface ITooltipSpec {
 }
 
 export class TooltipRegistry {
-  private providers: Array<TTooltipHandlerSpec & {pluginName: string, eventTypes: UPI.TEventRangeType[]}>
-  constructor (private pluginManager: PluginManager) {
+  private providers: Array<TTooltipHandlerSpec & { pluginName: string, eventTypes: UPI.TEventRangeType[] }>
+  constructor(private pluginManager: PluginManager) {
     this.providers = []
   }
 
-  public dispose () {
+  public dispose() {
     this.providers = []
   }
 
-  public register (pluginName: string, provider: TTooltipHandlerSpec): Disposable {
-    const idx = this.providers.findIndex(({priority}) => priority < provider.priority)
+  public register(pluginName: string, provider: TTooltipHandlerSpec): Disposable {
+    const idx = this.providers.findIndex(({ priority }) => priority < provider.priority)
     const defaultEvT: UPI.TEventRangeType[] = [UPI.TEventRangeType.selection, UPI.TEventRangeType.mouse]
     const record = {
       pluginName,
       eventTypes: provider.eventTypes || defaultEvT,
       priority: provider.priority,
-      handler: provider.handler
+      handler: provider.handler,
     }
     if (idx === -1) {
       this.providers.push(record)
@@ -42,12 +42,13 @@ export class TooltipRegistry {
     })
   }
 
-  public async showTooltip (
-    editor: TextEditor, type: UPI.TEventRangeType, spec?: ITooltipSpec
+  public async showTooltip(
+    editor: TextEditor, type: UPI.TEventRangeType, spec?: ITooltipSpec,
   ) {
     const controller = this.pluginManager.controller(editor)
     if (!controller) { return }
-    let pluginName, tooltipData: UPI.TTooltipFunction | UPI.ITooltipData
+    let pluginName: string
+    let tooltipData: UPI.TTooltipFunction | UPI.ITooltipData
     if (spec && typeof spec.tooltip !== 'function') {
       tooltipData = spec.tooltip
       pluginName = spec.pluginName
@@ -70,15 +71,15 @@ export class TooltipRegistry {
         if (!tooltip) {
           // if nobody wants to show anything, might as well hide...
           // TODO: this doesn't seem like a particularly bright idea?
-          controller.tooltips.hide(type, undefined, {persistent: false})
+          controller.tooltips.hide(type, undefined, { persistent: false })
           return
         }
-        ({pluginName, tooltipData} = tooltip)
+        ({ pluginName, tooltipData } = tooltip)
       }
       const newEventRange = controller.getEventRange(type)
       if (!newEventRange || !eventRange.crange.isEqual(newEventRange.crange)) { return }
     }
-    const {persistent = false} = tooltipData
+    const { persistent = false } = tooltipData
     let msg
     if (Array.isArray(tooltipData.text)) {
       msg = tooltipData.text.map(MessageObject.fromObject.bind(MessageObject))
@@ -86,27 +87,27 @@ export class TooltipRegistry {
       msg = MessageObject.fromObject(tooltipData.text)
     }
     controller.tooltips.show(
-      Range.fromObject(tooltipData.range), msg, type, pluginName, {persistent}
+      Range.fromObject(tooltipData.range), msg, type, pluginName, { persistent },
     )
   }
 
-  public hideTooltip (editor: TextEditor, type?: UPI.TEventRangeType, source?: string) {
+  public hideTooltip(editor: TextEditor, type?: UPI.TEventRangeType, source?: string) {
     const controller = this.pluginManager.controller(editor)
     if (!controller) { return }
     controller.tooltips.hide(type, source)
   }
 
-  private async defaultTooltipFunction (editor: TextEditor, type: UPI.TEventRangeType, crange: Range) {
-    for (const {pluginName, handler, eventTypes} of this.providers) {
+  private async defaultTooltipFunction(editor: TextEditor, type: UPI.TEventRangeType, crange: Range) {
+    for (const { pluginName, handler, eventTypes } of this.providers) {
       if (!eventTypes.includes(type)) { continue }
       try {
         const tooltipData = await Promise.resolve(handler(editor, crange, type))
         if (!tooltipData) {
           continue
         }
-        return {pluginName, tooltipData}
+        return { pluginName, tooltipData }
       } catch (e) {
-        this.pluginManager.backendStatus(pluginName, {status: 'warning', detail: `${e}`})
+        this.pluginManager.backendStatus(pluginName, { status: 'warning', detail: `${e}` })
         continue
       }
     }

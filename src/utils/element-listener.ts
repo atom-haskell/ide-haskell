@@ -1,7 +1,7 @@
-import {Disposable} from 'atom'
+import { Disposable } from 'atom'
 
-export function listen (
-  element: HTMLElement, event: string, selector: string, callback: (event: Event) => void
+export function listen(
+  element: HTMLElement, event: string, selector: string, callback: (event: Event) => void,
 ): Disposable {
   const bound = (evt: Event) => {
     const sel = (evt.target as HTMLElement).closest(selector)

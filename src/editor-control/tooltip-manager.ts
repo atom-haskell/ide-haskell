@@ -2,8 +2,8 @@ import {
   Range, TextEditor, DisplayMarker,
 } from 'atom'
 
-import {TooltipMessage} from './tooltip-view'
-import {EventTable} from './event-table'
+import { TooltipMessage } from './tooltip-view'
+import { EventTable } from './event-table'
 
 export interface IMarkerProperties {
   persistent: boolean
@@ -12,22 +12,22 @@ export interface IMarkerProperties {
 export class TooltipManager {
   private markers: EventTable
   private editorElement: HTMLElement
-  constructor (private editor: TextEditor) {
+  constructor(private editor: TextEditor) {
     this.markers = new EventTable(editor, [
-      [{type: UPI.TEventRangeType.keyboard}, {type: UPI.TEventRangeType.context}],
-      [{type: UPI.TEventRangeType.mouse}, {type: UPI.TEventRangeType.selection}],
+      [{ type: UPI.TEventRangeType.keyboard }, { type: UPI.TEventRangeType.context }],
+      [{ type: UPI.TEventRangeType.mouse }, { type: UPI.TEventRangeType.selection }],
     ])
     this.editorElement = atom.views.getView(this.editor)
   }
 
-  public dispose () {
+  public dispose() {
     this.markers.destroy()
     this.editorElement.classList.remove('ide-haskell--has-tooltips')
   }
 
-  public show (
+  public show(
     range: Range, text: UPI.IMessageObject | UPI.IMessageObject[],
-    type: UPI.TEventRangeType, source: string, detail: IMarkerProperties
+    type: UPI.TEventRangeType, source: string, detail: IMarkerProperties,
   ) {
     this.hide(type, source)
     const highlightMarker = this.markers.get(type, source).markBufferRange(range)
@@ -36,7 +36,7 @@ export class TooltipManager {
     this.editorElement.classList.add('ide-haskell--has-tooltips')
   }
 
-  public hide (type?: UPI.TEventRangeType, source?: string, template?: IMarkerProperties) {
+  public hide(type?: UPI.TEventRangeType, source?: string, template?: IMarkerProperties) {
     if (!type) {
       this.markers.clear()
       return
@@ -46,10 +46,10 @@ export class TooltipManager {
     } else {
       this.markers.get(type, source).findMarkers(template).forEach((m: DisplayMarker) => m.destroy())
     }
-    if (! this.has()) { this.editorElement.classList.remove('ide-haskell--has-tooltips') }
+    if (!this.has()) { this.editorElement.classList.remove('ide-haskell--has-tooltips') }
   }
 
-  public has (type?: UPI.TEventRangeType, source?: string, template?: IMarkerProperties) {
+  public has(type?: UPI.TEventRangeType, source?: string, template?: IMarkerProperties) {
     if (!type) {
       return this.markers.getMarkerCount() > 0
     }
@@ -60,15 +60,15 @@ export class TooltipManager {
     }
   }
 
-  private decorate (marker: DisplayMarker, tooltipView: TooltipMessage) {
+  private decorate(marker: DisplayMarker, tooltipView: TooltipMessage) {
     this.editor.decorateMarker(marker, {
       type: 'overlay',
       position: 'tail',
-      item: tooltipView
+      item: tooltipView,
     })
     this.editor.decorateMarker(marker, {
       type: 'highlight',
-      class: 'ide-haskell-type'
+      class: 'ide-haskell-type',
     })
   }
 }

@@ -1,36 +1,36 @@
 import * as etch from 'etch'
-import {ResultItem} from '../../results-db'
-import {TextEditor} from 'atom'
+import { ResultItem } from '../../results-db'
+import { TextEditor } from 'atom'
 
-export interface IProps extends JSX.Props {model: ResultItem}
+export interface IProps extends JSX.Props { model: ResultItem }
 
 export class OutputPanelItem implements JSX.ElementClass {
-  // tslint:disable-next-line: no-uninitialized-class-properties
+  // tslint:disable-next-line: no-uninitialized
   public element: HTMLElement
-  constructor (public props: IProps) {
+  constructor(public props: IProps) {
     etch.initialize(this)
   }
 
-  public render () {
+  public render() {
     return (
       <ide-haskell-panel-item key={this.props.model.hash()}>
         {this.renderPosition()}
         {this.renderContext()}
-        <ide-haskell-item-description innerHTML={this.props.model.message.toHtml()}/>
+        <ide-haskell-item-description innerHTML={this.props.model.message.toHtml()} />
       </ide-haskell-panel-item>
     )
   }
 
-  public async update (props: IProps) {
+  public async update(props: IProps) {
     if (props && props.model) { this.props.model = props.model }
     return etch.update(this)
   }
 
-  public async destroy () {
+  public async destroy() {
     await etch.destroy(this)
   }
 
-  public async clickPosition () {
+  public async clickPosition() {
     if (this.props.model.uri) {
       const editor: TextEditor = await atom.workspace.open(this.props.model.uri)
       if (this.props.model.position) {
@@ -39,14 +39,14 @@ export class OutputPanelItem implements JSX.ElementClass {
     }
   }
 
-  private renderPosition () {
+  private renderPosition() {
     if (this.props.model.uri) {
       const positionText =
         this.props.model.position
-        ? `${this.props.model.uri}: ${this.props.model.position.row + 1}, ${this.props.model.position.column + 1}`
-        : this.props.model.uri
+          ? `${this.props.model.uri}: ${this.props.model.position.row + 1}, ${this.props.model.position.column + 1}`
+          : this.props.model.uri
       return (
-        <ide-haskell-item-position on={{click: this.clickPosition.bind(this)}}>
+        <ide-haskell-item-position on={{ click: this.clickPosition.bind(this) }}>
           {positionText}
         </ide-haskell-item-position>
       )
@@ -55,7 +55,7 @@ export class OutputPanelItem implements JSX.ElementClass {
     }
   }
 
-  private renderContext () {
+  private renderContext() {
     if (this.props.model.context) {
       return (
         <ide-haskell-item-context>{this.props.model.context}</ide-haskell-item-context>

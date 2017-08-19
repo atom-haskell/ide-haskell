@@ -1,12 +1,12 @@
 import * as etch from 'etch'
-import {Disposable, CompositeDisposable} from 'atom'
-import {OutputPanelButtons} from './views/output-panel-buttons'
-import {OutputPanelCheckbox} from './views/output-panel-checkbox'
-import {ProgressBar} from './views/progress-bar'
-import {OutputPanelItems} from './views/output-panel-items'
-import {ResultsDB, ResultItem} from '../results-db'
-import {StatusIcon} from './views/status-icon'
-import {isDock, isSimpleControlDef} from '../utils'
+import { Disposable, CompositeDisposable } from 'atom'
+import { OutputPanelButtons } from './views/output-panel-buttons'
+import { OutputPanelCheckbox } from './views/output-panel-checkbox'
+import { ProgressBar } from './views/progress-bar'
+import { OutputPanelItems } from './views/output-panel-items'
+import { ResultsDB, ResultItem } from '../results-db'
+import { StatusIcon } from './views/status-icon'
+import { isDock, isSimpleControlDef } from '../utils'
 const $ = etch.dom
 
 export interface IState {
@@ -17,7 +17,7 @@ export interface IState {
 export type TPanelPosition = 'bottom' | 'left' | 'top' | 'right'
 
 export class OutputPanel {
-  // tslint:disable-next-line:no-uninitialized-class-properties
+  // tslint:disable-next-line:no-uninitialized
   private refs: {
     items: OutputPanelItems
     buttons: OutputPanelButtons
@@ -29,7 +29,7 @@ export class OutputPanel {
   private statusMap: Map<string, UPI.IStatus>
   private progress: number[]
   private itemFilter: (item: ResultItem) => boolean
-  constructor (private state: IState = {}, private results: ResultsDB) {
+  constructor(private state: IState = {}, private results: ResultsDB) {
     this.elements = new Set()
     this.statusMap = new Map()
     this.disposables = new CompositeDisposable()
@@ -62,70 +62,73 @@ export class OutputPanel {
     })
   }
 
-  public render () {
+  public render() {
     return (
       <ide-haskell-panel>
         <ide-haskell-panel-heading>
-          <StatusIcon ref="status" statusMap={this.statusMap}/>
-          <OutputPanelButtons ref="buttons" onChange={this.updateItems.bind(this)}/>
-          <OutputPanelCheckbox ref="checkboxUriFilter" class="ide-haskell-checkbox--uri-filter"
-            initialState={this.state.fileFilter} onSwitched={this.updateItems.bind(this)}
+          <StatusIcon ref="status" statusMap={this.statusMap} />
+          <OutputPanelButtons ref="buttons" onChange={this.updateItems} />
+          <OutputPanelCheckbox
+            ref="checkboxUriFilter"
+            class="ide-haskell-checkbox--uri-filter"
+            initialState={this.state.fileFilter}
+            onSwitched={this.updateItems}
             enabledHint="Show current file messages"
             disabledHint="Show all project messages"
-            />
+          />
           {Array.from(this.elements.values())}
-          <ProgressBar progress={this.progress}/>
+          <ProgressBar progress={this.progress} />
         </ide-haskell-panel-heading>
-        <OutputPanelItems model={this.results} filter={this.itemFilter} ref="items"/>
+        <OutputPanelItems model={this.results} filter={this.itemFilter} ref="items" />
       </ide-haskell-panel>
     )
   }
 
-  public async update () {
+  public async update() {
     return etch.update(this)
   }
 
-  public async destroy () {
+  public async destroy() {
     this.hide()
   }
 
-  public async reallyDestroy () {
+  public async reallyDestroy() {
     await etch.destroy(this)
     this.disposables.dispose()
   }
 
-  public async toggle () {
+  public async toggle() {
     const pane = atom.workspace.paneContainerForItem(this)
-    if (! pane || isDock(pane) && ! pane.isVisible()) {
+    if (!pane || isDock(pane) && !pane.isVisible()) {
       this.show()
     } else {
       this.hide()
     }
   }
 
-  public async show () {
-    await atom.workspace.open(this, {searchAllPanes: true, activatePane: false})
+  public async show() {
+    await atom.workspace.open(this, { searchAllPanes: true, activatePane: false })
     const pane = atom.workspace.paneContainerForItem(this)
     if (pane && isDock(pane)) { pane.show() }
   }
 
-  public async hide () {
+  public async hide() {
     atom.workspace.hide(this)
   }
 
-  public getTitle () {
+  public getTitle() {
     return 'IDE-Haskell'
   }
 
-  public getDefaultLocation () {
+  public getDefaultLocation() {
     return atom.config.get('ide-haskell.panelPosition')
   }
 
-  public addPanelControl<T> (def: UPI.TControlDefinition<T>) {
+  public addPanelControl<T>(def: UPI.TControlDefinition<T>) {
     let newElement: JSX.Element
     if (isSimpleControlDef(def)) {
-      const {events, classes, style, attrs} = def.opts
-      const props: {[key: string]: Object} = {}
+      const { events, classes, style, attrs } = def.opts
+      const props: { [key: string]: Object } = {}
       if (classes) { props.class = classes.join(' ') }
       if (style) { props.style = style }
       if (attrs) { props.attributes = attrs }
@@ -143,7 +146,7 @@ export class OutputPanel {
     })
   }
 
-  public updateItems () {
+  public updateItems = () => {
     const activeTab = this.getActiveTab()
     let currentUri: string | undefined
     if (activeTab) {
@@ -158,26 +161,26 @@ export class OutputPanel {
         }
       }
       const scroll = ato && ato.autoScroll && this.refs.items.atEnd()
-      this.itemFilter = ({uri, severity}) => (severity === filterSeverity) && (!filterUri || uri === filterUri)
+      this.itemFilter = ({ uri, severity }) => (severity === filterSeverity) && (!filterUri || uri === filterUri)
       if (scroll) { this.refs.items.scrollToEnd() }
     }
 
     this.refs.buttons.buttonNames().forEach((btn) => {
-      const f: {severity: string, uri?: string} = {severity: btn}
+      const f: { severity: string, uri?: string } = { severity: btn }
       const ato = this.refs.buttons.options(btn)
       if (currentUri && ato && ato.uriFilter) { f.uri = currentUri }
       this.refs.buttons.setCount(btn, Array.from(this.results.filter(
-        ({uri, severity}) => (severity === f.severity) && (!f.uri || uri === f.uri)
+        ({ uri, severity }) => (severity === f.severity) && (!f.uri || uri === f.uri),
       )).length)
     })
     this.update()
   }
 
-  public activateTab (tab: string) {
+  public activateTab(tab: string) {
     this.refs.buttons.setActive(tab)
   }
 
-  public activateFirstNonEmptyTab (severities: UPI.TSeverity[]) {
+  public activateFirstNonEmptyTab(severities: UPI.TSeverity[]) {
     const sevs: UPI.TSeverity[] = severities
     for (const i of sevs) {
       const count = this.refs.buttons.getCount(i)
@@ -188,68 +191,60 @@ export class OutputPanel {
     }
   }
 
-  public showItem (item: ResultItem) {
+  public showItem(item: ResultItem) {
     this.activateTab(item.severity)
     this.refs.items.showItem(item)
   }
 
-  public getActiveTab () {
+  public getActiveTab() {
     return this.refs.buttons.getActive()
   }
 
-  public createTab (name: string, opts: UPI.ISeverityTabDefinition) {
+  public createTab(name: string, opts: UPI.ISeverityTabDefinition) {
     if (!this.refs.buttons.buttonNames().includes(name)) {
       this.refs.buttons.createButton(name, opts)
       this.state.activeTab && this.activateTab(this.state.activeTab)
     }
   }
 
-  public serialize (): IState {
+  public serialize(): IState {
     return {
       activeTab: this.getActiveTab(),
-      fileFilter: this.refs.checkboxUriFilter.getState()
+      fileFilter: this.refs.checkboxUriFilter.getState(),
     }
   }
 
-  public backendStatus (pluginName: string, st: UPI.IStatus) {
+  public backendStatus(pluginName: string, st: UPI.IStatus) {
     this.statusMap.set(pluginName, st)
     this.progress =
       Array.from(this.statusMap.values())
-      .reduce(
+        .reduce(
         (cv, i) => {
           if (i.status === 'progress' && i.progress !== undefined) {
             cv.push(i.progress)
           }
           return cv
         },
-        [] as number[]
+        [] as number[],
       )
     this.update()
   }
 
-  public showNextError () {
-    const rs = Array.from(this.results.filter(({uri}) => !!uri))
+  public showNextError() {
+    const rs = Array.from(this.results.filter(({ uri }) => !!uri))
     if (rs.length === 0) { return }
 
-    if (this.currentResult !== undefined) {
-      this.currentResult++
-    } else {
-      this.currentResult = 0
-    }
+    this.currentResult++
     if (this.currentResult >= rs.length) { this.currentResult = 0 }
 
     this.showItem(rs[this.currentResult])
   }
 
-  public showPrevError () {
-    const rs = Array.from(this.results.filter(({uri}) => !!uri))
+  public showPrevError() {
+    const rs = Array.from(this.results.filter(({ uri }) => !!uri))
     if (rs.length === 0) { return }
 
-    if (this.currentResult !== undefined) {
-      this.currentResult--
-    } else {
-      this.currentResult = rs.length - 1
-    }
+    this.currentResult--
     if (this.currentResult < 0) { this.currentResult = rs.length - 1 }
 
     this.showItem(rs[this.currentResult])

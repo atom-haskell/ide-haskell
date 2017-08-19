@@ -1,14 +1,13 @@
-import {CompositeDisposable, TEmitter, Emitter, TextEditor,
-  Point, TextBuffer, Grammar, Disposable} from 'atom'
-import {ResultsDB} from './results-db'
-import {OutputPanel, IState as IOutputViewState} from './output-panel'
-import {ConfigParamManager, IState as IParamState} from './config-params'
-import {EditorControl} from './editor-control'
-import {LinterSupport} from './linter-support'
-import {TooltipRegistry} from './tooltip-registry'
-import {CheckResultsProvider} from './check-results-provider'
-import {StatusBarView} from './status-bar'
-import {PrettifyEditorController} from './prettify'
+import { CompositeDisposable, TEmitter, Emitter, TextEditor, TextBuffer, Grammar, Disposable } from 'atom'
+import { ResultsDB } from './results-db'
+import { OutputPanel, IState as IOutputViewState } from './output-panel'
+import { ConfigParamManager, IState as IParamState } from './config-params'
+import { EditorControl } from './editor-control'
+import { LinterSupport } from './linter-support'
+import { TooltipRegistry } from './tooltip-registry'
+import { CheckResultsProvider } from './check-results-provider'
+import { StatusBarView } from './status-bar'
+import { PrettifyEditorController } from './prettify'
 
 export {IParamState, IOutputViewState}
 
@@ -89,7 +88,7 @@ export class PluginManager {
   public serialize (): IState {
     return {
       outputView: this.outputPanel.serialize(),
-      configParams: this.configParamManager.serialize()
+      configParams: this.configParamManager.serialize(),
     }
   }
 
@@ -128,7 +127,7 @@ export class PluginManager {
   }
 
   public controllerType<U extends IEditorController, T extends IEditorControllerFactoryT<U>> (
-    factory: T, editor: TextEditor
+    factory: T, editor: TextEditor,
   ): U | undefined {
     const ecmap = this.controllers.get<U, T>(factory)
     const rec = ecmap && ecmap.get(editor)
@@ -160,7 +159,7 @@ export class PluginManager {
   }
 
   public addEditorController<U extends IEditorController, T extends IEditorControllerFactoryT<U>> (
-    factory: T
+    factory: T,
   ): Disposable {
     if (this.controllers.has(factory)) {
       throw new Error(`Duplicate controller factory ${factory.toString()}`)
@@ -180,7 +179,7 @@ export class PluginManager {
     this.statusBarView = new StatusBarView(this.outputPanel)
     this.statusBarTile = sb.addRightTile({
       item: this.statusBarView.element,
-      priority: 100
+      priority: 100,
     })
   }
 
@@ -206,7 +205,7 @@ export class PluginManager {
             map.delete(editor)
             controller.destroy()
           }),
-          editor.onDidDestroy(() => disposable.dispose())
+          editor.onDidDestroy(() => disposable.dispose()),
         )
         map.set(editor, {controller, disposable})
       } else if (rec && !factory.supportsGrammar(grammar.scopeName)) {
@@ -227,11 +226,11 @@ export class PluginManager {
           editor.onDidDestroy(() => {
             editorDisp.dispose()
             this.disposables.remove(editorDisp)
-          })
+          }),
         )
         this.disposables.add(editorDisp)
         this.controllerOnGrammar(editor, editor.getGrammar())
-      })
+      }),
     )
   }
 }

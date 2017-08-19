@@ -1,20 +1,19 @@
 import * as etch from 'etch'
 
 export class TooltipMessage {
-  // tslint:disable-next-line:no-uninitialized-class-properties // TODO: fix this?
   private message: JSX.Element[]
-  // tslint:disable-next-line:no-uninitialized-class-properties
+  // tslint:disable-next-line:no-uninitialized
   private element: HTMLElement
-  constructor (message: UPI.IMessageObject | UPI.IMessageObject[]) {
+  constructor(message: UPI.IMessageObject | UPI.IMessageObject[]) {
     if (Array.isArray(message)) {
-      this.message = message.map((m) => <div innerHTML={m.toHtml()}/>)
+      this.message = message.map((m) => <div key={m} innerHTML={m.toHtml()} />)
     } else {
-      this.message = [<div innerHTML={message.toHtml()}/>]
+      this.message = [<div key={message} innerHTML={message.toHtml()} />]
     }
     etch.initialize(this)
   }
 
-  public render () {
+  public render() {
     return (
       <ide-haskell-tooltip>
         {this.message}
@@ -22,11 +21,11 @@ export class TooltipMessage {
     )
   }
 
-  public async update () {
+  public async update() {
     return etch.update(this)
   }
 
-  public writeAfterUpdate () {
+  public writeAfterUpdate() {
     this.element.parentElement && this.element.parentElement.classList.add('ide-haskell')
   }
 }
