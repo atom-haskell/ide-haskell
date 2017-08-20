@@ -68,7 +68,8 @@ export class ConfigParamStore {
   }
 
   public async setValue<T>(pluginName: string, paramName: string, value?: T): Promise<T | undefined> {
-    const paramConfig = this.getParamConfig<T>(pluginName, paramName, 'set')
+    const paramConfig = await this.getParamConfig<T>(pluginName, paramName, 'set')
+    if (paramConfig === undefined) return undefined
     if (value === undefined) { value = await this.showSelect<T>(paramConfig.spec) }
     if (value !== undefined) {
       paramConfig.value = value
@@ -79,17 +80,26 @@ export class ConfigParamStore {
   }
 
   public async getValue<T>(pluginName: string, paramName: string): Promise<T | undefined> {
-    const paramConfig = this.getParamConfig<T>(pluginName, paramName, 'get')
+    const paramConfig = await this.getParamConfig<T>(pluginName, paramName, 'get')
+    if (paramConfig === undefined) return undefined
     if (paramConfig.value === undefined) { await this.setValue(pluginName, paramName) }
     return paramConfig.value
   }
 
-  public getValueRaw<T>(pluginName: string, paramName: string): T | undefined {
-    const paramConfig = this.getParamConfig<T>(pluginName, paramName, 'get raw')
+  public async getValueRaw<T>(pluginName: string, paramName: string): Promise<T | undefined> {
+    const paramConfig = await this.getParamConfig<T>(pluginName, paramName, 'get raw')
+    if (paramConfig === undefined) return undefined
     return paramConfig.value
   }
 
-  private getParamConfig<T>(pluginName: string, paramName: string, reason: string): IParamData<T> {
+  private async getParamConfig<T>(pluginName: string, paramName: string, reason: string): Promise<IParamData<T> | undefined> {
+    if (!atom.packages.isPackageLoaded(pluginName)) {
+      console.error(new Error(`No ${pluginName} package while trying to ${reason} ${pluginName}.${paramName}`))
+      return undefined
+    }
+    if (!atom.packages.isPackageActive(pluginName)) {
+      await atom.packages.activatePackage(pluginName)
+    }
     const pluginConfig = this.plugins.get(pluginName)
     if (!pluginConfig) {
       throw new Error(`${pluginName} is not defined while trying to ${reason} ${pluginName}.${paramName}`)

@@ -87,7 +87,12 @@ export class ParamControl<T> implements UPI.IElementObject<IProps<T>> {
         this.update()
       })
     this.disposables.add(this.storeDisposable)
-    this.value = this.props.store.getValueRaw<T>(this.props.pluginName, this.props.name)
+    this.setValueInitial()
+  }
+
+  private async setValueInitial() {
+    this.value = await this.props.store.getValueRaw<T>(this.props.pluginName, this.props.name)
+    this.update()
   }
 
   private initSpec() {
