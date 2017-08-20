@@ -53,7 +53,7 @@
   "devDependencies": {
     "@types/node": "^7.0.14",
     "@types/temp": "^0.8.29",
-    "atom-haskell-tslint-rules": "0.0.5",
+    "atom-haskell-tslint-rules": "0.0.6",
     "tslint": "^5.6.0",
     "typedoc": "^0.7.1",
     "typescript": "^2.4.0"
