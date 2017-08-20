@@ -1,3 +1,7 @@
+## 2.0.5
+* Await package activation before trying to get configParams
+* Enforce code style
+
 ## 2.0.4
 * Handle exceptions in imperative tooltips
 * Rewrite UPI2 as a thin adapter to UPI3
