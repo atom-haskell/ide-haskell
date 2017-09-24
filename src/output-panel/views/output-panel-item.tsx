@@ -1,6 +1,5 @@
 import * as etch from 'etch'
 import { ResultItem } from '../../results-db'
-import { TextEditor } from 'atom'
 
 export interface IProps extends JSX.Props { model: ResultItem }
 
@@ -30,12 +29,16 @@ export class OutputPanelItem implements JSX.ElementClass {
     await etch.destroy(this)
   }
 
-  public async clickPosition() {
+  public clickPosition(): void {
     if (this.props.model.uri) {
-      const editor: TextEditor = await atom.workspace.open(this.props.model.uri)
-      if (this.props.model.position) {
-        editor.setCursorBufferPosition(this.props.model.position)
-      }
+      atom.workspace.open(
+        this.props.model.uri,
+        {
+          searchAllPanes: true,
+          initialLine: this.props.model.position && this.props.model.position.row,
+          initialColumn: this.props.model.position && this.props.model.position.column,
+        },
+      )
     }
   }
 
