@@ -6,7 +6,7 @@ export class LinterSupport {
   constructor(private linter: Linter.Indie, private resultDb: ResultsDB) {
     this.disposables = new CompositeDisposable()
 
-    this.disposables.add(resultDb.onDidUpdate(this.update.bind(this)))
+    this.disposables.add(resultDb.onDidUpdate(this.update))
   }
 
   public destroy() {
@@ -14,7 +14,7 @@ export class LinterSupport {
     this.linter.dispose()
   }
 
-  public update() {
+  public update = () => {
     this.linter.deleteMessages()
     this.linter.setMessages(Array.from(this.messages()))
   }

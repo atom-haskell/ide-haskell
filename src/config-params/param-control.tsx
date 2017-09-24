@@ -36,7 +36,7 @@ export class ParamControl<T> implements UPI.IElementObject<IProps<T>> {
     etch.initialize(this)
 
     this.disposables.add(
-      atom.tooltips.add(this.element, { title: this.tooltipTitle.bind(this) }),
+      atom.tooltips.add(this.element, { title: this.tooltipTitle }),
     )
   }
 
@@ -101,7 +101,7 @@ export class ParamControl<T> implements UPI.IElementObject<IProps<T>> {
     }
   }
 
-  private tooltipTitle() {
+  private tooltipTitle = () => {
     if (this.hiddenValue) {
       return `${this.props.spec.displayName}: ${this.props.spec.displayTemplate(this.value)}`
     } else {

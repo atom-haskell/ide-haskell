@@ -29,7 +29,7 @@ export class OutputPanelItem implements JSX.ElementClass {
     await etch.destroy(this)
   }
 
-  public clickPosition(): void {
+  public clickPosition = () => {
     if (this.props.model.uri) {
       atom.workspace.open(
         this.props.model.uri,
@@ -49,7 +49,7 @@ export class OutputPanelItem implements JSX.ElementClass {
           ? `${this.props.model.uri}: ${this.props.model.position.row + 1}, ${this.props.model.position.column + 1}`
           : this.props.model.uri
       return (
-        <ide-haskell-item-position on={{ click: this.clickPosition.bind(this) }}>
+        <ide-haskell-item-position on={{ click: this.clickPosition }}>
           {positionText}
         </ide-haskell-item-position>
       )

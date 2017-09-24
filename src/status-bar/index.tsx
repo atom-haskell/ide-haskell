@@ -13,7 +13,7 @@ export class StatusBarView {
 
   public render() {
     return (
-      <div class="ide-haskell inline-block" on={{ click: this.didClick.bind(this) }}>
+      <div class="ide-haskell inline-block" on={{ click: this.didClick }}>
         <span>
           <ide-haskell-lambda />
           <StatusIcon statusMap={this.statusMap} />
@@ -35,7 +35,7 @@ export class StatusBarView {
     await etch.destroy(this)
   }
 
-  private didClick() {
+  private didClick = () => {
     this.panel.toggle()
   }
 }

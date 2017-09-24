@@ -35,7 +35,7 @@ export class CREditorControl implements IEditorController {
       persistent: false,
     })
     this.markerProps = new WeakMap()
-    this.disposables.add(this.resultsDB.onDidUpdate(this.updateResults.bind(this)))
+    this.disposables.add(this.resultsDB.onDidUpdate(this.updateResults))
     this.updateResults()
     this.registerGutterEvents()
   }
@@ -95,7 +95,7 @@ export class CREditorControl implements IEditorController {
     ))
   }
 
-  private updateResults() {
+  private updateResults = () => {
     this.markers.clear()
     const path = this.editor.getPath()
     for (const r of this.resultsDB.filter((m) => m.uri === path && m.isValid())) {

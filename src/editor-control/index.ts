@@ -46,9 +46,9 @@ export class EditorControl implements IEditorController {
       // tooltip tracking (mouse and selection)
       this.editorElement.onDidChangeScrollLeft(() => this.tooltips.hide(UPI.TEventRangeType.mouse)),
       this.editorElement.onDidChangeScrollTop(() => this.tooltips.hide(UPI.TEventRangeType.mouse)),
-      listen(this.editorElement, 'mousemove', '.scroll-view', this.trackMouseBufferPosition.bind(this)),
-      listen(this.editorElement, 'mouseout', '.scroll-view', this.stopTrackingMouseBufferPosition.bind(this)),
-      this.editor.onDidChangeSelectionRange(this.trackSelection.bind(this)),
+      listen(this.editorElement, 'mousemove', '.scroll-view', this.trackMouseBufferPosition),
+      listen(this.editorElement, 'mouseout', '.scroll-view', this.stopTrackingMouseBufferPosition),
+      this.editor.onDidChangeSelectionRange(this.trackSelection),
     )
 
     this.editorElement.classList.add('ide-haskell')
@@ -106,7 +106,7 @@ export class EditorControl implements IEditorController {
     }
   }
 
-  private trackMouseBufferPosition(e: MouseEvent) {
+  private trackMouseBufferPosition = (e: MouseEvent) => {
     const bufferPt = bufferPositionFromMouseEvent(this.editor, e)
     if (!bufferPt) { return }
 
@@ -124,13 +124,13 @@ export class EditorControl implements IEditorController {
     )
   }
 
-  private stopTrackingMouseBufferPosition(e: MouseEvent) {
+  private stopTrackingMouseBufferPosition = (e: MouseEvent) => {
     if (this.exprTypeTimeout) {
       return clearTimeout(this.exprTypeTimeout)
     }
   }
 
-  private trackSelection({ newBufferRange }: { newBufferRange: Range }) {
+  private trackSelection = ({ newBufferRange }: { newBufferRange: Range }) => {
     this.handleCursorUnderTooltip(newBufferRange)
 
     if (this.selTimeout) {

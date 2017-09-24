@@ -14,7 +14,7 @@ export class CheckResultsProvider {
     this.disposables.add(
       tooltipRegistry.register('builtin:check-results', {
         priority: 1000,
-        handler: this.tooltipProvider.bind(this),
+        handler: this.tooltipProvider,
         eventTypes: [UPI.TEventRangeType.mouse, UPI.TEventRangeType.keyboard],
       }),
       pluginManager.addEditorController(CREditorControl),
@@ -25,7 +25,7 @@ export class CheckResultsProvider {
     this.disposables.dispose()
   }
 
-  private tooltipProvider(editor: TextEditor, crange: Range, type: UPI.TEventRangeType): UPI.ITooltipData | undefined {
+  private tooltipProvider = (editor: TextEditor, crange: Range, type: UPI.TEventRangeType): UPI.ITooltipData | undefined => {
     const controller
       = this.pluginManager.controllerType<CREditorControl, typeof CREditorControl>(
         CREditorControl, editor,

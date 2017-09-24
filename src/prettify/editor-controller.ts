@@ -10,7 +10,7 @@ export class PrettifyEditorController {
   constructor (private editor: TextEditor, pluginManager: PluginManager) {
     const buffer = this.editor.getBuffer()
     this.disposables.add(
-      buffer.onWillSave(this.prettify.bind(this)),
+      buffer.onWillSave(this.prettify),
     )
   }
 
@@ -22,7 +22,7 @@ export class PrettifyEditorController {
     this.disposables.dispose()
   }
 
-  private async prettify () {
+  private prettify = async () => {
     if (atom.config.get('ide-haskell.onSavePrettify')) {
       if (this.isPretty) { return }
       this.isPretty = true
