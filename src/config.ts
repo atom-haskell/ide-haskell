@@ -31,10 +31,10 @@ export const config = {
   messageDisplayFrontend: {
     type: 'string',
     default: 'builtin',
-    description: `,
-    Frontend to use for displaying errors/warnigns/lints. Builtin,
-    (i.e. output panel) and atom-linter supported.,
-    Requires Atom restart.,
+    description: `
+    Frontend to use for displaying errors/warnigns/lints. Builtin
+    (i.e. output panel) and atom-linter supported.
+    Requires Atom restart.
     `,
     enum: ['builtin', 'linter'],
     order: 45,
@@ -72,7 +72,7 @@ export const config = {
   panelPosition: {
     type: 'string',
     default: 'bottom',
-    description: `,
+    description: `
     Default output panel position
     `,
     enum: ['bottom', 'left', 'right', 'center'],
