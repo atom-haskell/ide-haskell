@@ -19,7 +19,7 @@ export type TPanelPosition = 'bottom' | 'left' | 'top' | 'right'
 export class OutputPanel {
   // tslint:disable-next-line:no-uninitialized
   private refs: {
-    items: OutputPanelItems
+    items?: OutputPanelItems
     buttons: OutputPanelButtons
     checkboxUriFilter: OutputPanelCheckbox
   }
@@ -29,7 +29,8 @@ export class OutputPanel {
   private statusMap: Map<string, UPI.IStatus>
   private progress: number[]
   private itemFilter: (item: ResultItem) => boolean
-  constructor(private state: IState = {}, private results: ResultsDB) {
+  private results?: ResultsDB
+  constructor(private state: IState = {}) {
     this.elements = new Set()
     this.statusMap = new Map()
     this.disposables = new CompositeDisposable()
@@ -39,17 +40,6 @@ export class OutputPanel {
     this.itemFilter = () => true
 
     etch.initialize(this)
-
-    this.disposables.add(this.results.onDidUpdate((severities: UPI.TSeverity[]) => {
-      this.currentResult = 0
-      this.updateItems()
-      if (atom.config.get('ide-haskell.autoHideOutput') && this.results.isEmpty(severities)) {
-        this.hide()
-      } else if (atom.config.get('ide-haskell.switchTabOnCheck')) {
-        this.show()
-        this.activateFirstNonEmptyTab(severities)
-      }
-    }))
 
     this.disposables.add(atom.workspace.onDidChangeActivePaneItem(() => {
       if (this.refs.checkboxUriFilter.getState()) { this.updateItems() }
@@ -62,7 +52,29 @@ export class OutputPanel {
     })
   }
 
+  public connectResults(results: ResultsDB) {
+    if (this.results) throw new Error('Results already connected!')
+    this.results = results
+
+    const didUpdate = (severities: UPI.TSeverity[]) => {
+      this.currentResult = 0
+      this.updateItems()
+      if (atom.config.get('ide-haskell.autoHideOutput') && (!this.results || this.results.isEmpty(severities))) {
+        this.hide()
+      } else if (atom.config.get('ide-haskell.switchTabOnCheck')) {
+        this.show()
+        this.activateFirstNonEmptyTab(severities)
+      }
+    }
+
+    this.disposables.add(this.results.onDidUpdate(didUpdate))
+  }
+
   public render() {
+    const outputItems =
+      this.results
+      ? <OutputPanelItems model={this.results} filter={this.itemFilter} ref="items" />
+      : null // tslint:disable-line: no-null-keyword
     return (
       <ide-haskell-panel>
         <ide-haskell-panel-heading>
@@ -79,7 +91,7 @@ export class OutputPanel {
           {Array.from(this.elements.values())}
           <ProgressBar progress={this.progress} />
         </ide-haskell-panel-heading>
-        <OutputPanelItems model={this.results} filter={this.itemFilter} ref="items" />
+        {outputItems}
       </ide-haskell-panel>
     )
   }
@@ -119,6 +131,10 @@ export class OutputPanel {
 
   public getTitle() {
     return 'IDE-Haskell'
+  }
+
+  public getURI() {
+    return `ide-haskell://output-panel/`
   }
 
   public getDefaultLocation() {
@@ -161,18 +177,24 @@ export class OutputPanel {
           filterUri = currentUri
         }
       }
-      const scroll = ato && ato.autoScroll && this.refs.items.atEnd()
       this.itemFilter = ({ uri, severity }) => (severity === filterSeverity) && (!filterUri || uri === filterUri)
-      if (scroll) { this.refs.items.scrollToEnd() }
+      if (ato && ato.autoScroll && this.refs.items && this.refs.items.atEnd()) {
+        this.refs.items.scrollToEnd()
+      }
     }
 
     this.refs.buttons.buttonNames().forEach((btn) => {
       const f: { severity: string, uri?: string } = { severity: btn }
       const ato = this.refs.buttons.options(btn)
       if (currentUri && ato && ato.uriFilter) { f.uri = currentUri }
-      this.refs.buttons.setCount(btn, Array.from(this.results.filter(
-        ({ uri, severity }) => (severity === f.severity) && (!f.uri || uri === f.uri),
-      )).length)
+      this.refs.buttons.setCount(
+        btn,
+        this.results
+        ? Array.from(this.results.filter(
+            ({ uri, severity }) => (severity === f.severity) && (!f.uri || uri === f.uri),
+          )).length
+        : 0,
+      )
     })
     this.update()
   }
@@ -194,7 +216,7 @@ export class OutputPanel {
 
   public showItem(item: ResultItem) {
     this.activateTab(item.severity)
-    this.refs.items.showItem(item)
+    this.refs.items && this.refs.items.showItem(item)
   }
 
   public getActiveTab() {
@@ -208,10 +230,11 @@ export class OutputPanel {
     }
   }
 
-  public serialize(): IState {
+  public serialize(): IState & {deserializer: 'ide-haskell/OutputPanel'} {
     return {
       activeTab: this.getActiveTab(),
       fileFilter: this.refs.checkboxUriFilter.getState(),
+      deserializer: 'ide-haskell/OutputPanel',
     }
   }
 
@@ -232,6 +255,7 @@ export class OutputPanel {
   }
 
   public showNextError() {
+    if (!this.results) return
     const rs = Array.from(this.results.filter(({ uri }) => !!uri))
     if (rs.length === 0) { return }
 
@@ -242,6 +266,7 @@ export class OutputPanel {
   }
 
   public showPrevError() {
+    if (!this.results) return
     const rs = Array.from(this.results.filter(({ uri }) => !!uri))
     if (rs.length === 0) { return }
 

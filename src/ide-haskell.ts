@@ -4,10 +4,12 @@ import { prettifyFile } from './prettify'
 import { MAIN_MENU_LABEL } from './utils'
 import * as UPI2 from './upi-2'
 import * as UPI3 from './upi-3'
+import * as OutputPanel from './output-panel'
 
 let upiProvided = false
 let disposables: CompositeDisposable | undefined
 let pluginManager: PluginManager | undefined
+let outputPanel: OutputPanel.OutputPanel | undefined
 let menu: CompositeDisposable | undefined
 
 export { config } from './config'
@@ -39,7 +41,7 @@ export function activate(state: IState) {
 
   disposables = new CompositeDisposable()
 
-  pluginManager = new PluginManager(state)
+  pluginManager = new PluginManager(state, outputPanel || new OutputPanel.OutputPanel())
 
   // global commands
   disposables.add(
@@ -94,6 +96,11 @@ export function serialize() {
   if (pluginManager) {
     return pluginManager.serialize()
   }
+}
+
+export function deserializeOutputPanel(state: OutputPanel.IState) {
+  outputPanel = new OutputPanel.OutputPanel(state)
+  return outputPanel
 }
 
 export function provideUpi(): UPI2.IUPIProvided {

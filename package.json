@@ -57,5 +57,8 @@
     "tslint": "^5.6.0",
     "typedoc": "^0.7.1",
     "typescript": "^2.4.0"
+  },
+  "deserializers": {
+    "ide-haskell/OutputPanel": "deserializeOutputPanel"
   }
 }

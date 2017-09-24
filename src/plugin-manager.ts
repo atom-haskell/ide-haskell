@@ -14,7 +14,6 @@ export {IParamState, IOutputViewState}
 export type TEventType = 'keyboard' | 'context' | 'mouse' | 'selection'
 
 export interface IState {
-  outputView: IOutputViewState
   configParams: IParamState
 }
 
@@ -38,7 +37,6 @@ export interface TMap extends Map<IEditorControllerFactory, ECMap<IEditorControl
 
 export class PluginManager {
   public resultsDB: ResultsDB
-  public outputPanel: OutputPanel
   public configParamManager: ConfigParamManager
   public tooltipRegistry: TooltipRegistry
   private checkResultsProvider?: CheckResultsProvider
@@ -52,11 +50,11 @@ export class PluginManager {
   private statusBarTile?: StatusBar.StatusBarTile
   private statusBarView?: StatusBarView
   private controllers: TMap = new Map()
-  constructor (state: IState) {
+  constructor (state: IState, public outputPanel: OutputPanel) {
     this.disposables.add(this.emitter)
 
     this.resultsDB = new ResultsDB()
-    this.outputPanel = new OutputPanel(state.outputView, this.resultsDB)
+    this.outputPanel.connectResults(this.resultsDB)
     this.tooltipRegistry = new TooltipRegistry(this)
     this.configParamManager = new ConfigParamManager(this.outputPanel, state.configParams)
 
@@ -87,7 +85,6 @@ export class PluginManager {
 
   public serialize (): IState {
     return {
-      outputView: this.outputPanel.serialize(),
       configParams: this.configParamManager.serialize(),
     }
   }

@@ -72,6 +72,7 @@ export const config = {
   panelPosition: {
     type: 'string',
     default: 'bottom',
+    title: 'Default Panel Position',
     description: `
     Default output panel position
     `,
