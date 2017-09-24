@@ -2,43 +2,37 @@ import { CompositeDisposable } from 'atom'
 import * as etch from 'etch'
 
 export interface IProps extends JSX.Props {
-  initialState?: boolean
-  class?: string
-  onSwitched?: (state: boolean) => void
-  enabledHint?: string
-  disabledHint?: string
+  state: boolean
+  class: string
+  onSwitched: () => void
+  enabledHint: string
+  disabledHint: string
 }
 
 export class OutputPanelCheckbox implements JSX.ElementClass {
   private disposables: CompositeDisposable
   // tslint:disable-next-line:no-uninitialized
   private element: HTMLElement
-  private state: boolean
-  constructor(public props: IProps = {}) {
-    this.state = !!props.initialState
+  constructor(public props: IProps) {
     this.disposables = new CompositeDisposable()
     etch.initialize(this)
     this.disposables.add(
-      atom.tooltips.add(this.element, { title: this.tooltipTitle.bind(this) }),
+      atom.tooltips.add(this.element, { title: this.tooltipTitle }),
     )
   }
 
   public render() {
     return (
       <ide-haskell-checkbox
-        class={`${this.props.class}${this.state ? ' enabled' : ''}`}
-        on={{ click: this.toggleState.bind(this) }}
+        class={`${this.props.class}${this.props.state ? ' enabled' : ''}`}
+        on={{ click: this.props.onSwitched }}
       />
     )
   }
 
-  public async update(props?: IProps) {
-    if (props) { this.props = props }
+  public async update(props: Partial<IProps> = {}) {
+    this.props = {...this.props, ...props}
     return etch.update(this)
-  }
-
-  public getState() {
-    return this.state
   }
 
   public async destroy() {
@@ -46,18 +40,8 @@ export class OutputPanelCheckbox implements JSX.ElementClass {
     this.disposables.dispose()
   }
 
-  private setState(state: boolean) {
-    this.state = state
-    if (this.props.onSwitched) { this.props.onSwitched(this.state) }
-    this.update()
-  }
-
-  private toggleState() {
-    this.setState(!this.getState())
-  }
-
-  private tooltipTitle() {
-    if (this.getState()) {
+  private tooltipTitle = () => {
+    if (this.props.state) {
       return this.props.enabledHint
     } else {
       return this.props.disabledHint

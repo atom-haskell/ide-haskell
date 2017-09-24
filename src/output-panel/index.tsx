@@ -1,6 +1,6 @@
 import * as etch from 'etch'
 import { Disposable, CompositeDisposable } from 'atom'
-import { OutputPanelButtons } from './views/output-panel-buttons'
+import { IBtnDesc, OutputPanelButtons } from './views/output-panel-buttons'
 import { OutputPanelCheckbox } from './views/output-panel-checkbox'
 import { ProgressBar } from './views/progress-bar'
 import { OutputPanelItems } from './views/output-panel-items'
@@ -10,8 +10,8 @@ import { isDock, isSimpleControlDef } from '../utils'
 const $ = etch.dom
 
 export interface IState {
-  fileFilter?: boolean
-  activeTab?: string
+  fileFilter: boolean
+  activeTab: string
 }
 
 export type TPanelPosition = 'bottom' | 'left' | 'top' | 'right'
@@ -20,29 +20,24 @@ export class OutputPanel {
   // tslint:disable-next-line:no-uninitialized
   private refs: {
     items?: OutputPanelItems
-    buttons: OutputPanelButtons
-    checkboxUriFilter: OutputPanelCheckbox
   }
-  private elements: Set<JSX.Element>
-  private disposables: CompositeDisposable
-  private currentResult: number
-  private statusMap: Map<string, UPI.IStatus>
-  private progress: number[]
-  private itemFilter: (item: ResultItem) => boolean
+  private elements: Set<JSX.Element> = new Set()
+  private disposables: CompositeDisposable = new CompositeDisposable()
+  private currentResult: number = 0
+  private statusMap: Map<string, UPI.IStatus> = new Map()
+  private progress: number[] = []
+  private tabs: Map<string, IBtnDesc> = new Map()
+  private itemFilter?: (item: ResultItem) => boolean
   private results?: ResultsDB
-  constructor(private state: IState = {}) {
-    this.elements = new Set()
-    this.statusMap = new Map()
-    this.disposables = new CompositeDisposable()
-
-    this.currentResult = 0
-    this.progress = []
-    this.itemFilter = () => true
-
+  constructor(private state: IState = {fileFilter: false, activeTab: 'error'}) {
     etch.initialize(this)
 
+    for (const tab of ['error', 'warning', 'lint']) {
+      this.createTab(tab, {})
+    }
+
     this.disposables.add(atom.workspace.onDidChangeActivePaneItem(() => {
-      if (this.refs.checkboxUriFilter.getState()) { this.updateItems() }
+      if (this.state.fileFilter) this.updateItems()
     }))
     setImmediate(async () => {
       await this.show()
@@ -68,30 +63,36 @@ export class OutputPanel {
     }
 
     this.disposables.add(this.results.onDidUpdate(didUpdate))
+    this.update()
   }
 
   public render() {
-    const outputItems =
-      this.results
-      ? <OutputPanelItems model={this.results} filter={this.itemFilter} ref="items" />
-      : null // tslint:disable-line: no-null-keyword
+    if (!this.results) {
+      return <ide-haskell-panel/>
+    }
     return (
       <ide-haskell-panel>
         <ide-haskell-panel-heading>
-          <StatusIcon ref="status" statusMap={this.statusMap} />
-          <OutputPanelButtons ref="buttons" onChange={this.updateItems} />
+          <StatusIcon statusMap={this.statusMap} />
+          <OutputPanelButtons
+            buttons={Array.from(this.tabs.values())}
+            activeBtn={this.state.activeTab}
+          />
           <OutputPanelCheckbox
-            ref="checkboxUriFilter"
             class="ide-haskell-checkbox--uri-filter"
-            initialState={this.state.fileFilter}
-            onSwitched={this.updateItems}
+            state={this.state.fileFilter || false}
+            onSwitched={this.switchFileFilter}
             enabledHint="Show current file messages"
             disabledHint="Show all project messages"
           />
           {Array.from(this.elements.values())}
           <ProgressBar progress={this.progress} />
         </ide-haskell-panel-heading>
-        {outputItems}
+        <OutputPanelItems
+          model={this.results}
+          filter={this.itemFilter || (() => true)}
+          ref="items"
+        />
       </ide-haskell-panel>
     )
   }
@@ -100,7 +101,7 @@ export class OutputPanel {
     return etch.update(this)
   }
 
-  public async destroy() {
+  public destroy() {
     this.hide()
   }
 
@@ -112,9 +113,9 @@ export class OutputPanel {
   public async toggle() {
     const pane = atom.workspace.paneContainerForItem(this)
     if (!pane || isDock(pane) && !pane.isVisible()) {
-      this.show()
+      return this.show()
     } else {
-      this.hide()
+      return this.hide()
     }
   }
 
@@ -124,7 +125,7 @@ export class OutputPanel {
     if (pane && isDock(pane)) { pane.show() }
   }
 
-  public async hide() {
+  public hide() {
     const pane = atom.workspace.paneContainerForItem(this)
     if (pane && isDock(pane)) { atom.workspace.hide(this) }
   }
@@ -163,50 +164,49 @@ export class OutputPanel {
     })
   }
 
-  public updateItems = () => {
+  public async updateItems() {
     const activeTab = this.getActiveTab()
     let currentUri: string | undefined
+    if (this.state.fileFilter) {
+      const ed = atom.workspace.getActiveTextEditor()
+      currentUri = ed && ed.getPath()
+    }
+    let scroll: boolean = false
     if (activeTab) {
-      let filterUri: string | undefined
-      const filterSeverity = activeTab
-      const ato = this.refs.buttons.options(activeTab)
-      if (this.refs.checkboxUriFilter.getState()) {
-        const ed = atom.workspace.getActiveTextEditor()
-        currentUri = ed && ed.getPath()
-        if (currentUri && ato && ato.uriFilter) {
-          filterUri = currentUri
-        }
+      const ato = this.tabs.get(activeTab)
+      if (currentUri && ato && ato.uriFilter) {
+        this.itemFilter = ({ uri, severity }) => (severity === activeTab) && (uri === currentUri)
+      } else {
+        this.itemFilter = ({ severity }) => severity === activeTab
       }
-      this.itemFilter = ({ uri, severity }) => (severity === filterSeverity) && (!filterUri || uri === filterUri)
-      if (ato && ato.autoScroll && this.refs.items && this.refs.items.atEnd()) {
-        this.refs.items.scrollToEnd()
-      }
+      scroll = (ato && ato.autoScroll && this.refs.items && this.refs.items.atEnd()) || false
     }
 
-    this.refs.buttons.buttonNames().forEach((btn) => {
+    for (const [btn, ato] of this.tabs.entries()) {
       const f: { severity: string, uri?: string } = { severity: btn }
-      const ato = this.refs.buttons.options(btn)
       if (currentUri && ato && ato.uriFilter) { f.uri = currentUri }
-      this.refs.buttons.setCount(
-        btn,
+      ato.count =
         this.results
         ? Array.from(this.results.filter(
             ({ uri, severity }) => (severity === f.severity) && (!f.uri || uri === f.uri),
           )).length
-        : 0,
-      )
-    })
-    this.update()
+        : 0
+    }
+    await this.update()
+    if (scroll && this.refs.items) this.refs.items.scrollToEnd()
   }
 
   public activateTab(tab: string) {
-    this.refs.buttons.setActive(tab)
+    this.state.activeTab = tab
+    this.updateItems()
   }
 
   public activateFirstNonEmptyTab(severities: UPI.TSeverity[]) {
     const sevs: UPI.TSeverity[] = severities
     for (const i of sevs) {
-      const count = this.refs.buttons.getCount(i)
+      const tab = this.tabs.get(i)
+      if (!tab) continue
+      const count = tab.count
       if (count && count > 0) {
         this.activateTab(i)
         break
@@ -220,20 +220,29 @@ export class OutputPanel {
   }
 
   public getActiveTab() {
-    return this.refs.buttons.getActive()
+    return this.state.activeTab
   }
 
-  public createTab(name: string, opts: UPI.ISeverityTabDefinition) {
-    if (!this.refs.buttons.buttonNames().includes(name)) {
-      this.refs.buttons.createButton(name, opts)
+  public createTab(
+    name: string,
+    { uriFilter = true, autoScroll = false }: UPI.ISeverityTabDefinition,
+  ) {
+    if (!Array.from(this.tabs.keys()).includes(name)) {
+      this.tabs.set(name, {
+        name,
+        count: 0,
+        onClick: () => this.activateTab(name),
+        uriFilter,
+        autoScroll,
+      })
       this.state.activeTab && this.activateTab(this.state.activeTab)
     }
+    this.update()
   }
 
   public serialize(): IState & {deserializer: 'ide-haskell/OutputPanel'} {
     return {
-      activeTab: this.getActiveTab(),
-      fileFilter: this.refs.checkboxUriFilter.getState(),
+      ...this.state,
       deserializer: 'ide-haskell/OutputPanel',
     }
   }
@@ -274,5 +283,10 @@ export class OutputPanel {
     if (this.currentResult < 0) { this.currentResult = rs.length - 1 }
 
     this.showItem(rs[this.currentResult])
+  }
+
+  private switchFileFilter = () => {
+    this.state.fileFilter = !this.state.fileFilter
+    this.updateItems()
   }
 }
