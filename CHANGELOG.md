@@ -1,3 +1,8 @@
+## 2.1.0
+* Serialize panel position
+* Don't hide panel if it's not in dock
+* Remove extraneous commas from setting descriptions
+
 ## 2.0.5
 * Await package activation before trying to get configParams
 * Enforce code style
