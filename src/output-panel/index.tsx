@@ -182,17 +182,14 @@ export class OutputPanel {
       scroll = (ato && ato.autoScroll && this.refs.items && this.refs.items.atEnd()) || false
     }
 
-    for (const [btn, ato] of this.tabs.entries()) {
-      const f: { severity: string, uri?: string } = { severity: btn }
-      if (currentUri && ato && ato.uriFilter) { f.uri = currentUri }
-      ato.count =
-        this.results
-        ? Array.from(this.results.filter(
-            ({ uri, severity }) => (severity === f.severity) && (!f.uri || uri === f.uri),
-          )).length
-        : 0
+    if (this.results) {
+      for (const [btn, ato] of this.tabs.entries()) {
+        ato.count = Array.from(this.results.filter(({ severity }) => (severity === btn))).length
+      }
     }
+
     await this.update()
+
     if (scroll && this.refs.items) this.refs.items.scrollToEnd()
   }
 
