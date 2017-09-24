@@ -1,3 +1,8 @@
+## 2.1.1
+* Rework outputPanel, defer initialization until package is active (fixes problems introduced in 2.1.0 by panel deserialization, which happens before package activation)
+* Avoid bind(this)
+* Search all panes on item position click
+
 ## 2.1.0
 * Serialize panel position
 * Don't hide panel if it's not in dock
