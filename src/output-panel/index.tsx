@@ -113,7 +113,8 @@ export class OutputPanel {
   }
 
   public async hide() {
-    atom.workspace.hide(this)
+    const pane = atom.workspace.paneContainerForItem(this)
+    if (pane && isDock(pane)) { atom.workspace.hide(this) }
   }
 
   public getTitle() {
