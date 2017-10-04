@@ -38,7 +38,7 @@ export const config = {
       'text*tex*latex*haskell': {
         type: 'boolean',
         default: false,
-        title: 'Literal Haskell',
+        title: 'Literate Haskell',
         order: 15,
       },
       'source*hsig': {
