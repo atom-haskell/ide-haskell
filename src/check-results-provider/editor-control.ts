@@ -41,7 +41,14 @@ export class CREditorControl implements IEditorController {
   }
 
   public static supportsGrammar(grammar: string): boolean {
-    return grammar.includes('haskell') || grammar.includes('cabal')
+    return [
+      'source.c2hs',
+      // 'source.cabal',
+      'source.hsc2hs',
+      'source.haskell',
+      'text.tex.latex.haskell',
+      'source.hsig',
+    ].includes(grammar)
   }
 
   public destroy() {
