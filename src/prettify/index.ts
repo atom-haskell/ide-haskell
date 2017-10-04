@@ -3,14 +3,10 @@ import { getRootDir } from 'atom-haskell-utils'
 import { format as cabalFormat } from './util-cabal-format'
 import { format as filterFormat } from './util-stylish-haskell'
 
-export async function prettifyFile(editor: TextEditor, format: 'haskell' | 'cabal' = 'haskell') {
+export async function prettifyFile(editor: TextEditor) {
   const [firstCursor, ...cursors] = editor.getCursors().map((cursor) => cursor.getBufferPosition())
-  const modMap = {
-    haskell: filterFormat,
-    cabal: cabalFormat,
-  }
-  if (!modMap[format]) { throw new Error(`Unknown format ${format}`) }
-  const prettify = modMap[format]
+  const format = editor.getGrammar().scopeName
+  const prettify = format === 'source.cabal' ? cabalFormat : filterFormat
   const workDir = (await getRootDir(editor.getBuffer())).getPath()
   try {
     const { stdout, stderr } = await prettify(editor.getText(), workDir)

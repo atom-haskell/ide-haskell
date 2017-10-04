@@ -3,6 +3,7 @@ import {
 } from 'atom'
 import { PluginManager } from '../plugin-manager'
 import { prettifyFile } from './index'
+import { config } from '../config'
 
 export class PrettifyEditorController {
   private disposables = new CompositeDisposable()
@@ -15,7 +16,14 @@ export class PrettifyEditorController {
   }
 
   public static supportsGrammar (grammar: string): boolean {
-    return grammar.includes('haskell') || grammar.includes('cabal')
+    return [
+      'source.c2hs',
+      'source.cabal', // NOTE: special case
+      'source.hsc2hs',
+      'source.haskell',
+      'text.tex.latex.haskell',
+      'source.hsig',
+    ].includes(grammar)
   }
 
   public destroy () {
@@ -23,16 +31,15 @@ export class PrettifyEditorController {
   }
 
   private prettify = async () => {
-    if (atom.config.get('ide-haskell.onSavePrettify')) {
+    if (atom.config.get('ide-haskell.onSavePrettify', {scope: this.editor.getRootScopeDescriptor()})) {
       if (this.isPretty) { return }
       this.isPretty = true
+      const format = this.editor.getGrammar().scopeName.replace(/\./g, '*')
+      const enabled: {[K in keyof typeof config.onSavePrettifyFormats.properties]: boolean}
+        = atom.config.get('ide-haskell.onSavePrettifyFormats', {scope: this.editor.getRootScopeDescriptor()})
+      if (! enabled[format]) { return }
       try {
-        const scope = this.editor.getGrammar().scopeName
-        if (scope.includes('haskell')) {
-          await prettifyFile(this.editor, 'haskell')
-        } else if (scope.includes('cabal')) {
-          await prettifyFile(this.editor, 'cabal')
-        }
+        await prettifyFile(this.editor)
         await this.editor.getBuffer().save()
       } finally {
         this.isPretty = false

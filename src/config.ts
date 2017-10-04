@@ -2,8 +2,52 @@ export const config = {
   onSavePrettify: {
     type: 'boolean',
     default: false,
-    description: 'Run file through stylish-haskell before save',
+    description: 'Run file through prettifier before save',
     order: 20,
+  },
+  onSavePrettifyFormats: {
+    type: 'object',
+    title: 'Formats to prettify on save',
+    order: 21,
+    properties: {
+      'source*c2hs': {
+        type: 'boolean',
+        default: false,
+        title: 'C2HS',
+        order: 40,
+      },
+      'source*cabal': {
+        type: 'boolean',
+        default: false,
+        title: 'Cabal files',
+        description: 'Unlike others, will use `cabal format`',
+        order: 20,
+      },
+      'source*hsc2hs': {
+        type: 'boolean',
+        default: false,
+        title: 'HSC2HS',
+        order: 50,
+      },
+      'source*haskell': {
+        type: 'boolean',
+        default: true,
+        title: 'Haskell',
+        order: 10,
+      },
+      'text*tex*latex*haskell': {
+        type: 'boolean',
+        default: false,
+        title: 'Literal Haskell',
+        order: 15,
+      },
+      'source*hsig': {
+        type: 'boolean',
+        default: false,
+        title: 'Module signatures (hsig)',
+        order: 30,
+      },
+    },
   },
   switchTabOnCheck: {
     type: 'boolean',
