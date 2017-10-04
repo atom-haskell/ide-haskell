@@ -8,6 +8,7 @@ import { TooltipRegistry } from './tooltip-registry'
 import { CheckResultsProvider } from './check-results-provider'
 import { StatusBarView } from './status-bar'
 import { PrettifyEditorController } from './prettify'
+import { EditorMarkControl } from './editor-mark-control'
 
 export {IParamState, IOutputViewState}
 
@@ -61,6 +62,7 @@ export class PluginManager {
     this.disposables.add(
       this.addEditorController(EditorControl),
       this.addEditorController(PrettifyEditorController),
+      this.addEditorController(EditorMarkControl),
     )
     if (atom.config.get('ide-haskell.messageDisplayFrontend') === 'builtin') {
       this.checkResultsProvider = new CheckResultsProvider(this)

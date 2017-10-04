@@ -65,11 +65,6 @@ export function activate(state: IState) {
         }
       },
     }),
-    atom.commands.add('atom-text-editor[data-grammar~="cabal"]', {
-      'ide-haskell:prettify-file': ({ currentTarget }: IEventDesc) => {
-        prettifyFile(currentTarget.getModel(), 'cabal')
-      },
-    }),
   )
 
   menu = new CompositeDisposable()
