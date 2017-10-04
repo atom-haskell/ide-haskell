@@ -1,3 +1,11 @@
+## 2.2.0
+* Dispatch appropriate settings on editor's root scope (refer to [ide-haskell documentation](https://atom-haskell.github.io/core-packages/ide-haskell/#advanced-configuration-since-v2-2-0) for more intformation)
+* Individual prettify-on-save toggles **possibly breaking defaults if using prettify-on-save, check ide-haskell settings** (#216)
+* Move ide-haskell class mark to separate controller; Mark all full language-haskell grammars with ide-haskell class
+* More strict grammar match for editorControl
+* Enable checkResults gutter on all full language-haskell grammars
+* Simplify tab item count (now ignores URI filter)
+
 ## 2.1.1
 * Rework outputPanel, defer initialization until package is active (fixes problems introduced in 2.1.0 by panel deserialization, which happens before package activation)
 * Avoid bind(this)
