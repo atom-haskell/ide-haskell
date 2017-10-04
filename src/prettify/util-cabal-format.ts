@@ -30,11 +30,11 @@ async function read(path: string): Promise<string> {
   })
 }
 
-export async function format(text: string, workingDirectory: string) {
+export async function format(text: string, workingDirectory: string, scope: AtomTypes.ScopeDescriptor) {
   const { path, fd } = await makeTempFile(text)
   try {
     const { stderr } = await runFilter({
-      command: atom.config.get('ide-haskell.cabalPath'),
+      command: atom.config.get('ide-haskell.cabalPath', {scope}),
       args: ['format', path],
       cwd: workingDirectory,
     })

@@ -124,7 +124,10 @@ export class EditorControl implements IEditorController {
     }
     this.exprTypeTimeout = setTimeout(
       () => bufferPt && this.shouldShowTooltip(bufferPt, UPI.TEventRangeType.mouse),
-      atom.config.get('ide-haskell.expressionTypeInterval'),
+      atom.config.get(
+        'ide-haskell.expressionTypeInterval',
+        {scope: this.editor.getRootScopeDescriptor()},
+      ),
     )
   }
 
@@ -146,14 +149,20 @@ export class EditorControl implements IEditorController {
         clearTimeout(this.exprTypeTimeout)
       }
       this.tooltipRegistry.showTooltip(this.editor, UPI.TEventRangeType.keyboard)
-      if (atom.config.get('ide-haskell.onCursorMove') === 'Hide Tooltip') {
+      if (atom.config.get(
+        'ide-haskell.onCursorMove',
+        {scope: this.editor.getRootScopeDescriptor()},
+      ) === 'Hide Tooltip') {
         this.tooltips.hide(UPI.TEventRangeType.mouse, undefined, { persistent: false })
         this.tooltips.hide(UPI.TEventRangeType.context, undefined, { persistent: false })
       }
     } else {
       this.selTimeout = setTimeout(
         () => this.shouldShowTooltip(newBufferRange.start, UPI.TEventRangeType.selection),
-        atom.config.get('ide-haskell.expressionTypeInterval'),
+        atom.config.get(
+          'ide-haskell.expressionTypeInterval',
+          {scope: this.editor.getRootScopeDescriptor()},
+        ),
       )
     }
   }

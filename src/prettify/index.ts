@@ -9,7 +9,7 @@ export async function prettifyFile(editor: TextEditor) {
   const prettify = format === 'source.cabal' ? cabalFormat : filterFormat
   const workDir = (await getRootDir(editor.getBuffer())).getPath()
   try {
-    const { stdout, stderr } = await prettify(editor.getText(), workDir)
+    const { stdout, stderr } = await prettify(editor.getText(), workDir, editor.getRootScopeDescriptor())
     editor.setText(stdout)
     if (editor.getLastCursor()) {
       editor.getLastCursor().setBufferPosition(firstCursor, { autoscroll: false })
