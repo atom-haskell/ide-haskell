@@ -55,7 +55,14 @@ export class EditorControl implements IEditorController {
   }
 
   public static supportsGrammar(grammar: string): boolean {
-    return !!grammar.match(/haskell$/)
+    return [
+      // 'source.c2hs',
+      // 'source.cabal',
+      // 'source.hsc2hs',
+      'source.haskell',
+      'text.tex.latex.haskell',
+      // 'source.hsig',
+    ].includes(grammar)
   }
 
   public destroy() {
