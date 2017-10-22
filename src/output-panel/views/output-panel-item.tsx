@@ -3,6 +3,7 @@ import { ResultItem } from '../../results-db'
 
 export interface IProps extends JSX.Props { model: ResultItem }
 
+// tslint:disable-next-line:no-unsafe-any
 export class OutputPanelItem implements JSX.ElementClass {
   // tslint:disable-next-line: no-uninitialized
   public element: HTMLElement
@@ -12,11 +13,13 @@ export class OutputPanelItem implements JSX.ElementClass {
 
   public render() {
     return (
+      // tslint:disable:no-unsafe-any
       <ide-haskell-panel-item key={this.props.model.hash()}>
         {this.renderPosition()}
         {this.renderContext()}
         <ide-haskell-item-description innerHTML={this.props.model.message.toHtml()} />
       </ide-haskell-panel-item>
+      // tslint:enable:no-unsafe-any
     )
   }
 
@@ -31,6 +34,7 @@ export class OutputPanelItem implements JSX.ElementClass {
 
   public clickPosition = () => {
     if (this.props.model.uri) {
+      // tslint:disable-next-line:no-floating-promises
       atom.workspace.open(
         this.props.model.uri,
         {
@@ -49,9 +53,11 @@ export class OutputPanelItem implements JSX.ElementClass {
           ? `${this.props.model.uri}: ${this.props.model.position.row + 1}, ${this.props.model.position.column + 1}`
           : this.props.model.uri
       return (
+        // tslint:disable:no-unsafe-any
         <ide-haskell-item-position on={{ click: this.clickPosition }}>
           {positionText}
         </ide-haskell-item-position>
+        // tslint:enable:no-unsafe-any
       )
     } else {
       return ''
@@ -61,6 +67,7 @@ export class OutputPanelItem implements JSX.ElementClass {
   private renderContext() {
     if (this.props.model.context) {
       return (
+        // tslint:disable-next-line:no-unsafe-any
         <ide-haskell-item-context>{this.props.model.context}</ide-haskell-item-context>
       )
     } else {

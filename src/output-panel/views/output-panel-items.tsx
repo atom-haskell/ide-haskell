@@ -7,6 +7,7 @@ export interface IProps extends JSX.Props {
   filter: (item: ResultItem) => boolean
 }
 
+// tslint:disable-next-line:no-unsafe-any
 export class OutputPanelItems implements JSX.ElementClass {
   // tslint:disable-next-line:no-uninitialized
   private element: HTMLElement
@@ -18,9 +19,11 @@ export class OutputPanelItems implements JSX.ElementClass {
 
   public render() {
     return (
+      // tslint:disable:no-unsafe-any
       <ide-haskell-panel-items class="native-key-bindings" tabIndex="-1">
         {this.renderItems()}
       </ide-haskell-panel-items>
+      // tslint:enable:no-unsafe-any
     )
   }
 

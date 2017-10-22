@@ -1,7 +1,9 @@
 import highlight = require('atom-highlight')
 import * as cast from './cast'
 
-export class MessageObject implements UPI.IMessageObject {
+type IMessageObject = UPI.IMessageObject
+
+export class MessageObject implements IMessageObject {
   private htmlCache?: string
   constructor(private msg: UPI.TMessage) {
     // noop

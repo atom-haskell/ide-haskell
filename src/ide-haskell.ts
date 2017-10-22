@@ -21,6 +21,7 @@ export function activate(state: IState) {
 
   atom.views.getView(atom.workspace).classList.add('ide-haskell')
 
+  // tslint:disable-next-line:no-unsafe-any
   require('etch').setScheduler(atom.views)
 
   upiProvided = false
@@ -52,6 +53,7 @@ export function activate(state: IState) {
     }),
     atom.commands.add('atom-text-editor.ide-haskell', {
       'ide-haskell:prettify-file': ({ currentTarget }: IEventDesc) => {
+        // tslint:disable-next-line:no-floating-promises
         prettifyFile(currentTarget.getModel())
       },
     }),

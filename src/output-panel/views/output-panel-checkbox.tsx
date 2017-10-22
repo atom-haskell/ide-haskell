@@ -9,6 +9,7 @@ export interface IProps extends JSX.Props {
   disabledHint: string
 }
 
+// tslint:disable-next-line:no-unsafe-any
 export class OutputPanelCheckbox implements JSX.ElementClass {
   private disposables: CompositeDisposable
   // tslint:disable-next-line:no-uninitialized
@@ -23,6 +24,7 @@ export class OutputPanelCheckbox implements JSX.ElementClass {
 
   public render() {
     return (
+      // tslint:disable-next-line:no-unsafe-any
       <ide-haskell-checkbox
         class={`${this.props.class}${this.props.state ? ' enabled' : ''}`}
         on={{ click: this.props.onSwitched }}

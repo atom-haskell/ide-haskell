@@ -4,7 +4,9 @@ export interface IProps extends JSX.Props {
   progress: number[]
 }
 
-export class ProgressBar implements JSX.ElementClass {
+type ElementClass = JSX.ElementClass
+
+export class ProgressBar implements ElementClass {
   constructor(public props: IProps) {
     etch.initialize(this)
   }
@@ -12,9 +14,11 @@ export class ProgressBar implements JSX.ElementClass {
   public render() {
     const progress = this.aveProgress()
     return (
+      // tslint:disable:no-unsafe-any
       <ide-haskell-progress-bar className={isNaN(progress) ? '' : 'visible'}>
         <span style={{ width: `${progress * 100}%`, height: `${progress * 100}%` }} />
       </ide-haskell-progress-bar>
+      // tslint:enable:no-unsafe-any
     )
   }
 

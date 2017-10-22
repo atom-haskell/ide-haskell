@@ -7,6 +7,7 @@ export interface IProps extends JSX.Props {
   onClick: () => void
 }
 
+// tslint:disable-next-line:no-unsafe-any
 export class Button implements JSX.ElementClass {
   constructor(public props: IProps) {
     etch.initialize(this)
@@ -14,6 +15,7 @@ export class Button implements JSX.ElementClass {
 
   public render() {
     return (
+      // tslint:disable-next-line:no-unsafe-any
       <ide-haskell-button
         class={this.props.active ? 'active' : ''}
         dataset={{ caption: this.props.name, count: this.props.count }}

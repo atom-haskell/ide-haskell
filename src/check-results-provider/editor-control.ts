@@ -82,6 +82,7 @@ export class CREditorControl implements IEditorController {
         if (bufferPt) {
           const msg = this.getMessageAt(bufferPt, 'gutter')
           if (msg.length > 0) {
+            // tslint:disable-next-line:no-floating-promises
             this.tooltipRegistry.showTooltip(
               this.editor, UPI.TEventRangeType.mouse,
               {

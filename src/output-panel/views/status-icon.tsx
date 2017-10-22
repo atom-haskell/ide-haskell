@@ -3,7 +3,9 @@ import { CompositeDisposable } from 'atom'
 
 export interface IProps extends JSX.Props { statusMap: Map<string, UPI.IStatus> }
 
-export class StatusIcon implements JSX.ElementClass {
+type ElementClass = JSX.ElementClass
+
+export class StatusIcon implements ElementClass {
   private disposables: CompositeDisposable
   // tslint:disable-next-line:no-uninitialized
   private element: HTMLElement
@@ -31,6 +33,7 @@ export class StatusIcon implements JSX.ElementClass {
 
   public render() {
     return (
+      // tslint:disable-next-line:no-unsafe-any
       <ide-haskell-status-icon dataset={{ status: this.calcCurrentStatus() }} />
     )
   }

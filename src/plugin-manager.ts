@@ -76,6 +76,7 @@ export class PluginManager {
     this.disposables.dispose()
     this.checkResultsProvider && this.checkResultsProvider.destroy()
 
+    // tslint:disable-next-line:no-floating-promises
     this.outputPanel.reallyDestroy()
     this.configParamManager.destroy()
     this.removeStatusBar()

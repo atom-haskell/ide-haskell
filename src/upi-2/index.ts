@@ -6,7 +6,9 @@ import * as UPI2 from './def'
 export * from './def'
 import * as UPI3 from '../upi-3'
 
-export class UPIInstance implements UPI2.IUPIInstance {
+type IUPIInstance = UPI2.IUPIInstance
+
+export class UPIInstance implements IUPIInstance {
   private messages: UPI2.IResultItem[] = []
   private upi3: UPI.IUPIInstance
   private disposables = new CompositeDisposable()
@@ -44,6 +46,7 @@ export class UPIInstance implements UPI2.IUPIInstance {
   public setMessageTypes(types: { [severity: string]: UPI2.ISeverityTabDefinition }) {
     for (const type of Object.keys(types)) {
       const opts = types[type]
+      // tslint:disable-next-line:no-floating-promises
       this.upi3.addMessageTab(type, opts)
     }
   }
@@ -57,6 +60,7 @@ export class UPIInstance implements UPI2.IUPIInstance {
   }
 
   public showTooltip(opts: UPI2.IShowTooltipParams) {
+    // tslint:disable-next-line:no-floating-promises
     this.upi3.showTooltip(opts)
   }
 

@@ -29,14 +29,14 @@ export function instance(
     setMessages (messages: UPI.IResultItem[]) {
       messageProvider.setMessages(messages)
     },
-    addMessageTab (name: string, opts: UPI.ISeverityTabDefinition) {
-      pluginManager.outputPanel.createTab(name, opts)
+    async addMessageTab (name: string, opts: UPI.ISeverityTabDefinition) {
+      return pluginManager.outputPanel.createTab(name, opts)
     },
-    showTooltip ({editor, eventType, detail, tooltip}: UPI.IShowTooltipParams) {
+    async showTooltip ({editor, eventType, detail, tooltip}: UPI.IShowTooltipParams) {
       if (!eventType) {
         eventType = getEventType(detail)
       }
-      pluginManager.tooltipRegistry.showTooltip(
+      return pluginManager.tooltipRegistry.showTooltip(
         editor, eventType, {pluginName, tooltip},
       )
     },

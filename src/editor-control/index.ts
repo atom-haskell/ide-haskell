@@ -106,6 +106,7 @@ export class EditorControl implements IEditorController {
       pos.isEqual(this.editor.bufferRangeForBufferRow(pos.row).end)) {
       this.tooltips.hide(type)
     } else {
+      // tslint:disable-next-line:no-floating-promises
       this.tooltipRegistry.showTooltip(this.editor, type)
     }
   }
@@ -148,6 +149,7 @@ export class EditorControl implements IEditorController {
       if (this.exprTypeTimeout) {
         clearTimeout(this.exprTypeTimeout)
       }
+      // tslint:disable-next-line:no-floating-promises
       this.tooltipRegistry.showTooltip(this.editor, UPI.TEventRangeType.keyboard)
       if (atom.config.get(
         'ide-haskell.onCursorMove',
