@@ -1,7 +1,6 @@
 import { CompositeDisposable, TextEditor } from 'atom'
-import { MAIN_MENU_LABEL, getEventType } from '../utils'
+import { MAIN_MENU_LABEL, getEventType, isTEventRangeType } from '../utils'
 import { PluginManager } from '../plugin-manager'
-import { isTEventRangeType } from '../utils'
 import { consume } from './'
 
 export function instance(
@@ -17,7 +16,7 @@ export function instance(
     setMenu (name: string, menu: AtomTypes.AtomMenuItem[]) {
       const menuDisp = atom.menu.add([{
         label: MAIN_MENU_LABEL,
-        submenu: [ {label: name, submenu: menu} ],
+        submenu: [ { label: name, submenu: menu } ],
       },
       ])
       disposables.add(menuDisp)
@@ -32,12 +31,12 @@ export function instance(
     async addMessageTab (name: string, opts: UPI.ISeverityTabDefinition) {
       return pluginManager.outputPanel.createTab(name, opts)
     },
-    async showTooltip ({editor, eventType, detail, tooltip}: UPI.IShowTooltipParams) {
+    async showTooltip ({ editor, eventType, detail, tooltip }: UPI.IShowTooltipParams) {
       if (!eventType) {
         eventType = getEventType(detail)
       }
       return pluginManager.tooltipRegistry.showTooltip(
-        editor, eventType, {pluginName, tooltip},
+        editor, eventType, { pluginName, tooltip },
       )
     },
     addPanelControl<T> (def: UPI.TControlDefinition<T>) {

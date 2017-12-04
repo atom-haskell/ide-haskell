@@ -10,7 +10,7 @@ import { StatusBarView } from './status-bar'
 import { PrettifyEditorController } from './prettify'
 import { EditorMarkControl } from './editor-mark-control'
 
-export {IParamState, IOutputViewState}
+export { IParamState, IOutputViewState }
 
 export type TEventType = 'keyboard' | 'context' | 'mouse' | 'selection'
 
@@ -207,7 +207,7 @@ export class PluginManager {
           }),
           editor.onDidDestroy(() => disposable.dispose()),
         )
-        map.set(editor, {controller, disposable})
+        map.set(editor, { controller, disposable })
       } else if (rec && !factory.supportsGrammar(grammar.scopeName)) {
         rec.disposable.dispose()
       }

@@ -1,6 +1,6 @@
 import { Point, TextEditor } from 'atom'
 
-export {MessageObject} from './message-object'
+export { MessageObject } from './message-object'
 export * from './cast'
 export * from './element-listener'
 

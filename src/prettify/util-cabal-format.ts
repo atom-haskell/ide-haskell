@@ -34,7 +34,7 @@ export async function format(text: string, workingDirectory: string, scope: Atom
   const { path, fd } = await makeTempFile(text)
   try {
     const { stderr } = await runFilter({
-      command: atom.config.get('ide-haskell.cabalPath', {scope}),
+      command: atom.config.get('ide-haskell.cabalPath', { scope }),
       args: ['format', path],
       cwd: workingDirectory,
     })
@@ -47,6 +47,6 @@ export async function format(text: string, workingDirectory: string, scope: Atom
 
 function handleErr(err: NodeJS.ErrnoException): void {
   if (err) {
-    atom.notifications.addError(err.name, {detail: err.message, dismissable: true})
+    atom.notifications.addError(err.name, { detail: err.message, dismissable: true })
   }
 }

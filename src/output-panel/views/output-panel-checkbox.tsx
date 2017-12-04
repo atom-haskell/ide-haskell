@@ -33,7 +33,7 @@ export class OutputPanelCheckbox implements JSX.ElementClass {
   }
 
   public async update(props: Partial<IProps> = {}) {
-    this.props = {...this.props, ...props}
+    this.props = { ...this.props, ...props }
     return etch.update(this)
   }
 

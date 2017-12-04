@@ -32,7 +32,7 @@ export class CheckResultsProvider {
       )
     if (!controller) { return undefined }
     if (type === UPI.TEventRangeType.keyboard
-      && atom.config.get('ide-haskell.onCursorMove', {scope: editor.getRootScopeDescriptor()}) !== 'Show Tooltip') {
+      && atom.config.get('ide-haskell.onCursorMove', { scope: editor.getRootScopeDescriptor() }) !== 'Show Tooltip') {
       return undefined
     }
     const msg = controller.getMessageAt(crange.start, type)

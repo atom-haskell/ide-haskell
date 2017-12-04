@@ -2,12 +2,10 @@ import {
   Range, TextEditor, Point, CompositeDisposable,
   Disposable,
 } from 'atom'
-
 import {
   bufferPositionFromMouseEvent,
+  listen,
 } from '../utils'
-
-import { listen } from '../utils'
 import { TooltipManager } from './tooltip-manager'
 import { TooltipRegistry } from '../tooltip-registry'
 import { PluginManager, IEditorController } from '../plugin-manager'
@@ -127,7 +125,7 @@ export class EditorControl implements IEditorController {
       () => bufferPt && this.shouldShowTooltip(bufferPt, UPI.TEventRangeType.mouse),
       atom.config.get(
         'ide-haskell.expressionTypeInterval',
-        {scope: this.editor.getRootScopeDescriptor()},
+        { scope: this.editor.getRootScopeDescriptor() },
       ),
     )
   }
@@ -153,7 +151,7 @@ export class EditorControl implements IEditorController {
       this.tooltipRegistry.showTooltip(this.editor, UPI.TEventRangeType.keyboard)
       if (atom.config.get(
         'ide-haskell.onCursorMove',
-        {scope: this.editor.getRootScopeDescriptor()},
+        { scope: this.editor.getRootScopeDescriptor() },
       ) === 'Hide Tooltip') {
         this.tooltips.hide(UPI.TEventRangeType.mouse, undefined, { persistent: false })
         this.tooltips.hide(UPI.TEventRangeType.context, undefined, { persistent: false })
@@ -163,7 +161,7 @@ export class EditorControl implements IEditorController {
         () => this.shouldShowTooltip(newBufferRange.start, UPI.TEventRangeType.selection),
         atom.config.get(
           'ide-haskell.expressionTypeInterval',
-          {scope: this.editor.getRootScopeDescriptor()},
+          { scope: this.editor.getRootScopeDescriptor() },
         ),
       )
     }

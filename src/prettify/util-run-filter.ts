@@ -7,14 +7,14 @@ export interface IRunFilterArgs {
   stdin?: string
 }
 
-export async function runFilter({command, args, cwd, stdin}: IRunFilterArgs) {
+export async function runFilter({ command, args, cwd, stdin }: IRunFilterArgs) {
   return new Promise<{stdout: string, stderr: string}>((resolve, reject) => {
     try {
-      const proc = CP.execFile(command, args, {cwd}, (error, stdout, stderr) => {
+      const proc = CP.execFile(command, args, { cwd }, (error, stdout, stderr) => {
         if (!error) {
-          resolve({stdout, stderr})
+          resolve({ stdout, stderr })
         } else {
-          reject({error, stderr})
+          reject({ error, stderr })
         }
       })
       if (stdin) {

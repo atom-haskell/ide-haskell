@@ -29,7 +29,7 @@ export class OutputPanel {
   private tabs: Map<string, IBtnDesc> = new Map()
   private itemFilter?: (item: ResultItem) => boolean
   private results?: ResultsDB
-  constructor(private state: IState = {fileFilter: false, activeTab: 'error'}) {
+  constructor(private state: IState = { fileFilter: false, activeTab: 'error' }) {
     etch.initialize(this)
 
     for (const tab of ['error', 'warning', 'lint']) {

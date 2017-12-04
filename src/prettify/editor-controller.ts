@@ -33,14 +33,14 @@ export class PrettifyEditorController {
   }
 
   private prettify = async () => {
-    if (atom.config.get('ide-haskell.onSavePrettify', {scope: this.editor.getRootScopeDescriptor()})) {
+    if (atom.config.get('ide-haskell.onSavePrettify', { scope: this.editor.getRootScopeDescriptor() })) {
       if (this.isPretty) { return }
       this.isPretty = true
       try {
         const format = this.editor.getGrammar().scopeName.replace(/\./g, '*')
         const enabled: SavePrettifyFormats = atom.config.get(
           'ide-haskell.onSavePrettifyFormats',
-          {scope: this.editor.getRootScopeDescriptor()},
+          { scope: this.editor.getRootScopeDescriptor() },
         )
         if (! enabled[format]) { return }
         await prettifyFile(this.editor)
