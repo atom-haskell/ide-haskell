@@ -40,7 +40,13 @@ export async function format(text: string, workingDirectory: string, scope: Atom
     })
     return { stdout: await read(path), stderr }
   } finally {
-    FS.close(fd)
-    FS.unlink(path)
+    FS.close(fd, handleErr)
+    FS.unlink(path, handleErr)
+  }
+}
+
+function handleErr(err: NodeJS.ErrnoException): void {
+  if (err) {
+    atom.notifications.addError(err.name, {detail: err.message, dismissable: true})
   }
 }
