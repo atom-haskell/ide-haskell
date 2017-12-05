@@ -32,5 +32,6 @@
         "src/**/*.js",
         "typings/*.d.ts"
     ],
-    "compileOnSave": true
+    "compileOnSave": true,
+    "experimentalDecorators": true
 }

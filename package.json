@@ -46,6 +46,7 @@
     "atom-highlight": "^0.3.0",
     "atom-select-list": "^0.7.0",
     "etch": "^0.12.7",
+    "lodash-decorators": "^4.5.0",
     "temp": "^0.8.3"
   },
   "devDependencies": {

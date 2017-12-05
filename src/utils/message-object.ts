@@ -1,9 +1,9 @@
 import highlight = require('atom-highlight')
 import * as cast from './cast'
 import * as UPI from 'atom-haskell-upi'
+import { Memoize } from 'lodash-decorators'
 
 export class MessageObject implements UPI.IMessageObject {
-  private htmlCache?: string
   constructor(private msg: UPI.TMessage) {
     // noop
   }
@@ -16,21 +16,21 @@ export class MessageObject implements UPI.IMessageObject {
     }
   }
 
-  public toHtml(linter: boolean = false): string {
-    if (this.htmlCache !== undefined) { return this.htmlCache }
+  @Memoize()
+  public toHtml(): string {
     if (cast.isTextMessage(this.msg) && this.msg.highlighter) {
       const html = highlight({
         fileContents: this.msg.text,
         scopeName: this.msg.highlighter,
-        nbsp: linter,
-        lineDivs: linter,
+        nbsp: false,
+        lineDivs: false,
       })
-      if (html) { return this.htmlCache = html }
+      if (html) return html
 
       this.msg.highlighter = undefined
       return this.toHtml()
     } else if (cast.isHTMLMessage(this.msg)) {
-      return this.htmlCache = this.msg.html
+      return this.msg.html
     } else {
       let text: string
       if (cast.isTextMessage(this.msg)) {
@@ -40,7 +40,24 @@ export class MessageObject implements UPI.IMessageObject {
       }
       const div = document.createElement('div')
       div.innerText = text
-      return this.htmlCache = div.innerHTML
+      return div.innerHTML
+    }
+  }
+
+  @Memoize()
+  public toPlain(): string {
+    if (cast.isHTMLMessage(this.msg)) {
+      const div = document.createElement('div')
+      div.innerHTML = this.msg.html
+      return div.innerText
+    } else {
+      let text: string
+      if (cast.isTextMessage(this.msg)) {
+        text = this.msg.text
+      } else {
+        text = this.msg
+      }
+      return text
     }
   }
 

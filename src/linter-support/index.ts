@@ -35,7 +35,7 @@ export class LinterSupport {
         }
         yield {
           severity,
-          excerpt: result.message.toHtml(true),
+          excerpt: result.message.toPlain(),
           location: {
             file: result.uri,
             position: new Range(result.position, result.position.translate([0, 1])),
