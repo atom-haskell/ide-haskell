@@ -61,8 +61,6 @@ export class OutputPanel {
       if (atom.config.get('ide-haskell.autoHideOutput') && (!this.results || this.results.isEmpty(severities))) {
         this.hide()
       } else if (atom.config.get('ide-haskell.switchTabOnCheck')) {
-        // tslint:disable-next-line:no-floating-promises
-        this.show()
         this.activateFirstNonEmptyTab(severities)
       }
     }
@@ -211,12 +209,13 @@ export class OutputPanel {
   }
 
   public activateFirstNonEmptyTab(severities: UPI.TSeverity[]) {
-    const sevs: UPI.TSeverity[] = severities
-    for (const i of sevs) {
+    for (const i of severities) {
       const tab = this.tabs.get(i)
       if (!tab) continue
       const count = tab.count
       if (count && count > 0) {
+        // tslint:disable-next-line:no-floating-promises
+        this.show()
         this.activateTab(i)
         break
       }
