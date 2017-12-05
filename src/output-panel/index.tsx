@@ -235,6 +235,10 @@ export class OutputPanel {
     name: string,
     { uriFilter = true, autoScroll = false }: UPI.ISeverityTabDefinition,
   ) {
+    if (['error', 'warning', 'lint'].includes(name)
+      && atom.config.get('ide-haskell.messageDisplayFrontend') !== 'builtin') {
+      return
+    }
     if (!Array.from(this.tabs.keys()).includes(name)) {
       this.tabs.set(name, {
         name,
