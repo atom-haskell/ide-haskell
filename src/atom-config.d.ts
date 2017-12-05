@@ -1,5 +1,6 @@
-declare namespace AtomTypes {
-  interface ConfigInterface {
+export {}
+declare module 'atom' {
+  interface ConfigValues {
     // unscoped
     'ide-haskell.messageDisplayFrontend': 'builtin' | 'linter'
     'ide-haskell.startupMessageIdeBackend': boolean
