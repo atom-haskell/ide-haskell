@@ -6,7 +6,7 @@ import * as UPI from 'atom-haskell-upi'
 export class ResultItem {
   public readonly uri?: string
   public readonly position?: Point
-  public readonly message: UPI.IMessageObject
+  public readonly message: MessageObject
   public readonly severity: UPI.TSeverity
   public readonly context?: string
   private _isValid: boolean

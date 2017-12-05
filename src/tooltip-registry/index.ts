@@ -1,4 +1,4 @@
-import { TextEditor, Disposable, Range } from 'atom'
+import { TextEditor, Disposable, Range, RangeCompatible } from 'atom'
 import { MessageObject } from '../utils'
 import { PluginManager } from '../plugin-manager'
 import * as UPI from 'atom-haskell-upi'
@@ -6,12 +6,22 @@ import TEventRangeType = UPI.TEventRangeType
 
 export interface TTooltipHandlerSpec {
   priority: number
-  handler: UPI.TTooltipHandler
+  handler: TTooltipHandlerExt
   eventTypes?: TEventRangeType[]
 }
+export type TTooltipHandlerExt =
+    (editor: TextEditor, crange: Range, type: TEventRangeType) => ITooltipDataExt
+  | undefined
+  | Promise<ITooltipDataExt | undefined>
 export interface ITooltipSpec {
   pluginName: string
-  tooltip: UPI.TTooltipFunction | UPI.ITooltipData
+  tooltip: TTooltipFunctionExt | ITooltipDataExt
+}
+export type TTooltipFunctionExt = (crange: Range) => ITooltipDataExt | Promise<ITooltipDataExt>
+export interface ITooltipDataExt {
+  range: RangeCompatible
+  text: UPI.TSingleOrArray<UPI.TMessage | MessageObject>
+  persistent?: boolean
 }
 
 export class TooltipRegistry {
@@ -50,7 +60,7 @@ export class TooltipRegistry {
     const controller = this.pluginManager.controller(editor)
     if (!controller) { return }
     let pluginName: string
-    let tooltipData: UPI.TTooltipFunction | UPI.ITooltipData
+    let tooltipData: TTooltipFunctionExt | ITooltipDataExt
     if (spec && typeof spec.tooltip !== 'function') {
       tooltipData = spec.tooltip
       pluginName = spec.pluginName

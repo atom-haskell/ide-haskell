@@ -1,11 +1,11 @@
 import * as etch from 'etch'
-import * as UPI from 'atom-haskell-upi'
+import { MessageObject } from '../utils'
 
 export class TooltipMessage {
   private message: JSX.Element[]
   // tslint:disable-next-line:no-uninitialized
   private element: HTMLElement
-  constructor(message: UPI.IMessageObject | UPI.IMessageObject[]) {
+  constructor(message: MessageObject | MessageObject[]) {
     if (Array.isArray(message)) {
       // tslint:disable-next-line:no-unsafe-any
       this.message = message.map((m) => <div key={m} innerHTML={m.toHtml()} />)

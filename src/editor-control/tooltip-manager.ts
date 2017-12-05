@@ -6,6 +6,7 @@ import Range = AtomTypes.Range
 import TextEditor = AtomTypes.TextEditor
 import DisplayMarker = AtomTypes.DisplayMarker
 import TEventRangeType = UPI.TEventRangeType
+import { MessageObject } from '../utils'
 
 export interface IMarkerProperties extends AtomTypes.FindDisplayMarkerOptions {
   persistent: boolean
@@ -28,7 +29,7 @@ export class TooltipManager {
   }
 
   public show(
-    range: Range, text: UPI.IMessageObject | UPI.IMessageObject[],
+    range: Range, text: MessageObject | MessageObject[],
     type: TEventRangeType, source: string, detail: IMarkerProperties,
   ) {
     this.hide(type, source)

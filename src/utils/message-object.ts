@@ -3,13 +3,13 @@ import * as cast from './cast'
 import * as UPI from 'atom-haskell-upi'
 import { Memoize } from 'lodash-decorators'
 
-export class MessageObject implements UPI.IMessageObject {
+export class MessageObject {
   constructor(private msg: UPI.TMessage) {
     // noop
   }
 
-  public static fromObject(message: UPI.TMessage | UPI.IMessageObject): UPI.IMessageObject {
-    if (cast.isIMessageObject(message)) {
+  public static fromObject(message: UPI.TMessage | MessageObject): MessageObject {
+    if (message instanceof MessageObject) {
       return message
     } else {
       return new MessageObject(message)

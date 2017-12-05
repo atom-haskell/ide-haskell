@@ -7,7 +7,7 @@ import TEventRangeType = UPI.TEventRangeType
 
 import { ResultsDB, ResultItem } from '../results-db'
 import { PluginManager, IEditorController } from '../plugin-manager'
-import { listen, bufferPositionFromMouseEvent } from '../utils'
+import { listen, bufferPositionFromMouseEvent, MessageObject } from '../utils'
 import { TooltipRegistry } from '../tooltip-registry'
 
 export class CREditorControl implements IEditorController {
@@ -69,7 +69,7 @@ export class CREditorControl implements IEditorController {
 
   public getMessageAt(pos: Point, type: TEventRangeType | 'gutter') {
     const markers = this.find(pos, type)
-    const result: UPI.IMessageObject[] = []
+    const result: MessageObject[] = []
     for (const marker of markers) {
       if (!marker.isValid()) { continue }
       const res = this.markerProps.get(marker)

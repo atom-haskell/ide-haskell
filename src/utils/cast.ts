@@ -34,7 +34,3 @@ export function isTextMessage(msg: UPI.TMessage): msg is UPI.IMessageText {
 export function isHTMLMessage(msg: UPI.TMessage): msg is UPI.IMessageHTML {
   return !!(msg && (msg as UPI.IMessageHTML).html)
 }
-
-export function isIMessageObject(msg: UPI.TMessage | UPI.IMessageObject): msg is UPI.IMessageObject {
-  return !!(msg && (msg as UPI.IMessageObject).toHtml && (msg as UPI.IMessageObject).raw)
-}

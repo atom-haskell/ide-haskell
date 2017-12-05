@@ -6,6 +6,7 @@ import TEventRangeType = UPI.TEventRangeType
 
 import { PluginManager } from '../plugin-manager'
 import { CREditorControl } from './editor-control'
+import { ITooltipDataExt } from '../tooltip-registry'
 
 export class CheckResultsProvider {
   private disposables: CompositeDisposable
@@ -27,7 +28,7 @@ export class CheckResultsProvider {
     this.disposables.dispose()
   }
 
-  private tooltipProvider = (editor: TextEditor, crange: Range, type: TEventRangeType): UPI.ITooltipData | undefined => {
+  private tooltipProvider = (editor: TextEditor, crange: Range, type: TEventRangeType): ITooltipDataExt | undefined => {
     const controller
       = this.pluginManager.controllerType<CREditorControl, typeof CREditorControl>(
         CREditorControl, editor,
