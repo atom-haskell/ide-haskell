@@ -2,11 +2,12 @@ import { TextEditor, Disposable, Range } from 'atom'
 import { MessageObject } from '../utils'
 import { PluginManager } from '../plugin-manager'
 import * as UPI from 'atom-haskell-upi'
+import TEventRangeType = UPI.TEventRangeType
 
 export interface TTooltipHandlerSpec {
   priority: number
   handler: UPI.TTooltipHandler
-  eventTypes?: UPI.TEventRangeType[]
+  eventTypes?: TEventRangeType[]
 }
 export interface ITooltipSpec {
   pluginName: string
@@ -14,7 +15,7 @@ export interface ITooltipSpec {
 }
 
 export class TooltipRegistry {
-  private providers: Array<TTooltipHandlerSpec & { pluginName: string, eventTypes: UPI.TEventRangeType[] }>
+  private providers: Array<TTooltipHandlerSpec & { pluginName: string, eventTypes: TEventRangeType[] }>
   constructor(private pluginManager: PluginManager) {
     this.providers = []
   }
@@ -25,7 +26,7 @@ export class TooltipRegistry {
 
   public register(pluginName: string, provider: TTooltipHandlerSpec): Disposable {
     const idx = this.providers.findIndex(({ priority }) => priority < provider.priority)
-    const defaultEvT: UPI.TEventRangeType[] = [UPI.TEventRangeType.selection, UPI.TEventRangeType.mouse]
+    const defaultEvT: TEventRangeType[] = [TEventRangeType.selection, TEventRangeType.mouse]
     const record = {
       pluginName,
       eventTypes: provider.eventTypes || defaultEvT,
@@ -44,7 +45,7 @@ export class TooltipRegistry {
   }
 
   public async showTooltip(
-    editor: TextEditor, type: UPI.TEventRangeType, spec?: ITooltipSpec,
+    editor: TextEditor, type: TEventRangeType, spec?: ITooltipSpec,
   ) {
     const controller = this.pluginManager.controller(editor)
     if (!controller) { return }
@@ -93,13 +94,13 @@ export class TooltipRegistry {
     )
   }
 
-  public hideTooltip(editor: TextEditor, type?: UPI.TEventRangeType, source?: string) {
+  public hideTooltip(editor: TextEditor, type?: TEventRangeType, source?: string) {
     const controller = this.pluginManager.controller(editor)
     if (!controller) { return }
     controller.tooltips.hide(type, source)
   }
 
-  private async defaultTooltipFunction(editor: TextEditor, type: UPI.TEventRangeType, crange: Range) {
+  private async defaultTooltipFunction(editor: TextEditor, type: TEventRangeType, crange: Range) {
     for (const { pluginName, handler, eventTypes } of this.providers) {
       if (!eventTypes.includes(type)) { continue }
       try {

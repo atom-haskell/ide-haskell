@@ -5,6 +5,7 @@ import * as UPI from 'atom-haskell-upi'
 import * as AtomTypes from 'atom'
 import CompositeDisposable = AtomTypes.CompositeDisposable
 import TextEditor = AtomTypes.TextEditor
+import TEventRangeType = UPI.TEventRangeType
 
 export function instance(
   pluginManager: PluginManager, options: UPI.IRegistrationOptions,
@@ -57,8 +58,8 @@ export function instance(
     async setConfigParam<T> (name: string, value?: T): Promise<T | undefined> {
       return pluginManager.configParamManager.set<T>(pluginName, name, value)
     },
-    getEventRange (editor: TextEditor, typeOrDetail: UPI.TEventRangeType | Object) {
-      let type: UPI.TEventRangeType
+    getEventRange (editor: TextEditor, typeOrDetail: TEventRangeType | Object) {
+      let type: TEventRangeType
       if (isTEventRangeType(typeOrDetail)) {
         type = typeOrDetail
       } else {

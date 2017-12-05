@@ -10,8 +10,9 @@ import { TooltipManager } from './tooltip-manager'
 import { TooltipRegistry } from '../tooltip-registry'
 import { PluginManager, IEditorController } from '../plugin-manager'
 import * as UPI from 'atom-haskell-upi'
+import TEventRangeType = UPI.TEventRangeType
 
-export type TEventRangeResult = { crange: Range, pos: Point, eventType: UPI.TEventRangeType } | undefined
+export type TEventRangeResult = { crange: Range, pos: Point, eventType: TEventRangeType } | undefined
 
 export class EditorControl implements IEditorController {
   public tooltips: TooltipManager
@@ -43,8 +44,8 @@ export class EditorControl implements IEditorController {
       buffer.onDidSave(() => pluginManager.didSaveBuffer(buffer)),
       this.editor.onDidStopChanging(() => pluginManager.didStopChanging(buffer)),
       // tooltip tracking (mouse and selection)
-      this.editorElement.onDidChangeScrollLeft(() => this.tooltips.hide(UPI.TEventRangeType.mouse)),
-      this.editorElement.onDidChangeScrollTop(() => this.tooltips.hide(UPI.TEventRangeType.mouse)),
+      this.editorElement.onDidChangeScrollLeft(() => this.tooltips.hide(TEventRangeType.mouse)),
+      this.editorElement.onDidChangeScrollTop(() => this.tooltips.hide(TEventRangeType.mouse)),
       listen(this.editorElement, 'mousemove', '.scroll-view', this.trackMouseBufferPosition),
       listen(this.editorElement, 'mouseout', '.scroll-view', this.stopTrackingMouseBufferPosition),
       this.editor.onDidChangeSelectionRange(this.trackSelection),
@@ -74,7 +75,7 @@ export class EditorControl implements IEditorController {
   }
 
   public getEventRange(
-    eventType: UPI.TEventRangeType,
+    eventType: TEventRangeType,
   ): TEventRangeResult {
     let crange: Range
     let pos: Point
@@ -99,7 +100,7 @@ export class EditorControl implements IEditorController {
     return { crange, pos, eventType }
   }
 
-  private shouldShowTooltip(pos: Point, type: UPI.TEventRangeType) {
+  private shouldShowTooltip(pos: Point, type: TEventRangeType) {
     if ((pos.row < 0) ||
       (pos.row >= this.editor.getLineCount()) ||
       pos.isEqual(this.editor.getBuffer().rangeForRow(pos.row, false).end)) {
@@ -123,7 +124,7 @@ export class EditorControl implements IEditorController {
       clearTimeout(this.exprTypeTimeout)
     }
     this.exprTypeTimeout = window.setTimeout(
-      () => bufferPt && this.shouldShowTooltip(bufferPt, UPI.TEventRangeType.mouse),
+      () => bufferPt && this.shouldShowTooltip(bufferPt, TEventRangeType.mouse),
       atom.config.get(
         'ide-haskell.expressionTypeInterval',
         { scope: this.editor.getRootScopeDescriptor() },
@@ -144,22 +145,22 @@ export class EditorControl implements IEditorController {
       clearTimeout(this.selTimeout)
     }
     if (newBufferRange.isEmpty()) {
-      this.tooltips.hide(UPI.TEventRangeType.selection)
+      this.tooltips.hide(TEventRangeType.selection)
       if (this.exprTypeTimeout) {
         clearTimeout(this.exprTypeTimeout)
       }
       // tslint:disable-next-line:no-floating-promises
-      this.tooltipRegistry.showTooltip(this.editor, UPI.TEventRangeType.keyboard)
+      this.tooltipRegistry.showTooltip(this.editor, TEventRangeType.keyboard)
       if (atom.config.get(
         'ide-haskell.onCursorMove',
         { scope: this.editor.getRootScopeDescriptor() },
       ) === 'Hide Tooltip') {
-        this.tooltips.hide(UPI.TEventRangeType.mouse, undefined, { persistent: false })
-        this.tooltips.hide(UPI.TEventRangeType.context, undefined, { persistent: false })
+        this.tooltips.hide(TEventRangeType.mouse, undefined, { persistent: false })
+        this.tooltips.hide(TEventRangeType.context, undefined, { persistent: false })
       }
     } else {
       this.selTimeout = window.setTimeout(
-        () => this.shouldShowTooltip(newBufferRange.start, UPI.TEventRangeType.selection),
+        () => this.shouldShowTooltip(newBufferRange.start, TEventRangeType.selection),
         atom.config.get(
           'ide-haskell.expressionTypeInterval',
           { scope: this.editor.getRootScopeDescriptor() },

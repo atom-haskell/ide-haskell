@@ -1,13 +1,14 @@
 import { TextEditor, DisplayMarkerLayer } from 'atom'
 import { eventRangeTypeVals } from '../utils'
 import * as UPI from 'atom-haskell-upi'
+import TEventRangeType = UPI.TEventRangeType
 
-export type IMarkerGroup = Array<{ type: UPI.TEventRangeType, source?: string }>
+export type IMarkerGroup = Array<{ type: TEventRangeType, source?: string }>
 
 export type TTableCell = Map<string | undefined, DisplayMarkerLayer>
 
 export type TTable = {
-  [K in UPI.TEventRangeType]: TTableCell
+  [K in TEventRangeType]: TTableCell
 }
 
 export class EventTable {
@@ -38,7 +39,7 @@ export class EventTable {
     }
   }
 
-  public get(type: UPI.TEventRangeType, source?: string) {
+  public get(type: TEventRangeType, source?: string) {
     const tbl = this.table[type] as Map<string | undefined, DisplayMarkerLayer>
     let res = tbl.get(source)
     if (!res) {

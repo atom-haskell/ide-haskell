@@ -2,6 +2,7 @@ import {
   Range, TextEditor, CompositeDisposable,
 } from 'atom'
 import * as UPI from 'atom-haskell-upi'
+import TEventRangeType = UPI.TEventRangeType
 
 import { PluginManager } from '../plugin-manager'
 import { CREditorControl } from './editor-control'
@@ -16,7 +17,7 @@ export class CheckResultsProvider {
       tooltipRegistry.register('builtin:check-results', {
         priority: 1000,
         handler: this.tooltipProvider,
-        eventTypes: [UPI.TEventRangeType.mouse, UPI.TEventRangeType.keyboard],
+        eventTypes: [TEventRangeType.mouse, TEventRangeType.keyboard],
       }),
       pluginManager.addEditorController(CREditorControl),
     )
@@ -26,13 +27,13 @@ export class CheckResultsProvider {
     this.disposables.dispose()
   }
 
-  private tooltipProvider = (editor: TextEditor, crange: Range, type: UPI.TEventRangeType): UPI.ITooltipData | undefined => {
+  private tooltipProvider = (editor: TextEditor, crange: Range, type: TEventRangeType): UPI.ITooltipData | undefined => {
     const controller
       = this.pluginManager.controllerType<CREditorControl, typeof CREditorControl>(
         CREditorControl, editor,
       )
     if (!controller) { return undefined }
-    if (type === UPI.TEventRangeType.keyboard
+    if (type === TEventRangeType.keyboard
       && atom.config.get('ide-haskell.onCursorMove', { scope: editor.getRootScopeDescriptor() }) !== 'Show Tooltip') {
       return undefined
     }

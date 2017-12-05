@@ -39,7 +39,7 @@ export function consume(pluginManager: PluginManager, options: UPI.IRegistration
   if (tooltip) {
     let handler: UPI.TTooltipHandler
     let priority: number | undefined
-    let eventTypes: UPI.TEventRangeType[] | undefined
+    let eventTypes: TEventRangeType[] | undefined
     if (typeof tooltip === 'function') {
       handler = tooltip
     } else {

@@ -3,6 +3,7 @@ import {
   DisplayMarkerLayer,
 } from 'atom'
 import * as UPI from 'atom-haskell-upi'
+import TEventRangeType = UPI.TEventRangeType
 
 import { ResultsDB, ResultItem } from '../results-db'
 import { PluginManager, IEditorController } from '../plugin-manager'
@@ -66,7 +67,7 @@ export class CREditorControl implements IEditorController {
     }
   }
 
-  public getMessageAt(pos: Point, type: UPI.TEventRangeType | 'gutter') {
+  public getMessageAt(pos: Point, type: TEventRangeType | 'gutter') {
     const markers = this.find(pos, type)
     const result: UPI.IMessageObject[] = []
     for (const marker of markers) {
@@ -88,7 +89,7 @@ export class CREditorControl implements IEditorController {
           if (msg.length > 0) {
             // tslint:disable-next-line:no-floating-promises
             this.tooltipRegistry.showTooltip(
-              this.editor, UPI.TEventRangeType.mouse,
+              this.editor, TEventRangeType.mouse,
               {
                 pluginName: 'builtin:check-results',
                 tooltip: {
@@ -103,7 +104,7 @@ export class CREditorControl implements IEditorController {
     ))
     this.disposables.add(listen(
       this.gutterElement, 'mouseout', '.decoration', (e) =>
-        this.tooltipRegistry.hideTooltip(this.editor, UPI.TEventRangeType.mouse, 'builtin:check-results'),
+        this.tooltipRegistry.hideTooltip(this.editor, TEventRangeType.mouse, 'builtin:check-results'),
     ))
   }
 
@@ -144,7 +145,7 @@ export class CREditorControl implements IEditorController {
     this.editor.decorateMarker(m, { type: 'highlight', ...cls })
   }
 
-  private find(pos: Point, type: UPI.TEventRangeType | 'gutter') {
+  private find(pos: Point, type: TEventRangeType | 'gutter') {
     switch (type) {
       case 'gutter':
         return this.markers.findMarkers({ startBufferRow: pos.row })
