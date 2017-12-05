@@ -34,8 +34,10 @@ async function read(path: string): Promise<string> {
 export async function format(text: string, workingDirectory: string, scope: AtomTypes.ScopeDescriptor) {
   const { path, fd } = await makeTempFile(text)
   try {
+    const command = atom.config.get('ide-haskell.cabalPath', { scope })
+    if (command === undefined) throw new Error("Couldn't get 'ide-haskell.cabalPath'")
     const { stderr } = await runFilter({
-      command: atom.config.get('ide-haskell.cabalPath', { scope }),
+      command,
       args: ['format', path],
       cwd: workingDirectory,
     })

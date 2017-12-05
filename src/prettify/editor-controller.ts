@@ -38,10 +38,11 @@ export class PrettifyEditorController {
       this.isPretty = true
       try {
         const format = this.editor.getGrammar().scopeName.replace(/\./g, '*')
-        const enabled: SavePrettifyFormats = atom.config.get(
+        const enabled: SavePrettifyFormats | undefined = atom.config.get(
           'ide-haskell.onSavePrettifyFormats',
           { scope: this.editor.getRootScopeDescriptor() },
         )
+        if (! enabled) throw new Error("Couldn't get 'ide-haskell.onSavePrettifyFormats'")
         if (! enabled[format]) { return }
         await prettifyFile(this.editor)
         await this.editor.getBuffer().save()
