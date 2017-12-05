@@ -20,8 +20,6 @@
     "ide-haskell-upi": {
       "description": "Universal pluggable interface",
       "versions": {
-        "0.0.1": "provideUpi",
-        "0.2.0": "provideUpi",
         "0.3.0": "provideUpi3"
       }
     }
@@ -29,7 +27,7 @@
   "consumedServices": {
     "linter-indie": {
       "versions": {
-        "1.0.0": "consumeLinter"
+        "2.0.0": "consumeLinter"
       }
     },
     "status-bar": {
@@ -51,12 +49,13 @@
     "temp": "^0.8.3"
   },
   "devDependencies": {
+    "@types/atom": "^1.22.2",
     "@types/node": "^8.0.54",
     "@types/temp": "^0.8.31",
     "atom-haskell-tslint-rules": "^0.1.1",
     "tslint": "^5.8.0",
     "typedoc": "^0.9.0",
-    "typescript": "^2.6.2"
+    "typescript": "~2.6.0"
   },
   "deserializers": {
     "ide-haskell/OutputPanel": "deserializeOutputPanel"

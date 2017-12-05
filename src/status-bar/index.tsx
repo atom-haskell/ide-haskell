@@ -1,6 +1,7 @@
 import * as etch from 'etch'
 import { OutputPanel } from '../output-panel'
 import { StatusIcon } from '../output-panel/views/status-icon'
+import * as UPI from 'atom-haskell-upi'
 
 export class StatusBarView {
   // tslint:disable-next-line:no-uninitialized

@@ -1,5 +1,6 @@
 import { CompositeDisposable, Disposable } from 'atom'
 import * as etch from 'etch'
+import * as UPI from 'atom-haskell-upi'
 
 import { ConfigParamStore } from './param-store'
 
@@ -108,11 +109,12 @@ export class ParamControl<T> implements UPI.IElementObject<IProps<T>> {
     }
   }
 
-  private tooltipTitle = () => {
+  private tooltipTitle = (): string => {
+    const displayName = this.props.spec.displayName || 'Undefined name'
     if (this.hiddenValue) {
-      return `${this.props.spec.displayName}: ${this.props.spec.displayTemplate(this.value)}`
+      return `${displayName}: ${this.props.spec.displayTemplate(this.value)}`
     } else {
-      return this.props.spec.displayName
+      return displayName
     }
   }
 }

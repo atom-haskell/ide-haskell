@@ -1,5 +1,6 @@
 import { selectListView } from './param-select-view'
-import { TEmitter, Emitter, CompositeDisposable, Disposable } from 'atom'
+import { Emitter, CompositeDisposable, Disposable } from 'atom'
+import * as UPI from 'atom-haskell-upi'
 
 interface IParamData<T> {
   spec: UPI.IParamSpec<T>
@@ -15,7 +16,7 @@ export type TUpdatedCallback<T> = (arg: TUpdatedCallbackArg<T>) => void
 
 export class ConfigParamStore {
   private disposables: CompositeDisposable
-  private emitter: TEmitter<{
+  private emitter: Emitter<{
     'did-update': { pluginName: string, paramName: string, value: any }
   }>
   private saved: IState

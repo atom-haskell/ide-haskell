@@ -1,4 +1,5 @@
 import { runFilter } from './util-run-filter'
+import * as AtomTypes from 'atom'
 
 export async function format(text: string, workingDirectory: string, scope: AtomTypes.ScopeDescriptor) {
   return runFilter({

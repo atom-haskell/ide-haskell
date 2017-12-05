@@ -9,6 +9,7 @@ import {
 import { TooltipManager } from './tooltip-manager'
 import { TooltipRegistry } from '../tooltip-registry'
 import { PluginManager, IEditorController } from '../plugin-manager'
+import * as UPI from 'atom-haskell-upi'
 
 export type TEventRangeResult = { crange: Range, pos: Point, eventType: UPI.TEventRangeType } | undefined
 
@@ -101,7 +102,7 @@ export class EditorControl implements IEditorController {
   private shouldShowTooltip(pos: Point, type: UPI.TEventRangeType) {
     if ((pos.row < 0) ||
       (pos.row >= this.editor.getLineCount()) ||
-      pos.isEqual(this.editor.bufferRangeForBufferRow(pos.row).end)) {
+      pos.isEqual(this.editor.getBuffer().rangeForRow(pos.row, false).end)) {
       this.tooltips.hide(type)
     } else {
       // tslint:disable-next-line:no-floating-promises

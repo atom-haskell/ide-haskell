@@ -1,5 +1,6 @@
 import { ResultItem } from './result-item'
 import { ResultsDB } from './'
+import * as UPI from 'atom-haskell-upi'
 
 export type TMessageProviderFunction = (pushMessages: (messages: UPI.IResultItem[]) => void) => void
 

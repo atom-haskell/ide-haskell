@@ -1,7 +1,10 @@
-import { CompositeDisposable, TextEditor } from 'atom'
 import { MAIN_MENU_LABEL, getEventType, isTEventRangeType } from '../utils'
 import { PluginManager } from '../plugin-manager'
 import { consume } from './'
+import * as UPI from 'atom-haskell-upi'
+import * as AtomTypes from 'atom'
+import CompositeDisposable = AtomTypes.CompositeDisposable
+import TextEditor = AtomTypes.TextEditor
 
 export function instance(
   pluginManager: PluginManager, options: UPI.IRegistrationOptions,
@@ -13,7 +16,7 @@ export function instance(
   disposables.add(consume(pluginManager, options))
 
   return {
-    setMenu (name: string, menu: AtomTypes.AtomMenuItem[]) {
+    setMenu (name: string, menu: ReadonlyArray<AtomTypes.MenuOptions>) {
       const menuDisp = atom.menu.add([{
         label: MAIN_MENU_LABEL,
         submenu: [ { label: name, submenu: menu } ],

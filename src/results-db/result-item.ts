@@ -1,6 +1,7 @@
 import { createHash } from 'crypto'
 import { Point } from 'atom'
 import { MessageObject } from '../utils'
+import * as UPI from 'atom-haskell-upi'
 
 export class ResultItem {
   public readonly uri?: string
@@ -14,7 +15,7 @@ export class ResultItem {
     this.uri = uri
     this.message = MessageObject.fromObject(message)
     this.severity = severity
-    this.position = position && Point.fromObject(position)
+    this.position = position && Point.fromObject(position as any) // TODO: fix this as soon as new typings available
     this.context = context
     this._isValid = true
   }

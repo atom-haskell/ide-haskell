@@ -7,6 +7,7 @@ import { OutputPanelItems } from './views/output-panel-items'
 import { ResultsDB, ResultItem } from '../results-db'
 import { StatusIcon } from './views/status-icon'
 import { isDock, isSimpleControlDef } from '../utils'
+import * as UPI from 'atom-haskell-upi'
 const $ = etch.dom
 
 export interface IState {

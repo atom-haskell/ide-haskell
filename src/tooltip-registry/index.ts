@@ -1,6 +1,7 @@
 import { TextEditor, Disposable, Range } from 'atom'
 import { MessageObject } from '../utils'
 import { PluginManager } from '../plugin-manager'
+import * as UPI from 'atom-haskell-upi'
 
 export interface TTooltipHandlerSpec {
   priority: number

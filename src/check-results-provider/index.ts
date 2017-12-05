@@ -1,6 +1,7 @@
 import {
   Range, TextEditor, CompositeDisposable,
 } from 'atom'
+import * as UPI from 'atom-haskell-upi'
 
 import { PluginManager } from '../plugin-manager'
 import { CREditorControl } from './editor-control'

@@ -1,5 +1,6 @@
 import * as etch from 'etch'
 import { CompositeDisposable } from 'atom'
+import * as UPI from 'atom-haskell-upi'
 
 export interface IProps extends JSX.Props { statusMap: Map<string, UPI.IStatus> }
 

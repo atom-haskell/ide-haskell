@@ -1,3 +1,5 @@
+import * as AtomTypes from 'atom'
+import * as UPI from 'atom-haskell-upi'
 import Dock = AtomTypes.Dock
 import WorkspaceCenter = AtomTypes.WorkspaceCenter
 

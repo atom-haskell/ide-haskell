@@ -1,4 +1,5 @@
 import * as etch from 'etch'
+import * as UPI from 'atom-haskell-upi'
 
 export class TooltipMessage {
   private message: JSX.Element[]

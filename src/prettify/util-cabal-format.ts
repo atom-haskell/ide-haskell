@@ -1,6 +1,7 @@
 import * as FS from 'fs'
 import * as Temp from 'temp'
 import { runFilter } from './util-run-filter'
+import * as AtomTypes from 'atom'
 
 async function makeTempFile(contents: string) {
   return new Promise<Temp.OpenFile>((resolve, reject) => {

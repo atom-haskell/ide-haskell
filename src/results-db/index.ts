@@ -1,7 +1,8 @@
 import { ResultItem } from './result-item'
-import { CompositeDisposable, TEmitter, Emitter } from 'atom'
+import { CompositeDisposable, Emitter } from 'atom'
 import { Provider, TMessageProviderFunction } from './provider'
 import { notUndefined } from '../utils'
+import * as UPI from 'atom-haskell-upi'
 
 export { TMessageProviderFunction, ResultItem }
 
@@ -11,7 +12,7 @@ export class ResultsDB {
   private currentId: number
   private messages: Map<string, ResultItem>
   private disposables: CompositeDisposable
-  private emitter: TEmitter<{
+  private emitter: Emitter<{
     'did-update': UPI.TSeverity[]
   }>
   constructor() {

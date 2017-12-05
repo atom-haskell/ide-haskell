@@ -1,5 +1,6 @@
 import { TextEditor, DisplayMarkerLayer } from 'atom'
 import { eventRangeTypeVals } from '../utils'
+import * as UPI from 'atom-haskell-upi'
 
 export type IMarkerGroup = Array<{ type: UPI.TEventRangeType, source?: string }>
 

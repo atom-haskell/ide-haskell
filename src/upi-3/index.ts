@@ -2,6 +2,7 @@ import { CompositeDisposable, Disposable } from 'atom'
 
 import { PluginManager } from '../plugin-manager'
 import { MAIN_MENU_LABEL } from '../utils'
+import * as UPI from 'atom-haskell-upi'
 
 export * from './instance'
 

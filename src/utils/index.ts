@@ -1,4 +1,5 @@
 import { Point, TextEditor } from 'atom'
+import * as UPI from 'atom-haskell-upi'
 
 export { MessageObject } from './message-object'
 export * from './cast'

@@ -3,6 +3,7 @@ import { ParamControl } from './param-control'
 import { ConfigParamStore, IState as IStoreState } from './param-store'
 
 import { OutputPanel } from '../output-panel'
+import * as UPI from 'atom-haskell-upi'
 
 type IState = IStoreState
 export { IState }

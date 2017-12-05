@@ -1,4 +1,4 @@
-import { CompositeDisposable, TEmitter, Emitter, TextEditor, TextBuffer, Grammar, Disposable } from 'atom'
+import { CompositeDisposable, Emitter, TextEditor, TextBuffer, Grammar, Disposable } from 'atom'
 import { ResultsDB } from './results-db'
 import { OutputPanel, IState as IOutputViewState } from './output-panel'
 import { ConfigParamManager, IState as IParamState } from './config-params'
@@ -9,6 +9,9 @@ import { CheckResultsProvider } from './check-results-provider'
 import { StatusBarView } from './status-bar'
 import { PrettifyEditorController } from './prettify'
 import { EditorMarkControl } from './editor-mark-control'
+import * as UPI from 'atom-haskell-upi'
+import * as Linter from 'atom/linter'
+import * as StatusBar from 'atom/status-bar'
 
 export { IParamState, IOutputViewState }
 
@@ -43,12 +46,12 @@ export class PluginManager {
   private checkResultsProvider?: CheckResultsProvider
   private linterSupport?: LinterSupport
   private disposables = new CompositeDisposable()
-  private emitter: TEmitter<{
+  private emitter: Emitter<{
     'will-save-buffer': TextBuffer
     'did-save-buffer': TextBuffer
     'did-stop-changing': TextBuffer
   }> = new Emitter()
-  private statusBarTile?: StatusBar.StatusBarTile
+  private statusBarTile?: StatusBar.Tile
   private statusBarView?: StatusBarView
   private controllers: TMap = new Map()
   constructor (state: IState, public outputPanel: OutputPanel) {
@@ -117,6 +120,7 @@ export class PluginManager {
   }
 
   public togglePanel () {
+    // tslint:disable-next-line:no-floating-promises
     atom.workspace.toggle(this.outputPanel)
   }
 
@@ -134,7 +138,7 @@ export class PluginManager {
     return rec && rec.controller
   }
 
-  public setLinter (linter: Linter.Indie) {
+  public setLinter (linter: Linter.IndieDelegate) {
     if (atom.config.get('ide-haskell.messageDisplayFrontend') !== 'linter') { return }
     this.linterSupport = new LinterSupport(linter, this.resultsDB)
   }

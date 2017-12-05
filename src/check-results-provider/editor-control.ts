@@ -2,6 +2,7 @@ import {
   Range, TextEditor, Point, CompositeDisposable, Gutter, DisplayMarker,
   DisplayMarkerLayer,
 } from 'atom'
+import * as UPI from 'atom-haskell-upi'
 
 import { ResultsDB, ResultItem } from '../results-db'
 import { PluginManager, IEditorController } from '../plugin-manager'
@@ -9,6 +10,7 @@ import { listen, bufferPositionFromMouseEvent } from '../utils'
 import { TooltipRegistry } from '../tooltip-registry'
 
 export class CREditorControl implements IEditorController {
+  // tslint:disable-next-line:no-uninitialized
   private gutter: Gutter
   private gutterElement: HTMLElement
   private markers: DisplayMarkerLayer
@@ -17,8 +19,10 @@ export class CREditorControl implements IEditorController {
   private tooltipRegistry: TooltipRegistry
   private resultsDB: ResultsDB
   constructor(private editor: TextEditor, pluginManager: PluginManager) {
-    this.gutter = this.editor.gutterWithName('ide-haskell-check-results')
-    if (!this.gutter) {
+    const gutter = this.editor.gutterWithName('ide-haskell-check-results')
+    if (gutter) {
+      this.gutter = gutter
+    } else {
       this.gutter = this.editor.addGutter({
         name: 'ide-haskell-check-results',
         priority: 10,

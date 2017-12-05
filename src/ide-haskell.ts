@@ -1,10 +1,14 @@
-import { IEventDesc, CompositeDisposable, Disposable } from 'atom'
 import { PluginManager, IState } from './plugin-manager'
 import { prettifyFile } from './prettify'
 import { MAIN_MENU_LABEL } from './utils'
-import * as UPI2 from './upi-2'
 import * as UPI3 from './upi-3'
 import * as OutputPanel from './output-panel'
+import * as AtomTypes from 'atom'
+import * as UPI from 'atom-haskell-upi'
+import * as Linter from 'atom/linter'
+import * as StatusBar from 'atom/status-bar'
+import CompositeDisposable = AtomTypes.CompositeDisposable
+import Disposable = AtomTypes.Disposable
 
 let upiProvided = false
 let disposables: CompositeDisposable | undefined
@@ -52,13 +56,13 @@ export function activate(state: IState) {
       'ide-haskell:prev-error': () => { pluginManager && pluginManager.prevError() },
     }),
     atom.commands.add('atom-text-editor.ide-haskell', {
-      'ide-haskell:prettify-file': ({ currentTarget }: IEventDesc) => {
+      'ide-haskell:prettify-file': ({ currentTarget }: AtomTypes.CommandEvent) => {
         // tslint:disable-next-line:no-floating-promises
         prettifyFile(currentTarget.getModel())
       },
     }),
     atom.commands.add('atom-text-editor.ide-haskell--has-tooltips', {
-      'ide-haskell:close-tooltip': ({ currentTarget, abortKeyBinding }: IEventDesc) => {
+      'ide-haskell:close-tooltip': ({ currentTarget, abortKeyBinding }: AtomTypes.CommandEvent) => {
         const controller = pluginManager && pluginManager.controller(currentTarget.getModel())
         if (controller && controller.tooltips.has()) {
           controller.tooltips.hide()
@@ -100,16 +104,6 @@ export function deserializeOutputPanel(state: OutputPanel.IState) {
   return outputPanel
 }
 
-export function provideUpi(): UPI2.IUPIProvided {
-  upiProvided = true
-  return {
-    registerPlugin(disp, pluginName) {
-      if (!pluginManager) { return undefined }
-      return UPI2.instance(pluginManager, disp, pluginName)
-    },
-  }
-}
-
 export function provideUpi3(): UPI.IUPIRegistration {
   upiProvided = true
   return (options: UPI.IRegistrationOptions) => {
@@ -125,9 +119,9 @@ export function consumeUpi3(registration: UPI.IRegistrationOptions): Disposable 
   }
 }
 
-export function consumeLinter(indieRegistry: Linter.IndieRegistry): Disposable | undefined {
+export function consumeLinter(register: (opts: {}) => Linter.IndieDelegate): Disposable | undefined {
   if (!(disposables && pluginManager)) { return undefined }
-  const linter = indieRegistry.register({ name: 'IDE-Haskell' })
+  const linter = register({ name: 'IDE-Haskell' })
   disposables.add(linter)
   pluginManager.setLinter(linter)
   return linter

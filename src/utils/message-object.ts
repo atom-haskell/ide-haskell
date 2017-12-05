@@ -1,9 +1,8 @@
 import highlight = require('atom-highlight')
 import * as cast from './cast'
+import * as UPI from 'atom-haskell-upi'
 
-type IMessageObject = UPI.IMessageObject
-
-export class MessageObject implements IMessageObject {
+export class MessageObject implements UPI.IMessageObject {
   private htmlCache?: string
   constructor(private msg: UPI.TMessage) {
     // noop
