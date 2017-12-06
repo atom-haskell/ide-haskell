@@ -103,7 +103,7 @@ export class CREditorControl implements IEditorController {
       },
     ))
     this.disposables.add(listen(
-      this.gutterElement, 'mouseout', '.decoration', (e) =>
+      this.gutterElement, 'mouseout', '.decoration', () =>
         this.tooltipRegistry.hideTooltip(this.editor, TEventRangeType.mouse, 'builtin:check-results'),
     ))
   }

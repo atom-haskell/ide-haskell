@@ -124,5 +124,6 @@ export class TooltipRegistry {
         continue
       }
     }
+    return undefined
   }
 }

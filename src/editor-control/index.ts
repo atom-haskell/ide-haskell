@@ -132,7 +132,7 @@ export class EditorControl implements IEditorController {
     )
   }
 
-  private stopTrackingMouseBufferPosition = (e: MouseEvent) => {
+  private stopTrackingMouseBufferPosition = () => {
     if (this.exprTypeTimeout) {
       return clearTimeout(this.exprTypeTimeout)
     }

@@ -97,6 +97,7 @@ export function serialize() {
   if (pluginManager) {
     return pluginManager.serialize()
   }
+  return undefined
 }
 
 export function deserializeOutputPanel(state: OutputPanel.IState) {
@@ -117,6 +118,7 @@ export function consumeUpi3(registration: UPI.IRegistrationOptions): Disposable 
   if (pluginManager) {
     return UPI3.consume(pluginManager, registration)
   }
+  return undefined
 }
 
 export function consumeLinter(register: (opts: {}) => Linter.IndieDelegate): Disposable | undefined {

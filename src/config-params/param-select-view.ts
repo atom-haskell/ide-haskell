@@ -38,7 +38,7 @@ export async function selectListView<T>(
   let panel: Panel<SelectListView<T>> | undefined
   let res: T | undefined
   try {
-    res = await new Promise<T | undefined>((resolve, reject) => {
+    res = await new Promise<T | undefined>((resolve) => {
       const select = new SelectListView({
         items: myitems,
         infoMessage: heading,

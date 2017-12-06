@@ -1,10 +1,10 @@
 import { TextEditor } from 'atom'
 
-import { PluginManager, IEditorController } from '../plugin-manager'
+import { IEditorController } from '../plugin-manager'
 
 export class EditorMarkControl implements IEditorController {
   private editorElement: HTMLElement
-  constructor(private editor: TextEditor, pluginManager: PluginManager) {
+  constructor(private editor: TextEditor) {
     this.editorElement = atom.views.getView(this.editor) as any
     this.editorElement.classList.add('ide-haskell')
   }

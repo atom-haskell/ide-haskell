@@ -1,7 +1,6 @@
 import {
   TextEditor, CompositeDisposable,
 } from 'atom'
-import { PluginManager } from '../plugin-manager'
 import { prettifyFile } from './index'
 import { config } from '../config'
 
@@ -10,7 +9,7 @@ type SavePrettifyFormats = {[K in keyof typeof config.onSavePrettifyFormats.prop
 export class PrettifyEditorController {
   private disposables = new CompositeDisposable()
   private isPretty: boolean = false
-  constructor (private editor: TextEditor, pluginManager: PluginManager) {
+  constructor (private editor: TextEditor) {
     const buffer = this.editor.getBuffer()
     this.disposables.add(
       buffer.onWillSave(this.prettify),

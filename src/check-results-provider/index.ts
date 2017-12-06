@@ -42,5 +42,6 @@ export class CheckResultsProvider {
     if (msg.length > 0) {
       return { range: crange, text: msg }
     }
+    return undefined
   }
 }
