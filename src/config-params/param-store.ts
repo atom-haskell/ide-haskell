@@ -16,7 +16,7 @@ export type TUpdatedCallback<T> = (arg: TUpdatedCallbackArg<T>) => void
 
 export class ConfigParamStore {
   private disposables: CompositeDisposable
-  private emitter: Emitter<{
+  private emitter: Emitter<{}, {
     'did-update': { pluginName: string, paramName: string, value: any }
   }>
   private saved: IState

@@ -46,7 +46,7 @@ export class PluginManager {
   private checkResultsProvider?: CheckResultsProvider
   private linterSupport?: LinterSupport
   private disposables = new CompositeDisposable()
-  private emitter: Emitter<{
+  private emitter: Emitter<{}, {
     'will-save-buffer': TextBuffer
     'did-save-buffer': TextBuffer
     'did-stop-changing': TextBuffer

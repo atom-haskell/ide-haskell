@@ -12,7 +12,7 @@ export class ResultsDB {
   private currentId: number
   private messages: Map<string, ResultItem>
   private disposables: CompositeDisposable
-  private emitter: Emitter<{
+  private emitter: Emitter<{}, {
     'did-update': UPI.TSeverity[]
   }>
   constructor() {
