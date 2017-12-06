@@ -26,7 +26,11 @@
         "noFallthroughCasesInSwitch": true,
         "noImplicitReturns": true,
         "noUnusedLocals": true,
-        "noUnusedParameters": true
+        "noUnusedParameters": true,
+        "typeRoots" : [
+          "./typings",
+          "./node_modules/@types"
+        ]
     },
     "exclude": [
         "node_modules"
@@ -34,8 +38,7 @@
     "include": [
         "src/**/*.ts",
         "src/**/*.tsx",
-        "src/**/*.js",
-        "typings/*.d.ts"
+        "src/**/*.js"
     ],
     "compileOnSave": true,
     "experimentalDecorators": true
