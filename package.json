@@ -14,7 +14,7 @@
     "language-haskell:grammar-used"
   ],
   "engines": {
-    "atom": ">=1.19.0 <2.0.0"
+    "atom": ">=1.22.0 <2.0.0"
   },
   "providedServices": {
     "ide-haskell-upi": {
@@ -47,10 +47,11 @@
     "atom-select-list": "^0.7.0",
     "etch": "^0.12.7",
     "lodash-decorators": "^4.5.0",
-    "temp": "^0.8.3"
+    "temp": "^0.8.3",
+    "tslib": "^1.8.0"
   },
   "devDependencies": {
-    "@types/atom": "^1.22.2",
+    "@types/atom": "^1.22.3",
     "@types/node": "^8.0.54",
     "@types/temp": "^0.8.31",
     "atom-haskell-tslint-rules": "^0.1.1",
