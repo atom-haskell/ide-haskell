@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "atom-haskell-utils": "^1.0.1",
-    "atom-highlight": "^0.3.0",
+    "atom-highlight": "^0.4.1",
     "atom-select-list": "^0.7.0",
     "etch": "^0.12.7",
     "lodash-decorators": "^4.5.0",
