@@ -70,9 +70,12 @@ Changelog is available [here][CHANGELOG].
 
 ## License
 
+Copyright © 2014 Alexander Chaika
 Copyright © 2015 Atom-Haskell
 
-Contributors:
+Contributors (by number of commits):
+
+<!-- BEGIN CONTRIBUTORS LIST -->
 * Nikolay Yakimov
 * Alexander Chaika
 * John Quigley
@@ -82,6 +85,8 @@ Contributors:
 * Daniel Beskin
 * Gabor Greif
 * Daniel Gröber
+
+<!-- END CONTRIBUTORS LIST -->
 
 See the [LICENSE.md][LICENSE] for details.
 
