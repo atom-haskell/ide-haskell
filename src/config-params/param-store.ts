@@ -71,7 +71,7 @@ export class ConfigParamStore {
   public async setValue<T>(pluginName: string, paramName: string, value?: T): Promise<T | undefined> {
     const paramConfig = await this.getParamConfig<T>(pluginName, paramName, 'set')
     if (paramConfig === undefined) return undefined
-    if (value === undefined) { value = await this.showSelect<T>(paramConfig.spec) }
+    if (value === undefined) { value = await this.showSelect<T>(paramConfig) }
     if (value !== undefined) {
       paramConfig.value = value
       this.saved[`${pluginName}.${paramName}`] = value
@@ -112,12 +112,14 @@ export class ConfigParamStore {
     return paramConfig
   }
 
-  private async showSelect<T>(spec: UPI.IParamSpec<T>): Promise<T | undefined> {
+  private async showSelect<T>(param: IParamData<T>): Promise<T | undefined> {
+    const spec = param.spec
     return selectListView<T>({
       items: (typeof spec.items === 'function') ? spec.items() : spec.items,
       heading: spec.description,
       itemTemplate: spec.itemTemplate.bind(spec),
       itemFilterKey: spec.itemFilterKey,
+      activeItem: param.value,
     })
   }
 }

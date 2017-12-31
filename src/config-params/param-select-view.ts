@@ -6,26 +6,33 @@ export interface ISelectListParams<T> {
   heading?: string
   itemTemplate?: (item: T) => string
   itemFilterKey?: string | ((item: T) => string)
-  itemElement?: (item: T) => HTMLElement
+  activeItem?: T
 }
 
 export async function selectListView<T>(
-  { items, heading, itemTemplate, itemFilterKey, itemElement }: ISelectListParams<T>,
+  { items, heading, itemTemplate, itemFilterKey, activeItem }: ISelectListParams<T>,
 ): Promise<T | undefined> {
-  const itemElementDefault = (item: T) => {
+  const elementForItem = (item: T) => {
     const li = document.createElement('li')
+    const div = document.createElement('div')
+    div.style.display = 'inline-block'
+    let isActive
     if (itemTemplate) {
-      li.innerHTML = itemTemplate(item)
+      div.innerHTML = itemTemplate(item)
+      isActive = activeItem && itemTemplate(item) === itemTemplate(activeItem)
     } else {
-      li.innerText = `${item}`
+      div.innerText = `${item}`
+      isActive = activeItem && item === activeItem
     }
+    if (isActive) li.classList.add('active')
     // hack for backwards compatibility
-    if (li.firstElementChild && li.firstElementChild.tagName === 'LI') {
-      li.innerHTML = li.firstElementChild.innerHTML
+    if (div.firstElementChild && div.firstElementChild.tagName === 'LI') {
+      div.innerHTML = div.firstElementChild.innerHTML
     }
+    li.appendChild(div)
     return li
   }
-  const filterKeyFn = (item: T) => {
+  const filterKeyForItem = (item: T) => {
     if (typeof itemFilterKey === 'string') {
       return `${item[itemFilterKey]}`
     } else if (itemFilterKey) {
@@ -42,9 +49,9 @@ export async function selectListView<T>(
       const select = new SelectListView({
         items: myitems,
         infoMessage: heading,
-        itemsClassList: ['ide-haskell'],
-        elementForItem: itemElement || itemElementDefault,
-        filterKeyForItem: filterKeyFn,
+        itemsClassList: ['ide-haskell', 'mark-active'],
+        elementForItem,
+        filterKeyForItem,
         didCancelSelection: () => {
           resolve()
         },

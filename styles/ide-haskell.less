@@ -352,6 +352,13 @@ ide-haskell-tooltip {
     font-size: 150%;
     text-align: center;
   }
+  .list-group.ide-haskell.mark-active > li {
+    display: flex;
+    align-items: center;
+    & > div {
+      flex-grow: 1;
+    }
+  }
 }
 
 .ide-haskell-status-tooltip .tooltip-inner {
