@@ -125,9 +125,7 @@ export class PluginManager {
   }
 
   public controller (editor: TextEditor): EditorControl | undefined {
-    const ecmap = this.controllers.get<EditorControl, typeof EditorControl>(EditorControl)
-    const rec = ecmap && ecmap.get(editor)
-    return rec && rec.controller
+    return this.controllerType(EditorControl, editor)
   }
 
   public controllerType<U extends IEditorController, T extends IEditorControllerFactoryT<U>> (
