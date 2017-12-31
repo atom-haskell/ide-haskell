@@ -95,17 +95,14 @@ export class PluginManager {
     }
   }
 
-  public onWillSaveBuffer (callback: UPI.TTextBufferCallback) {
-    return this.emitter.on('will-save-buffer', callback)
-  }
+  public onWillSaveBuffer = (callback: UPI.TTextBufferCallback) =>
+    this.emitter.on('will-save-buffer', callback)
 
-  public onDidSaveBuffer (callback: UPI.TTextBufferCallback) {
-    return this.emitter.on('did-save-buffer', callback)
-  }
+  public onDidSaveBuffer = (callback: UPI.TTextBufferCallback) =>
+    this.emitter.on('did-save-buffer', callback)
 
-  public onDidStopChanging (callback: UPI.TTextBufferCallback) {
-    return this.emitter.on('did-stop-changing', callback)
-  }
+  public onDidStopChanging = (callback: UPI.TTextBufferCallback) =>
+    this.emitter.on('did-stop-changing', callback)
 
   public willSaveBuffer (buffer: TextBuffer) {
     return this.emitter.emit('will-save-buffer', buffer)

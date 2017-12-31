@@ -28,13 +28,13 @@ export function consume(pluginManager: PluginManager, options: UPI.IRegistration
   }
   if (events) {
     if (events.onWillSaveBuffer) {
-      disp.add(registerEvent(events.onWillSaveBuffer, pluginManager.onWillSaveBuffer.bind(pluginManager)))
+      disp.add(registerEvent(events.onWillSaveBuffer, pluginManager.onWillSaveBuffer))
     }
     if (events.onDidSaveBuffer) {
-      disp.add(registerEvent(events.onDidSaveBuffer, pluginManager.onDidSaveBuffer.bind(pluginManager)))
+      disp.add(registerEvent(events.onDidSaveBuffer, pluginManager.onDidSaveBuffer))
     }
     if (events.onDidStopChanging) {
-      disp.add(registerEvent(events.onDidStopChanging, pluginManager.onDidStopChanging.bind(pluginManager)))
+      disp.add(registerEvent(events.onDidStopChanging, pluginManager.onDidStopChanging))
     }
   }
   if (tooltip) {

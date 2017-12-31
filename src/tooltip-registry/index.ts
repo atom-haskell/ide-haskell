@@ -95,7 +95,7 @@ export class TooltipRegistry {
     const { persistent = false } = tooltipData
     let msg
     if (Array.isArray(tooltipData.text)) {
-      msg = tooltipData.text.map(MessageObject.fromObject.bind(MessageObject))
+      msg = tooltipData.text.map(MessageObject.fromObject)
     } else {
       msg = MessageObject.fromObject(tooltipData.text)
     }
