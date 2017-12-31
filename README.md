@@ -59,10 +59,10 @@ More information is available in [lib/upi.coffee][upi] source file
 - [x] Code beautify
 - [x] Cabal project management (with ide-haskell-cabal)
 - [x] Jump to definition (since haskell-ghc-mod 1.3.0, or with ide-haskell-hasktags)
-- [x] Interactive REPL (alpha, with ide-haskell-repl)
+- [x] Interactive REPL (with ide-haskell-repl)
 - [x] Stack project management (with ide-haskell-cabal)
 - [ ] Who calls and vice versa
-- [ ] Documentation support
+- [x] Documentation support (alpha, with ide-haskell-hoogle)
 
 ## Changelog
 
@@ -70,7 +70,7 @@ Changelog is available [here][CHANGELOG].
 
 ## License
 
-Copyright © 2014 Alexander Chaika
+Copyright © 2014 Alexander Chaika \
 Copyright © 2015 Atom-Haskell
 
 Contributors (by number of commits):
