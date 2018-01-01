@@ -16,6 +16,12 @@
   "engines": {
     "atom": ">=1.23.0 <2.0.0"
   },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p . && tsc --noEmit -p ./spec",
+    "lint": "tslint --project . && tslint --project ./spec",
+    "test": "npm run typecheck && npm run lint"
+  },
+  "atomTestRunner": "./spec/runner.js",
   "providedServices": {
     "ide-haskell-upi": {
       "description": "Universal pluggable interface",
@@ -53,9 +59,15 @@
   },
   "devDependencies": {
     "@types/atom": "^1.23.0",
+    "@types/chai": "^4.0.10",
+    "@types/mocha": "^2.2.45",
     "@types/node": "^8.5.2",
     "@types/temp": "^0.8.31",
     "atom-haskell-tslint-rules": "^0.1.1",
+    "atom-mocha-test-runner": "^1.2.0",
+    "chai": "^4.1.2",
+    "mocha": "^4.1.0",
+    "ts-node": "^4.1.0",
     "tslint": "^5.8.0",
     "typedoc": "^0.9.0",
     "typescript": "~2.6.2"
