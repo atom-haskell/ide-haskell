@@ -14,7 +14,7 @@
     "language-haskell:grammar-used"
   ],
   "engines": {
-    "atom": ">=1.22.0 <2.0.0"
+    "atom": ">=1.23.0 <2.0.0"
   },
   "providedServices": {
     "ide-haskell-upi": {
