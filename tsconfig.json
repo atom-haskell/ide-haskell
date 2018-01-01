@@ -33,7 +33,8 @@
         ]
     },
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "spec"
     ],
     "include": [
         "src/**/*.ts",
