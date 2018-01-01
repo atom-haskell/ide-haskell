@@ -1,3 +1,7 @@
+## 2.2.2
+* Update atom typings; bump devDependencies
+* Add lodash to dependencies
+
 ## 2.2.1
 * Show currently-selected param value
 * Remove unnecessary `bind`s
