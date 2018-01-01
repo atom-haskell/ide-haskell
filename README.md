@@ -1,4 +1,4 @@
-# IDE-Haskell ![](https://david-dm.org/atom-haskell/ide-haskell.svg)
+# IDE-Haskell [![](https://david-dm.org/atom-haskell/ide-haskell.svg)](https://david-dm.org/atom-haskell/ide-haskell) [![](https://travis-ci.org/atom-haskell/ide-haskell.svg?branch=master)](https://travis-ci.org/atom-haskell/ide-haskell)
 
 Welcome to IDE-Haskell plugin for amazing [Atom](http://atom.io) editor! This
 plugin is intended to help you with development in
