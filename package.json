@@ -49,16 +49,16 @@
     "lodash": "^4.17.4",
     "lodash-decorators": "^4.5.0",
     "temp": "^0.8.3",
-    "tslib": "^1.8.0"
+    "tslib": "^1.8.1"
   },
   "devDependencies": {
-    "@types/atom": "^1.22.3",
-    "@types/node": "^8.0.54",
+    "@types/atom": "^1.23.0",
+    "@types/node": "^8.5.2",
     "@types/temp": "^0.8.31",
     "atom-haskell-tslint-rules": "^0.1.1",
     "tslint": "^5.8.0",
     "typedoc": "^0.9.0",
-    "typescript": "~2.6.0"
+    "typescript": "~2.6.2"
   },
   "deserializers": {
     "ide-haskell/OutputPanel": "deserializeOutputPanel"

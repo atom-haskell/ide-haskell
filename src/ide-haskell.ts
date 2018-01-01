@@ -56,13 +56,13 @@ export function activate(state: IState) {
       'ide-haskell:prev-error': () => { pluginManager && pluginManager.prevError() },
     }),
     atom.commands.add('atom-text-editor.ide-haskell', {
-      'ide-haskell:prettify-file': ({ currentTarget }: AtomTypes.CommandEvent) => {
+      'ide-haskell:prettify-file': ({ currentTarget }) => {
         // tslint:disable-next-line:no-floating-promises
         prettifyFile(currentTarget.getModel())
       },
     }),
     atom.commands.add('atom-text-editor.ide-haskell--has-tooltips', {
-      'ide-haskell:close-tooltip': ({ currentTarget, abortKeyBinding }: AtomTypes.CommandEvent) => {
+      'ide-haskell:close-tooltip': ({ currentTarget, abortKeyBinding }) => {
         const controller = pluginManager && pluginManager.controller(currentTarget.getModel())
         if (controller && controller.tooltips.has()) {
           controller.tooltips.hide()
