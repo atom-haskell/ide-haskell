@@ -3,7 +3,7 @@ import { join } from 'path'
 
 const pkg = join(__dirname, '..')
 
-describe('package', function () {
+describe('package', function() {
   this.timeout(60000)
   it('should activate', async () => {
     const packages: any = atom.packages

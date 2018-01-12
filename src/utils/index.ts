@@ -10,15 +10,27 @@ export const MAIN_MENU_LABEL = 'Haskell IDE'
 
 export function getEventType(detail: any) {
   // tslint:disable-next-line:no-unsafe-any
-  if (detail && (detail.contextCommand || (detail[0] && detail[0].contextCommand))) {
+  if (
+    detail &&
+    (detail.contextCommand || (detail[0] && detail[0].contextCommand))
+  ) {
     return TEventRangeType.context
-  } else { return TEventRangeType.keyboard }
+  } else {
+    return TEventRangeType.keyboard
+  }
 }
 
-  // screen position from mouse event
-export function bufferPositionFromMouseEvent(editor: TextEditor, event: MouseEvent) {
+// screen position from mouse event
+export function bufferPositionFromMouseEvent(
+  editor: TextEditor,
+  event: MouseEvent,
+) {
   // tslint:disable-next-line:no-unsafe-any
-  const sp: Point = (atom.views.getView(editor) as any).component.screenPositionForMouseEvent(event)
-  if (isNaN(sp.row) || isNaN(sp.column)) { return undefined }
+  const sp: Point = (atom.views.getView(
+    editor,
+  ) as any).component.screenPositionForMouseEvent(event)
+  if (isNaN(sp.row) || isNaN(sp.column)) {
+    return undefined
+  }
   return editor.bufferPositionForScreenPosition(sp)
 }

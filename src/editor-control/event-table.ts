@@ -3,13 +3,11 @@ import { eventRangeTypeVals } from '../utils'
 import * as UPI from 'atom-haskell-upi'
 import TEventRangeType = UPI.TEventRangeType
 
-export type IMarkerGroup = Array<{ type: TEventRangeType, source?: string }>
+export type IMarkerGroup = Array<{ type: TEventRangeType; source?: string }>
 
 export type TTableCell = Map<string | undefined, DisplayMarkerLayer>
 
-export type TTable = {
-  [K in TEventRangeType]: TTableCell
-}
+export type TTable = { [K in TEventRangeType]: TTableCell }
 
 export class EventTable {
   private table: TTable
@@ -25,7 +23,7 @@ export class EventTable {
       const layer = this.editor.addMarkerLayer()
       this.layers.add(layer)
       for (const { type, source } of i) {
-        (this.table[type] as TTableCell).set(source, layer)
+        ;(this.table[type] as TTableCell).set(source, layer)
       }
     }
   }
@@ -65,13 +63,13 @@ export class EventTable {
     return count
   }
 
-  public * values() {
+  public *values() {
     for (const i of eventRangeTypeVals) {
       yield this.table[i] as TTableCell
     }
   }
 
-  public * entries() {
+  public *entries() {
     for (const i of eventRangeTypeVals) {
       yield [i, this.table[i]]
     }

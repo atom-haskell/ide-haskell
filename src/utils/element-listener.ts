@@ -1,7 +1,10 @@
 import { Disposable } from 'atom'
 
 export function listen<T extends keyof HTMLElementEventMap>(
-  element: HTMLElement, event: T, selector: string, callback: (event: HTMLElementEventMap[T]) => void,
+  element: HTMLElement,
+  event: T,
+  selector: string,
+  callback: (event: HTMLElementEventMap[T]) => void,
 ): Disposable {
   const bound = (evt: Event) => {
     const sel = (evt.target as HTMLElement).closest(selector)

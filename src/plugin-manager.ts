@@ -1,4 +1,11 @@
-import { CompositeDisposable, Emitter, TextEditor, TextBuffer, Grammar, Disposable } from 'atom'
+import {
+  CompositeDisposable,
+  Emitter,
+  TextEditor,
+  TextBuffer,
+  Grammar,
+  Disposable,
+} from 'atom'
 import { ResultsDB } from './results-db'
 import { OutputPanel, IState as IOutputViewState } from './output-panel'
 import { ConfigParamManager, IState as IParamState } from './config-params'
@@ -22,21 +29,32 @@ export interface IState {
 }
 
 export interface IEditorController {
-  destroy (): void
+  destroy(): void
 }
 
-export type IEditorControllerFactory = IEditorControllerFactoryT<IEditorController>
+export type IEditorControllerFactory = IEditorControllerFactoryT<
+  IEditorController
+>
 
 export interface IEditorControllerFactoryT<T> {
   new (editor: TextEditor, manager: PluginManager): T
-  supportsGrammar (grammar: string): boolean
+  supportsGrammar(grammar: string): boolean
 }
 
-export type ECMap<T extends IEditorController> = WeakMap<TextEditor, {controller: T, disposable: Disposable}>
+export type ECMap<T extends IEditorController> = WeakMap<
+  TextEditor,
+  { controller: T; disposable: Disposable }
+>
 
-export interface TMap extends Map<IEditorControllerFactory, ECMap<IEditorController>> {
-  get<U extends IEditorController, T extends IEditorControllerFactoryT<U>> (key: T): ECMap<U>
-  set<U extends IEditorController, T extends IEditorControllerFactoryT<U>> (key: T, val: ECMap<U>): this
+export interface TMap
+  extends Map<IEditorControllerFactory, ECMap<IEditorController>> {
+  get<U extends IEditorController, T extends IEditorControllerFactoryT<U>>(
+    key: T,
+  ): ECMap<U>
+  set<U extends IEditorController, T extends IEditorControllerFactoryT<U>>(
+    key: T,
+    val: ECMap<U>,
+  ): this
 }
 
 export class PluginManager {
@@ -46,21 +64,27 @@ export class PluginManager {
   private checkResultsProvider?: CheckResultsProvider
   private linterSupport?: LinterSupport
   private disposables = new CompositeDisposable()
-  private emitter: Emitter<{}, {
-    'will-save-buffer': TextBuffer
-    'did-save-buffer': TextBuffer
-    'did-stop-changing': TextBuffer
-  }> = new Emitter()
+  private emitter: Emitter<
+    {},
+    {
+      'will-save-buffer': TextBuffer
+      'did-save-buffer': TextBuffer
+      'did-stop-changing': TextBuffer
+    }
+  > = new Emitter()
   private statusBarTile?: StatusBar.Tile
   private statusBarView?: StatusBarView
   private controllers: TMap = new Map()
-  constructor (state: IState, public outputPanel: OutputPanel) {
+  constructor(state: IState, public outputPanel: OutputPanel) {
     this.disposables.add(this.emitter)
 
     this.resultsDB = new ResultsDB()
     this.outputPanel.connectResults(this.resultsDB)
     this.tooltipRegistry = new TooltipRegistry(this)
-    this.configParamManager = new ConfigParamManager(this.outputPanel, state.configParams)
+    this.configParamManager = new ConfigParamManager(
+      this.outputPanel,
+      state.configParams,
+    )
 
     this.disposables.add(
       this.addEditorController(EditorControl),
@@ -74,7 +98,7 @@ export class PluginManager {
     this.subscribeEditorController()
   }
 
-  public deactivate () {
+  public deactivate() {
     this.resultsDB.destroy()
     this.disposables.dispose()
     this.checkResultsProvider && this.checkResultsProvider.destroy()
@@ -89,7 +113,7 @@ export class PluginManager {
     }
   }
 
-  public serialize (): IState {
+  public serialize(): IState {
     return {
       configParams: this.configParamManager.serialize(),
     }
@@ -104,51 +128,58 @@ export class PluginManager {
   public onDidStopChanging = (callback: UPI.TTextBufferCallback) =>
     this.emitter.on('did-stop-changing', callback)
 
-  public willSaveBuffer (buffer: TextBuffer) {
+  public willSaveBuffer(buffer: TextBuffer) {
     return this.emitter.emit('will-save-buffer', buffer)
   }
 
-  public didSaveBuffer (buffer: TextBuffer) {
+  public didSaveBuffer(buffer: TextBuffer) {
     return this.emitter.emit('did-save-buffer', buffer)
   }
 
-  public didStopChanging (buffer: TextBuffer) {
+  public didStopChanging(buffer: TextBuffer) {
     return this.emitter.emit('did-stop-changing', buffer)
   }
 
-  public togglePanel () {
+  public togglePanel() {
     // tslint:disable-next-line:no-floating-promises
     atom.workspace.toggle(this.outputPanel)
   }
 
-  public controller (editor: TextEditor): EditorControl | undefined {
+  public controller(editor: TextEditor): EditorControl | undefined {
     return this.controllerType(EditorControl, editor)
   }
 
-  public controllerType<U extends IEditorController, T extends IEditorControllerFactoryT<U>> (
-    factory: T, editor: TextEditor,
-  ): U | undefined {
+  public controllerType<
+    U extends IEditorController,
+    T extends IEditorControllerFactoryT<U>
+  >(factory: T, editor: TextEditor): U | undefined {
     const ecmap = this.controllers.get<U, T>(factory)
     const rec = ecmap && ecmap.get(editor)
     return rec && rec.controller
   }
 
-  public setLinter (linter: Linter.IndieDelegate) {
-    if (atom.config.get('ide-haskell.messageDisplayFrontend') !== 'linter') { return }
+  public setLinter(linter: Linter.IndieDelegate) {
+    if (atom.config.get('ide-haskell.messageDisplayFrontend') !== 'linter') {
+      return
+    }
     this.linterSupport = new LinterSupport(linter, this.resultsDB)
   }
 
-  public nextError () {
-    if (atom.config.get('ide-haskell.messageDisplayFrontend') !== 'builtin') { return }
+  public nextError() {
+    if (atom.config.get('ide-haskell.messageDisplayFrontend') !== 'builtin') {
+      return
+    }
     this.outputPanel.showNextError()
   }
 
-  public prevError () {
-    if (atom.config.get('ide-haskell.messageDisplayFrontend') !== 'builtin') { return }
+  public prevError() {
+    if (atom.config.get('ide-haskell.messageDisplayFrontend') !== 'builtin') {
+      return
+    }
     this.outputPanel.showPrevError()
   }
 
-  public backendStatus (pluginName: string, st: UPI.IStatus) {
+  public backendStatus(pluginName: string, st: UPI.IStatus) {
     if (this.outputPanel) {
       this.outputPanel.backendStatus(pluginName, st)
     }
@@ -157,9 +188,10 @@ export class PluginManager {
     }
   }
 
-  public addEditorController<U extends IEditorController, T extends IEditorControllerFactoryT<U>> (
-    factory: T,
-  ): Disposable {
+  public addEditorController<
+    U extends IEditorController,
+    T extends IEditorControllerFactoryT<U>
+  >(factory: T): Disposable {
     if (this.controllers.has(factory)) {
       throw new Error(`Duplicate controller factory ${factory.toString()}`)
     }
@@ -174,7 +206,7 @@ export class PluginManager {
     })
   }
 
-  public setStatusBar (sb: StatusBar.StatusBar) {
+  public setStatusBar(sb: StatusBar.StatusBar) {
     this.statusBarView = new StatusBarView(this.outputPanel)
     this.statusBarTile = sb.addRightTile({
       item: this.statusBarView.element,
@@ -182,7 +214,7 @@ export class PluginManager {
     })
   }
 
-  public removeStatusBar () {
+  public removeStatusBar() {
     if (this.statusBarTile) {
       this.statusBarTile.destroy()
       this.statusBarTile = undefined
@@ -193,7 +225,7 @@ export class PluginManager {
     }
   }
 
-  private controllerOnGrammar (editor: TextEditor, grammar: Grammar) {
+  private controllerOnGrammar(editor: TextEditor, grammar: Grammar) {
     for (const [factory, map] of this.controllers.entries()) {
       const rec = map.get(editor)
       if (!rec && factory.supportsGrammar(grammar.scopeName)) {
@@ -214,7 +246,7 @@ export class PluginManager {
   }
 
   // Observe text editors to attach controller
-  private subscribeEditorController () {
+  private subscribeEditorController() {
     this.disposables.add(
       atom.workspace.observeTextEditors((editor) => {
         const editorDisp = new CompositeDisposable()

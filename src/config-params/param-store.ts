@@ -11,14 +11,21 @@ export interface IState {
   [pluginNameParamName: string]: Object
 }
 
-interface TUpdatedCallbackArg<T> { pluginName: string, paramName: string, value: T | undefined }
+interface TUpdatedCallbackArg<T> {
+  pluginName: string
+  paramName: string
+  value: T | undefined
+}
 export type TUpdatedCallback<T> = (arg: TUpdatedCallbackArg<T>) => void
 
 export class ConfigParamStore {
   private disposables: CompositeDisposable
-  private emitter: Emitter<{}, {
-    'did-update': { pluginName: string, paramName: string, value: any }
-  }>
+  private emitter: Emitter<
+    {},
+    {
+      'did-update': { pluginName: string; paramName: string; value: any }
+    }
+  >
   private saved: IState
   private plugins: Map<string, Map<string, IParamData<any>>>
   constructor(state: IState = {}) {
@@ -37,7 +44,11 @@ export class ConfigParamStore {
     this.disposables.dispose()
   }
 
-  public onDidUpdate<T>(pluginName: string, paramName: string, callback: TUpdatedCallback<T>) {
+  public onDidUpdate<T>(
+    pluginName: string,
+    paramName: string,
+    callback: TUpdatedCallback<T>,
+  ) {
     return this.emitter.on('did-update', (val) => {
       if (val.pluginName === pluginName && val.paramName === paramName) {
         callback(val)
@@ -45,7 +56,11 @@ export class ConfigParamStore {
     })
   }
 
-  public addParamSpec<T>(pluginName: string, paramName: string, spec: UPI.IParamSpec<T>) {
+  public addParamSpec<T>(
+    pluginName: string,
+    paramName: string,
+    spec: UPI.IParamSpec<T>,
+  ) {
     let pluginConfig = this.plugins.get(pluginName)
     if (!pluginConfig) {
       pluginConfig = new Map()
@@ -55,7 +70,9 @@ export class ConfigParamStore {
       throw new Error(`Parameter ${pluginName}.${paramName} already defined!`)
     }
     let value: T | undefined = this.saved[`${pluginName}.${paramName}`] as T
-    if (value === undefined) { value = spec.default }
+    if (value === undefined) {
+      value = spec.default
+    }
     pluginConfig.set(paramName, { spec, value })
     this.emitter.emit('did-update', { pluginName, paramName, value })
     return new Disposable(() => {
@@ -68,10 +85,20 @@ export class ConfigParamStore {
     })
   }
 
-  public async setValue<T>(pluginName: string, paramName: string, value?: T): Promise<T | undefined> {
-    const paramConfig = await this.getParamConfig<T>(pluginName, paramName, 'set')
+  public async setValue<T>(
+    pluginName: string,
+    paramName: string,
+    value?: T,
+  ): Promise<T | undefined> {
+    const paramConfig = await this.getParamConfig<T>(
+      pluginName,
+      paramName,
+      'set',
+    )
     if (paramConfig === undefined) return undefined
-    if (value === undefined) { value = await this.showSelect<T>(paramConfig) }
+    if (value === undefined) {
+      value = await this.showSelect<T>(paramConfig)
+    }
     if (value !== undefined) {
       paramConfig.value = value
       this.saved[`${pluginName}.${paramName}`] = value
@@ -80,22 +107,46 @@ export class ConfigParamStore {
     return value
   }
 
-  public async getValue<T>(pluginName: string, paramName: string): Promise<T | undefined> {
-    const paramConfig = await this.getParamConfig<T>(pluginName, paramName, 'get')
+  public async getValue<T>(
+    pluginName: string,
+    paramName: string,
+  ): Promise<T | undefined> {
+    const paramConfig = await this.getParamConfig<T>(
+      pluginName,
+      paramName,
+      'get',
+    )
     if (paramConfig === undefined) return undefined
-    if (paramConfig.value === undefined) { await this.setValue(pluginName, paramName) }
+    if (paramConfig.value === undefined) {
+      await this.setValue(pluginName, paramName)
+    }
     return paramConfig.value
   }
 
-  public async getValueRaw<T>(pluginName: string, paramName: string): Promise<T | undefined> {
-    const paramConfig = await this.getParamConfig<T>(pluginName, paramName, 'get raw')
+  public async getValueRaw<T>(
+    pluginName: string,
+    paramName: string,
+  ): Promise<T | undefined> {
+    const paramConfig = await this.getParamConfig<T>(
+      pluginName,
+      paramName,
+      'get raw',
+    )
     if (paramConfig === undefined) return undefined
     return paramConfig.value
   }
 
-  private async getParamConfig<T>(pluginName: string, paramName: string, reason: string): Promise<IParamData<T> | undefined> {
+  private async getParamConfig<T>(
+    pluginName: string,
+    paramName: string,
+    reason: string,
+  ): Promise<IParamData<T> | undefined> {
     if (!atom.packages.isPackageLoaded(pluginName)) {
-      console.error(new Error(`No ${pluginName} package while trying to ${reason} ${pluginName}.${paramName}`))
+      console.error(
+        new Error(
+          `No ${pluginName} package while trying to ${reason} ${pluginName}.${paramName}`,
+        ),
+      )
       return undefined
     }
     if (!atom.packages.isPackageActive(pluginName)) {
@@ -103,11 +154,15 @@ export class ConfigParamStore {
     }
     const pluginConfig = this.plugins.get(pluginName)
     if (!pluginConfig) {
-      throw new Error(`${pluginName} is not defined while trying to ${reason} ${pluginName}.${paramName}`)
+      throw new Error(
+        `${pluginName} is not defined while trying to ${reason} ${pluginName}.${paramName}`,
+      )
     }
     const paramConfig = pluginConfig.get(paramName)
     if (!paramConfig) {
-      throw new Error(`${paramName} is not defined while trying to ${reason} ${pluginName}.${paramName}`)
+      throw new Error(
+        `${paramName} is not defined while trying to ${reason} ${pluginName}.${paramName}`,
+      )
     }
     return paramConfig
   }
@@ -115,7 +170,7 @@ export class ConfigParamStore {
   private async showSelect<T>(param: IParamData<T>): Promise<T | undefined> {
     const spec = param.spec
     return selectListView<T>({
-      items: (typeof spec.items === 'function') ? spec.items() : spec.items,
+      items: typeof spec.items === 'function' ? spec.items() : spec.items,
       heading: spec.description,
       itemTemplate: spec.itemTemplate.bind(spec),
       itemFilterKey: spec.itemFilterKey,

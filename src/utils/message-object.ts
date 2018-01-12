@@ -8,7 +8,9 @@ export class MessageObject {
     // noop
   }
 
-  public static fromObject = (message: UPI.TMessage | MessageObject): MessageObject => {
+  public static fromObject = (
+    message: UPI.TMessage | MessageObject,
+  ): MessageObject => {
     if (message instanceof MessageObject) {
       return message
     } else {

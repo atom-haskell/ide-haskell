@@ -1,5 +1,10 @@
 import {
-  Range, TextEditor, Point, CompositeDisposable, Gutter, DisplayMarker,
+  Range,
+  TextEditor,
+  Point,
+  CompositeDisposable,
+  Gutter,
+  DisplayMarker,
   DisplayMarkerLayer,
 } from 'atom'
 import * as UPI from 'atom-haskell-upi'
@@ -71,25 +76,32 @@ export class CREditorControl implements IEditorController {
     const markers = this.find(pos, type)
     const result: MessageObject[] = []
     for (const marker of markers) {
-      if (!marker.isValid()) { continue }
+      if (!marker.isValid()) {
+        continue
+      }
       const res = this.markerProps.get(marker)
-      if (!res) { continue }
+      if (!res) {
+        continue
+      }
       result.push(res.message)
     }
     return result
   }
 
   private registerGutterEvents() {
-    this.disposables.add(listen(
-      this.gutterElement, 'mouseover', '.decoration',
-      (e) => {
-        const bufferPt = bufferPositionFromMouseEvent(this.editor, e as MouseEvent)
+    this.disposables.add(
+      listen(this.gutterElement, 'mouseover', '.decoration', (e) => {
+        const bufferPt = bufferPositionFromMouseEvent(
+          this.editor,
+          e as MouseEvent,
+        )
         if (bufferPt) {
           const msg = this.getMessageAt(bufferPt, 'gutter')
           if (msg.length > 0) {
             // tslint:disable-next-line:no-floating-promises
             this.tooltipRegistry.showTooltip(
-              this.editor, TEventRangeType.mouse,
+              this.editor,
+              TEventRangeType.mouse,
               {
                 pluginName: 'builtin:check-results',
                 tooltip: {
@@ -100,27 +112,39 @@ export class CREditorControl implements IEditorController {
             )
           }
         }
-      },
-    ))
-    this.disposables.add(listen(
-      this.gutterElement, 'mouseout', '.decoration', () =>
-        this.tooltipRegistry.hideTooltip(this.editor, TEventRangeType.mouse, 'builtin:check-results'),
-    ))
+      }),
+    )
+    this.disposables.add(
+      listen(this.gutterElement, 'mouseout', '.decoration', () =>
+        this.tooltipRegistry.hideTooltip(
+          this.editor,
+          TEventRangeType.mouse,
+          'builtin:check-results',
+        ),
+      ),
+    )
   }
 
   private updateResults = () => {
     this.markers.clear()
     const path = this.editor.getPath()
-    for (const r of this.resultsDB.filter((m) => m.uri === path && m.isValid())) {
+    for (const r of this.resultsDB.filter(
+      (m) => m.uri === path && m.isValid(),
+    )) {
       this.markerFromCheckResult(r)
     }
   }
 
   private markerFromCheckResult(resItem: ResultItem) {
     const { position } = resItem
-    if (!position) { return }
+    if (!position) {
+      return
+    }
 
-    const range = new Range(position, Point.fromObject([position.row, position.column + 1]))
+    const range = new Range(
+      position,
+      Point.fromObject([position.row, position.column + 1]),
+    )
     const marker = this.markers.markBufferRange(range, { invalidate: 'inside' })
     this.markerProps.set(marker, resItem)
     const disp = new CompositeDisposable()
@@ -153,7 +177,8 @@ export class CREditorControl implements IEditorController {
         return this.markers.findMarkers({ startBufferPosition: pos })
       case 'mouse':
         return this.markers.findMarkers({ containsBufferPosition: pos })
-      default: throw new TypeError('Switch assertion failed')
+      default:
+        throw new TypeError('Switch assertion failed')
     }
   }
 }

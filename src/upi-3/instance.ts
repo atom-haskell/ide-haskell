@@ -8,7 +8,8 @@ import TextEditor = AtomTypes.TextEditor
 import TEventRangeType = UPI.TEventRangeType
 
 export function instance(
-  pluginManager: PluginManager, options: UPI.IRegistrationOptions,
+  pluginManager: PluginManager,
+  options: UPI.IRegistrationOptions,
 ): UPI.IUPIInstance {
   const pluginName = options.name
   const disposables = new CompositeDisposable()
@@ -17,48 +18,58 @@ export function instance(
   disposables.add(consume(pluginManager, options))
 
   return {
-    setMenu (name: string, menu: ReadonlyArray<AtomTypes.MenuOptions>) {
-      const menuDisp = atom.menu.add([{
-        label: MAIN_MENU_LABEL,
-        submenu: [ { label: name, submenu: menu } ],
-      },
+    setMenu(name: string, menu: ReadonlyArray<AtomTypes.MenuOptions>) {
+      const menuDisp = atom.menu.add([
+        {
+          label: MAIN_MENU_LABEL,
+          submenu: [{ label: name, submenu: menu }],
+        },
       ])
       disposables.add(menuDisp)
       return menuDisp
     },
-    setStatus (status: UPI.IStatus) {
+    setStatus(status: UPI.IStatus) {
       return pluginManager.backendStatus(pluginName, status)
     },
-    setMessages (messages: UPI.IResultItem[]) {
+    setMessages(messages: UPI.IResultItem[]) {
       messageProvider.setMessages(messages)
     },
-    async addMessageTab (name: string, opts: UPI.ISeverityTabDefinition) {
+    async addMessageTab(name: string, opts: UPI.ISeverityTabDefinition) {
       return pluginManager.outputPanel.createTab(name, opts)
     },
-    async showTooltip ({ editor, eventType, detail, tooltip }: UPI.IShowTooltipParams) {
+    async showTooltip({
+      editor,
+      eventType,
+      detail,
+      tooltip,
+    }: UPI.IShowTooltipParams) {
       if (!eventType) {
         eventType = getEventType(detail)
       }
-      return pluginManager.tooltipRegistry.showTooltip(
-        editor, eventType, { pluginName, tooltip },
-      )
+      return pluginManager.tooltipRegistry.showTooltip(editor, eventType, {
+        pluginName,
+        tooltip,
+      })
     },
-    addPanelControl<T> (def: UPI.TControlDefinition<T>) {
+    addPanelControl<T>(def: UPI.TControlDefinition<T>) {
       return pluginManager.outputPanel.addPanelControl(def)
     },
-    addConfigParam<T> (paramName: string, spec: UPI.IParamSpec<T>) {
+    addConfigParam<T>(paramName: string, spec: UPI.IParamSpec<T>) {
       return pluginManager.configParamManager.add(pluginName, paramName, spec)
     },
-    async getConfigParam<T> (name: string): Promise<T | undefined> {
+    async getConfigParam<T>(name: string): Promise<T | undefined> {
       return pluginManager.configParamManager.get<T>(pluginName, name)
     },
-    async getOthersConfigParam<T> (plugin: string, name: string): Promise<T | undefined> {
+    async getOthersConfigParam<T>(
+      plugin: string,
+      name: string,
+    ): Promise<T | undefined> {
       return pluginManager.configParamManager.get<T>(plugin, name)
     },
-    async setConfigParam<T> (name: string, value?: T): Promise<T | undefined> {
+    async setConfigParam<T>(name: string, value?: T): Promise<T | undefined> {
       return pluginManager.configParamManager.set<T>(pluginName, name, value)
     },
-    getEventRange (editor: TextEditor, typeOrDetail: TEventRangeType | Object) {
+    getEventRange(editor: TextEditor, typeOrDetail: TEventRangeType | Object) {
       let type: TEventRangeType
       if (isTEventRangeType(typeOrDetail)) {
         type = typeOrDetail
@@ -66,10 +77,12 @@ export function instance(
         type = getEventType(typeOrDetail)
       }
       const controller = pluginManager.controller(editor)
-      if (!controller) { return undefined }
+      if (!controller) {
+        return undefined
+      }
       return controller.getEventRange(type)
     },
-    dispose () {
+    dispose() {
       disposables.dispose()
     },
   }

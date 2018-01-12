@@ -9,9 +9,13 @@ export interface ISelectListParams<T> {
   activeItem?: T
 }
 
-export async function selectListView<T>(
-  { items, heading, itemTemplate, itemFilterKey, activeItem }: ISelectListParams<T>,
-): Promise<T | undefined> {
+export async function selectListView<T>({
+  items,
+  heading,
+  itemTemplate,
+  itemFilterKey,
+  activeItem,
+}: ISelectListParams<T>): Promise<T | undefined> {
   const elementForItem = (item: T) => {
     const li = document.createElement('li')
     const div = document.createElement('div')

@@ -12,9 +12,12 @@ export class ResultsDB {
   private currentId: number
   private messages: Map<string, ResultItem>
   private disposables: CompositeDisposable
-  private emitter: Emitter<{}, {
-    'did-update': UPI.TSeverity[]
-  }>
+  private emitter: Emitter<
+    {},
+    {
+      'did-update': UPI.TSeverity[]
+    }
+  >
   constructor() {
     this.currentId = 0
     this.disposables = new CompositeDisposable()
@@ -34,7 +37,7 @@ export class ResultsDB {
   public didUpdate(providerId: number, msgs: ResultItem[]) {
     const uris: string[] = msgs.map((v) => v.uri).filter(notUndefined)
     for (const [k, v] of Array.from(this.messages)) {
-      if (v.providerId === providerId || v.uri && uris.includes(v.uri)) {
+      if (v.providerId === providerId || (v.uri && uris.includes(v.uri))) {
         this.messages.delete(k)
       }
     }
@@ -55,13 +58,17 @@ export class ResultsDB {
     return this.messages.values()
   }
 
-  public * filter(f: (item: ResultItem) => boolean) {
+  public *filter(f: (item: ResultItem) => boolean) {
     for (const v of this.results()) {
-      if (f(v)) { yield v }
+      if (f(v)) {
+        yield v
+      }
     }
   }
 
   public isEmpty(severities: UPI.TSeverity[]) {
-    return !Array.from(this.messages.values()).some(({ severity }) => severities.includes(severity))
+    return !Array.from(this.messages.values()).some(({ severity }) =>
+      severities.includes(severity),
+    )
   }
 }

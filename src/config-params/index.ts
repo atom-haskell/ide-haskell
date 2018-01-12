@@ -22,7 +22,11 @@ export class ConfigParamManager {
     return this.store.serialize()
   }
 
-  public add(pluginName: string, paramName: string, spec: UPI.IParamSpec<Object>) {
+  public add(
+    pluginName: string,
+    paramName: string,
+    spec: UPI.IParamSpec<Object>,
+  ) {
     const disp = new CompositeDisposable()
     disp.add(
       this.store.addParamSpec(pluginName, paramName, spec),

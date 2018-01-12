@@ -7,15 +7,28 @@ import TEventRangeType = UPI.TEventRangeType
 
 export * from './instance'
 
-export function consume(pluginManager: PluginManager, options: UPI.IRegistrationOptions): Disposable {
-  const { name, menu, messageTypes, events, controls, params, tooltip } = options
+export function consume(
+  pluginManager: PluginManager,
+  options: UPI.IRegistrationOptions,
+): Disposable {
+  const {
+    name,
+    menu,
+    messageTypes,
+    events,
+    controls,
+    params,
+    tooltip,
+  } = options
   const disp = new CompositeDisposable()
 
   if (menu) {
-    const menuDisp = atom.menu.add([{
-      label: MAIN_MENU_LABEL,
-      submenu: [{ label: menu.label, submenu: menu.menu }],
-    }])
+    const menuDisp = atom.menu.add([
+      {
+        label: MAIN_MENU_LABEL,
+        submenu: [{ label: menu.label, submenu: menu.menu }],
+      },
+    ])
     disp.add(menuDisp)
   }
   if (messageTypes) {
@@ -28,13 +41,22 @@ export function consume(pluginManager: PluginManager, options: UPI.IRegistration
   }
   if (events) {
     if (events.onWillSaveBuffer) {
-      disp.add(registerEvent(events.onWillSaveBuffer, pluginManager.onWillSaveBuffer))
+      disp.add(
+        registerEvent(events.onWillSaveBuffer, pluginManager.onWillSaveBuffer),
+      )
     }
     if (events.onDidSaveBuffer) {
-      disp.add(registerEvent(events.onDidSaveBuffer, pluginManager.onDidSaveBuffer))
+      disp.add(
+        registerEvent(events.onDidSaveBuffer, pluginManager.onDidSaveBuffer),
+      )
     }
     if (events.onDidStopChanging) {
-      disp.add(registerEvent(events.onDidStopChanging, pluginManager.onDidStopChanging))
+      disp.add(
+        registerEvent(
+          events.onDidStopChanging,
+          pluginManager.onDidStopChanging,
+        ),
+      )
     }
   }
   if (tooltip) {
@@ -44,10 +66,18 @@ export function consume(pluginManager: PluginManager, options: UPI.IRegistration
     if (typeof tooltip === 'function') {
       handler = tooltip
     } else {
-      ({ handler, priority, eventTypes } = tooltip)
+      ;({ handler, priority, eventTypes } = tooltip)
     }
-    if (!priority) { priority = 100 }
-    disp.add(pluginManager.tooltipRegistry.register(name, { priority, handler, eventTypes }))
+    if (!priority) {
+      priority = 100
+    }
+    disp.add(
+      pluginManager.tooltipRegistry.register(name, {
+        priority,
+        handler,
+        eventTypes,
+      }),
+    )
   }
   if (controls) {
     for (const i of controls) {
@@ -57,9 +87,7 @@ export function consume(pluginManager: PluginManager, options: UPI.IRegistration
   if (params) {
     for (const paramName of Object.keys(params)) {
       const spec = params[paramName]
-      disp.add(
-        pluginManager.configParamManager.add(name, paramName, spec),
-      )
+      disp.add(pluginManager.configParamManager.add(name, paramName, spec))
     }
   }
 

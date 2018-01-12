@@ -8,7 +8,9 @@ export function isDock(object: Dock | WorkspaceCenter): object is Dock {
   return object.constructor.name === 'Dock'
 }
 
-export function isSimpleControlDef<T>(def: UPI.TControlDefinition<T>): def is UPI.IControlSimpleDefinition {
+export function isSimpleControlDef<T>(
+  def: UPI.TControlDefinition<T>,
+): def is UPI.IControlSimpleDefinition {
   return typeof def.element === 'string'
 }
 
@@ -23,8 +25,12 @@ export const eventRangeTypeVals = [
   TEventRangeType.selection,
 ]
 
-export function isTEventRangeType(x: TEventRangeType | Object): x is TEventRangeType {
-  return typeof x === 'string' && eventRangeTypeVals.includes(x as TEventRangeType)
+export function isTEventRangeType(
+  x: TEventRangeType | Object,
+): x is TEventRangeType {
+  return (
+    typeof x === 'string' && eventRangeTypeVals.includes(x as TEventRangeType)
+  )
 }
 
 export function isTextMessage(msg: UPI.TMessage): msg is UPI.IMessageText {
