@@ -20,6 +20,7 @@
     "typecheck": "tsc --noEmit -p . && tsc --noEmit -p ./spec",
     "lint": "tslint --project . && tslint --project ./spec",
     "test": "npm run typecheck && npm run lint"
+    "build": "tsc -p .",
   },
   "atomTestRunner": "./spec/runner.js",
   "providedServices": {
