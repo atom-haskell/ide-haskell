@@ -236,14 +236,13 @@ export class OutputPanel {
   }
 
   public activateFirstNonEmptyTab(severities: UPI.TSeverity[]) {
-    for (const i of severities) {
-      const tab = this.tabs.get(i)
-      if (!tab) continue
+    for (const tab of this.tabs.values()) {
+      if (!severities.includes(tab.name)) continue
       const count = tab.count
       if (count && count > 0) {
         // tslint:disable-next-line:no-floating-promises
         this.show()
-        this.activateTab(i)
+        this.activateTab(tab.name)
         break
       }
     }
