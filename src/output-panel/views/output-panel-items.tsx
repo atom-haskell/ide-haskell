@@ -11,7 +11,10 @@ export interface IProps extends JSX.Props {
 export class OutputPanelItems implements JSX.ElementClass {
   // tslint:disable-next-line:no-uninitialized
   private element: HTMLElement
-  private itemMap: WeakMap<ResultItem, { component: OutputPanelItem, domNode: HTMLElement }>
+  private itemMap: WeakMap<
+    ResultItem,
+    { component: OutputPanelItem; domNode: HTMLElement }
+  >
   constructor(public props: IProps) {
     this.itemMap = new WeakMap()
     etch.initialize(this)
@@ -54,7 +57,10 @@ export class OutputPanelItems implements JSX.ElementClass {
   }
 
   public atEnd() {
-    return (this.element.scrollTop >= (this.element.scrollHeight - this.element.clientHeight))
+    return (
+      this.element.scrollTop >=
+      this.element.scrollHeight - this.element.clientHeight
+    )
   }
 
   private renderItems() {

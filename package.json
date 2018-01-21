@@ -12,7 +12,7 @@
   },
   "scripts": {
     "build": "tsc -p .",
-    "prettier": "prettier --write 'src/**/*.ts' 'spec/**/*.ts'",
+    "prettier": "prettier --write 'src/**/*.ts?(x)' 'spec/**/*.ts?(x)'",
     "prettier-check": "prettier -l 'src/**/*.ts' 'spec/**/*.ts'",
     "typecheck": "tsc --noEmit -p . && tsc --noEmit -p spec",
     "lint": "tslint --project . && tslint --project spec",

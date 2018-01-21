@@ -19,9 +19,7 @@ export class TooltipMessage {
   public render() {
     return (
       // tslint:disable:no-unsafe-any
-      <ide-haskell-tooltip>
-        {this.message}
-      </ide-haskell-tooltip>
+      <ide-haskell-tooltip>{this.message}</ide-haskell-tooltip>
       // tslint:enable:no-unsafe-any
     )
   }
@@ -31,6 +29,7 @@ export class TooltipMessage {
   }
 
   public writeAfterUpdate() {
-    this.element.parentElement && this.element.parentElement.classList.add('ide-haskell')
+    this.element.parentElement &&
+      this.element.parentElement.classList.add('ide-haskell')
   }
 }

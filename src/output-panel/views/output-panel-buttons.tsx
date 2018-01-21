@@ -9,7 +9,10 @@ export interface IBtnDesc {
   autoScroll: boolean
 }
 
-export interface IProps extends JSX.Props { buttons: IBtnDesc[], activeBtn?: string }
+export interface IProps extends JSX.Props {
+  buttons: IBtnDesc[]
+  activeBtn?: string
+}
 
 // tslint:disable-next-line:no-unsafe-any
 export class OutputPanelButtons implements JSX.ElementClass {
@@ -32,7 +35,7 @@ export class OutputPanelButtons implements JSX.ElementClass {
     return etch.update(this)
   }
 
-  private * renderButtons() {
+  private *renderButtons() {
     for (const props of this.props.buttons) {
       yield (
         <Button

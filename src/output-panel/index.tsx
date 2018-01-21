@@ -30,7 +30,9 @@ export class OutputPanel {
   private tabs: Map<string, IBtnDesc> = new Map()
   private itemFilter?: (item: ResultItem) => boolean
   private results?: ResultsDB
-  constructor(private state: IState = { fileFilter: false, activeTab: 'error' }) {
+  constructor(
+    private state: IState = { fileFilter: false, activeTab: 'error' },
+  ) {
     etch.initialize(this)
 
     for (const tab of ['error', 'warning', 'lint']) {
@@ -38,10 +40,12 @@ export class OutputPanel {
       this.createTab(tab, {})
     }
 
-    this.disposables.add(atom.workspace.onDidChangeActivePaneItem(() => {
-      // tslint:disable-next-line:no-floating-promises
-      if (this.state.fileFilter) this.updateItems()
-    }))
+    this.disposables.add(
+      atom.workspace.onDidChangeActivePaneItem(() => {
+        // tslint:disable-next-line:no-floating-promises
+        if (this.state.fileFilter) this.updateItems()
+      }),
+    )
     setImmediate(async () => {
       await this.show()
       if (atom.config.get('ide-haskell.autoHideOutput')) {
@@ -58,7 +62,10 @@ export class OutputPanel {
       this.currentResult = 0
       // tslint:disable-next-line:no-floating-promises
       this.updateItems()
-      if (atom.config.get('ide-haskell.autoHideOutput') && (!this.results || this.results.isEmpty(severities))) {
+      if (
+        atom.config.get('ide-haskell.autoHideOutput') &&
+        (!this.results || this.results.isEmpty(severities))
+      ) {
         this.hide()
       } else if (atom.config.get('ide-haskell.switchTabOnCheck')) {
         this.activateFirstNonEmptyTab(severities)
@@ -73,7 +80,7 @@ export class OutputPanel {
   public render() {
     if (!this.results) {
       // tslint:disable-next-line:no-unsafe-any
-      return <ide-haskell-panel/>
+      return <ide-haskell-panel />
     }
     return (
       // tslint:disable:no-unsafe-any
@@ -119,7 +126,7 @@ export class OutputPanel {
 
   public async toggle() {
     const pane = atom.workspace.paneContainerForItem(this)
-    if (!pane || isDock(pane) && !pane.isVisible()) {
+    if (!pane || (isDock(pane) && !pane.isVisible())) {
       return this.show()
     } else {
       return this.hide()
@@ -127,14 +134,21 @@ export class OutputPanel {
   }
 
   public async show() {
-    await atom.workspace.open(this, { searchAllPanes: true, activatePane: false })
+    await atom.workspace.open(this, {
+      searchAllPanes: true,
+      activatePane: false,
+    })
     const pane = atom.workspace.paneContainerForItem(this)
-    if (pane && isDock(pane)) { pane.show() }
+    if (pane && isDock(pane)) {
+      pane.show()
+    }
   }
 
   public hide() {
     const pane = atom.workspace.paneContainerForItem(this)
-    if (pane && isDock(pane)) { atom.workspace.hide(this) }
+    if (pane && isDock(pane)) {
+      atom.workspace.hide(this)
+    }
   }
 
   public getTitle() {
@@ -154,10 +168,18 @@ export class OutputPanel {
     if (isSimpleControlDef(def)) {
       const { events, classes, style, attrs } = def.opts
       const props: { [key: string]: Object } = {}
-      if (classes) { props.class = classes.join(' ') }
-      if (style) { props.style = style }
-      if (attrs) { props.attributes = attrs }
-      if (events) { props.on = events }
+      if (classes) {
+        props.class = classes.join(' ')
+      }
+      if (style) {
+        props.style = style
+      }
+      if (attrs) {
+        props.attributes = attrs
+      }
+      if (events) {
+        props.on = events
+      }
 
       newElement = $(def.element, props)
     } else {
@@ -184,16 +206,21 @@ export class OutputPanel {
     if (activeTab) {
       const ato = this.tabs.get(activeTab)
       if (currentUri && ato && ato.uriFilter) {
-        this.itemFilter = ({ uri, severity }) => (severity === activeTab) && (uri === currentUri)
+        this.itemFilter = ({ uri, severity }) =>
+          severity === activeTab && uri === currentUri
       } else {
         this.itemFilter = ({ severity }) => severity === activeTab
       }
-      scroll = (ato && ato.autoScroll && this.refs.items && this.refs.items.atEnd()) || false
+      scroll =
+        (ato && ato.autoScroll && this.refs.items && this.refs.items.atEnd()) ||
+        false
     }
 
     if (this.results) {
       for (const [btn, ato] of this.tabs.entries()) {
-        ato.count = Array.from(this.results.filter(({ severity }) => (severity === btn))).length
+        ato.count = Array.from(
+          this.results.filter(({ severity }) => severity === btn),
+        ).length
       }
     }
 
@@ -235,8 +262,10 @@ export class OutputPanel {
     name: string,
     { uriFilter = true, autoScroll = false }: UPI.ISeverityTabDefinition,
   ) {
-    if (['error', 'warning', 'lint'].includes(name)
-      && atom.config.get('ide-haskell.messageDisplayFrontend') !== 'builtin') {
+    if (
+      ['error', 'warning', 'lint'].includes(name) &&
+      atom.config.get('ide-haskell.messageDisplayFrontend') !== 'builtin'
+    ) {
       return
     }
     if (!Array.from(this.tabs.keys()).includes(name)) {
@@ -252,7 +281,7 @@ export class OutputPanel {
     return this.update()
   }
 
-  public serialize(): IState & {deserializer: 'ide-haskell/OutputPanel'} {
+  public serialize(): IState & { deserializer: 'ide-haskell/OutputPanel' } {
     return {
       ...this.state,
       deserializer: 'ide-haskell/OutputPanel',
@@ -261,17 +290,15 @@ export class OutputPanel {
 
   public backendStatus(pluginName: string, st: UPI.IStatus) {
     this.statusMap.set(pluginName, st)
-    this.progress =
-      Array.from(this.statusMap.values())
-        .reduce(
-        (cv, i) => {
-          if (i.status === 'progress' && i.progress !== undefined) {
-            cv.push(i.progress)
-          }
-          return cv
-        },
-        [] as number[],
-      )
+    this.progress = Array.from(this.statusMap.values()).reduce(
+      (cv, i) => {
+        if (i.status === 'progress' && i.progress !== undefined) {
+          cv.push(i.progress)
+        }
+        return cv
+      },
+      [] as number[],
+    )
     // tslint:disable-next-line:no-floating-promises
     this.update()
   }
@@ -279,10 +306,14 @@ export class OutputPanel {
   public showNextError() {
     if (!this.results) return
     const rs = Array.from(this.results.filter(({ uri }) => !!uri))
-    if (rs.length === 0) { return }
+    if (rs.length === 0) {
+      return
+    }
 
     this.currentResult++
-    if (this.currentResult >= rs.length) { this.currentResult = 0 }
+    if (this.currentResult >= rs.length) {
+      this.currentResult = 0
+    }
 
     this.showItem(rs[this.currentResult])
   }
@@ -290,10 +321,14 @@ export class OutputPanel {
   public showPrevError() {
     if (!this.results) return
     const rs = Array.from(this.results.filter(({ uri }) => !!uri))
-    if (rs.length === 0) { return }
+    if (rs.length === 0) {
+      return
+    }
 
     this.currentResult--
-    if (this.currentResult < 0) { this.currentResult = rs.length - 1 }
+    if (this.currentResult < 0) {
+      this.currentResult = rs.length - 1
+    }
 
     this.showItem(rs[this.currentResult])
   }

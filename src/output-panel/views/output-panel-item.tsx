@@ -1,7 +1,9 @@
 import * as etch from 'etch'
 import { ResultItem } from '../../results-db'
 
-export interface IProps extends JSX.Props { model: ResultItem }
+export interface IProps extends JSX.Props {
+  model: ResultItem
+}
 
 // tslint:disable-next-line:no-unsafe-any
 export class OutputPanelItem implements JSX.ElementClass {
@@ -17,14 +19,18 @@ export class OutputPanelItem implements JSX.ElementClass {
       <ide-haskell-panel-item key={this.props.model.hash()}>
         {this.renderPosition()}
         {this.renderContext()}
-        <ide-haskell-item-description innerHTML={this.props.model.message.toHtml()} />
+        <ide-haskell-item-description
+          innerHTML={this.props.model.message.toHtml()}
+        />
       </ide-haskell-panel-item>
       // tslint:enable:no-unsafe-any
     )
   }
 
   public async update(props: IProps) {
-    if (props && props.model) { this.props.model = props.model }
+    if (props && props.model) {
+      this.props.model = props.model
+    }
     return etch.update(this)
   }
 
@@ -35,23 +41,21 @@ export class OutputPanelItem implements JSX.ElementClass {
   public clickPosition = () => {
     if (this.props.model.uri) {
       // tslint:disable-next-line:no-floating-promises
-      atom.workspace.open(
-        this.props.model.uri,
-        {
-          searchAllPanes: true,
-          initialLine: this.props.model.position && this.props.model.position.row,
-          initialColumn: this.props.model.position && this.props.model.position.column,
-        },
-      )
+      atom.workspace.open(this.props.model.uri, {
+        searchAllPanes: true,
+        initialLine: this.props.model.position && this.props.model.position.row,
+        initialColumn:
+          this.props.model.position && this.props.model.position.column,
+      })
     }
   }
 
   private renderPosition() {
     if (this.props.model.uri) {
-      const positionText =
-        this.props.model.position
-          ? `${this.props.model.uri}: ${this.props.model.position.row + 1}, ${this.props.model.position.column + 1}`
-          : this.props.model.uri
+      const positionText = this.props.model.position
+        ? `${this.props.model.uri}: ${this.props.model.position.row + 1}, ${this
+            .props.model.position.column + 1}`
+        : this.props.model.uri
       return (
         // tslint:disable:no-unsafe-any
         <ide-haskell-item-position on={{ click: this.clickPosition }}>
@@ -68,7 +72,9 @@ export class OutputPanelItem implements JSX.ElementClass {
     if (this.props.model.context) {
       return (
         // tslint:disable-next-line:no-unsafe-any
-        <ide-haskell-item-context>{this.props.model.context}</ide-haskell-item-context>
+        <ide-haskell-item-context>
+          {this.props.model.context}
+        </ide-haskell-item-context>
       )
     } else {
       return ''
