@@ -16,8 +16,6 @@ let pluginManager: PluginManager | undefined
 let outputPanel: OutputPanel.OutputPanel | undefined
 let menu: CompositeDisposable | undefined
 
-export { config } from './config'
-
 function cleanConfig() {
   /*noop*/
 }

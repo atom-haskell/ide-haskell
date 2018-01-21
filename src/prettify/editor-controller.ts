@@ -1,11 +1,6 @@
 import { TextEditor, CompositeDisposable } from 'atom'
 import { prettifyFile } from './index'
-import { config } from '../config'
 import { IEditorController } from '../plugin-manager'
-
-type SavePrettifyFormats = {
-  [K in keyof typeof config.onSavePrettifyFormats.properties]: boolean
-}
 
 export class PrettifyEditorController implements IEditorController {
   private disposables = new CompositeDisposable()
@@ -36,13 +31,9 @@ export class PrettifyEditorController implements IEditorController {
       })
     ) {
       const format = this.editor.getGrammar().scopeName.replace(/\./g, '*')
-      const enabled: SavePrettifyFormats | undefined = atom.config.get(
-        'ide-haskell.onSavePrettifyFormats',
-        { scope: this.editor.getRootScopeDescriptor() },
-      )
-      if (!enabled) {
-        throw new Error("Couldn't get 'ide-haskell.onSavePrettifyFormats'")
-      }
+      const enabled = atom.config.get('ide-haskell.onSavePrettifyFormats', {
+        scope: this.editor.getRootScopeDescriptor(),
+      })
       if (!enabled[format]) {
         return
       }
