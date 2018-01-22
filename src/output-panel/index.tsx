@@ -58,18 +58,32 @@ export class OutputPanel {
     if (this.results) throw new Error('Results already connected!')
     this.results = results
 
+    let lastUpdateTime = Date.now()
+    let collectedSeverities = new Set<UPI.TSeverity>()
     const didUpdate = (severities: UPI.TSeverity[]) => {
       this.currentResult = 0
       // tslint:disable-next-line:no-floating-promises
       this.updateItems()
+      const newUpdateTime = Date.now()
+      if (
+        newUpdateTime - lastUpdateTime <
+        atom.config.get('ide-haskell.switchTabOnCheckInterval')
+      ) {
+        for (const s of severities) {
+          collectedSeverities.add(s)
+        }
+      } else {
+        collectedSeverities = new Set(severities)
+      }
       if (
         atom.config.get('ide-haskell.autoHideOutput') &&
         (!this.results || this.results.isEmpty(severities))
       ) {
         this.hide()
       } else if (atom.config.get('ide-haskell.switchTabOnCheck')) {
-        this.activateFirstNonEmptyTab(severities)
+        this.activateFirstNonEmptyTab(collectedSeverities)
       }
+      lastUpdateTime = newUpdateTime
     }
 
     this.disposables.add(this.results.onDidUpdate(didUpdate))
@@ -235,9 +249,9 @@ export class OutputPanel {
     this.updateItems()
   }
 
-  public activateFirstNonEmptyTab(severities: UPI.TSeverity[]) {
+  public activateFirstNonEmptyTab(severities: Set<UPI.TSeverity>) {
     for (const tab of this.tabs.values()) {
-      if (!severities.includes(tab.name)) continue
+      if (!severities.has(tab.name)) continue
       const count = tab.count
       if (count && count > 0) {
         // tslint:disable-next-line:no-floating-promises

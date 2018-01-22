@@ -18,6 +18,7 @@ declare module 'atom' {
       'source*hsig': boolean
     }
     'ide-haskell.switchTabOnCheck': boolean
+    'ide-haskell.switchTabOnCheckInterval': number
     'ide-haskell.expressionTypeInterval': number
     'ide-haskell.onCursorMove': 'Show Tooltip' | 'Hide Tooltip' | 'Nothing'
     'ide-haskell.messageDisplayFrontend': 'builtin' | 'linter'
@@ -36,7 +37,7 @@ declare module 'atom' {
       'onSavePrettifyFormats.source*haskell': boolean
       'onSavePrettifyFormats.text*tex*latex*haskell': boolean
       'onSavePrettifyFormats.source*hsig': boolean
-      onSavePrettifyFormats: {
+      'onSavePrettifyFormats': {
         'source*c2hs': boolean
         'source*cabal': boolean
         'source*hsc2hs': boolean
@@ -45,6 +46,7 @@ declare module 'atom' {
         'source*hsig': boolean
       }
       switchTabOnCheck: boolean
+      switchTabOnCheckInterval: number
       expressionTypeInterval: number
       onCursorMove: 'Show Tooltip' | 'Hide Tooltip' | 'Nothing'
       messageDisplayFrontend: 'builtin' | 'linter'

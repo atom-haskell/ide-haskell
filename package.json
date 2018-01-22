@@ -127,8 +127,16 @@
     "switchTabOnCheck": {
       "type": "boolean",
       "default": true,
-      "description": "Switch to error tab after file check finished",
+      "description":
+        "Automatically switch to leftmost updated tab (error/warning/lint/etc)",
       "order": 10
+    },
+    "switchTabOnCheckInterval": {
+      "type": "integer",
+      "default": 300,
+      "description":
+        "Messages grouping time interval in ms, raise this if switchTabOnCheck switches to wrong tabs",
+      "order": 11
     },
     "expressionTypeInterval": {
       "type": "integer",
