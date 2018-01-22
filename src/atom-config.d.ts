@@ -37,7 +37,7 @@ declare module 'atom' {
       'onSavePrettifyFormats.source*haskell': boolean
       'onSavePrettifyFormats.text*tex*latex*haskell': boolean
       'onSavePrettifyFormats.source*hsig': boolean
-      'onSavePrettifyFormats': {
+      onSavePrettifyFormats: {
         'source*c2hs': boolean
         'source*cabal': boolean
         'source*hsc2hs': boolean
