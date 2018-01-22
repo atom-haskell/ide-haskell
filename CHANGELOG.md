@@ -1,3 +1,14 @@
+## 2.2.3
+* Fix for https://github.com/atom-haskell/ide-haskell-cabal/issues/20
+    * Group fast-firing messages for purposes of switchTabOnCheck
+    * Do not rely on severities ordering when deciding which tab to switch to if `switchTabOnCheck` is enabled
+* Code cleanup (strict boolean expressions)
+* Pin node types version
+* Move config schema to package.json
+* Add Travis CI builds
+* Add the most basic tests
+* Bump Atom version
+
 ## 2.2.2
 * Update atom typings; bump devDependencies
 * Add lodash to dependencies
