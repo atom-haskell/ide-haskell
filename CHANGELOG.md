@@ -1,6 +1,6 @@
 ## 2.2.3
 
--   Fix for https://github.com/atom-haskell/ide-haskell-cabal/issues/20
+-   Fix for <https://github.com/atom-haskell/ide-haskell-cabal/issues/20>
     -   Group fast-firing messages for purposes of `switchTabOnCheck`
     -   Do not rely on severities ordering when deciding which tab to
         switch to if `switchTabOnCheck` is enabled
