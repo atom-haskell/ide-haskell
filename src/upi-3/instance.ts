@@ -43,7 +43,7 @@ export function instance(
       detail,
       tooltip,
     }: UPI.IShowTooltipParams) {
-      if (!eventType) {
+      if (eventType === undefined) {
         eventType = getEventType(detail)
       }
       return pluginManager.tooltipRegistry.showTooltip(editor, eventType, {

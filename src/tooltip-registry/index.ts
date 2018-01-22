@@ -52,7 +52,7 @@ export class TooltipRegistry {
     ]
     const record = {
       pluginName,
-      eventTypes: provider.eventTypes || defaultEvT,
+      eventTypes: provider.eventTypes ? provider.eventTypes : defaultEvT,
       priority: provider.priority,
       handler: provider.handler,
     }

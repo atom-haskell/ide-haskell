@@ -161,9 +161,6 @@ export class CREditorControl implements IEditorController {
   }
 
   private decorateMarker(m: DisplayMarker, r: ResultItem) {
-    if (!this.gutter) {
-      return
-    }
     const cls = { class: `ide-haskell-${r.severity}` }
     this.gutter.decorateMarker(m, { type: 'line-number', ...cls })
     this.editor.decorateMarker(m, { type: 'highlight', ...cls })

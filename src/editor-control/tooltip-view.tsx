@@ -29,7 +29,8 @@ export class TooltipMessage {
   }
 
   public writeAfterUpdate() {
-    this.element.parentElement &&
+    if (this.element.parentElement) {
       this.element.parentElement.classList.add('ide-haskell')
+    }
   }
 }

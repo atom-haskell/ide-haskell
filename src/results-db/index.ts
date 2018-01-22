@@ -37,7 +37,10 @@ export class ResultsDB {
   public didUpdate(providerId: number, msgs: ResultItem[]) {
     const uris: string[] = msgs.map((v) => v.uri).filter(notUndefined)
     for (const [k, v] of Array.from(this.messages)) {
-      if (v.providerId === providerId || (v.uri && uris.includes(v.uri))) {
+      if (
+        v.providerId === providerId ||
+        (v.uri !== undefined && uris.includes(v.uri))
+      ) {
         this.messages.delete(k)
       }
     }

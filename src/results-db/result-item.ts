@@ -18,7 +18,7 @@ export class ResultItem {
     this.uri = uri
     this.message = MessageObject.fromObject(message)
     this.severity = severity
-    this.position = position && Point.fromObject(position as any) // TODO: fix this as soon as new typings available
+    this.position = position ? Point.fromObject(position) : undefined
     this.context = context
     this._isValid = true
   }
@@ -32,14 +32,14 @@ export class ResultItem {
   }
 
   public hash() {
-    if (this._hash) {
+    if (this._hash !== undefined) {
       return this._hash
     }
     const h = createHash('sha1')
     h.update(
       JSON.stringify({
         uri: this.uri,
-        position: this.position && this.position.serialize(),
+        position: this.position ? this.position.serialize() : undefined,
         message: this.message.raw(),
         severity: this.severity,
         context: this.context,

@@ -29,8 +29,9 @@ export class StatusIcon implements ElementClass {
             res.push(`
           <ide-haskell-status-item>
             <ide-haskell-status-icon data-status="${status}">${plugin}</ide-haskell-status-icon>
-            <ide-haskell-status-detail>${detail ||
-              ''}</ide-haskell-status-detail>
+            <ide-haskell-status-detail>${
+              detail ? detail : ''
+            }</ide-haskell-status-detail>
           </ide-haskell-status-item>
           `)
           }
@@ -66,7 +67,8 @@ export class StatusIcon implements ElementClass {
       ready: 0,
     }
     const stArr = Array.from(this.props.statusMap.values())
+    if (stArr.length === 0) return 'ready'
     const [consensus] = stArr.sort((a, b) => prio[b.status] - prio[a.status])
-    return consensus ? consensus.status : 'ready'
+    return consensus.status
   }
 }

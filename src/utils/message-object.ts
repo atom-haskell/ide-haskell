@@ -20,7 +20,7 @@ export class MessageObject {
 
   @Memoize()
   public toHtml(): string {
-    if (cast.isTextMessage(this.msg) && this.msg.highlighter) {
+    if (cast.isTextMessage(this.msg) && this.msg.highlighter !== undefined) {
       const html = highlight({
         fileContents: this.msg.text,
         scopeName: this.msg.highlighter,

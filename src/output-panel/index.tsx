@@ -103,7 +103,7 @@ export class OutputPanel {
         </ide-haskell-panel-heading>
         <OutputPanelItems
           model={this.results}
-          filter={this.itemFilter || (() => true)}
+          filter={this.itemFilter}
           ref="items"
         />
       </ide-haskell-panel>
@@ -200,12 +200,12 @@ export class OutputPanel {
     let currentUri: string | undefined
     if (this.state.fileFilter) {
       const ed = atom.workspace.getActiveTextEditor()
-      currentUri = ed && ed.getPath()
+      currentUri = ed ? ed.getPath() : undefined
     }
     let scroll: boolean = false
     if (activeTab) {
       const ato = this.tabs.get(activeTab)
-      if (currentUri && ato && ato.uriFilter) {
+      if (currentUri !== undefined && ato && ato.uriFilter) {
         this.itemFilter = ({ uri, severity }) =>
           severity === activeTab && uri === currentUri
       } else {
@@ -250,7 +250,8 @@ export class OutputPanel {
 
   public showItem(item: ResultItem) {
     this.activateTab(item.severity)
-    this.refs.items && this.refs.items.showItem(item)
+    // tslint:disable-next-line:no-floating-promises
+    if (this.refs.items) this.refs.items.showItem(item)
   }
 
   public getActiveTab() {
@@ -275,7 +276,7 @@ export class OutputPanel {
         uriFilter,
         autoScroll,
       })
-      this.state.activeTab && this.activateTab(this.state.activeTab)
+      if (this.state.activeTab) this.activateTab(this.state.activeTab)
     }
     return this.update()
   }
@@ -304,7 +305,7 @@ export class OutputPanel {
 
   public showNextError() {
     if (!this.results) return
-    const rs = Array.from(this.results.filter(({ uri }) => !!uri))
+    const rs = Array.from(this.results.filter(({ uri }) => uri !== undefined))
     if (rs.length === 0) {
       return
     }
@@ -319,7 +320,7 @@ export class OutputPanel {
 
   public showPrevError() {
     if (!this.results) return
-    const rs = Array.from(this.results.filter(({ uri }) => !!uri))
+    const rs = Array.from(this.results.filter(({ uri }) => uri !== undefined))
     if (rs.length === 0) {
       return
     }

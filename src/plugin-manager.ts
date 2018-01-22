@@ -46,17 +46,6 @@ export type ECMap<T extends IEditorController> = WeakMap<
   { controller: T; disposable: Disposable }
 >
 
-export interface TMap
-  extends Map<IEditorControllerFactory, ECMap<IEditorController>> {
-  get<U extends IEditorController, T extends IEditorControllerFactoryT<U>>(
-    key: T,
-  ): ECMap<U>
-  set<U extends IEditorController, T extends IEditorControllerFactoryT<U>>(
-    key: T,
-    val: ECMap<U>,
-  ): this
-}
-
 export class PluginManager {
   public resultsDB: ResultsDB
   public configParamManager: ConfigParamManager
@@ -74,7 +63,10 @@ export class PluginManager {
   > = new Emitter()
   private statusBarTile?: StatusBar.Tile
   private statusBarView?: StatusBarView
-  private controllers: TMap = new Map()
+  private controllers = new Map<
+    IEditorControllerFactory,
+    ECMap<IEditorController>
+  >()
   constructor(state: IState, public outputPanel: OutputPanel) {
     this.disposables.add(this.emitter)
 
@@ -101,7 +93,7 @@ export class PluginManager {
   public deactivate() {
     this.resultsDB.destroy()
     this.disposables.dispose()
-    this.checkResultsProvider && this.checkResultsProvider.destroy()
+    if (this.checkResultsProvider) this.checkResultsProvider.destroy()
 
     // tslint:disable-next-line:no-floating-promises
     this.outputPanel.reallyDestroy()
@@ -153,9 +145,9 @@ export class PluginManager {
     U extends IEditorController,
     T extends IEditorControllerFactoryT<U>
   >(factory: T, editor: TextEditor): U | undefined {
-    const ecmap = this.controllers.get<U, T>(factory)
-    const rec = ecmap && ecmap.get(editor)
-    return rec && rec.controller
+    const ecmap = this.controllers.get(factory)
+    const rec = ecmap ? ecmap.get(editor) : undefined
+    return rec ? (rec.controller as U) : undefined
   }
 
   public setLinter(linter: Linter.IndieDelegate) {
@@ -180,9 +172,7 @@ export class PluginManager {
   }
 
   public backendStatus(pluginName: string, st: UPI.IStatus) {
-    if (this.outputPanel) {
-      this.outputPanel.backendStatus(pluginName, st)
-    }
+    this.outputPanel.backendStatus(pluginName, st)
     if (this.statusBarView) {
       this.statusBarView.backendStatus(pluginName, st)
     }
@@ -201,7 +191,7 @@ export class PluginManager {
       this.controllers.delete(factory)
       for (const te of atom.workspace.getTextEditors()) {
         const rec = map.get(te)
-        rec && rec.disposable.dispose()
+        if (rec) rec.disposable.dispose()
       }
     })
   }

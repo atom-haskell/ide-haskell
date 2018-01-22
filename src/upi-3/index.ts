@@ -68,7 +68,7 @@ export function consume(
     } else {
       ;({ handler, priority, eventTypes } = tooltip)
     }
-    if (!priority) {
+    if (priority === undefined) {
       priority = 100
     }
     disp.add(

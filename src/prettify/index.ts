@@ -17,10 +17,9 @@ export async function prettifyFile(editor: TextEditor) {
       editor.getRootScopeDescriptor(),
     )
     editor.setText(stdout)
-    if (editor.getLastCursor()) {
-      editor
-        .getLastCursor()
-        .setBufferPosition(firstCursor, { autoscroll: false })
+    const lastCursor = editor.getLastCursor()
+    if (lastCursor) {
+      lastCursor.setBufferPosition(firstCursor, { autoscroll: false })
     }
     cursors.forEach((cursor) => {
       editor.addCursorAtBufferPosition(cursor, { autoscroll: false })

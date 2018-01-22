@@ -28,9 +28,7 @@ export class OutputPanelItem implements JSX.ElementClass {
   }
 
   public async update(props: IProps) {
-    if (props && props.model) {
-      this.props.model = props.model
-    }
+    this.props.model = props.model
     return etch.update(this)
   }
 
@@ -39,7 +37,7 @@ export class OutputPanelItem implements JSX.ElementClass {
   }
 
   public clickPosition = () => {
-    if (this.props.model.uri) {
+    if (this.props.model.uri !== undefined) {
       // tslint:disable-next-line:no-floating-promises
       atom.workspace.open(this.props.model.uri, {
         searchAllPanes: true,
@@ -51,7 +49,7 @@ export class OutputPanelItem implements JSX.ElementClass {
   }
 
   private renderPosition() {
-    if (this.props.model.uri) {
+    if (this.props.model.uri !== undefined) {
       const positionText = this.props.model.position
         ? `${this.props.model.uri}: ${this.props.model.position.row + 1}, ${this
             .props.model.position.column + 1}`
@@ -69,7 +67,7 @@ export class OutputPanelItem implements JSX.ElementClass {
   }
 
   private renderContext() {
-    if (this.props.model.context) {
+    if (this.props.model.context !== undefined) {
       return (
         // tslint:disable-next-line:no-unsafe-any
         <ide-haskell-item-context>

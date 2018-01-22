@@ -44,22 +44,19 @@ export function activate(state: IState) {
 
   disposables = new CompositeDisposable()
 
-  pluginManager = new PluginManager(
-    state,
-    outputPanel || new OutputPanel.OutputPanel(),
-  )
+  pluginManager = new PluginManager(state, deserializeOutputPanel())
 
   // global commands
   disposables.add(
     atom.commands.add('atom-workspace', {
       'ide-haskell:toggle-output': () => {
-        pluginManager && pluginManager.togglePanel()
+        if (pluginManager) pluginManager.togglePanel()
       },
       'ide-haskell:next-error': () => {
-        pluginManager && pluginManager.nextError()
+        if (pluginManager) pluginManager.nextError()
       },
       'ide-haskell:prev-error': () => {
-        pluginManager && pluginManager.prevError()
+        if (pluginManager) pluginManager.prevError()
       },
     }),
     atom.commands.add('atom-text-editor.ide-haskell', {
@@ -74,7 +71,7 @@ export function activate(state: IState) {
           pluginManager && pluginManager.controller(currentTarget.getModel())
         if (controller && controller.tooltips.has()) {
           controller.tooltips.hide()
-        } else if (abortKeyBinding) {
+        } else {
           abortKeyBinding()
         }
       },
@@ -96,13 +93,18 @@ export function activate(state: IState) {
 }
 
 export function deactivate() {
-  pluginManager && pluginManager.deactivate()
+  if (pluginManager) pluginManager.deactivate()
 
   // clear commands
-  disposables && disposables.dispose()
+  if (disposables) disposables.dispose()
 
-  menu && menu.dispose()
+  if (menu) menu.dispose()
   atom.menu.update()
+
+  disposables = undefined
+  pluginManager = undefined
+  menu = undefined
+  outputPanel = undefined
 }
 
 export function serialize() {
@@ -112,8 +114,8 @@ export function serialize() {
   return undefined
 }
 
-export function deserializeOutputPanel(state: OutputPanel.IState) {
-  outputPanel = new OutputPanel.OutputPanel(state)
+export function deserializeOutputPanel(state?: OutputPanel.IState) {
+  if (!outputPanel) outputPanel = new OutputPanel.OutputPanel(state)
   return outputPanel
 }
 

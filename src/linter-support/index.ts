@@ -25,7 +25,7 @@ export class LinterSupport {
 
   private *messages(): IterableIterator<Linter.Message> {
     for (const result of this.resultDb.results()) {
-      if (result.uri && result.position) {
+      if (result.uri !== undefined && result.position) {
         let severity: 'error' | 'warning' | 'info'
         switch (result.severity) {
           case 'error':

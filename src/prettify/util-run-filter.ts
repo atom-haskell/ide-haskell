@@ -14,7 +14,7 @@ export async function runFilter({ command, args, cwd, stdin }: IRunFilterArgs) {
         command,
         args,
         { cwd },
-        (error, stdout, stderr) => {
+        (error: Error | undefined, stdout, stderr) => {
           if (!error) {
             resolve({ stdout, stderr })
           } else {
@@ -22,7 +22,7 @@ export async function runFilter({ command, args, cwd, stdin }: IRunFilterArgs) {
           }
         },
       )
-      if (stdin) {
+      if (stdin !== undefined) {
         proc.stdin.write(stdin)
         proc.stdin.end()
       }

@@ -19,15 +19,19 @@ async function makeTempFile(contents: string) {
 
 async function read(path: string): Promise<string> {
   return new Promise<string>((resolve, reject) => {
-    FS.readFile(path, { encoding: 'utf-8' }, (error, text) => {
-      if (error) {
-        // tslint:disable-next-line:no-console
-        console.error(error)
-        reject(error)
-      } else {
-        resolve(text)
-      }
-    })
+    FS.readFile(
+      path,
+      { encoding: 'utf-8' },
+      (error: NodeJS.ErrnoException | undefined, text) => {
+        if (error) {
+          // tslint:disable-next-line:no-console
+          console.error(error)
+          reject(error)
+        } else {
+          resolve(text)
+        }
+      },
+    )
   })
 }
 
@@ -51,7 +55,7 @@ export async function format(
   }
 }
 
-function handleErr(err: NodeJS.ErrnoException): void {
+function handleErr(err?: NodeJS.ErrnoException): void {
   if (err) {
     atom.notifications.addError(err.name, {
       detail: err.message,

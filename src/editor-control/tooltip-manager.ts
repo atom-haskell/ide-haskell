@@ -49,7 +49,7 @@ export class TooltipManager {
     source?: string,
     template?: IMarkerProperties,
   ) {
-    if (!type) {
+    if (type === undefined) {
       this.markers.clear()
       return
     }
@@ -71,11 +71,11 @@ export class TooltipManager {
     source?: string,
     template?: IMarkerProperties,
   ) {
-    if (!type) {
+    if (type === undefined) {
       return this.markers.getMarkerCount() > 0
     }
     if (!template) {
-      return this.markers.get(type, source).getMarkerCount()
+      return this.markers.get(type, source).getMarkerCount() > 0
     } else {
       return this.markers.get(type, source).findMarkers(template).length > 0
     }

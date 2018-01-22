@@ -1,1 +1,14 @@
-{ "extends": "atom-haskell-tslint-rules" }
+{
+  "extends": "atom-haskell-tslint-rules",
+  "rules": {
+    "strict-type-predicates": true,
+    "strict-boolean-expressions": [
+      true,
+      "allow-null-union",
+      "allow-undefined-union",
+      "allow-string",
+      "allow-number",
+      "allow-boolean-or-undefined"
+    ]
+  }
+}

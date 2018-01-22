@@ -81,10 +81,10 @@ export class EditorControl implements IEditorController {
   }
 
   public destroy() {
-    if (this.exprTypeTimeout) {
+    if (this.exprTypeTimeout !== undefined) {
       clearTimeout(this.exprTypeTimeout)
     }
-    if (this.selTimeout) {
+    if (this.selTimeout !== undefined) {
       clearTimeout(this.selTimeout)
     }
     this.disposables.dispose()
@@ -99,11 +99,11 @@ export class EditorControl implements IEditorController {
       case 'context':
         if (!this.lastMouseBufferPt) return undefined
         pos = this.lastMouseBufferPt
-        const [selRange] = this.editor
+        const selRanges = this.editor
           .getSelections()
           .map((sel) => sel.getBufferRange())
           .filter((sel) => sel.containsPoint(pos))
-        crange = selRange || new Range(pos, pos)
+        crange = selRanges.length > 0 ? selRanges[0] : new Range(pos, pos)
         break
       case 'keyboard':
       case 'selection':
@@ -141,11 +141,13 @@ export class EditorControl implements IEditorController {
     }
     this.lastMouseBufferPt = bufferPt
 
-    if (this.exprTypeTimeout) {
+    if (this.exprTypeTimeout !== undefined) {
       clearTimeout(this.exprTypeTimeout)
     }
     this.exprTypeTimeout = window.setTimeout(
-      () => bufferPt && this.shouldShowTooltip(bufferPt, TEventRangeType.mouse),
+      () => {
+        this.shouldShowTooltip(bufferPt, TEventRangeType.mouse)
+      },
       atom.config.get('ide-haskell.expressionTypeInterval', {
         scope: this.editor.getRootScopeDescriptor(),
       }),
@@ -153,7 +155,7 @@ export class EditorControl implements IEditorController {
   }
 
   private stopTrackingMouseBufferPosition = () => {
-    if (this.exprTypeTimeout) {
+    if (this.exprTypeTimeout !== undefined) {
       return clearTimeout(this.exprTypeTimeout)
     }
   }
@@ -161,12 +163,12 @@ export class EditorControl implements IEditorController {
   private trackSelection = ({ newBufferRange }: { newBufferRange: Range }) => {
     this.handleCursorUnderTooltip(newBufferRange)
 
-    if (this.selTimeout) {
+    if (this.selTimeout !== undefined) {
       clearTimeout(this.selTimeout)
     }
     if (newBufferRange.isEmpty()) {
       this.tooltips.hide(TEventRangeType.selection)
-      if (this.exprTypeTimeout) {
+      if (this.exprTypeTimeout !== undefined) {
         clearTimeout(this.exprTypeTimeout)
       }
       // tslint:disable-next-line:no-floating-promises
@@ -230,7 +232,9 @@ export class EditorControl implements IEditorController {
     const ymin = Math.round(
       Math.min(ttbox.top + ttbox.height, slcl.top + slcl.height),
     )
-    const tt = document.querySelector('ide-haskell-tooltip') as HTMLElement
+    const tt = document.querySelector(
+      'ide-haskell-tooltip',
+    ) as HTMLElement | null
     if (tt) {
       if (ymax <= ymin && xmax <= xmin) {
         tt.classList.add('ide-haskell-tooltip-subdued')
