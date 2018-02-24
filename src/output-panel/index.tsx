@@ -28,10 +28,18 @@ export class OutputPanel {
   private tabs: Map<string, IBtnDesc> = new Map()
   private itemFilter?: (item: ResultItem) => boolean
   private results?: ResultsDB
+  // tslint:disable-next-line:no-uninitialized
+  private buttonsClass: 'buttons-top' | 'buttons-left'
   constructor(
     private state: IState = { fileFilter: false, activeTab: 'error' },
   ) {
+    this.setButtonsClass(atom.config.get('ide-haskell.buttonsPosition'))
     etch.initialize(this)
+    atom.config.onDidChange('ide-haskell.buttonsPosition', ({ newValue }) => {
+      this.setButtonsClass(newValue)
+      // tslint:disable-next-line:no-floating-promises
+      this.update()
+    })
 
     for (const tab of ['error', 'warning', 'lint']) {
       // tslint:disable-next-line:no-floating-promises
@@ -91,12 +99,10 @@ export class OutputPanel {
 
   public render() {
     if (!this.results) {
-      // tslint:disable-next-line:no-unsafe-any
       return <ide-haskell-panel />
     }
     return (
-      // tslint:disable:no-unsafe-any
-      <ide-haskell-panel>
+      <ide-haskell-panel class={this.buttonsClass}>
         <ide-haskell-panel-heading>
           <StatusIcon statusMap={this.statusMap} />
           <OutputPanelButtons
@@ -119,7 +125,6 @@ export class OutputPanel {
           ref="items"
         />
       </ide-haskell-panel>
-      // tslint:enable:no-unsafe-any
     )
   }
 
@@ -349,5 +354,16 @@ export class OutputPanel {
     this.state.fileFilter = !this.state.fileFilter
     // tslint:disable-next-line:no-floating-promises
     this.updateItems()
+  }
+
+  private setButtonsClass(buttonsPos: 'top' | 'left') {
+    switch (buttonsPos) {
+      case 'top':
+        this.buttonsClass = 'buttons-top'
+        break
+      case 'left':
+        this.buttonsClass = 'buttons-left'
+        break
+    }
   }
 }

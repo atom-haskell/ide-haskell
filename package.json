@@ -3,16 +3,10 @@
   "main": "./lib/ide-haskell",
   "version": "2.2.3",
   "description": "Haskell IDE",
-  "keywords": [
-    "ide-haskell",
-    "ide",
-    "haskell"
-  ],
+  "keywords": ["ide-haskell", "ide", "haskell"],
   "repository": "https://github.com/atom-haskell/ide-haskell",
   "license": "MIT",
-  "activationHooks": [
-    "language-haskell:grammar-used"
-  ],
+  "activationHooks": ["language-haskell:grammar-used"],
   "engines": {
     "atom": ">=1.23.0 <2.0.0"
   },
@@ -133,13 +127,15 @@
     "switchTabOnCheck": {
       "type": "boolean",
       "default": true,
-      "description": "Automatically switch to leftmost updated tab (error/warning/lint/etc)",
+      "description":
+        "Automatically switch to leftmost updated tab (error/warning/lint/etc)",
       "order": 10
     },
     "switchTabOnCheckInterval": {
       "type": "integer",
       "default": 300,
-      "description": "Messages grouping time interval in ms, raise this if switchTabOnCheck switches to wrong tabs",
+      "description":
+        "Messages grouping time interval in ms, raise this if switchTabOnCheck switches to wrong tabs",
       "order": 11
     },
     "expressionTypeInterval": {
@@ -150,23 +146,18 @@
     },
     "onCursorMove": {
       "type": "string",
-      "description": "Show check results (error, lint) description tooltips when text cursor is near marker, close open tooltips, or do nothing?",
-      "enum": [
-        "Show Tooltip",
-        "Hide Tooltip",
-        "Nothing"
-      ],
+      "description":
+        "Show check results (error, lint) description tooltips when text cursor is near marker, close open tooltips, or do nothing?",
+      "enum": ["Show Tooltip", "Hide Tooltip", "Nothing"],
       "default": "Nothing",
       "order": 40
     },
     "messageDisplayFrontend": {
       "type": "string",
       "default": "builtin",
-      "description": "Frontend to use for displaying errors/warnigns/lints. Builtin (i.e. output panel) and atom-linter supported. Requires Atom restart.",
-      "enum": [
-        "builtin",
-        "linter"
-      ],
+      "description":
+        "Frontend to use for displaying errors/warnigns/lints. Builtin (i.e. output panel) and atom-linter supported. Requires Atom restart.",
+      "enum": ["builtin", "linter"],
       "order": 45
     },
     "stylishHaskellPath": {
@@ -180,7 +171,8 @@
       "type": "array",
       "default": [],
       "title": "Prettifier Arguments",
-      "description": "Additional arguments to pass to prettifier; comma-separated",
+      "description":
+        "Additional arguments to pass to prettifier; comma-separated",
       "items": {
         "type": "string"
       },
@@ -195,7 +187,8 @@
     "startupMessageIdeBackend": {
       "type": "boolean",
       "default": true,
-      "description": "Show info message about haskell-ide-backend service on activation",
+      "description":
+        "Show info message about haskell-ide-backend service on activation",
       "order": 80
     },
     "panelPosition": {
@@ -203,13 +196,15 @@
       "default": "bottom",
       "title": "Default Panel Position",
       "description": "Default output panel position",
-      "enum": [
-        "bottom",
-        "left",
-        "right",
-        "center"
-      ],
+      "enum": ["bottom", "left", "right", "center"],
       "order": 41
+    },
+    "buttonsPosition": {
+      "type": "string",
+      "default": "top",
+      "title": "Panel buttons position",
+      "enum": ["top", "left"],
+      "order": 42
     },
     "hideParameterValues": {
       "type": "boolean",

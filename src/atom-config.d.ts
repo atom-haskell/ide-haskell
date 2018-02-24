@@ -27,6 +27,7 @@ declare module 'atom' {
     'ide-haskell.cabalPath': string
     'ide-haskell.startupMessageIdeBackend': boolean
     'ide-haskell.panelPosition': 'bottom' | 'left' | 'right' | 'center'
+    'ide-haskell.buttonsPosition': 'top' | 'left'
     'ide-haskell.hideParameterValues': boolean
     'ide-haskell.autoHideOutput': boolean
     'ide-haskell': {
@@ -55,6 +56,7 @@ declare module 'atom' {
       cabalPath: string
       startupMessageIdeBackend: boolean
       panelPosition: 'bottom' | 'left' | 'right' | 'center'
+      buttonsPosition: 'top' | 'left'
       hideParameterValues: boolean
       autoHideOutput: boolean
     }

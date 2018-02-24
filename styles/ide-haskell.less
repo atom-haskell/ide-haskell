@@ -65,7 +65,7 @@
 ide-haskell-panel {
   display: flex;
 
-  atom-dock.bottom &, atom-workspace-axis > atom-pane-container & {
+  &.buttons-top {
     width: auto !important;
     flex-direction: column;
     ide-haskell-panel-heading {
@@ -89,7 +89,7 @@ ide-haskell-panel {
       }
     }
   }
-  atom-dock.left &, atom-dock.right & {
+  &.buttons-left {
     height: auto !important;
     flex-direction: row;
     ide-haskell-panel-heading {
