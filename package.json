@@ -64,7 +64,7 @@
     "atom-mocha-test-runner": "^1.2.0",
     "chai": "^4.1.2",
     "mocha": "^5.0.1",
-    "prettier": "prettier/prettier#1.11.0-rc.1",
+    "prettier": "git+https://git@github.com/prettier/prettier",
     "ts-node": "^5.0.0",
     "tslint": "^5.9.1",
     "typedoc": "^0.10.0",
