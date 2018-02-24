@@ -93,7 +93,6 @@ export class TooltipRegistry {
         } catch (e) {
           this.pluginManager.backendStatus(spec.pluginName, {
             status: 'warning',
-            // tslint:disable-next-line:no-unsafe-any
             detail: e.toString(),
           })
           return

@@ -9,7 +9,6 @@ export * from './element-listener'
 export const MAIN_MENU_LABEL = 'Haskell IDE'
 
 export function getEventType(detail: any) {
-  // tslint:disable-next-line:no-unsafe-any
   if (
     detail &&
     (detail.contextCommand || (detail[0] && detail[0].contextCommand))
@@ -25,7 +24,6 @@ export function bufferPositionFromMouseEvent(
   editor: TextEditor,
   event: MouseEvent,
 ) {
-  // tslint:disable-next-line:no-unsafe-any
   const sp: Point = (atom.views.getView(
     editor,
   ) as any).component.screenPositionForMouseEvent(event)

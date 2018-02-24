@@ -4,8 +4,7 @@ import { StatusIcon } from '../output-panel/views/status-icon'
 import * as UPI from 'atom-haskell-upi'
 
 export class StatusBarView {
-  // tslint:disable-next-line:no-uninitialized
-  public element: HTMLElement
+  public element!: HTMLElement
   private statusMap: Map<string, UPI.IStatus>
   constructor(private panel: OutputPanel) {
     this.statusMap = new Map()
@@ -14,14 +13,12 @@ export class StatusBarView {
 
   public render() {
     return (
-      // tslint:disable:no-unsafe-any
       <div class="ide-haskell inline-block" on={{ click: this.didClick }}>
         <span>
           <ide-haskell-lambda />
           <StatusIcon statusMap={this.statusMap} />
         </span>
       </div>
-      // tslint:enable:no-unsafe-any
     )
   }
 

@@ -5,17 +5,14 @@ export interface IProps extends JSX.Props {
   model: ResultItem
 }
 
-// tslint:disable-next-line:no-unsafe-any
 export class OutputPanelItem implements JSX.ElementClass {
-  // tslint:disable-next-line: no-uninitialized
-  public element: HTMLElement
+  public element!: HTMLElement
   constructor(public props: IProps) {
     etch.initialize(this)
   }
 
   public render() {
     return (
-      // tslint:disable:no-unsafe-any
       <ide-haskell-panel-item key={this.props.model.hash()}>
         {this.renderPosition()}
         {this.renderContext()}
@@ -23,7 +20,6 @@ export class OutputPanelItem implements JSX.ElementClass {
           innerHTML={this.props.model.message.toHtml()}
         />
       </ide-haskell-panel-item>
-      // tslint:enable:no-unsafe-any
     )
   }
 
@@ -55,11 +51,9 @@ export class OutputPanelItem implements JSX.ElementClass {
             .props.model.position.column + 1}`
         : this.props.model.uri
       return (
-        // tslint:disable:no-unsafe-any
         <ide-haskell-item-position on={{ click: this.clickPosition }}>
           {positionText}
         </ide-haskell-item-position>
-        // tslint:enable:no-unsafe-any
       )
     } else {
       return ''
@@ -69,7 +63,6 @@ export class OutputPanelItem implements JSX.ElementClass {
   private renderContext() {
     if (this.props.model.context !== undefined) {
       return (
-        // tslint:disable-next-line:no-unsafe-any
         <ide-haskell-item-context>
           {this.props.model.context}
         </ide-haskell-item-context>

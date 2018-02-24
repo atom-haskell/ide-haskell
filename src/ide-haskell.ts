@@ -25,7 +25,6 @@ export function activate(state: IState) {
 
   atom.views.getView(atom.workspace).classList.add('ide-haskell')
 
-  // tslint:disable-next-line:no-unsafe-any
   require('etch').setScheduler(atom.views)
 
   upiProvided = false

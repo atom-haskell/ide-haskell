@@ -10,8 +10,7 @@ type ElementClass = JSX.ElementClass
 
 export class StatusIcon implements ElementClass {
   private disposables: CompositeDisposable
-  // tslint:disable-next-line:no-uninitialized
-  private element: HTMLElement
+  private element!: HTMLElement
   constructor(public props: IProps) {
     this.disposables = new CompositeDisposable()
 
@@ -43,7 +42,6 @@ export class StatusIcon implements ElementClass {
 
   public render() {
     return (
-      // tslint:disable-next-line:no-unsafe-any
       <ide-haskell-status-icon dataset={{ status: this.calcCurrentStatus() }} />
     )
   }

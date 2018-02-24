@@ -14,7 +14,6 @@ export interface IProps extends JSX.Props {
   activeBtn?: string
 }
 
-// tslint:disable-next-line:no-unsafe-any
 export class OutputPanelButtons implements JSX.ElementClass {
   constructor(public props: IProps) {
     etch.initialize(this)
@@ -22,11 +21,9 @@ export class OutputPanelButtons implements JSX.ElementClass {
 
   public render() {
     return (
-      // tslint:disable:no-unsafe-any
       <ide-haskell-panel-buttons>
         {Array.from(this.renderButtons())}
       </ide-haskell-panel-buttons>
-      // tslint:enable:no-unsafe-any
     )
   }
 

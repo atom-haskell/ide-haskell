@@ -34,9 +34,7 @@ export async function prettifyFile(editor: TextEditor) {
       )
     }
   } catch (e) {
-    // tslint:disable-next-line:no-unsafe-any
     const err: Error = e.error || e
-    // tslint:disable-next-line:no-unsafe-any
     let stderr: string = e.stderr ? e.stderr.trim() : ''
     if (err.message.includes(stderr)) {
       stderr = ''

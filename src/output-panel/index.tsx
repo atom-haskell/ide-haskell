@@ -16,8 +16,7 @@ export interface IState {
 }
 
 export class OutputPanel {
-  // tslint:disable-next-line:no-uninitialized
-  private refs: {
+  private refs!: {
     items?: OutputPanelItems
   }
   private elements: Set<JSX.Element> = new Set()
@@ -28,8 +27,7 @@ export class OutputPanel {
   private tabs: Map<string, IBtnDesc> = new Map()
   private itemFilter?: (item: ResultItem) => boolean
   private results?: ResultsDB
-  // tslint:disable-next-line:no-uninitialized
-  private buttonsClass: 'buttons-top' | 'buttons-left'
+  private buttonsClass!: 'buttons-top' | 'buttons-left'
   constructor(
     private state: IState = { fileFilter: false, activeTab: 'error' },
   ) {

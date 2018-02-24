@@ -13,7 +13,7 @@ export class EventTable {
   private table: TTable
   private layers: Set<DisplayMarkerLayer>
   constructor(private editor: TextEditor, groups: IMarkerGroup[]) {
-    // tslint:disable-next-line:no-null-keyword no-unsafe-any
+    // tslint:disable-next-line:no-null-keyword
     this.table = Object.create(null)
     for (const i of eventRangeTypeVals) {
       this.table[i] = new Map()

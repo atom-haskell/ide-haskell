@@ -11,10 +11,8 @@ export interface IProps<T> {
   store: ConfigParamStore
 }
 
-// tslint:disable-next-line:no-unsafe-any
 export class ParamControl<T> implements UPI.IElementObject<IProps<T>> {
-  // tslint:disable-next-line: no-uninitialized
-  public element: HTMLElement
+  public element!: HTMLElement
   private disposables: CompositeDisposable
   private hiddenValue: boolean
   private value?: T
@@ -55,7 +53,6 @@ export class ParamControl<T> implements UPI.IElementObject<IProps<T>> {
       classList.push('hidden-value')
     }
     return (
-      // tslint:disable:no-unsafe-any
       <ide-haskell-param
         class={classList.join(' ')}
         on={{ click: async () => this.setValue() }}
@@ -64,7 +61,6 @@ export class ParamControl<T> implements UPI.IElementObject<IProps<T>> {
           {this.props.spec.displayTemplate(this.value)}
         </ide-haskell-param-value>
       </ide-haskell-param>
-      // tslint:enable:no-unsafe-any
     )
   }
 

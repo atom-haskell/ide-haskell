@@ -16,7 +16,6 @@ import { listen, bufferPositionFromMouseEvent, MessageObject } from '../utils'
 import { TooltipRegistry } from '../tooltip-registry'
 
 export class CREditorControl implements IEditorController {
-  // tslint:disable-next-line:no-uninitialized
   private gutter: Gutter
   private gutterElement: HTMLElement
   private markers: DisplayMarkerLayer
