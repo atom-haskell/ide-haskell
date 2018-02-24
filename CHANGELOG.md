@@ -1,6 +1,22 @@
+## 2.3.0
+
+-   Bump dependencies. Minimal Atom version is 1.24
+-   Use HTML progress element for progress bar
+
+    This makes it a little bit more consistent with the style guide.
+
+-   Add configuration option for buttons position
+
+    Whereas before buttons (Error/Warning/Lint/etc) position was defined
+    by whether the panel is positioned in bottom dock or left/right one,
+    now the behavior is controlled by a configuration option
+    `ide-haskell.buttonsPosition`, 'Panel buttons position', which can
+    be either 'top' (the default) or 'left'.
+
 ## 2.2.3
 
--   Fix for <https://github.com/atom-haskell/ide-haskell-cabal/issues/20>
+-   Fix for
+    <https://github.com/atom-haskell/ide-haskell-cabal/issues/20>
     -   Group fast-firing messages for purposes of `switchTabOnCheck`
     -   Do not rely on severities ordering when deciding which tab to
         switch to if `switchTabOnCheck` is enabled
@@ -252,7 +268,8 @@
 ## 1.4.0
 
 -   Add more detail to setup instructions (pull request \#140 from
-    @Gabriel439)
+    1)
+
 -   Pretty tooltips
 
 ## 1.3.9
