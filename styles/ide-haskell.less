@@ -2,9 +2,9 @@
 //
 // See https://github.com/atom/atom-dark-ui/blob/master/stylesheets/ui-variables.less
 // for a full listing of what's available.
-@import "octicon-utf-codes";
-@import "ui-variables";
-@import "icon";
+@import 'octicon-utf-codes';
+@import 'ui-variables';
+@import 'icon';
 
 @font-face {
   font-family: 'icomoon';
@@ -20,7 +20,7 @@
   line-height: 1.8em;
   color: @text-color-subtle;
   border: 1px solid @button-border-color;
-  background: fade(@button-background-color,33%);
+  background: fade(@button-background-color, 33%);
   cursor: pointer;
   vertical-align: middle;
 
@@ -37,17 +37,17 @@
     content: @check;
   }
 
-  &[data-status=progress]:before {
+  &[data-status='progress']:before {
     content: @hourglass;
   }
-  &[data-status=ready]:before {
+  &[data-status='ready']:before {
     content: @check;
   }
-  &[data-status=error]:before {
+  &[data-status='error']:before {
     color: @text-color-error;
     content: @alert;
   }
-  &[data-status=warning]:before {
+  &[data-status='warning']:before {
     content: @stop;
     color: @text-color-warning;
   }
@@ -62,17 +62,15 @@ ide-haskell-panel {
     ide-haskell-panel-heading {
       flex-direction: row;
       ide-haskell-panel-buttons {
-        display: flex;
         flex-direction: row;
         ide-haskell-button {
           margin-right: -1px; // hide left border
-          padding: 0 .6em;
           &:first-of-type {
             border-top-left-radius: @component-border-radius;
             border-bottom-left-radius: @component-border-radius;
           }
           &:last-of-type {
-            margin-right: .6em;
+            margin-right: 0.6em;
             border-top-right-radius: @component-border-radius;
             border-bottom-right-radius: @component-border-radius;
           }
@@ -86,17 +84,15 @@ ide-haskell-panel {
     ide-haskell-panel-heading {
       flex-direction: column;
       ide-haskell-panel-buttons {
-        display: flex;
         flex-direction: column;
         ide-haskell-button {
           margin-top: -1px; // hide left border
-          padding: 0 .6em;
           &:first-of-type {
             border-top-left-radius: @component-border-radius;
             border-top-right-radius: @component-border-radius;
           }
           &:last-of-type {
-            margin-bottom: .6em;
+            margin-bottom: 0.6em;
             border-bottom-left-radius: @component-border-radius;
             border-bottom-right-radius: @component-border-radius;
           }
@@ -130,7 +126,7 @@ ide-haskell-panel {
       &.cancel {
         width: 2em;
         border-radius: @component-border-radius;
-        margin: .5ex;
+        margin: 0.5ex;
         &:before {
           .icon;
           display: block;
@@ -142,8 +138,10 @@ ide-haskell-panel {
     }
 
     ide-haskell-panel-buttons {
+      display: flex;
       ide-haskell-button {
         text-transform: capitalize;
+        padding: 0 0.6em;
 
         &.active {
           color: @text-color-highlight;
@@ -154,7 +152,7 @@ ide-haskell-panel {
           content: attr(data-caption);
         }
 
-        &:not([data-count="0"]):before {
+        &:not([data-count='0']):before {
           content: attr(data-caption) ' (' attr(data-count) ')';
         }
       }
@@ -165,12 +163,12 @@ ide-haskell-panel {
       margin: 0.125em;
       font-size: 1.2em;
       &:before {
-        font-family: "icomoon";
-        content: "\e930";
+        font-family: 'icomoon';
+        content: '\e930';
         margin: 0 0.5em;
       }
       &.enabled:before {
-        content: "\e926";
+        content: '\e926';
       }
       border-radius: @component-border-radius;
     }
@@ -183,7 +181,7 @@ ide-haskell-panel {
     font-size: 1.2em;
     margin: 0.125em;
     &:before {
-      content: attr(data-display-name) ":";
+      content: attr(data-display-name) ':';
     }
     ide-haskell-param-value {
       margin-right: 1ex;
@@ -240,7 +238,7 @@ ide-haskell-tooltip {
     border-style: solid;
     border-color: @overlay-border-color transparent;
     display: block;
-    width:0;
+    width: 0;
     position: absolute;
     top: -0.5ch;
     left: 0;
@@ -249,7 +247,7 @@ ide-haskell-tooltip {
     background-repeat: no-repeat;
     margin: 0;
     padding: 0;
-    content: "";
+    content: '';
   }
   & > div {
     text-align: left;
@@ -268,7 +266,8 @@ ide-haskell-tooltip {
   border: solid 2px @overlay-border-color;
   padding: 5px;
   border-radius: 0 0.5em;
-  &.ide-haskell-tooltip-subdued, &:hover {
+  &.ide-haskell-tooltip-subdued,
+  &:hover {
     opacity: 0.3;
   }
 }
@@ -320,7 +319,8 @@ atom-overlay.ide-haskell {
     border-bottom: solid 1px;
   }
   ide-haskell-lambda {
-    -webkit-mask: url('atom://ide-haskell/resources/haskell.svg') no-repeat 50% 50%;
+    -webkit-mask: url('atom://ide-haskell/resources/haskell.svg') no-repeat 50%
+      50%;
     mask: url('atom://ide-haskell/resources/haskell.svg') no-repeat 50% 50%;
     -webkit-mask-size: contain;
     mask-size: contain;

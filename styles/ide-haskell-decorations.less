@@ -1,28 +1,40 @@
-@import "octicon-utf-codes";
-@import "ui-variables";
-@import "icon";
+@import 'octicon-utf-codes';
+@import 'ui-variables';
+@import 'icon';
 
 .highlight {
   &.ide-haskell-lint .region {
-    background: linear-gradient(to right, @background-color-info 0%, fadeout(@background-color-info, 50%) 100%);
+    background: linear-gradient(
+      to right,
+      @background-color-info 0%,
+      fadeout(@background-color-info, 50%) 100%
+    );
   }
   &.ide-haskell-warning .region {
-    background: linear-gradient(to right, @background-color-warning 0%, fadeout(@background-color-warning, 50%) 100%);
+    background: linear-gradient(
+      to right,
+      @background-color-warning 0%,
+      fadeout(@background-color-warning, 50%) 100%
+    );
   }
   &.ide-haskell-error .region {
-    background: linear-gradient(to right, @background-color-error 0%, fadeout(@background-color-error, 50%) 100%);
+    background: linear-gradient(
+      to right,
+      @background-color-error 0%,
+      fadeout(@background-color-error, 50%) 100%
+    );
   }
   &.ide-haskell-type .region {
     background: fade(@background-color-info, 10%);
   }
 }
 
-.gutter[gutter-name="ide-haskell-check-results"] .decoration {
+.gutter[gutter-name='ide-haskell-check-results'] .decoration {
   &:before {
     .icon;
-    font-size:0.8em;
-    width:0.8em;
-    height:0.8em;
+    font-size: 0.8em;
+    width: 0.8em;
+    height: 0.8em;
   }
 
   &.ide-haskell-lint {
@@ -54,6 +66,6 @@
 }
 
 // A hack to catch mouse events only on .scroll-view
-.scroll-view>.lines {
+.scroll-view > .lines {
   pointer-events: none;
 }
