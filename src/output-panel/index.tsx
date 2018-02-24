@@ -15,8 +15,6 @@ export interface IState {
   activeTab: string
 }
 
-export type TPanelPosition = 'bottom' | 'left' | 'top' | 'right'
-
 export class OutputPanel {
   // tslint:disable-next-line:no-uninitialized
   private refs: {
