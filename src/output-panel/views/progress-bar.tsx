@@ -13,15 +13,9 @@ export class ProgressBar implements ElementClass {
 
   public render() {
     const progress = this.aveProgress()
-    return (
-      // tslint:disable:no-unsafe-any
-      <ide-haskell-progress-bar className={isNaN(progress) ? '' : 'visible'}>
-        <span
-          style={{ width: `${progress * 100}%`, height: `${progress * 100}%` }}
-        />
-      </ide-haskell-progress-bar>
-      // tslint:enable:no-unsafe-any
-    )
+    if (isNaN(progress)) return <progress style={{ display: 'none' }} />
+    else if (progress === 0) return <progress />
+    else return <progress value={progress.toString()} max="1" />
   }
 
   public async update(props: IProps) {
