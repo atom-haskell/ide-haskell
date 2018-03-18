@@ -1,3 +1,16 @@
+## 2.3.1
+
+-   Raise progress priority to always show it
+
+    Before, progress indicator wouldn't be shown when any component
+    reported errors or warnings. Progress indicator priority has been
+    raised to always show it when an operation is in progress.
+
+-   Show progress status for declarative events
+
+    Some events, like mouseover type tooltip, didn't always show
+    progress indicator correctly.
+
 ## 2.3.0
 
 -   Bump dependencies. Minimal Atom version is 1.24
