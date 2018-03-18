@@ -154,7 +154,15 @@ export class TooltipRegistry {
         continue
       }
       try {
+        this.pluginManager.backendStatus(pluginName, {
+          status: 'progress',
+          detail: '',
+        })
         const tooltipData = await Promise.resolve(handler(editor, crange, type))
+        this.pluginManager.backendStatus(pluginName, {
+          status: 'ready',
+          detail: '',
+        })
         if (!tooltipData) {
           continue
         }

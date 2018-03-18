@@ -1,4 +1,4 @@
-import { CompositeDisposable, Disposable } from 'atom'
+import { TextBuffer, CompositeDisposable, Disposable } from 'atom'
 
 import { PluginManager } from '../plugin-manager'
 import { MAIN_MENU_LABEL } from '../utils'
@@ -42,17 +42,29 @@ export function consume(
   if (events) {
     if (events.onWillSaveBuffer) {
       disp.add(
-        registerEvent(events.onWillSaveBuffer, pluginManager.onWillSaveBuffer),
+        registerEvent(
+          name,
+          pluginManager,
+          events.onWillSaveBuffer,
+          pluginManager.onWillSaveBuffer,
+        ),
       )
     }
     if (events.onDidSaveBuffer) {
       disp.add(
-        registerEvent(events.onDidSaveBuffer, pluginManager.onDidSaveBuffer),
+        registerEvent(
+          name,
+          pluginManager,
+          events.onDidSaveBuffer,
+          pluginManager.onDidSaveBuffer,
+        ),
       )
     }
     if (events.onDidStopChanging) {
       disp.add(
         registerEvent(
+          name,
+          pluginManager,
           events.onDidStopChanging,
           pluginManager.onDidStopChanging,
         ),
@@ -95,16 +107,30 @@ export function consume(
 }
 
 function registerEvent(
+  name: string,
+  manager: PluginManager,
   cb: UPI.TSingleOrArray<UPI.TTextBufferCallback>,
   reg: (cb: UPI.TTextBufferCallback) => Disposable,
 ) {
+  function wrapStatus(cb: UPI.TTextBufferCallback) {
+    return async function(buffer: TextBuffer) {
+      try {
+        manager.backendStatus(name, { status: 'progress', detail: '' })
+        await cb(buffer)
+        manager.backendStatus(name, { status: 'ready', detail: '' })
+      } catch (e) {
+        manager.backendStatus(name, { status: 'warning', detail: `${e}` })
+        console.warn(e)
+      }
+    }
+  }
   if (Array.isArray(cb)) {
     const disp = new CompositeDisposable()
     for (const i of cb) {
-      disp.add(reg(i))
+      disp.add(reg(wrapStatus(i)))
     }
     return disp
   } else {
-    return reg(cb)
+    return reg(wrapStatus(cb))
   }
 }
