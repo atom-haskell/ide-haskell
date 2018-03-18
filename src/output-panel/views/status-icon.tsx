@@ -59,7 +59,7 @@ export class StatusIcon implements ElementClass {
 
   private calcCurrentStatus(): 'ready' | 'warning' | 'error' | 'progress' {
     const prio = {
-      progress: 5,
+      progress: 50,
       error: 20,
       warning: 10,
       ready: 0,
