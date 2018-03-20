@@ -24,7 +24,7 @@
     "lint": "tslint --project . && tslint --project spec",
     "test": "npm run typecheck && npm run lint && npm run prettier-check"
   },
-  "atomTestRunner": "./spec/runner.js",
+  "atomTestRunner": "./node_modules/atom-ts-spec-runner/runner.js",
   "providedServices": {
     "ide-haskell-upi": {
       "description": "Universal pluggable interface",
@@ -67,7 +67,7 @@
     "@types/node": "^7",
     "@types/temp": "^0.8.31",
     "atom-haskell-tslint-rules": "^0.2.2",
-    "atom-mocha-test-runner": "^1.2.0",
+    "atom-ts-spec-runner": "^1.1.0",
     "chai": "^4.1.2",
     "mocha": "^5.0.1",
     "prettier": "^1.11.1",
