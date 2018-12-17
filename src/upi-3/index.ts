@@ -4,12 +4,18 @@ import { PluginManager } from '../plugin-manager'
 import { MAIN_MENU_LABEL } from '../utils'
 import * as UPI from 'atom-haskell-upi'
 import TEventRangeType = UPI.TEventRangeType
+import { Provider } from '../results-db/provider'
 
 export * from './instance'
+
+export interface FeatureSet {
+  eventsReturnResults: boolean
+}
 
 export function consume(
   pluginManager: PluginManager,
   options: UPI.IRegistrationOptions,
+  featureSet: FeatureSet,
 ): Disposable {
   const {
     name,
@@ -21,6 +27,7 @@ export function consume(
     tooltip,
   } = options
   const disp = new CompositeDisposable()
+  let messageProvider: Provider | undefined
 
   if (menu) {
     const menuDisp = atom.menu.add([
@@ -32,6 +39,9 @@ export function consume(
     disp.add(menuDisp)
   }
   if (messageTypes) {
+    if (featureSet.eventsReturnResults) {
+      messageProvider = pluginManager.resultsDB.registerProvider()
+    }
     // TODO: make disposable
     for (const type of Object.keys(messageTypes)) {
       const opts = messageTypes[type]
@@ -45,6 +55,7 @@ export function consume(
         registerEvent(
           name,
           pluginManager,
+          messageProvider,
           events.onWillSaveBuffer,
           pluginManager.onWillSaveBuffer,
         ),
@@ -55,6 +66,7 @@ export function consume(
         registerEvent(
           name,
           pluginManager,
+          messageProvider,
           events.onDidSaveBuffer,
           pluginManager.onDidSaveBuffer,
         ),
@@ -65,6 +77,7 @@ export function consume(
         registerEvent(
           name,
           pluginManager,
+          messageProvider,
           events.onDidStopChanging,
           pluginManager.onDidStopChanging,
         ),
@@ -109,6 +122,7 @@ export function consume(
 function registerEvent(
   name: string,
   manager: PluginManager,
+  provider: Provider | undefined,
   cb: UPI.TSingleOrArray<UPI.TTextBufferCallback>,
   reg: (cb: UPI.TTextBufferCallback) => Disposable,
 ) {
@@ -116,7 +130,8 @@ function registerEvent(
     return async function(buffer: TextBuffer) {
       try {
         manager.backendStatus(name, { status: 'progress', detail: '' })
-        await cb(buffer)
+        const res = await cb(buffer)
+        if (provider && Array.isArray(res)) provider.setMessages(res)
         manager.backendStatus(name, { status: 'ready', detail: '' })
       } catch (e) {
         manager.backendStatus(name, { status: 'warning', detail: `${e}` })

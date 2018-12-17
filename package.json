@@ -46,7 +46,8 @@
     },
     "ide-haskell-upi-plugin": {
       "versions": {
-        "^0.3.0": "consumeUpi3"
+        "0.3.0": "consumeUpi3_0",
+        "^0.3.1": "consumeUpi3"
       }
     }
   },

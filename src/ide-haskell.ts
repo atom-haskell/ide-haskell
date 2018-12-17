@@ -126,8 +126,22 @@ export function provideUpi3(): UPI.IUPIRegistration {
         'IDE-Haskell failed to provide UPI instance: pluginManager is undefined',
       )
     }
-    return UPI3.instance(pluginManager, options)
+    return UPI3.instance(pluginManager, options, {
+      eventsReturnResults: false,
+    })
   }
+}
+
+export function consumeUpi3_0(
+  registration: UPI.IRegistrationOptions,
+): Disposable | undefined {
+  upiProvided = true
+  if (pluginManager) {
+    return UPI3.consume(pluginManager, registration, {
+      eventsReturnResults: false,
+    })
+  }
+  return undefined
 }
 
 export function consumeUpi3(
@@ -135,7 +149,9 @@ export function consumeUpi3(
 ): Disposable | undefined {
   upiProvided = true
   if (pluginManager) {
-    return UPI3.consume(pluginManager, registration)
+    return UPI3.consume(pluginManager, registration, {
+      eventsReturnResults: true,
+    })
   }
   return undefined
 }

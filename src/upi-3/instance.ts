@@ -1,6 +1,6 @@
 import { MAIN_MENU_LABEL, getEventType, isTEventRangeType } from '../utils'
 import { PluginManager } from '../plugin-manager'
-import { consume } from './'
+import { consume, FeatureSet } from './'
 import * as UPI from 'atom-haskell-upi'
 import * as AtomTypes from 'atom'
 import CompositeDisposable = AtomTypes.CompositeDisposable
@@ -10,12 +10,13 @@ import TEventRangeType = UPI.TEventRangeType
 export function instance(
   pluginManager: PluginManager,
   options: UPI.IRegistrationOptions,
+  featureSet: FeatureSet,
 ): UPI.IUPIInstance {
   const pluginName = options.name
   const disposables = new CompositeDisposable()
   const messageProvider = pluginManager.resultsDB.registerProvider()
   disposables.add(messageProvider)
-  disposables.add(consume(pluginManager, options))
+  disposables.add(consume(pluginManager, options, featureSet))
 
   return {
     setMenu(name: string, menu: ReadonlyArray<AtomTypes.MenuOptions>) {
