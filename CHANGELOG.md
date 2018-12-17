@@ -1,3 +1,8 @@
+## 2.4.0
+
+-   Allow UPI declarative events to return check results
+-   Use atom-ts-spec-runner
+
 ## 2.3.1
 
 -   Raise progress priority to always show it
