@@ -125,11 +125,19 @@ export class CREditorControl implements IEditorController {
   }
 
   private updateResults = () => {
-    this.markers.clear()
     const path = this.editor.getPath()
-    for (const r of this.resultsDB.filter(
-      (m) => m.uri === path && m.isValid(),
-    )) {
+    const resultsToMark = Array.from(
+      this.resultsDB.filter((m) => m.uri === path && m.isValid()),
+    )
+    const currentMarkers = this.markers.getMarkers()
+    const newResults = resultsToMark.filter((r) =>
+      currentMarkers.every((m) => this.markerProps.get(m) !== r),
+    )
+    const markersToDelete = currentMarkers.filter(
+      (m) => !resultsToMark.includes(this.markerProps.get(m)!),
+    )
+    markersToDelete.forEach((m) => m.destroy())
+    for (const r of newResults) {
       this.markerFromCheckResult(r)
     }
   }
