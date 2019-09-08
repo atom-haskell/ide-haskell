@@ -8,7 +8,7 @@ export type TMessageProviderFunction = (
 
 export class Provider {
   private disposed: boolean
-  constructor(private parent: ResultsDB, public readonly id: number) {
+  constructor(private parent: ResultsDB, private providerSeverities: Set<UPI.TSeverity>, public readonly id: number) {
     this.disposed = false
   }
 
@@ -17,7 +17,15 @@ export class Provider {
       return
     }
     this.disposed = true
-    this.parent.didUpdate(this.id, [])
+    this.parent.didUpdate(this.id, Array.from(this.providerSeverities), [])
+  }
+  
+  public addSeverity(name: UPI.TSeverity) {
+    this.providerSeverities.add(name)
+  }
+  
+  public removeSeverity(name: UPI.TSeverity) {
+    this.providerSeverities.delete(name)
   }
 
   public setMessages(messages: UPI.IResultItem[]): void {
@@ -25,6 +33,6 @@ export class Provider {
       return
     }
     const msgs = messages.map((m) => new ResultItem(this.id, m))
-    this.parent.didUpdate(this.id, msgs)
+    this.parent.didUpdate(this.id, Array.from(this.providerSeverities), msgs)
   }
 }

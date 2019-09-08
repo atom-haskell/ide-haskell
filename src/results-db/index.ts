@@ -34,12 +34,16 @@ export class ResultsDB {
     return this.emitter.on('did-update', callback)
   }
 
-  public didUpdate(providerId: number, msgs: ResultItem[]) {
+  public didUpdate(
+    providerId: number,
+    providerSeverities: UPI.TSeverity[],
+    msgs: ResultItem[],
+  ) {
     const uris: string[] = msgs.map((v) => v.uri).filter(notUndefined)
     for (const [k, v] of Array.from(this.messages)) {
       if (
         v.providerId === providerId ||
-        (v.uri !== undefined && uris.includes(v.uri))
+        (uris.includes(v.uri!) && providerSeverities.includes(v.severity))
       ) {
         this.messages.delete(k)
       }
@@ -51,8 +55,8 @@ export class ResultsDB {
     this.emitter.emit('did-update', Array.from(severities))
   }
 
-  public registerProvider() {
-    const p = new Provider(this, ++this.currentId)
+  public registerProvider(providerSeverities: UPI.TSeverity[]) {
+    const p = new Provider(this, new Set(providerSeverities), ++this.currentId)
     this.disposables.add(p)
     return p
   }

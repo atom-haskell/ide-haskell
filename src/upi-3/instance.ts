@@ -14,7 +14,9 @@ export function instance(
 ): UPI.IUPIInstance {
   const pluginName = options.name
   const disposables = new CompositeDisposable()
-  const messageProvider = pluginManager.resultsDB.registerProvider()
+  const messageProvider = pluginManager.resultsDB.registerProvider(
+    options.messageTypes !== undefined ? Object.keys(options.messageTypes) : [],
+  )
   disposables.add(messageProvider)
   disposables.add(consume(pluginManager, options, featureSet))
 
