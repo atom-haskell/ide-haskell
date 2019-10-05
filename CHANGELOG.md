@@ -1,3 +1,8 @@
+## 2.4.1
+
+-   Limit what results are cleared on message provider reported severities
+-   Do not recreate already existing result markers
+
 ## 2.4.0
 
 -   Allow UPI declarative events to return check results
