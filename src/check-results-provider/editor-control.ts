@@ -133,9 +133,10 @@ export class CREditorControl implements IEditorController {
     const newResults = resultsToMark.filter((r) =>
       currentMarkers.every((m) => this.markerProps.get(m) !== r),
     )
-    const markersToDelete = currentMarkers.filter(
-      (m) => !resultsToMark.includes(this.markerProps.get(m)!),
-    )
+    const markersToDelete = currentMarkers.filter((m) => {
+      const p = this.markerProps.get(m)
+      return !p || !resultsToMark.includes(p)
+    })
     markersToDelete.forEach((m) => m.destroy())
     for (const r of newResults) {
       this.markerFromCheckResult(r)

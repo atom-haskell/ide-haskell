@@ -21,7 +21,7 @@ export class LinterSupport {
   public update = () => {
     this.linter.clearMessages()
     this.linter.setAllMessages(Array.from(this.messages()))
-  };
+  }
 
   private *messages(): IterableIterator<Linter.Message> {
     for (const result of this.resultDb.results()) {

@@ -305,15 +305,12 @@ export class OutputPanel {
 
   public backendStatus(pluginName: string, st: UPI.IStatus) {
     this.statusMap.set(pluginName, st)
-    this.progress = Array.from(this.statusMap.values()).reduce(
-      (cv, i) => {
-        if (i.status === 'progress' && i.progress !== undefined) {
-          cv.push(i.progress)
-        }
-        return cv
-      },
-      [] as number[],
-    )
+    this.progress = Array.from(this.statusMap.values()).reduce((cv, i) => {
+      if (i.status === 'progress' && i.progress !== undefined) {
+        cv.push(i.progress)
+      }
+      return cv
+    }, [] as number[])
     // tslint:disable-next-line:no-floating-promises
     this.update()
   }

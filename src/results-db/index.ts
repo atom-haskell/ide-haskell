@@ -43,7 +43,9 @@ export class ResultsDB {
     for (const [k, v] of Array.from(this.messages)) {
       if (
         v.providerId === providerId ||
-        (uris.includes(v.uri!) && providerSeverities.includes(v.severity))
+        (v.uri !== undefined &&
+          uris.includes(v.uri) &&
+          providerSeverities.includes(v.severity))
       ) {
         this.messages.delete(k)
       }

@@ -41,7 +41,7 @@ export function consume(
   if (messageTypes) {
     if (featureSet.eventsReturnResults) {
       messageProvider = pluginManager.resultsDB.registerProvider(
-        messageTypes !== undefined ? Object.keys(messageTypes) : [],
+        Object.keys(messageTypes),
       )
     }
     // TODO: make disposable
