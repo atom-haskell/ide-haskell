@@ -49,6 +49,11 @@ export function consume(
     for (const type of Object.keys(messageTypes)) {
       const opts = messageTypes[type]
       handlePromise(pluginManager.outputPanel.createTab(type, opts))
+      disp.add(
+        new Disposable(function() {
+          handlePromise(pluginManager.outputPanel.removeTab(type))
+        }),
+      )
     }
   }
   if (events) {
