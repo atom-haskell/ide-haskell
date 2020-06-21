@@ -44,9 +44,18 @@ export class OutputPanel {
       handlePromise(this.update())
     })
 
-    for (const tab of OutputPanel.defaultTabs) {
-      handlePromise(this.createTab(tab, {}))
+    if (atom.config.get('ide-haskell.messageDisplayFrontend') === 'builtin') {
+      for (const name of OutputPanel.defaultTabs) {
+        this.tabs.set(name, {
+          name,
+          count: 0,
+          onClick: () => this.activateTab(name),
+          uriFilter: true,
+          autoScroll: false,
+        })
+      }
     }
+    handlePromise(this.update())
 
     this.disposables.add(
       atom.workspace.onDidChangeActivePaneItem(() => {
@@ -277,12 +286,7 @@ export class OutputPanel {
     name: string,
     { uriFilter = true, autoScroll = false }: UPI.ISeverityTabDefinition,
   ) {
-    if (
-      OutputPanel.defaultTabs.includes(name) &&
-      atom.config.get('ide-haskell.messageDisplayFrontend') !== 'builtin'
-    ) {
-      return
-    }
+    if (OutputPanel.defaultTabs.includes(name)) return
     if (this.tabs.has(name)) {
       // tslint:disable-next-line: no-non-null-assertion
       this.tabUsers.set(name, this.tabUsers.get(name)! + 1)
