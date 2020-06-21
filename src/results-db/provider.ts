@@ -32,7 +32,7 @@ export class Provider {
     this.providerSeverities.delete(name)
   }
 
-  public setMessages(messages: UPI.IResultItem[]): void {
+  public setMessages(messages: ReadonlyArray<UPI.IResultItem>): void {
     if (this.disposed) {
       return
     }

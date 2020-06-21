@@ -16,6 +16,7 @@ import { CheckResultsProvider } from './check-results-provider'
 import { StatusBarView } from './status-bar'
 import { PrettifyEditorController } from './prettify'
 import { EditorMarkControl } from './editor-mark-control'
+import { BackendStatusController } from './backend-status'
 import * as UPI from 'atom-haskell-upi'
 import * as Linter from 'atom/linter'
 import * as StatusBar from 'atom/status-bar'
@@ -48,31 +49,34 @@ export type ECMap<T extends IEditorController> = WeakMap<
 >
 
 export class PluginManager {
-  public resultsDB: ResultsDB
-  public configParamManager: ConfigParamManager
-  public tooltipRegistry: TooltipRegistry
-  private checkResultsProvider?: CheckResultsProvider
+  public readonly resultsDB: ResultsDB
+  public readonly configParamManager: ConfigParamManager
+  public readonly tooltipRegistry: TooltipRegistry
+  private readonly checkResultsProvider?: CheckResultsProvider
   private linterSupport?: LinterSupport
-  private disposables = new CompositeDisposable()
-  private emitter: Emitter<
+  private readonly disposables = new CompositeDisposable()
+  private readonly emitter: Emitter<
     {},
     {
-      'will-save-buffer': TextBuffer
       'did-save-buffer': TextBuffer
       'did-stop-changing': TextBuffer
     }
   > = new Emitter()
   private statusBarTile?: StatusBar.Tile
   private statusBarView?: StatusBarView
-  private controllers = new Map<
+  private willSaveHandlers = new Set<UPI.TTextBufferCallback>()
+  private readonly controllers = new Map<
     IEditorControllerFactory,
     ECMap<IEditorController>
   >()
+  private readonly backendStatusController = new BackendStatusController()
+
   constructor(state: IState, public outputPanel: OutputPanel) {
     this.disposables.add(this.emitter)
 
     this.resultsDB = new ResultsDB()
     this.outputPanel.connectResults(this.resultsDB)
+    this.outputPanel.connectBsc(this.backendStatusController)
     this.tooltipRegistry = new TooltipRegistry(this)
     this.configParamManager = new ConfigParamManager(
       this.outputPanel,
@@ -111,8 +115,10 @@ export class PluginManager {
     }
   }
 
-  public onWillSaveBuffer = (callback: UPI.TTextBufferCallback) =>
-    this.emitter.on('will-save-buffer', callback)
+  public onWillSaveBuffer = (callback: UPI.TTextBufferCallback) => {
+    this.willSaveHandlers.add(callback)
+    return new Disposable(() => this.willSaveHandlers.delete(callback))
+  }
 
   public onDidSaveBuffer = (callback: UPI.TTextBufferCallback) =>
     this.emitter.on('did-save-buffer', callback)
@@ -120,8 +126,10 @@ export class PluginManager {
   public onDidStopChanging = (callback: UPI.TTextBufferCallback) =>
     this.emitter.on('did-stop-changing', callback)
 
-  public willSaveBuffer(buffer: TextBuffer) {
-    return this.emitter.emit('will-save-buffer', buffer)
+  public async willSaveBuffer(buffer: TextBuffer) {
+    return Promise.all(
+      Array.from(this.willSaveHandlers.values()).map((f) => f(buffer)),
+    )
   }
 
   public didSaveBuffer(buffer: TextBuffer) {
@@ -170,11 +178,12 @@ export class PluginManager {
     this.outputPanel.showPrevError()
   }
 
-  public backendStatus(pluginName: string, st: UPI.IStatus) {
-    this.outputPanel.backendStatus(pluginName, st)
-    if (this.statusBarView) {
-      this.statusBarView.backendStatus(pluginName, st)
-    }
+  public forceBackendStatus(pluginName: string, st: UPI.IStatus) {
+    this.backendStatusController.forceBackendStatus(pluginName, st)
+  }
+
+  public getAwaiter(pluginName: string) {
+    return this.backendStatusController.getAwaiter(pluginName)
   }
 
   public addEditorController<
@@ -196,7 +205,10 @@ export class PluginManager {
   }
 
   public setStatusBar(sb: StatusBar.StatusBar) {
-    this.statusBarView = new StatusBarView(this.outputPanel)
+    this.statusBarView = new StatusBarView(
+      this.outputPanel,
+      this.backendStatusController,
+    )
     this.statusBarTile = sb.addRightTile({
       item: this.statusBarView.element,
       priority: 100,

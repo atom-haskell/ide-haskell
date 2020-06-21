@@ -32,7 +32,7 @@ export function instance(
       return menuDisp
     },
     setStatus(status: UPI.IStatus) {
-      return pluginManager.backendStatus(pluginName, status)
+      return pluginManager.forceBackendStatus(pluginName, status)
     },
     setMessages(messages: UPI.IResultItem[]) {
       messageProvider.setMessages(messages)

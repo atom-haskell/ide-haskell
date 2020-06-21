@@ -11,12 +11,12 @@ export type TEventRangeResult =
   | undefined
 
 export class EditorControl implements IEditorController {
-  public tooltips: TooltipManager
-  private disposables: CompositeDisposable
+  public readonly tooltips: TooltipManager
+  private readonly disposables: CompositeDisposable
   private lastMouseBufferPt?: Point
   private exprTypeTimeout?: number
   private selTimeout?: number
-  private editorElement: HTMLElement & {
+  private readonly editorElement: HTMLElement & {
     onDidChangeScrollTop(a: () => void): Disposable
     onDidChangeScrollLeft(a: () => void): Disposable
     pixelRectForScreenRange(
@@ -28,8 +28,11 @@ export class EditorControl implements IEditorController {
       height: number
     }
   }
-  private tooltipRegistry: TooltipRegistry
-  constructor(private editor: TextEditor, pluginManager: PluginManager) {
+  private readonly tooltipRegistry: TooltipRegistry
+  constructor(
+    private readonly editor: TextEditor,
+    pluginManager: PluginManager,
+  ) {
     this.disposables = new CompositeDisposable()
     this.tooltips = new TooltipManager(this.editor)
     this.disposables.add(this.tooltips)
@@ -41,7 +44,9 @@ export class EditorControl implements IEditorController {
 
     this.disposables.add(
       // buffer events for automatic check
-      buffer.onWillSave(() => pluginManager.willSaveBuffer(buffer)),
+      buffer.onWillSave(async () => {
+        await pluginManager.willSaveBuffer(buffer)
+      }),
       buffer.onDidSave(() => pluginManager.didSaveBuffer(buffer)),
       this.editor.onDidStopChanging(() =>
         pluginManager.didStopChanging(buffer),

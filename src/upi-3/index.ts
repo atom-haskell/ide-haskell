@@ -31,6 +31,37 @@ export function consume(
   const disp = new CompositeDisposable()
   let messageProvider: Provider | undefined
 
+  function registerEvent(
+    cb: UPI.TSingleOrArray<UPI.TTextBufferCallback>,
+    reg: (cb: UPI.TTextBufferCallback) => Disposable,
+  ) {
+    if (Array.isArray(cb)) {
+      const disp = new CompositeDisposable()
+      for (const i of cb) {
+        disp.add(reg(wrapStatus(i)))
+      }
+      return disp
+    } else {
+      return reg(wrapStatus(cb))
+    }
+  }
+
+  const awaiter = pluginManager.getAwaiter(name)
+
+  function wrapStatus<Args extends Array<unknown>>(
+    cb: (...args: Args) => ReturnType<UPI.TTextBufferCallback>,
+  ) {
+    return function(...args: Args): void {
+      handlePromise(
+        awaiter(() => cb(...args)).then((res) => {
+          if (messageProvider && res !== undefined) {
+            messageProvider.setMessages(res)
+          }
+        }),
+      )
+    }
+  }
+
   if (menu) {
     const menuDisp = atom.menu.add([
       {
@@ -59,32 +90,17 @@ export function consume(
   if (events) {
     if (events.onWillSaveBuffer) {
       disp.add(
-        registerEvent(
-          name,
-          pluginManager,
-          messageProvider,
-          events.onWillSaveBuffer,
-          pluginManager.onWillSaveBuffer,
-        ),
+        registerEvent(events.onWillSaveBuffer, pluginManager.onWillSaveBuffer),
       )
     }
     if (events.onDidSaveBuffer) {
       disp.add(
-        registerEvent(
-          name,
-          pluginManager,
-          messageProvider,
-          events.onDidSaveBuffer,
-          pluginManager.onDidSaveBuffer,
-        ),
+        registerEvent(events.onDidSaveBuffer, pluginManager.onDidSaveBuffer),
       )
     }
     if (events.onDidStopChanging) {
       disp.add(
         registerEvent(
-          name,
-          pluginManager,
-          messageProvider,
           events.onDidStopChanging,
           pluginManager.onDidStopChanging,
         ),
@@ -128,17 +144,7 @@ export function consume(
       for (const [cmd, handler] of Object.entries(cmds)) {
         disp.add(
           atom.commands.add(target, cmd, function(event) {
-            wrapStatus(
-              name,
-              pluginManager,
-              messageProvider,
-              handler,
-            )(event.currentTarget).catch(function(e: Error) {
-              atom.notifications.addError(e.toString(), {
-                detail: e.message,
-                dismissable: true,
-              })
-            })
+            wrapStatus(handler)(event.currentTarget)
           }),
         )
       }
@@ -146,41 +152,4 @@ export function consume(
   }
 
   return disp
-}
-
-function registerEvent(
-  name: string,
-  manager: PluginManager,
-  provider: Provider | undefined,
-  cb: UPI.TSingleOrArray<UPI.TTextBufferCallback>,
-  reg: (cb: UPI.TTextBufferCallback) => Disposable,
-) {
-  if (Array.isArray(cb)) {
-    const disp = new CompositeDisposable()
-    for (const i of cb) {
-      disp.add(reg(wrapStatus(name, manager, provider, i)))
-    }
-    return disp
-  } else {
-    return reg(wrapStatus(name, manager, provider, cb))
-  }
-}
-
-function wrapStatus<Args extends Array<unknown>, R>(
-  name: string,
-  manager: PluginManager,
-  provider: Provider | undefined,
-  cb: (...args: Args) => R,
-) {
-  return async function(...args: Args) {
-    try {
-      manager.backendStatus(name, { status: 'progress', detail: '' })
-      const res = await Promise.resolve(cb(...args))
-      if (provider && Array.isArray(res)) provider.setMessages(res)
-      manager.backendStatus(name, { status: 'ready', detail: '' })
-    } catch (e) {
-      manager.backendStatus(name, { status: 'warning', detail: `${e}` })
-      console.warn(e)
-    }
-  }
 }

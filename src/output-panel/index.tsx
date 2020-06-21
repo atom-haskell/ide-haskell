@@ -2,13 +2,11 @@ import * as etch from 'etch'
 import { Disposable, CompositeDisposable } from 'atom'
 import { IBtnDesc, OutputPanelButtons } from './views/output-panel-buttons'
 import { OutputPanelCheckbox } from './views/output-panel-checkbox'
-import { ProgressBar } from './views/progress-bar'
 import { OutputPanelItems } from './views/output-panel-items'
 import { ResultsDB, ResultItem } from '../results-db'
-import { StatusIcon } from './views/status-icon'
 import { isDock, isSimpleControlDef, handlePromise } from '../utils'
 import * as UPI from 'atom-haskell-upi'
-const $ = etch.dom
+import { BackendStatusController } from '../backend-status'
 
 export interface IState {
   fileFilter: boolean
@@ -16,24 +14,23 @@ export interface IState {
 }
 
 export class OutputPanel {
-  private static defaultTabs: ReadonlyArray<string> = [
+  private static readonly defaultTabs: ReadonlyArray<string> = [
     'error',
     'warning',
     'lint',
   ]
-  private refs!: {
+  private readonly refs!: {
     items?: OutputPanelItems
   }
-  private elements: Set<JSX.Element> = new Set()
-  private disposables: CompositeDisposable = new CompositeDisposable()
-  private currentResult: number = 0
-  private statusMap: Map<string, UPI.IStatus> = new Map()
-  private progress: number[] = []
-  private tabs: Map<string, IBtnDesc> = new Map()
-  private tabUsers: Map<string, number> = new Map()
+  private readonly elements: Set<JSX.Element> = new Set()
+  private readonly disposables: CompositeDisposable = new CompositeDisposable()
+  private readonly tabs: Map<string, IBtnDesc> = new Map()
+  private readonly tabUsers: Map<string, number> = new Map()
   private itemFilter?: (item: ResultItem) => boolean
+  private currentResult: number = 0
   private results?: ResultsDB
   private buttonsClass!: 'buttons-top' | 'buttons-left'
+  private bsc?: BackendStatusController
   constructor(
     private state: IState = { fileFilter: false, activeTab: 'error' },
   ) {
@@ -68,6 +65,16 @@ export class OutputPanel {
         this.hide()
       }
     })
+  }
+
+  public connectBsc(bsc: BackendStatusController) {
+    if (this.bsc) throw new Error('BackendStatusController already connected!')
+    this.bsc = bsc
+    this.disposables.add(
+      this.bsc.onDidUpdate(() => handlePromise(this.update())),
+    )
+
+    handlePromise(this.update())
   }
 
   public connectResults(results: ResultsDB) {
@@ -111,10 +118,11 @@ export class OutputPanel {
     if (!this.results) {
       return <ide-haskell-panel />
     }
+    // tslint:disable: strict-boolean-expressions no-null-keyword
     return (
       <ide-haskell-panel class={this.buttonsClass}>
         <ide-haskell-panel-heading>
-          <StatusIcon statusMap={this.statusMap} />
+          {this.bsc?.renderStatusIcon() || null}
           <OutputPanelButtons
             buttons={Array.from(this.tabs.values())}
             activeBtn={this.state.activeTab}
@@ -127,7 +135,7 @@ export class OutputPanel {
             disabledHint="Show all project messages"
           />
           {Array.from(this.elements.values())}
-          <ProgressBar progress={this.progress} />
+          {this.bsc?.renderProgressBar() || null}
         </ide-haskell-panel-heading>
         <OutputPanelItems
           model={this.results}
@@ -136,6 +144,7 @@ export class OutputPanel {
         />
       </ide-haskell-panel>
     )
+    // tslint:enable: strict-boolean-expressions no-null-keyword
   }
 
   public async update() {
@@ -208,9 +217,9 @@ export class OutputPanel {
         props.on = events
       }
 
-      newElement = $(def.element, props)
+      newElement = etch.dom(def.element, props)
     } else {
-      newElement = $(def.element, def.opts)
+      newElement = etch.dom(def.element, def.opts)
     }
     this.elements.add(newElement)
 
@@ -332,18 +341,6 @@ export class OutputPanel {
       ...this.state,
       deserializer: 'ide-haskell/OutputPanel',
     }
-  }
-
-  public backendStatus(pluginName: string, st: UPI.IStatus) {
-    this.statusMap.set(pluginName, st)
-    this.progress = Array.from(this.statusMap.values()).reduce((cv, i) => {
-      if (i.status === 'progress' && i.progress !== undefined) {
-        cv.push(i.progress)
-      }
-      return cv
-    }, [] as number[])
-
-    handlePromise(this.update())
   }
 
   public showNextError() {

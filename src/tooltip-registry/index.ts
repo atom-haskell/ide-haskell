@@ -29,11 +29,13 @@ export interface ITooltipDataExt {
 
 export class TooltipRegistry {
   private providers: Array<
-    TTooltipHandlerSpec & { pluginName: string; eventTypes: TEventRangeType[] }
-  >
-  constructor(private pluginManager: PluginManager) {
-    this.providers = []
-  }
+    TTooltipHandlerSpec & {
+      pluginName: string
+      eventTypes: TEventRangeType[]
+    }
+  > = []
+
+  constructor(private pluginManager: PluginManager) {}
 
   public dispose() {
     this.providers = []
@@ -88,15 +90,11 @@ export class TooltipRegistry {
       }
       if (spec && typeof spec.tooltip === 'function') {
         pluginName = spec.pluginName
-        try {
-          tooltipData = await Promise.resolve(spec.tooltip(eventRange.crange))
-        } catch (e) {
-          this.pluginManager.backendStatus(spec.pluginName, {
-            status: 'warning',
-            detail: e.toString(),
-          })
-          return
-        }
+        const awaiter = this.pluginManager.getAwaiter(pluginName)
+        const tt = spec.tooltip
+        const tooltipDataTemp = await awaiter(() => tt(eventRange.crange))
+        if (tooltipDataTemp === undefined) return
+        tooltipData = tooltipDataTemp
       } else {
         const tooltip = await this.defaultTooltipFunction(
           editor,
@@ -153,27 +151,11 @@ export class TooltipRegistry {
       if (!eventTypes.includes(type)) {
         continue
       }
-      try {
-        this.pluginManager.backendStatus(pluginName, {
-          status: 'progress',
-          detail: '',
-        })
-        const tooltipData = await Promise.resolve(handler(editor, crange, type))
-        this.pluginManager.backendStatus(pluginName, {
-          status: 'ready',
-          detail: '',
-        })
-        if (!tooltipData) {
-          continue
-        }
-        return { pluginName, tooltipData }
-      } catch (e) {
-        this.pluginManager.backendStatus(pluginName, {
-          status: 'warning',
-          detail: `${e}`,
-        })
-        continue
-      }
+      const awaiter = this.pluginManager.getAwaiter(pluginName)
+      const tooltipData = await awaiter(() => handler(editor, crange, type))
+      if (tooltipData === undefined) continue
+
+      return { pluginName, tooltipData }
     }
     return undefined
   }
