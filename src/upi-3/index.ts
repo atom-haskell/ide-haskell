@@ -1,7 +1,7 @@
 import { CompositeDisposable, Disposable } from 'atom'
 
 import { PluginManager } from '../plugin-manager'
-import { MAIN_MENU_LABEL } from '../utils'
+import { MAIN_MENU_LABEL, handlePromise } from '../utils'
 import * as UPI from 'atom-haskell-upi'
 import TEventRangeType = UPI.TEventRangeType
 import { Provider } from '../results-db/provider'
@@ -46,11 +46,9 @@ export function consume(
         Object.keys(messageTypes),
       )
     }
-    // TODO: make disposable
     for (const type of Object.keys(messageTypes)) {
       const opts = messageTypes[type]
-      // tslint:disable-next-line:no-floating-promises
-      pluginManager.outputPanel.createTab(type, opts)
+      handlePromise(pluginManager.outputPanel.createTab(type, opts))
     }
   }
   if (events) {

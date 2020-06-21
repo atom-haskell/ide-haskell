@@ -1,5 +1,6 @@
 import * as etch from 'etch'
 import { ResultItem } from '../../results-db'
+import { handlePromise } from '../../utils'
 
 export interface IProps extends JSX.Props {
   model: ResultItem
@@ -34,13 +35,15 @@ export class OutputPanelItem implements JSX.ElementClass {
 
   public clickPosition = () => {
     if (this.props.model.uri !== undefined) {
-      // tslint:disable-next-line:no-floating-promises
-      atom.workspace.open(this.props.model.uri, {
-        searchAllPanes: true,
-        initialLine: this.props.model.position && this.props.model.position.row,
-        initialColumn:
-          this.props.model.position && this.props.model.position.column,
-      })
+      handlePromise(
+        atom.workspace.open(this.props.model.uri, {
+          searchAllPanes: true,
+          initialLine:
+            this.props.model.position && this.props.model.position.row,
+          initialColumn:
+            this.props.model.position && this.props.model.position.column,
+        }),
+      )
     }
   }
 

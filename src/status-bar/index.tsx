@@ -2,6 +2,7 @@ import * as etch from 'etch'
 import { OutputPanel } from '../output-panel'
 import { StatusIcon } from '../output-panel/views/status-icon'
 import * as UPI from 'atom-haskell-upi'
+import { handlePromise } from '../utils'
 
 export class StatusBarView {
   public element!: HTMLElement
@@ -28,17 +29,14 @@ export class StatusBarView {
 
   public backendStatus(pluginName: string, st: UPI.IStatus) {
     this.statusMap.set(pluginName, st)
-    // tslint:disable-next-line:no-floating-promises
-    this.update()
+    handlePromise(this.update())
   }
 
   public destroy() {
-    // tslint:disable-next-line:no-floating-promises
-    etch.destroy(this)
+    handlePromise(etch.destroy(this))
   }
 
   private didClick = () => {
-    // tslint:disable-next-line:no-floating-promises
-    this.panel.toggle()
+    handlePromise(this.panel.toggle())
   }
 }

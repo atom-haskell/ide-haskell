@@ -3,6 +3,7 @@ import * as etch from 'etch'
 import * as UPI from 'atom-haskell-upi'
 
 import { ConfigParamStore } from './param-store'
+import { handlePromise } from '../utils'
 
 export interface IProps<T> {
   pluginName: string
@@ -33,8 +34,7 @@ export class ParamControl<T> implements UPI.IElementObject<IProps<T>> {
         'ide-haskell.hideParameterValues',
         ({ newValue }) => {
           this.hiddenValue = newValue
-          // tslint:disable-next-line:no-floating-promises
-          this.update()
+          handlePromise(this.update())
         },
       ),
     )
@@ -87,8 +87,7 @@ export class ParamControl<T> implements UPI.IElementObject<IProps<T>> {
 
   public async setValue(e?: T) {
     await this.props.store.setValue(this.props.pluginName, this.props.name, e)
-    // tslint:disable-next-line:no-floating-promises
-    this.update()
+    handlePromise(this.update())
   }
 
   public async destroy() {
@@ -105,13 +104,11 @@ export class ParamControl<T> implements UPI.IElementObject<IProps<T>> {
       this.props.name,
       ({ value }) => {
         this.value = value
-        // tslint:disable-next-line:no-floating-promises
-        this.update()
+        handlePromise(this.update())
       },
     )
     this.disposables.add(this.storeDisposable)
-    // tslint:disable-next-line:no-floating-promises
-    this.setValueInitial()
+    handlePromise(this.setValueInitial())
   }
 
   private async setValueInitial() {

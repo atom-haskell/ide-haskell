@@ -1,6 +1,6 @@
 import { PluginManager, IState } from './plugin-manager'
 import { prettifyFile } from './prettify'
-import { MAIN_MENU_LABEL } from './utils'
+import { MAIN_MENU_LABEL, handlePromise } from './utils'
 import * as UPI3 from './upi-3'
 import * as OutputPanel from './output-panel'
 import * as AtomTypes from 'atom'
@@ -60,8 +60,7 @@ export function activate(state: IState) {
     }),
     atom.commands.add('atom-text-editor.ide-haskell', {
       'ide-haskell:prettify-file': ({ currentTarget }) => {
-        // tslint:disable-next-line:no-floating-promises
-        prettifyFile(currentTarget.getModel())
+        handlePromise(prettifyFile(currentTarget.getModel()))
       },
     }),
     atom.commands.add('atom-text-editor.ide-haskell--has-tooltips', {

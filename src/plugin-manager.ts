@@ -19,6 +19,7 @@ import { EditorMarkControl } from './editor-mark-control'
 import * as UPI from 'atom-haskell-upi'
 import * as Linter from 'atom/linter'
 import * as StatusBar from 'atom/status-bar'
+import { handlePromise } from './utils'
 
 export { IParamState, IOutputViewState }
 
@@ -95,8 +96,7 @@ export class PluginManager {
     this.disposables.dispose()
     if (this.checkResultsProvider) this.checkResultsProvider.destroy()
 
-    // tslint:disable-next-line:no-floating-promises
-    this.outputPanel.reallyDestroy()
+    handlePromise(this.outputPanel.reallyDestroy())
     this.configParamManager.destroy()
     this.removeStatusBar()
     if (this.linterSupport) {
@@ -133,8 +133,7 @@ export class PluginManager {
   }
 
   public togglePanel() {
-    // tslint:disable-next-line:no-floating-promises
-    atom.workspace.toggle(this.outputPanel)
+    handlePromise(atom.workspace.toggle(this.outputPanel))
   }
 
   public controller(editor: TextEditor): EditorControl | undefined {

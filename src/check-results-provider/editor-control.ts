@@ -12,7 +12,12 @@ import TEventRangeType = UPI.TEventRangeType
 
 import { ResultsDB, ResultItem } from '../results-db'
 import { PluginManager, IEditorController } from '../plugin-manager'
-import { listen, bufferPositionFromMouseEvent, MessageObject } from '../utils'
+import {
+  listen,
+  bufferPositionFromMouseEvent,
+  MessageObject,
+  handlePromise,
+} from '../utils'
 import { TooltipRegistry } from '../tooltip-registry'
 
 export class CREditorControl implements IEditorController {
@@ -97,17 +102,18 @@ export class CREditorControl implements IEditorController {
         if (bufferPt) {
           const msg = this.getMessageAt(bufferPt, 'gutter')
           if (msg.length > 0) {
-            // tslint:disable-next-line:no-floating-promises
-            this.tooltipRegistry.showTooltip(
-              this.editor,
-              TEventRangeType.mouse,
-              {
-                pluginName: 'builtin:check-results',
-                tooltip: {
-                  text: msg,
-                  range: new Range(bufferPt, bufferPt),
+            handlePromise(
+              this.tooltipRegistry.showTooltip(
+                this.editor,
+                TEventRangeType.mouse,
+                {
+                  pluginName: 'builtin:check-results',
+                  tooltip: {
+                    text: msg,
+                    range: new Range(bufferPt, bufferPt),
+                  },
                 },
-              },
+              ),
             )
           }
         }

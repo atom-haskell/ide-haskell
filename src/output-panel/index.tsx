@@ -6,7 +6,7 @@ import { ProgressBar } from './views/progress-bar'
 import { OutputPanelItems } from './views/output-panel-items'
 import { ResultsDB, ResultItem } from '../results-db'
 import { StatusIcon } from './views/status-icon'
-import { isDock, isSimpleControlDef } from '../utils'
+import { isDock, isSimpleControlDef, handlePromise } from '../utils'
 import * as UPI from 'atom-haskell-upi'
 const $ = etch.dom
 
@@ -16,6 +16,11 @@ export interface IState {
 }
 
 export class OutputPanel {
+  private static defaultTabs: ReadonlyArray<string> = [
+    'error',
+    'warning',
+    'lint',
+  ]
   private refs!: {
     items?: OutputPanelItems
   }
@@ -25,6 +30,7 @@ export class OutputPanel {
   private statusMap: Map<string, UPI.IStatus> = new Map()
   private progress: number[] = []
   private tabs: Map<string, IBtnDesc> = new Map()
+  private tabUsers: Map<string, number> = new Map()
   private itemFilter?: (item: ResultItem) => boolean
   private results?: ResultsDB
   private buttonsClass!: 'buttons-top' | 'buttons-left'
@@ -35,19 +41,16 @@ export class OutputPanel {
     etch.initialize(this)
     atom.config.onDidChange('ide-haskell.buttonsPosition', ({ newValue }) => {
       this.setButtonsClass(newValue)
-      // tslint:disable-next-line:no-floating-promises
-      this.update()
+      handlePromise(this.update())
     })
 
-    for (const tab of ['error', 'warning', 'lint']) {
-      // tslint:disable-next-line:no-floating-promises
-      this.createTab(tab, {})
+    for (const tab of OutputPanel.defaultTabs) {
+      handlePromise(this.createTab(tab, {}))
     }
 
     this.disposables.add(
       atom.workspace.onDidChangeActivePaneItem(() => {
-        // tslint:disable-next-line:no-floating-promises
-        if (this.state.fileFilter) this.updateItems()
+        if (this.state.fileFilter) handlePromise(this.updateItems())
       }),
     )
     setImmediate(async () => {
@@ -66,8 +69,8 @@ export class OutputPanel {
     let collectedSeverities = new Set<UPI.TSeverity>()
     const didUpdate = (severities: UPI.TSeverity[]) => {
       this.currentResult = 0
-      // tslint:disable-next-line:no-floating-promises
-      this.updateItems()
+
+      handlePromise(this.updateItems())
       const newUpdateTime = Date.now()
       if (
         newUpdateTime - lastUpdateTime <
@@ -91,8 +94,8 @@ export class OutputPanel {
     }
 
     this.disposables.add(this.results.onDidUpdate(didUpdate))
-    // tslint:disable-next-line:no-floating-promises
-    this.update()
+
+    handlePromise(this.update())
   }
 
   public render() {
@@ -201,12 +204,11 @@ export class OutputPanel {
       newElement = $(def.element, def.opts)
     }
     this.elements.add(newElement)
-    // tslint:disable-next-line:no-floating-promises
-    this.update()
+
+    handlePromise(this.update())
     return new Disposable(() => {
       this.elements.delete(newElement)
-      // tslint:disable-next-line:no-floating-promises
-      this.update()
+      handlePromise(this.update())
     })
   }
 
@@ -246,8 +248,7 @@ export class OutputPanel {
 
   public activateTab(tab: string) {
     this.state.activeTab = tab
-    // tslint:disable-next-line:no-floating-promises
-    this.updateItems()
+    handlePromise(this.updateItems())
   }
 
   public activateFirstNonEmptyTab(severities: Set<UPI.TSeverity>) {
@@ -255,8 +256,7 @@ export class OutputPanel {
       if (!severities.has(tab.name)) continue
       const count = tab.count
       if (count && count > 0) {
-        // tslint:disable-next-line:no-floating-promises
-        this.show()
+        handlePromise(this.show())
         this.activateTab(tab.name)
         break
       }
@@ -265,8 +265,8 @@ export class OutputPanel {
 
   public showItem(item: ResultItem) {
     this.activateTab(item.severity)
-    // tslint:disable-next-line:no-floating-promises
-    if (this.refs.items) this.refs.items.showItem(item)
+
+    if (this.refs.items) handlePromise(this.refs.items.showItem(item))
   }
 
   public getActiveTab() {
@@ -278,12 +278,16 @@ export class OutputPanel {
     { uriFilter = true, autoScroll = false }: UPI.ISeverityTabDefinition,
   ) {
     if (
-      ['error', 'warning', 'lint'].includes(name) &&
+      OutputPanel.defaultTabs.includes(name) &&
       atom.config.get('ide-haskell.messageDisplayFrontend') !== 'builtin'
     ) {
       return
     }
-    if (!Array.from(this.tabs.keys()).includes(name)) {
+    if (this.tabs.has(name)) {
+      // tslint:disable-next-line: no-non-null-assertion
+      this.tabUsers.set(name, this.tabUsers.get(name)! + 1)
+    } else {
+      this.tabUsers.set(name, 1)
       this.tabs.set(name, {
         name,
         count: 0,
@@ -294,6 +298,29 @@ export class OutputPanel {
       if (this.state.activeTab) this.activateTab(this.state.activeTab)
     }
     return this.update()
+  }
+
+  public async removeTab(name: string) {
+    if (OutputPanel.defaultTabs.includes(name)) return
+    if (this.tabUsers.has(name)) {
+      // tslint:disable-next-line: no-non-null-assertion
+      let n = this.tabUsers.get(name)!
+      n -= 1
+      if (n === 0) {
+        this.tabUsers.delete(name)
+        this.tabs.delete(name)
+        if (this.state.activeTab === name) {
+          this.state.activeTab = OutputPanel.defaultTabs[0]
+        }
+        return this.update()
+      } else {
+        this.tabUsers.set(name, n)
+      }
+    } else {
+      throw new Error(
+        `Ide-Haskell: Removing nonexistent output panel tab ${name}`,
+      )
+    }
   }
 
   public serialize(): IState & { deserializer: 'ide-haskell/OutputPanel' } {
@@ -311,8 +338,8 @@ export class OutputPanel {
       }
       return cv
     }, [] as number[])
-    // tslint:disable-next-line:no-floating-promises
-    this.update()
+
+    handlePromise(this.update())
   }
 
   public showNextError() {
@@ -347,8 +374,7 @@ export class OutputPanel {
 
   private switchFileFilter = () => {
     this.state.fileFilter = !this.state.fileFilter
-    // tslint:disable-next-line:no-floating-promises
-    this.updateItems()
+    handlePromise(this.updateItems())
   }
 
   private setButtonsClass(buttonsPos: 'top' | 'left') {

@@ -1,5 +1,5 @@
 import { Range, TextEditor, Point, CompositeDisposable, Disposable } from 'atom'
-import { bufferPositionFromMouseEvent, listen } from '../utils'
+import { bufferPositionFromMouseEvent, listen, handlePromise } from '../utils'
 import { TooltipManager } from './tooltip-manager'
 import { TooltipRegistry } from '../tooltip-registry'
 import { PluginManager, IEditorController } from '../plugin-manager'
@@ -125,8 +125,7 @@ export class EditorControl implements IEditorController {
     ) {
       this.tooltips.hide(type)
     } else {
-      // tslint:disable-next-line:no-floating-promises
-      this.tooltipRegistry.showTooltip(this.editor, type)
+      handlePromise(this.tooltipRegistry.showTooltip(this.editor, type))
     }
   }
 
@@ -171,8 +170,10 @@ export class EditorControl implements IEditorController {
       if (this.exprTypeTimeout !== undefined) {
         clearTimeout(this.exprTypeTimeout)
       }
-      // tslint:disable-next-line:no-floating-promises
-      this.tooltipRegistry.showTooltip(this.editor, TEventRangeType.keyboard)
+
+      handlePromise(
+        this.tooltipRegistry.showTooltip(this.editor, TEventRangeType.keyboard),
+      )
       if (
         atom.config.get('ide-haskell.onCursorMove', {
           scope: this.editor.getRootScopeDescriptor(),
