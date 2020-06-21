@@ -1,4 +1,4 @@
-import { TextBuffer, CompositeDisposable, Disposable } from 'atom'
+import { CompositeDisposable, Disposable } from 'atom'
 
 import { PluginManager } from '../plugin-manager'
 import { MAIN_MENU_LABEL } from '../utils'
@@ -9,7 +9,8 @@ import { Provider } from '../results-db/provider'
 export * from './instance'
 
 export interface FeatureSet {
-  eventsReturnResults: boolean
+  eventsReturnResults?: boolean
+  supportsCommands?: boolean
 }
 
 export function consume(
@@ -25,6 +26,7 @@ export function consume(
     controls,
     params,
     tooltip,
+    commands,
   } = options
   const disp = new CompositeDisposable()
   let messageProvider: Provider | undefined
@@ -117,6 +119,28 @@ export function consume(
       disp.add(pluginManager.configParamManager.add(name, paramName, spec))
     }
   }
+  if (featureSet.supportsCommands && commands) {
+    for (const [target, cmds] of Object.entries(commands)) {
+      if (cmds === undefined) continue
+      for (const [cmd, handler] of Object.entries(cmds)) {
+        disp.add(
+          atom.commands.add(target, cmd, function(event) {
+            wrapStatus(
+              name,
+              pluginManager,
+              messageProvider,
+              handler,
+            )(event.currentTarget).catch(function(e: Error) {
+              atom.notifications.addError(e.toString(), {
+                detail: e.message,
+                dismissable: true,
+              })
+            })
+          }),
+        )
+      }
+    }
+  }
 
   return disp
 }
@@ -128,26 +152,32 @@ function registerEvent(
   cb: UPI.TSingleOrArray<UPI.TTextBufferCallback>,
   reg: (cb: UPI.TTextBufferCallback) => Disposable,
 ) {
-  function wrapStatus(cb: UPI.TTextBufferCallback) {
-    return async function(buffer: TextBuffer) {
-      try {
-        manager.backendStatus(name, { status: 'progress', detail: '' })
-        const res = await cb(buffer)
-        if (provider && Array.isArray(res)) provider.setMessages(res)
-        manager.backendStatus(name, { status: 'ready', detail: '' })
-      } catch (e) {
-        manager.backendStatus(name, { status: 'warning', detail: `${e}` })
-        console.warn(e)
-      }
-    }
-  }
   if (Array.isArray(cb)) {
     const disp = new CompositeDisposable()
     for (const i of cb) {
-      disp.add(reg(wrapStatus(i)))
+      disp.add(reg(wrapStatus(name, manager, provider, i)))
     }
     return disp
   } else {
-    return reg(wrapStatus(cb))
+    return reg(wrapStatus(name, manager, provider, cb))
+  }
+}
+
+function wrapStatus<Args extends Array<unknown>, R>(
+  name: string,
+  manager: PluginManager,
+  provider: Provider | undefined,
+  cb: (...args: Args) => R,
+) {
+  return async function(...args: Args) {
+    try {
+      manager.backendStatus(name, { status: 'progress', detail: '' })
+      const res = await Promise.resolve(cb(...args))
+      if (provider && Array.isArray(res)) provider.setMessages(res)
+      manager.backendStatus(name, { status: 'ready', detail: '' })
+    } catch (e) {
+      manager.backendStatus(name, { status: 'warning', detail: `${e}` })
+      console.warn(e)
+    }
   }
 }

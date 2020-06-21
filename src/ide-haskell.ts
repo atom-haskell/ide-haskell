@@ -118,43 +118,51 @@ export function deserializeOutputPanel(state?: OutputPanel.IState) {
   return outputPanel
 }
 
-export function provideUpi3(): UPI.IUPIRegistration {
-  upiProvided = true
-  return (options: UPI.IRegistrationOptions) => {
-    if (!pluginManager) {
-      throw new Error(
-        'IDE-Haskell failed to provide UPI instance: pluginManager is undefined',
-      )
+function provideUpi3(features: UPI3.FeatureSet = {}) {
+  return function(): UPI.IUPIRegistration {
+    upiProvided = true
+    return (options: UPI.IRegistrationOptions) => {
+      if (!pluginManager) {
+        throw new Error(
+          'IDE-Haskell failed to provide UPI instance: pluginManager is undefined',
+        )
+      }
+      return UPI3.instance(pluginManager, options, features)
     }
-    return UPI3.instance(pluginManager, options, {
-      eventsReturnResults: false,
-    })
   }
 }
 
-export function consumeUpi3_0(
-  registration: UPI.IRegistrationOptions,
-): Disposable | undefined {
-  upiProvided = true
-  if (pluginManager) {
-    return UPI3.consume(pluginManager, registration, {
-      eventsReturnResults: false,
-    })
+// tslint:disable-next-line: variable-name
+export const provideUpi3_0 = provideUpi3()
+// tslint:disable-next-line: variable-name
+export const provideUpi3_1 = provideUpi3({ eventsReturnResults: true })
+// tslint:disable-next-line: variable-name
+export const provideUpi3_2 = provideUpi3({
+  eventsReturnResults: true,
+  supportsCommands: true,
+})
+
+function consumeUpi3(features: UPI3.FeatureSet = {}) {
+  return function(
+    registration: UPI.IRegistrationOptions,
+  ): Disposable | undefined {
+    upiProvided = true
+    if (pluginManager) {
+      return UPI3.consume(pluginManager, registration, features)
+    }
+    return undefined
   }
-  return undefined
 }
 
-export function consumeUpi3(
-  registration: UPI.IRegistrationOptions,
-): Disposable | undefined {
-  upiProvided = true
-  if (pluginManager) {
-    return UPI3.consume(pluginManager, registration, {
-      eventsReturnResults: true,
-    })
-  }
-  return undefined
-}
+// tslint:disable-next-line: variable-name
+export const consumeUpi3_0 = consumeUpi3({})
+// tslint:disable-next-line: variable-name
+export const consumeUpi3_1 = consumeUpi3({ eventsReturnResults: true })
+// tslint:disable-next-line: variable-name
+export const consumeUpi3_2 = consumeUpi3({
+  eventsReturnResults: true,
+  supportsCommands: true,
+})
 
 export function consumeLinter(
   register: (opts: {}) => Linter.IndieDelegate,

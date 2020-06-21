@@ -29,7 +29,9 @@
     "ide-haskell-upi": {
       "description": "Universal pluggable interface",
       "versions": {
-        "0.3.0": "provideUpi3"
+        "0.3.0": "provideUpi3_0",
+        "0.3.1": "provideUpi3_1",
+        "0.3.2": "provideUpi3_2"
       }
     }
   },
@@ -47,7 +49,8 @@
     "ide-haskell-upi-plugin": {
       "versions": {
         "0.3.0": "consumeUpi3_0",
-        "^0.3.1": "consumeUpi3"
+        "0.3.1": "consumeUpi3_1",
+        "0.3.2": "consumeUpi3_2"
       }
     }
   },
