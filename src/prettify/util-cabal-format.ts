@@ -22,7 +22,7 @@ async function read(path: string): Promise<string> {
     FS.readFile(
       path,
       { encoding: 'utf-8' },
-      (error: NodeJS.ErrnoException | undefined, text) => {
+      (error: NodeJS.ErrnoException | null, text) => {
         if (error) {
           // tslint:disable-next-line:no-console
           console.error(error)
@@ -55,7 +55,7 @@ export async function format(
   }
 }
 
-function handleErr(err?: NodeJS.ErrnoException): void {
+function handleErr(err: NodeJS.ErrnoException | null): void {
   if (err) {
     atom.notifications.addError(err.name, {
       detail: err.message,

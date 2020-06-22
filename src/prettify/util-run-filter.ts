@@ -14,7 +14,7 @@ export async function runFilter({ command, args, cwd, stdin }: IRunFilterArgs) {
         command,
         args,
         { cwd },
-        (error: Error | undefined, stdout, stderr) => {
+        (error: Error | null, stdout, stderr) => {
           if (!error) {
             resolve({ stdout, stderr })
           } else {
