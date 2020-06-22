@@ -1,5 +1,5 @@
 import { TextEditor, CompositeDisposable } from 'atom'
-import { prettifyFile } from './index'
+import { prettifyFile } from './main'
 import { IEditorController } from '../plugin-manager'
 
 export class PrettifyEditorController implements IEditorController {

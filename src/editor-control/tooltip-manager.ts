@@ -2,11 +2,12 @@ import { TooltipMessage } from './tooltip-view'
 import { EventTable } from './event-table'
 import * as AtomTypes from 'atom'
 import * as UPI from 'atom-haskell-upi'
-import Range = AtomTypes.Range
-import TextEditor = AtomTypes.TextEditor
-import DisplayMarker = AtomTypes.DisplayMarker
 import TEventRangeType = UPI.TEventRangeType
 import { MessageObject } from '../utils'
+
+type Range = AtomTypes.Range
+type TextEditor = AtomTypes.TextEditor
+type DisplayMarker = AtomTypes.DisplayMarker
 
 export interface IMarkerProperties extends AtomTypes.FindDisplayMarkerOptions {
   persistent: boolean

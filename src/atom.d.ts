@@ -8,3 +8,8 @@ declare module 'atom' {
     getLastCursor(): Cursor | undefined // TODO: Upstream to DT
   }
 }
+declare global {
+  interface ArrayConstructor {
+    isArray(arg: ReadonlyArray<any> | any): arg is ReadonlyArray<any>
+  }
+}

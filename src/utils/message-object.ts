@@ -1,7 +1,7 @@
-import highlight = require('atom-highlight')
+import highlight from 'atom-highlight'
 import * as cast from './cast'
 import * as UPI from 'atom-haskell-upi'
-import { Memoize } from 'lodash-decorators'
+import Memoize from 'lodash-decorators/memoize'
 
 export class MessageObject {
   constructor(private msg: UPI.TMessage) {

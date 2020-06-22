@@ -1,8 +1,8 @@
 import * as AtomTypes from 'atom'
 import * as UPI from 'atom-haskell-upi'
-import Dock = AtomTypes.Dock
-import WorkspaceCenter = AtomTypes.WorkspaceCenter
 import TEventRangeType = UPI.TEventRangeType
+type Dock = AtomTypes.Dock
+type WorkspaceCenter = AtomTypes.WorkspaceCenter
 
 export function isDock(object: Dock | WorkspaceCenter): object is Dock {
   return object.constructor.name === 'Dock'

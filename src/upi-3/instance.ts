@@ -1,11 +1,11 @@
 import { MAIN_MENU_LABEL, getEventType, isTEventRangeType } from '../utils'
 import { PluginManager } from '../plugin-manager'
-import { consume, FeatureSet } from './'
+import { consume, FeatureSet } from './consume'
 import * as UPI from 'atom-haskell-upi'
 import * as AtomTypes from 'atom'
 import CompositeDisposable = AtomTypes.CompositeDisposable
-import TextEditor = AtomTypes.TextEditor
-import TEventRangeType = UPI.TEventRangeType
+type TextEditor = AtomTypes.TextEditor
+type TEventRangeType = UPI.TEventRangeType
 
 export function instance(
   pluginManager: PluginManager,
