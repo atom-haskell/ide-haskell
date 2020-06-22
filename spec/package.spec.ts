@@ -6,7 +6,7 @@ const pkg = join(__dirname, '..')
 describe('package', function() {
   this.timeout(60000)
   it('should activate', async () => {
-    const packages: any = atom.packages
+    const packages = atom.packages
 
     // Load package, but it won't activate until the grammar is used
     const promise = atom.packages.activatePackage(pkg)

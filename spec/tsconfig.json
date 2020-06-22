@@ -1,4 +1,8 @@
 {
+  "compilerOptions": {
+    "target": "es2015",
+    "module": "commonjs"
+  },
   "compileOnSave": false,
   "extends": "../tsconfig.json",
   "include": ["./**.ts"],
