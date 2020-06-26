@@ -1,6 +1,6 @@
 {
   "name": "ide-haskell",
-  "main": "./dist/main",
+  "main": "./dist/main.js",
   "version": "2.4.1",
   "description": "Haskell IDE",
   "keywords": [
@@ -17,7 +17,7 @@
     "atom": ">=1.46.0 <2.0.0"
   },
   "scripts": {
-    "build": "rollup -c",
+    "build": "tsc --project . && parcel build lib/ide-haskell.js",
     "prettier": "prettier --write 'src/**/*.ts?(x)' 'spec/**/*.ts?(x)'",
     "prettier-check": "prettier -l 'src/**/*.ts' 'spec/**/*.ts'",
     "typecheck": "tsc --noEmit -p . && tsc --noEmit -p spec",
@@ -58,13 +58,6 @@
     "atom-haskell-utils": "^1.0.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.10.3",
-    "@babel/plugin-proposal-class-properties": "^7.10.1",
-    "@babel/preset-env": "^7.10.3",
-    "@rollup/plugin-babel": "^5.0.3",
-    "@rollup/plugin-commonjs": "^12.0.0",
-    "@rollup/plugin-node-resolve": "^8.0.1",
-    "@rollup/plugin-typescript": "^4.1.2",
     "@types/atom": "^1.40.4",
     "@types/chai": "^4.2.11",
     "@types/mocha": "^7.0.2",
@@ -79,9 +72,8 @@
     "lodash": "^4.17.15",
     "lodash-decorators": "^6.0.1",
     "mocha": "^8.0.1",
+    "parcel": "^2.0.0-beta.1",
     "prettier": "^1.19.1",
-    "rollup": "^2.17.1",
-    "rollup-plugin-terser": "^6.1.0",
     "temp": "^0.9.1",
     "ts-node": "^8.10.2",
     "tslib": "^2.0.0",
@@ -89,6 +81,17 @@
     "typedoc": "^0.17.7",
     "typescript": "~3.9.5",
     "typescript-tslint-plugin": "^0.5.5"
+  },
+  "targets": {
+    "main": {
+      "context": "electron-renderer",
+      "includeNodeModules": {
+        "atom": false,
+        "atom-haskell-utils": false
+      },
+      "outputFormat": "commonjs",
+      "isLibrary": true
+    }
   },
   "deserializers": {
     "ide-haskell/OutputPanel": "deserializeOutputPanel"
