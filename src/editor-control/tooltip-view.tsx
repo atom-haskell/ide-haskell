@@ -4,7 +4,10 @@ import { MessageObject } from '../utils'
 export class TooltipMessage {
   private message: JSX.Element[]
   private element!: HTMLElement
-  constructor(message: MessageObject | MessageObject[]) {
+  constructor(
+    private source: string,
+    message: MessageObject | MessageObject[],
+  ) {
     if (Array.isArray(message)) {
       this.message = message.map((m) => <div key={m} innerHTML={m.toHtml()} />)
     } else {
@@ -14,7 +17,11 @@ export class TooltipMessage {
   }
 
   public render() {
-    return <ide-haskell-tooltip>{this.message}</ide-haskell-tooltip>
+    return (
+      <ide-haskell-tooltip dataset={{ source: this.source }}>
+        {this.message}
+      </ide-haskell-tooltip>
+    )
   }
 
   public async update() {

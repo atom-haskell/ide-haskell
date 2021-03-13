@@ -41,7 +41,7 @@ export class TooltipManager {
       .get(type, source)
       .markBufferRange(range)
     highlightMarker.setProperties(detail)
-    this.decorate(highlightMarker, new TooltipMessage(text))
+    this.decorate(highlightMarker, new TooltipMessage(source, text))
     this.editorElement.classList.add('ide-haskell--has-tooltips')
   }
 
