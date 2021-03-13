@@ -12,12 +12,7 @@ import TEventRangeType = UPI.TEventRangeType
 
 import { ResultsDB, ResultItem } from '../results-db'
 import { PluginManager, IEditorController } from '../plugin-manager'
-import {
-  listen,
-  bufferPositionFromMouseEvent,
-  MessageObject,
-  handlePromise,
-} from '../utils'
+import { listen, bufferPositionFromMouseEvent, handlePromise } from '../utils'
 import { TooltipRegistry } from '../tooltip-registry'
 
 export class CREditorControl implements IEditorController {
@@ -76,20 +71,27 @@ export class CREditorControl implements IEditorController {
     }
   }
 
-  public getMessageAt(pos: Point, type: TEventRangeType | 'gutter') {
+  public *getResultAt(pos: Point, type: TEventRangeType | 'gutter') {
     const markers = this.find(pos, type)
-    const result: MessageObject[] = []
     for (const marker of markers) {
-      if (!marker.isValid()) {
-        continue
-      }
+      if (!marker.isValid()) continue
       const res = this.markerProps.get(marker)
-      if (!res) {
-        continue
-      }
-      result.push(res.message)
+      if (!res) continue
+      yield res
     }
-    return result
+  }
+
+  public *getMessageAt(pos: Point, type: TEventRangeType | 'gutter') {
+    for (const res of this.getResultAt(pos, type)) {
+      yield res.message
+    }
+  }
+
+  public async *getActionAt(pos: Point, type: TEventRangeType | 'gutter') {
+    for (const res of this.getResultAt(pos, type)) {
+      if (!res.actions) continue
+      yield* await res.actions()
+    }
   }
 
   private registerGutterEvents() {
@@ -100,7 +102,7 @@ export class CREditorControl implements IEditorController {
           e as MouseEvent,
         )
         if (bufferPt) {
-          const msg = this.getMessageAt(bufferPt, 'gutter')
+          const msg = Array.from(this.getMessageAt(bufferPt, 'gutter'))
           if (msg.length > 0) {
             handlePromise(
               this.tooltipRegistry.showTooltip(

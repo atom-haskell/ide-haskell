@@ -1,10 +1,11 @@
-import { Range, TextEditor, CompositeDisposable } from 'atom'
+import { Range, TextEditor, CompositeDisposable, Panel } from 'atom'
 import * as UPI from 'atom-haskell-upi'
 import TEventRangeType = UPI.TEventRangeType
 
 import { PluginManager } from '../plugin-manager'
 import { CREditorControl } from './editor-control'
 import { ITooltipDataExt } from '../tooltip-registry'
+import SelectListView from 'atom-select-list'
 
 export class CheckResultsProvider {
   private disposables: CompositeDisposable
@@ -19,6 +20,56 @@ export class CheckResultsProvider {
         eventTypes: [TEventRangeType.mouse, TEventRangeType.keyboard],
       }),
       pluginManager.addEditorController(CREditorControl),
+      atom.commands.add('atom-text-editor.ide-haskell', {
+        'ide-haskell:show-actions': async ({ currentTarget }) => {
+          const editor = currentTarget.getModel()
+          const controller = this.pluginManager.controllerType<
+            CREditorControl,
+            typeof CREditorControl
+          >(CREditorControl, editor)
+          if (!controller) return
+          const actions: UPI.Action[] = []
+          for await (const a of controller.getActionAt(
+            editor.getCursorBufferPosition(),
+            TEventRangeType.keyboard,
+          )) {
+            actions.push(a)
+          }
+          let panel: Panel | undefined
+          try {
+            const choice = await new Promise<UPI.Action | undefined>(
+              (resolve) => {
+                const select = new SelectListView({
+                  items: actions,
+                  infoMessage: 'Actions',
+                  itemsClassList: ['ide-haskell', 'mark-active'],
+                  elementForItem: (x) => {
+                    const el = document.createElement('li')
+                    el.innerText = x.title
+                    return el
+                  },
+                  filterKeyForItem: (x) => x.title,
+                  didCancelSelection: () => {
+                    resolve(undefined)
+                  },
+                  didConfirmSelection: (item) => {
+                    resolve(item)
+                  },
+                })
+                select.element.classList.add('ide-haskell')
+                panel = atom.workspace.addModalPanel({
+                  item: select,
+                  visible: true,
+                })
+                select.focus()
+              },
+            )
+            if (choice) await choice.apply()
+          } finally {
+            if (panel) panel.destroy()
+          }
+        },
+      }),
     )
   }
 
@@ -46,7 +97,7 @@ export class CheckResultsProvider {
     ) {
       return undefined
     }
-    const msg = controller.getMessageAt(crange.start, type)
+    const msg = Array.from(controller.getMessageAt(crange.start, type))
     if (msg.length > 0) {
       return { range: crange, text: msg }
     }
