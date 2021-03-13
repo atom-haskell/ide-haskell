@@ -87,11 +87,17 @@ export class CREditorControl implements IEditorController {
     }
   }
 
-  public async *getActionAt(pos: Point, type: TEventRangeType | 'gutter') {
-    for (const res of this.getResultAt(pos, type)) {
-      if (!res.actions) continue
-      yield* await res.actions()
-    }
+  public async getActionAt(
+    pos: Point,
+    type: TEventRangeType | 'gutter',
+  ): Promise<UPI.Action[]> {
+    return ([] as UPI.Action[]).concat(
+      ...(await Promise.all(
+        Array.from(this.getResultAt(pos, type)).map((res) =>
+          res.actions ? res.actions() : [],
+        ),
+      )),
+    )
   }
 
   private registerGutterEvents() {

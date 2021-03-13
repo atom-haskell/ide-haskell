@@ -232,7 +232,24 @@ ide-haskell-panel {
   }
 }
 
+ide-haskell-tooltip-with-actions {
+  display: flex;
+  flex-direction: row;
+}
+
+ide-haskell-tooltip-actions {
+  button {
+    pointer-events: all;
+  }
+  flex-grow: 0;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 ide-haskell-tooltip {
+  flex-grow: 1;
+  flex-shrink: 1;
   &::before {
     border-width: 0 0.5ch 0.5ch;
     border-style: solid;

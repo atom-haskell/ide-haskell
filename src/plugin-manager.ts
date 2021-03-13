@@ -21,6 +21,7 @@ import * as UPI from 'atom-haskell-upi'
 import * as Linter from 'atom/linter'
 import * as StatusBar from 'atom/status-bar'
 import { handlePromise } from './utils'
+import { ActionsProvider } from './actions-provider'
 
 export { IParamState, IOutputViewState }
 
@@ -48,6 +49,8 @@ export type ECMap<T extends IEditorController> = WeakMap<
   { controller: T; disposable: Disposable }
 >
 
+type InterfaceType<U> = U extends IEditorControllerFactoryT<infer T> ? T : never
+
 export class PluginManager {
   public readonly resultsDB: ResultsDB
   public readonly configParamManager: ConfigParamManager
@@ -70,6 +73,7 @@ export class PluginManager {
     ECMap<IEditorController>
   >()
   private readonly backendStatusController = new BackendStatusController()
+  private readonly actionsProvider: ActionsProvider
 
   constructor(state: IState, public outputPanel: OutputPanel) {
     this.disposables.add(this.emitter)
@@ -78,6 +82,7 @@ export class PluginManager {
     this.outputPanel.connectResults(this.resultsDB)
     this.outputPanel.connectBsc(this.backendStatusController)
     this.tooltipRegistry = new TooltipRegistry(this)
+    this.actionsProvider = new ActionsProvider(this)
     this.configParamManager = new ConfigParamManager(
       this.outputPanel,
       state.configParams,
@@ -87,6 +92,8 @@ export class PluginManager {
       this.addEditorController(EditorControl),
       this.addEditorController(PrettifyEditorController),
       this.addEditorController(EditorMarkControl),
+      this.tooltipRegistry,
+      this.actionsProvider,
     )
     if (atom.config.get('ide-haskell.messageDisplayFrontend') === 'builtin') {
       this.checkResultsProvider = new CheckResultsProvider(this)
@@ -148,13 +155,13 @@ export class PluginManager {
     return this.controllerType(EditorControl, editor)
   }
 
-  public controllerType<
-    U extends IEditorController,
-    T extends IEditorControllerFactoryT<U>
-  >(factory: T, editor: TextEditor): U | undefined {
+  public controllerType<U extends IEditorControllerFactory>(
+    factory: U,
+    editor: TextEditor,
+  ): InterfaceType<U> | undefined {
     const ecmap = this.controllers.get(factory)
-    const rec = ecmap ? ecmap.get(editor) : undefined
-    return rec ? (rec.controller as U) : undefined
+    const rec = ecmap?.get(editor)
+    return rec?.controller as InterfaceType<U>
   }
 
   public setLinter(linter: Linter.IndieDelegate) {

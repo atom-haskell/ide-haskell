@@ -25,6 +25,7 @@ export interface ITooltipDataExt {
   range: RangeCompatible
   text: UPI.TSingleOrArray<UPI.TMessage | MessageObject>
   persistent?: boolean
+  actions?: () => Promise<UPI.Action[]>
 }
 
 export class TooltipRegistry {
@@ -122,8 +123,10 @@ export class TooltipRegistry {
       msg = MessageObject.fromObject(tooltipData.text)
     }
     controller.tooltips.show(
+      editor,
       Range.fromObject(tooltipData.range),
       msg,
+      tooltipData.actions,
       type,
       pluginName,
       { persistent },

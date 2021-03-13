@@ -30,8 +30,10 @@ export class TooltipManager {
   }
 
   public show(
+    editor: TextEditor,
     range: Range,
     text: MessageObject | MessageObject[],
+    actions: (() => Promise<UPI.Action[]>) | undefined,
     type: TEventRangeType,
     source: string,
     detail: IMarkerProperties,
@@ -41,7 +43,20 @@ export class TooltipManager {
       .get(type, source)
       .markBufferRange(range)
     highlightMarker.setProperties(detail)
-    this.decorate(highlightMarker, new TooltipMessage(source, text))
+    this.decorate(
+      highlightMarker,
+      new TooltipMessage(
+        source,
+        text,
+        () => {
+          atom.commands.dispatch(
+            atom.views.getView(editor),
+            'ide-haskell:show-actions',
+          )
+        },
+        actions,
+      ),
+    )
     this.editorElement.classList.add('ide-haskell--has-tooltips')
   }
 
