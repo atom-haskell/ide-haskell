@@ -1,3 +1,14 @@
+## 2.5.0
+
+-   Attach source data to tooltip
+-   Bundle distribution (faster load times, smaller footprint)
+-   Move backend status to separate module
+-   Optimize default tabs creation
+-   Make output panel tabs disposable
+-   Handle promises appropriately
+-   \[UPI\] Add declarative-style commands
+-   Minor fixes
+
 ## 2.4.1
 
 -   Limit what results are cleared on message provider reported severities
