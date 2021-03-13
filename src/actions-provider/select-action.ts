@@ -3,6 +3,7 @@ import * as UPI from 'atom-haskell-upi'
 import SelectListView from 'atom-select-list'
 export async function selectAction(actions: UPI.Action[]) {
   let panel: Panel | undefined
+  const currentFocus = document.activeElement as HTMLElement | undefined | null
   try {
     return await new Promise<UPI.Action | undefined>((resolve) => {
       const select = new SelectListView({
@@ -31,5 +32,6 @@ export async function selectAction(actions: UPI.Action[]) {
     })
   } finally {
     panel?.destroy()
+    currentFocus?.focus()
   }
 }

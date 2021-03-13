@@ -47,6 +47,7 @@ export async function selectListView<T>({
   }
   const myitems = await Promise.resolve(items)
   let panel: Panel<SelectListView<T>> | undefined
+  const currentFocus = document.activeElement as HTMLElement | undefined | null
   try {
     return await new Promise<T | undefined>((resolve) => {
       const select = new SelectListView({
@@ -70,6 +71,7 @@ export async function selectListView<T>({
       select.focus()
     })
   } finally {
-    if (panel) panel.destroy()
+    panel?.destroy()
+    currentFocus?.focus()
   }
 }
