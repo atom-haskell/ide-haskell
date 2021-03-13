@@ -3,6 +3,7 @@ import { MessageObject } from '../utils'
 import { PluginManager } from '../plugin-manager'
 import * as UPI from 'atom-haskell-upi'
 import TEventRangeType = UPI.TEventRangeType
+import { ActionsProvider } from '../actions-provider'
 
 export interface TTooltipHandlerSpec {
   priority: number
@@ -36,7 +37,10 @@ export class TooltipRegistry {
     }
   > = []
 
-  constructor(private pluginManager: PluginManager) {}
+  constructor(
+    private readonly pluginManager: PluginManager,
+    private readonly actionsProvider?: ActionsProvider,
+  ) {}
 
   public dispose() {
     this.providers = []
@@ -123,10 +127,9 @@ export class TooltipRegistry {
       msg = MessageObject.fromObject(tooltipData.text)
     }
     controller.tooltips.show(
-      editor,
       Range.fromObject(tooltipData.range),
       msg,
-      tooltipData.actions,
+      this.actionsProvider?.renderActions(editor, tooltipData.actions),
       type,
       pluginName,
       { persistent },

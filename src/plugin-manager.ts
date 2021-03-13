@@ -81,8 +81,8 @@ export class PluginManager {
     this.resultsDB = new ResultsDB()
     this.outputPanel.connectResults(this.resultsDB)
     this.outputPanel.connectBsc(this.backendStatusController)
-    this.tooltipRegistry = new TooltipRegistry(this)
     this.actionsProvider = new ActionsProvider(this)
+    this.tooltipRegistry = new TooltipRegistry(this, this.actionsProvider)
     this.configParamManager = new ConfigParamManager(
       this.outputPanel,
       state.configParams,

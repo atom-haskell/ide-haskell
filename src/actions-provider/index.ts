@@ -1,10 +1,11 @@
-import { CompositeDisposable } from 'atom'
+import { CompositeDisposable, TextEditor } from 'atom'
 import * as UPI from 'atom-haskell-upi'
 import TEventRangeType = UPI.TEventRangeType
 
 import { PluginManager } from '../plugin-manager'
 import { CREditorControl } from '../check-results-provider/editor-control'
 import { selectAction } from './select-action'
+import { renderActions } from './render-actions'
 
 export class ActionsProvider {
   private disposables: CompositeDisposable
@@ -28,6 +29,13 @@ export class ActionsProvider {
         },
       }),
     )
+  }
+
+  public async renderActions(
+    editor: TextEditor,
+    actions: (() => Promise<UPI.Action[]>) | undefined,
+  ) {
+    return renderActions(editor, actions)
   }
 
   public dispose() {
