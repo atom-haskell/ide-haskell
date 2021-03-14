@@ -238,9 +238,7 @@ ide-haskell-tooltip-with-actions {
   align-items: flex-start;
 
   ide-haskell-tooltip-actions {
-    button {
-      pointer-events: all;
-    }
+    pointer-events: all;
     flex-grow: 0;
     flex-shrink: 1;
     display: flex;
@@ -248,6 +246,7 @@ ide-haskell-tooltip-with-actions {
   }
 
   ide-haskell-tooltip {
+    pointer-events: all;
     flex-grow: 0;
     flex-shrink: 0;
     &::before {
@@ -283,8 +282,7 @@ ide-haskell-tooltip-with-actions {
     border: solid 2px @overlay-border-color;
     padding: 5px;
     border-radius: 0 0.5em;
-    &.ide-haskell-tooltip-subdued,
-    &:hover {
+    &.ide-haskell-tooltip-subdued {
       opacity: 0.3;
     }
   }
