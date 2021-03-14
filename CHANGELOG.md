@@ -1,3 +1,15 @@
+## 2.6.0
+
+-   Pointer-events on tooltips
+-   Tweak styles
+-   More sensible registry defaults
+-   Untie actions from tooltips
+-   Initial support for standalone actions
+-   Fix select list focus issues
+-   Factor out action rendering
+-   Better actions support
+-   Crude actions support
+
 ## 2.5.0
 
 -   Attach source data to tooltip
