@@ -5,10 +5,8 @@ import { handlePromise } from '../utils'
 
 export async function renderActions(
   editor: TextEditor,
-  actions?: () => Promise<UPI.Action[] | undefined>,
+  act?: UPI.Action[],
 ): Promise<JSX.Element | undefined> {
-  if (!actions) return undefined
-  const act = await actions()
   if (!act) return undefined
   if (!act.length) return undefined
   const maxActions = 8

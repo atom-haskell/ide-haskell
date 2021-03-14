@@ -13,7 +13,7 @@ import TEventRangeType = UPI.TEventRangeType
 import { ResultsDB, ResultItem } from '../results-db'
 import { PluginManager, IEditorController } from '../plugin-manager'
 import { listen, bufferPositionFromMouseEvent, handlePromise } from '../utils'
-import { TooltipRegistry } from '../tooltip-registry'
+import { TooltipManager } from '../tooltip-manager'
 
 export class CREditorControl implements IEditorController {
   private gutter: Gutter
@@ -21,7 +21,7 @@ export class CREditorControl implements IEditorController {
   private markers: DisplayMarkerLayer
   private disposables: CompositeDisposable
   private markerProps: WeakMap<DisplayMarker, ResultItem>
-  private tooltipRegistry: TooltipRegistry
+  private tooltipManager: TooltipManager
   private resultsDB: ResultsDB
   constructor(private editor: TextEditor, pluginManager: PluginManager) {
     const gutter = this.editor.gutterWithName('ide-haskell-check-results')
@@ -36,7 +36,7 @@ export class CREditorControl implements IEditorController {
     this.gutterElement = atom.views.getView(this.gutter)
 
     this.resultsDB = pluginManager.resultsDB
-    this.tooltipRegistry = pluginManager.tooltipRegistry
+    this.tooltipManager = pluginManager.tooltipManager
 
     this.disposables = new CompositeDisposable()
     this.markers = editor.addMarkerLayer({
@@ -87,19 +87,6 @@ export class CREditorControl implements IEditorController {
     }
   }
 
-  public async getActionAt(
-    pos: Point,
-    type: TEventRangeType | 'gutter',
-  ): Promise<UPI.Action[]> {
-    return ([] as UPI.Action[]).concat(
-      ...(await Promise.all(
-        Array.from(this.getResultAt(pos, type)).map((res) =>
-          res.actions ? res.actions() : [],
-        ),
-      )),
-    )
-  }
-
   private registerGutterEvents() {
     this.disposables.add(
       listen(this.gutterElement, 'mouseover', '.decoration', (e) => {
@@ -111,7 +98,7 @@ export class CREditorControl implements IEditorController {
           const msg = Array.from(this.getMessageAt(bufferPt, 'gutter'))
           if (msg.length > 0) {
             handlePromise(
-              this.tooltipRegistry.showTooltip(
+              this.tooltipManager.showTooltip(
                 this.editor,
                 TEventRangeType.mouse,
                 {
@@ -129,7 +116,7 @@ export class CREditorControl implements IEditorController {
     )
     this.disposables.add(
       listen(this.gutterElement, 'mouseout', '.decoration', () =>
-        this.tooltipRegistry.hideTooltip(
+        this.tooltipManager.hideTooltip(
           this.editor,
           TEventRangeType.mouse,
           'builtin:check-results',

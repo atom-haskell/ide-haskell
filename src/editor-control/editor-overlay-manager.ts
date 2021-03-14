@@ -1,9 +1,7 @@
-import { TooltipMessage } from './tooltip-view'
 import { EventTable } from './event-table'
 import * as AtomTypes from 'atom'
 import * as UPI from 'atom-haskell-upi'
 import TEventRangeType = UPI.TEventRangeType
-import { MessageObject } from '../utils'
 
 type Range = AtomTypes.Range
 type TextEditor = AtomTypes.TextEditor
@@ -13,7 +11,7 @@ export interface IMarkerProperties extends AtomTypes.FindDisplayMarkerOptions {
   persistent: boolean
 }
 
-export class TooltipManager {
+export class EditorOverlayManager {
   private markers: EventTable
   private editorElement: HTMLElement
   constructor(private editor: TextEditor) {
@@ -31,18 +29,17 @@ export class TooltipManager {
 
   public show(
     range: Range,
-    text: MessageObject | MessageObject[],
-    actions: Promise<JSX.Element | undefined> | undefined,
     type: TEventRangeType,
     source: string,
     detail: IMarkerProperties,
+    view: object,
   ) {
     this.hide(type, source)
     const highlightMarker = this.markers
       .get(type, source)
       .markBufferRange(range)
     highlightMarker.setProperties(detail)
-    this.decorate(highlightMarker, new TooltipMessage(source, text, actions))
+    this.decorate(highlightMarker, view)
     this.editorElement.classList.add('ide-haskell--has-tooltips')
   }
 
@@ -83,7 +80,7 @@ export class TooltipManager {
     }
   }
 
-  private decorate(marker: DisplayMarker, tooltipView: TooltipMessage) {
+  private decorate(marker: DisplayMarker, tooltipView: object) {
     this.editor.decorateMarker(marker, {
       type: 'overlay',
       position: 'tail',

@@ -9,19 +9,17 @@ export class ResultItem {
   public readonly message: MessageObject
   public readonly severity: UPI.TSeverity
   public readonly context?: string
-  public readonly actions?: UPI.IResultItem['actions']
   private _isValid: boolean
   private _hash?: string
   constructor(
     public readonly providerId: number,
-    { uri, message, severity, position, context, actions }: UPI.IResultItem,
+    { uri, message, severity, position, context }: UPI.IResultItem,
   ) {
     this.uri = uri
     this.message = MessageObject.fromObject(message)
     this.severity = severity
     this.position = position ? Point.fromObject(position) : undefined
     this.context = context
-    this.actions = actions
     this._isValid = true
   }
 

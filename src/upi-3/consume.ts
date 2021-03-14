@@ -171,17 +171,13 @@ export function consume(
       priority = 50
     }
     disp.add(
-      pluginManager.tooltipRegistry.register(name, {
+      pluginManager.actionRegistry.register(name, {
         priority,
         handler: async function(editor, range, types) {
           const actions = await Promise.resolve(handler(editor, range, types))
           if (!actions) return undefined
           if (!actions.length) return undefined
-          return {
-            actions: async () => actions,
-            text: '',
-            range: range,
-          }
+          return actions
         },
         eventTypes: eventTypes ?? [
           TEventRangeType.selection,

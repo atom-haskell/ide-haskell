@@ -49,7 +49,7 @@ export function instance(
       if (eventType === undefined) {
         eventType = getEventType(detail)
       }
-      return pluginManager.tooltipRegistry.showTooltip(editor, eventType, {
+      return pluginManager.tooltipManager.showTooltip(editor, eventType, {
         pluginName,
         tooltip,
       })

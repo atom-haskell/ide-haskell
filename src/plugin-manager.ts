@@ -21,7 +21,8 @@ import * as UPI from 'atom-haskell-upi'
 import * as Linter from 'atom/linter'
 import * as StatusBar from 'atom/status-bar'
 import { handlePromise } from './utils'
-import { ActionsProvider } from './actions-provider'
+import { ActionRegistry } from './actions-registry'
+import { TooltipManager } from './tooltip-manager'
 
 export { IParamState, IOutputViewState }
 
@@ -55,6 +56,8 @@ export class PluginManager {
   public readonly resultsDB: ResultsDB
   public readonly configParamManager: ConfigParamManager
   public readonly tooltipRegistry: TooltipRegistry
+  public readonly actionRegistry: ActionRegistry
+  public readonly tooltipManager: TooltipManager
   private readonly checkResultsProvider?: CheckResultsProvider
   private linterSupport?: LinterSupport
   private readonly disposables = new CompositeDisposable()
@@ -73,7 +76,6 @@ export class PluginManager {
     ECMap<IEditorController>
   >()
   private readonly backendStatusController = new BackendStatusController()
-  private readonly actionsProvider: ActionsProvider
 
   constructor(state: IState, public outputPanel: OutputPanel) {
     this.disposables.add(this.emitter)
@@ -81,8 +83,9 @@ export class PluginManager {
     this.resultsDB = new ResultsDB()
     this.outputPanel.connectResults(this.resultsDB)
     this.outputPanel.connectBsc(this.backendStatusController)
-    this.actionsProvider = new ActionsProvider(this)
-    this.tooltipRegistry = new TooltipRegistry(this, this.actionsProvider)
+    this.actionRegistry = new ActionRegistry(this)
+    this.tooltipRegistry = new TooltipRegistry(this)
+    this.tooltipManager = new TooltipManager(this)
     this.configParamManager = new ConfigParamManager(
       this.outputPanel,
       state.configParams,
@@ -93,7 +96,7 @@ export class PluginManager {
       this.addEditorController(PrettifyEditorController),
       this.addEditorController(EditorMarkControl),
       this.tooltipRegistry,
-      this.actionsProvider,
+      this.actionRegistry,
     )
     if (atom.config.get('ide-haskell.messageDisplayFrontend') === 'builtin') {
       this.checkResultsProvider = new CheckResultsProvider(this)

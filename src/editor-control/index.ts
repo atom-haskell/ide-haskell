@@ -1,7 +1,7 @@
 import { Range, TextEditor, Point, CompositeDisposable, Disposable } from 'atom'
 import { bufferPositionFromMouseEvent, listen, handlePromise } from '../utils'
-import { TooltipManager } from './tooltip-manager'
-import { TooltipRegistry } from '../tooltip-registry'
+import { EditorOverlayManager } from './editor-overlay-manager'
+import { TooltipManager as GlobalTooltipManager } from '../tooltip-manager'
 import { PluginManager, IEditorController } from '../plugin-manager'
 import * as UPI from 'atom-haskell-upi'
 import TEventRangeType = UPI.TEventRangeType
@@ -11,7 +11,7 @@ export type TEventRangeResult =
   | undefined
 
 export class EditorControl implements IEditorController {
-  public readonly tooltips: TooltipManager
+  public readonly tooltips: EditorOverlayManager
   private readonly disposables: CompositeDisposable
   private lastMouseBufferPt?: Point
   private exprTypeTimeout?: number
@@ -28,15 +28,15 @@ export class EditorControl implements IEditorController {
       height: number
     }
   }
-  private readonly tooltipRegistry: TooltipRegistry
+  private readonly tooltipManager: GlobalTooltipManager
   constructor(
     private readonly editor: TextEditor,
     pluginManager: PluginManager,
   ) {
     this.disposables = new CompositeDisposable()
-    this.tooltips = new TooltipManager(this.editor)
+    this.tooltips = new EditorOverlayManager(this.editor)
     this.disposables.add(this.tooltips)
-    this.tooltipRegistry = pluginManager.tooltipRegistry
+    this.tooltipManager = pluginManager.tooltipManager
 
     this.editorElement = atom.views.getView(this.editor) as any
 
@@ -130,7 +130,7 @@ export class EditorControl implements IEditorController {
     ) {
       this.tooltips.hide(type)
     } else {
-      handlePromise(this.tooltipRegistry.showTooltip(this.editor, type))
+      handlePromise(this.tooltipManager.showTooltip(this.editor, type))
     }
   }
 
@@ -177,7 +177,7 @@ export class EditorControl implements IEditorController {
       }
 
       handlePromise(
-        this.tooltipRegistry.showTooltip(this.editor, TEventRangeType.keyboard),
+        this.tooltipManager.showTooltip(this.editor, TEventRangeType.keyboard),
       )
       if (
         atom.config.get('ide-haskell.onCursorMove', {
