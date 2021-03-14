@@ -124,12 +124,9 @@ export function consume(
     } else {
       ;({ handler, priority, eventTypes } = tooltip)
     }
-    if (priority === undefined) {
-      priority = 100
-    }
     disp.add(
       pluginManager.tooltipRegistry.register(name, {
-        priority,
+        priority: priority ?? 100,
         handler,
         eventTypes,
       }),
@@ -167,22 +164,16 @@ export function consume(
     } else {
       ;({ handler, priority, eventTypes } = actions)
     }
-    if (priority === undefined) {
-      priority = 50
-    }
     disp.add(
       pluginManager.actionRegistry.register(name, {
-        priority,
+        priority: priority ?? 100,
         handler: async function(editor, range, types) {
           const actions = await Promise.resolve(handler(editor, range, types))
           if (!actions) return undefined
           if (!actions.length) return undefined
           return actions
         },
-        eventTypes: eventTypes ?? [
-          TEventRangeType.selection,
-          TEventRangeType.context,
-        ],
+        eventTypes,
       }),
     )
   }

@@ -34,6 +34,7 @@ export class PriorityRegistry<Spec> {
     const defaultEvT: TEventRangeType[] = [
       TEventRangeType.selection,
       TEventRangeType.mouse,
+      TEventRangeType.context,
     ]
     const record = {
       pluginName,

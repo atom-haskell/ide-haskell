@@ -15,7 +15,7 @@ export class ActionRegistry extends PriorityRegistry<UPI.Action[]> {
           const editor = currentTarget.getModel()
           const act = await this.pluginManager.actionRegistry.getActions(
             editor,
-            TEventRangeType.context,
+            TEventRangeType.context, // context is used to force value even on empty range
             editor.getSelectedBufferRange(),
           )
           if (act && act.length) {
