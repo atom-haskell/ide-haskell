@@ -30,9 +30,7 @@ export class TooltipMessage {
   public render() {
     return (
       <ide-haskell-tooltip-with-actions>
-        <ide-haskell-tooltip dataset={{ source: this.source }}>
-          {this.message}
-        </ide-haskell-tooltip>
+        {this.renderTooltip()}
         {this.actions ?? null}
       </ide-haskell-tooltip-with-actions>
     )
@@ -45,6 +43,18 @@ export class TooltipMessage {
   public writeAfterUpdate() {
     if (this.element.parentElement) {
       this.element.parentElement.classList.add('ide-haskell')
+    }
+  }
+
+  private renderTooltip() {
+    if (this.message.length) {
+      return (
+        <ide-haskell-tooltip dataset={{ source: this.source }}>
+          {this.message}
+        </ide-haskell-tooltip>
+      )
+    } else {
+      return null
     }
   }
 }

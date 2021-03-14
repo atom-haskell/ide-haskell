@@ -9,6 +9,7 @@ import { Provider } from '../results-db/provider'
 export interface FeatureSet {
   eventsReturnResults?: boolean
   supportsCommands?: boolean
+  supportsActions?: boolean
 }
 
 export function consume(
@@ -25,6 +26,7 @@ export function consume(
     params,
     tooltip,
     commands,
+    actions,
   } = options
   const disp = new CompositeDisposable()
   let messageProvider: Provider | undefined
@@ -155,6 +157,38 @@ export function consume(
         )
       }
     }
+  }
+  if (featureSet.supportsActions && actions) {
+    let handler: UPI.TActionHandler
+    let priority: number | undefined
+    let eventTypes: TEventRangeType[] | undefined
+    if (typeof actions === 'function') {
+      handler = actions
+    } else {
+      ;({ handler, priority, eventTypes } = actions)
+    }
+    if (priority === undefined) {
+      priority = 50
+    }
+    disp.add(
+      pluginManager.tooltipRegistry.register(name, {
+        priority,
+        handler: async function(editor, range, types) {
+          const actions = await Promise.resolve(handler(editor, range, types))
+          if (!actions) return undefined
+          if (!actions.length) return undefined
+          return {
+            actions: async () => actions,
+            text: '',
+            range: range,
+          }
+        },
+        eventTypes: eventTypes ?? [
+          TEventRangeType.selection,
+          TEventRangeType.context,
+        ],
+      }),
+    )
   }
 
   return disp

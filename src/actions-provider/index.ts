@@ -20,12 +20,22 @@ export class ActionsProvider {
             editor,
           )
           if (!controller) return
-          const actions = await controller.getActionAt(
+          let actions = await controller.getActionAt(
             editor.getCursorBufferPosition(),
             TEventRangeType.keyboard,
           )
-          const choice = await selectAction(actions)
-          if (choice) await choice.apply()
+          if (!actions.length) {
+            const act = await this.pluginManager.tooltipRegistry.getActions(
+              editor,
+              TEventRangeType.context,
+              editor.getSelectedBufferRange(),
+            )
+            if (act) actions = act
+          }
+          if (actions.length) {
+            const choice = await selectAction(actions)
+            if (choice) await choice.apply()
+          }
         },
       }),
     )
@@ -33,7 +43,7 @@ export class ActionsProvider {
 
   public async renderActions(
     editor: TextEditor,
-    actions: (() => Promise<UPI.Action[]>) | undefined,
+    actions: (() => Promise<UPI.Action[] | undefined>) | undefined,
   ) {
     return renderActions(editor, actions)
   }

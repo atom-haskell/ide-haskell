@@ -140,6 +140,12 @@ export const provideUpi3_2 = provideUpi3({
   eventsReturnResults: true,
   supportsCommands: true,
 })
+// tslint:disable-next-line: variable-name
+export const provideUpi3_3 = provideUpi3({
+  eventsReturnResults: true,
+  supportsCommands: true,
+  supportsActions: true,
+})
 
 function consumeUpi3(features: UPI3.FeatureSet = {}) {
   return function(

@@ -31,7 +31,8 @@
       "versions": {
         "0.3.0": "provideUpi3_0",
         "0.3.1": "provideUpi3_1",
-        "0.3.2": "provideUpi3_2"
+        "0.3.2": "provideUpi3_2",
+        "0.3.3": "provideUpi3_3"
       }
     }
   },

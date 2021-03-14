@@ -26,7 +26,7 @@ export interface ITooltipDataExt {
   range: RangeCompatible
   text: UPI.TSingleOrArray<UPI.TMessage | MessageObject>
   persistent?: boolean
-  actions?: () => Promise<UPI.Action[]>
+  actions?: () => Promise<UPI.Action[] | undefined>
 }
 
 export class TooltipRegistry {
@@ -148,7 +148,7 @@ export class TooltipRegistry {
     controller.tooltips.hide(type, source)
   }
 
-  private async defaultTooltipFunction(
+  public async getActions(
     editor: TextEditor,
     type: TEventRangeType,
     crange: Range,
@@ -160,9 +160,37 @@ export class TooltipRegistry {
       const awaiter = this.pluginManager.getAwaiter(pluginName)
       const tooltipData = await awaiter(() => handler(editor, crange, type))
       if (tooltipData === undefined) continue
-
-      return { pluginName, tooltipData }
+      if (tooltipData.text) continue
+      if (!tooltipData.actions) continue
+      const act = await tooltipData.actions()
+      if (!act) continue
+      if (!act.length) continue
+      return act
     }
     return undefined
+  }
+
+  // TODO: should split actions from tooltips
+  private async defaultTooltipFunction(
+    editor: TextEditor,
+    type: TEventRangeType,
+    crange: Range,
+  ) {
+    let result
+    for (const { pluginName, handler, eventTypes } of this.providers) {
+      if (!eventTypes.includes(type)) {
+        continue
+      }
+      const awaiter = this.pluginManager.getAwaiter(pluginName)
+      const tooltipData = await awaiter(() => handler(editor, crange, type))
+      if (tooltipData === undefined) continue
+      if (!result) {
+        result = { pluginName, tooltipData }
+      } else if (!tooltipData.text) {
+        result.tooltipData.actions = tooltipData.actions
+      }
+      if (result.tooltipData.actions) break
+    }
+    return result
   }
 }
