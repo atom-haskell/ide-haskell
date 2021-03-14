@@ -49,12 +49,32 @@ export class TooltipMessage {
   private renderTooltip() {
     if (this.message.length) {
       return (
-        <ide-haskell-tooltip dataset={{ source: this.source }}>
+        <ide-haskell-tooltip
+          on={{ click: this.tooltipClick }}
+          dataset={{ source: this.source }}
+        >
           {this.message}
         </ide-haskell-tooltip>
       )
     } else {
       return null
+    }
+  }
+
+  private tooltipClick = (e: MouseEvent) => {
+    if (!e.target) return
+    const htmlTarget = e.target as HTMLElement
+    if (htmlTarget.matches('a')) {
+      const href = (htmlTarget as HTMLLinkElement).href
+      if (href) {
+        handlePromise(
+          atom.workspace.open(`ide-haskell://hoogle/web/${href}`, {
+            searchAllPanes: true,
+            split: 'right',
+            activateItem: true,
+          }),
+        )
+      }
     }
   }
 }
