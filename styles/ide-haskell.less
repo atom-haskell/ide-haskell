@@ -234,59 +234,59 @@ ide-haskell-panel {
 
 ide-haskell-tooltip-with-actions {
   display: flex;
-  flex-direction: row;
+  flex-direction: column-reverse;
   align-items: flex-start;
-}
 
-ide-haskell-tooltip-actions {
-  button {
-    pointer-events: all;
+  ide-haskell-tooltip-actions {
+    button {
+      pointer-events: all;
+    }
+    flex-grow: 0;
+    flex-shrink: 1;
+    display: flex;
+    flex-direction: row;
   }
-  flex-grow: 0;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-}
 
-ide-haskell-tooltip {
-  flex-grow: 1;
-  flex-shrink: 1;
-  &::before {
-    border-width: 0 0.5ch 0.5ch;
-    border-style: solid;
-    border-color: @overlay-border-color transparent;
+  ide-haskell-tooltip {
+    flex-grow: 0;
+    flex-shrink: 0;
+    &::before {
+      border-width: 0 0.5ch 0.5ch;
+      border-style: solid;
+      border-color: @overlay-border-color transparent;
+      display: block;
+      width: 0;
+      position: absolute;
+      top: -0.5ch;
+      left: 0;
+      height: 0.5ch;
+      background-size: 50% 100%;
+      background-repeat: no-repeat;
+      margin: 0;
+      padding: 0;
+      content: '';
+    }
+    & > div {
+      text-align: left;
+      // color: @text-color-info;
+      font-size: 85%;
+      display: block;
+      white-space: pre-wrap;
+      background: none !important;
+      word-break: break-all;
+    }
+    & > div + div {
+      margin-top: 1em;
+    }
     display: block;
-    width: 0;
-    position: absolute;
-    top: -0.5ch;
-    left: 0;
-    height: 0.5ch;
-    background-size: 50% 100%;
-    background-repeat: no-repeat;
-    margin: 0;
-    padding: 0;
-    content: '';
-  }
-  & > div {
-    text-align: left;
-    // color: @text-color-info;
-    font-size: 85%;
-    display: block;
-    white-space: pre-wrap;
-    background: none !important;
-    word-break: break-all;
-  }
-  & > div + div {
-    margin-top: 1em;
-  }
-  display: block;
-  background: @overlay-background-color;
-  border: solid 2px @overlay-border-color;
-  padding: 5px;
-  border-radius: 0 0.5em;
-  &.ide-haskell-tooltip-subdued,
-  &:hover {
-    opacity: 0.3;
+    background: @overlay-background-color;
+    border: solid 2px @overlay-border-color;
+    padding: 5px;
+    border-radius: 0 0.5em;
+    &.ide-haskell-tooltip-subdued,
+    &:hover {
+      opacity: 0.3;
+    }
   }
 }
 

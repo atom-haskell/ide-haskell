@@ -9,7 +9,7 @@ export async function renderActions(
 ): Promise<JSX.Element | undefined> {
   if (!act) return undefined
   if (!act.length) return undefined
-  const maxActions = 8
+  const maxActions = 4
   return (
     <ide-haskell-tooltip-actions>
       {act.slice(0, maxActions).map((act) => (
