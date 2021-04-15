@@ -23,6 +23,9 @@ export async function runFilter({ command, args, cwd, stdin }: IRunFilterArgs) {
         },
       )
       if (stdin !== undefined) {
+        if (!proc.stdin) {
+          throw new Error('No stdin')
+        }
         proc.stdin.write(stdin)
         proc.stdin.end()
       }

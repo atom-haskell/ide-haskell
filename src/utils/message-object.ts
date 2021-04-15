@@ -1,4 +1,4 @@
-import highlight from 'atom-highlight'
+import { hightlightLines } from 'atom-highlight'
 import * as cast from './cast'
 import * as UPI from 'atom-haskell-upi'
 import Memoize from 'lodash-decorators/memoize'
@@ -21,13 +21,10 @@ export class MessageObject {
   @Memoize()
   public toHtml(): string {
     if (cast.isTextMessage(this.msg) && this.msg.highlighter !== undefined) {
-      const html = highlight({
-        fileContents: this.msg.text,
-        scopeName: this.msg.highlighter,
-        nbsp: false,
-        lineDivs: false,
-      })
-      if (html) return html
+      const html = Array.from(
+        hightlightLines(this.msg.text.split('\n'), this.msg.highlighter),
+      )
+      if (html.length > 0) return html.join('\n')
 
       this.msg.highlighter = undefined
       return this.toHtml()

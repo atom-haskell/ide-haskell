@@ -57,7 +57,7 @@ export async function selectListView<T>({
         elementForItem,
         filterKeyForItem,
         didCancelSelection: () => {
-          resolve()
+          resolve(undefined)
         },
         didConfirmSelection: (item: T) => {
           resolve(item)
