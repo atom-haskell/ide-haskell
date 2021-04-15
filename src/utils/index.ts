@@ -37,7 +37,7 @@ export function handlePromise(promise: Promise<any>): void {
   // tslint:disable-next-line:strict-type-predicates no-unbound-method
   if (typeof promise.catch !== 'function') {
     atom.notifications.addFatalError(
-      'Atom-Typescript: non-promise passed to handlePromise. Please report this.',
+      'IDE-Haskell: non-promise passed to handlePromise. Please report this.',
       {
         stack: new Error().stack,
         dismissable: true,
@@ -46,7 +46,7 @@ export function handlePromise(promise: Promise<any>): void {
     return
   }
   promise.catch((err: Error) => {
-    atom.notifications.addFatalError(`Atom-Typescript error: ${err.message}`, {
+    atom.notifications.addFatalError(`IDE-Haskell error: ${err.message}`, {
       detail: err.toString(),
       stack: err.stack,
       dismissable: true,
