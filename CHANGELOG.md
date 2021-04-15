@@ -1,3 +1,10 @@
+## 2.7.0
+
+-   Update dependencies
+-   Clean-up internal API
+-   s\/Atom-Typescript\/IDE-Haskell\/g
+-   Open tooltip links via ide-haskell-hoogle
+
 ## 2.6.0
 
 -   Pointer-events on tooltips
