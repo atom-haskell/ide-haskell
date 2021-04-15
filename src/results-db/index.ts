@@ -40,7 +40,7 @@ export class ResultsDB {
     msgs: ResultItem[],
   ) {
     const uris: string[] = msgs.map((v) => v.uri).filter(notUndefined)
-    for (const [k, v] of Array.from(this.messages)) {
+    for (const [k, v] of this.messages.entries()) {
       if (
         v.providerId === providerId ||
         (v.uri !== undefined &&
@@ -64,15 +64,11 @@ export class ResultsDB {
   }
 
   public results() {
-    return this.messages.values()
+    return Array.from(this.messages.values())
   }
 
-  public *filter(f: (item: ResultItem) => boolean) {
-    for (const v of this.results()) {
-      if (f(v)) {
-        yield v
-      }
-    }
+  public filter(f: (item: ResultItem) => boolean) {
+    return this.results().filter(f)
   }
 
   public isEmpty(severities: UPI.TSeverity[]) {

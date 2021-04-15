@@ -22,7 +22,7 @@ export class OutputPanelButtons implements JSX.ElementClass {
   public render() {
     return (
       <ide-haskell-panel-buttons>
-        {Array.from(this.renderButtons())}
+        {this.renderButtons()}
       </ide-haskell-panel-buttons>
     )
   }
@@ -32,16 +32,14 @@ export class OutputPanelButtons implements JSX.ElementClass {
     return etch.update(this)
   }
 
-  private *renderButtons() {
-    for (const props of this.props.buttons) {
-      yield (
-        <Button
-          active={props.name === this.props.activeBtn}
-          name={props.name}
-          count={props.count}
-          onClick={props.onClick}
-        />
-      )
-    }
+  private renderButtons() {
+    return this.props.buttons.map((props) => (
+      <Button
+        active={props.name === this.props.activeBtn}
+        name={props.name}
+        count={props.count}
+        onClick={props.onClick}
+      />
+    ))
   }
 }

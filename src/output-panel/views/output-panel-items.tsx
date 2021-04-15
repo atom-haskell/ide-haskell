@@ -63,7 +63,7 @@ export class OutputPanelItems implements JSX.ElementClass {
     const items = this.props.filter
       ? this.props.model.filter(this.props.filter)
       : this.props.model.results()
-    return Array.from(items).map((item) => {
+    return items.map((item) => {
       const view = <OutputPanelItem model={item} />
       this.itemMap.set(item, view as any)
       return view

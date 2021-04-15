@@ -32,8 +32,8 @@ export class EventTable {
     for (const i of this.layers.values()) {
       i.destroy()
     }
-    for (const i of this.values()) {
-      i.clear()
+    for (const i of eventRangeTypeVals) {
+      this.table[i].clear()
     }
   }
 
@@ -61,17 +61,5 @@ export class EventTable {
       count += i.getMarkerCount()
     }
     return count
-  }
-
-  public *values() {
-    for (const i of eventRangeTypeVals) {
-      yield this.table[i] as TTableCell
-    }
-  }
-
-  public *entries() {
-    for (const i of eventRangeTypeVals) {
-      yield [i, this.table[i]]
-    }
   }
 }

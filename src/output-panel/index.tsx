@@ -253,8 +253,8 @@ export class OutputPanel {
 
     if (this.results) {
       for (const [btn, ato] of this.tabs.entries()) {
-        ato.count = Array.from(
-          this.results.filter(({ severity }) => severity === btn),
+        ato.count = this.results.filter(
+          ({ severity }) => severity === btn,
         ).length
       }
     }
@@ -345,7 +345,7 @@ export class OutputPanel {
 
   public showNextError() {
     if (!this.results) return
-    const rs = Array.from(this.results.filter(({ uri }) => uri !== undefined))
+    const rs = this.results.filter(({ uri }) => uri !== undefined)
     if (rs.length === 0) {
       return
     }
@@ -360,7 +360,7 @@ export class OutputPanel {
 
   public showPrevError() {
     if (!this.results) return
-    const rs = Array.from(this.results.filter(({ uri }) => uri !== undefined))
+    const rs = this.results.filter(({ uri }) => uri !== undefined)
     if (rs.length === 0) {
       return
     }

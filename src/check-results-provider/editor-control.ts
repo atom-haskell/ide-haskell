@@ -12,7 +12,12 @@ import TEventRangeType = UPI.TEventRangeType
 
 import { ResultsDB, ResultItem } from '../results-db'
 import { PluginManager, IEditorController } from '../plugin-manager'
-import { listen, bufferPositionFromMouseEvent, handlePromise } from '../utils'
+import {
+  listen,
+  bufferPositionFromMouseEvent,
+  handlePromise,
+  MessageObject,
+} from '../utils'
 import { TooltipManager } from '../tooltip-manager'
 
 export class CREditorControl implements IEditorController {
@@ -71,19 +76,20 @@ export class CREditorControl implements IEditorController {
     }
   }
 
-  public *getResultAt(pos: Point, type: TEventRangeType | 'gutter') {
+  public getMessageAt(
+    pos: Point,
+    type: TEventRangeType | 'gutter',
+  ): MessageObject[] {
+    return Array.from(this.getResultAt(pos, type)).map((res) => res.message)
+  }
+
+  private *getResultAt(pos: Point, type: TEventRangeType | 'gutter') {
     const markers = this.find(pos, type)
     for (const marker of markers) {
       if (!marker.isValid()) continue
       const res = this.markerProps.get(marker)
       if (!res) continue
       yield res
-    }
-  }
-
-  public *getMessageAt(pos: Point, type: TEventRangeType | 'gutter') {
-    for (const res of this.getResultAt(pos, type)) {
-      yield res.message
     }
   }
 
@@ -95,7 +101,7 @@ export class CREditorControl implements IEditorController {
           e as MouseEvent,
         )
         if (bufferPt) {
-          const msg = Array.from(this.getMessageAt(bufferPt, 'gutter'))
+          const msg = this.getMessageAt(bufferPt, 'gutter')
           if (msg.length > 0) {
             handlePromise(
               this.tooltipManager.showTooltip(
@@ -127,8 +133,8 @@ export class CREditorControl implements IEditorController {
 
   private updateResults = () => {
     const path = this.editor.getPath()
-    const resultsToMark = Array.from(
-      this.resultsDB.filter((m) => m.uri === path && m.isValid()),
+    const resultsToMark = this.resultsDB.filter(
+      (m) => m.uri === path && m.isValid(),
     )
     const currentMarkers = this.markers.getMarkers()
     const newResults = resultsToMark.filter((r) =>

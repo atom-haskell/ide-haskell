@@ -46,7 +46,7 @@ export class CheckResultsProvider {
     ) {
       return undefined
     }
-    const msg = Array.from(controller.getMessageAt(crange.start, type))
+    const msg = controller.getMessageAt(crange.start, type)
     if (msg.length > 0) {
       return { range: crange, text: msg }
     }
