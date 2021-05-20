@@ -7,12 +7,6 @@ plugin is intended to help you with development in
 **NOTE:** You must install dependencies in addition to
 installing the package itself. Refer to documentation site https://atom-haskell.github.io/ for setup and usage instructions.
 
-## IRC Chat
-
-You can join #atom-haskell on FreeNode, and devs can usually be found there. Bear in mind that if someone's on the channel, it doesn't necessarily mean they aren't AFK.
-
-If you're not familiar with IRC, you can use [FreeNode's webchat](https://webchat.freenode.net/?channels=#atom-haskell)
-
 ## Features
 
 Here is a brief and incomplete overview. Visit https://atom-haskell.github.io/ for more details.
